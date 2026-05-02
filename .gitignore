@@ -1,0 +1,39 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+
+# Environment and local credentials
+.env
+.env.*
+*.pem
+.deploy-keys/
+
+# Logs and local runtime files
+*.log
+*.tsbuildinfo
+next-env.d.ts
+
+# Temporary/generated working files
+tmp/
+**/.tmp/
+**/.tmp-*/
+**/.tmp-*
+**/.temp/
+*.tgz
+
+# Large local reference material; keep out of GitHub unless handled separately.
+剑桥初级英语语法 (墨菲) (Z-Library).pdf
+
+# Local audit/checkout repositories
+_audit_repo/
+_repo_check/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

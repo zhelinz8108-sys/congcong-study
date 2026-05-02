@@ -1,0 +1,15 @@
+[Unit]
+Description=Congcong Study Plan Next.js app
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/www/study-plan
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /www/study-plan/node_modules/next/dist/bin/next start -p 3001 -H 127.0.0.1
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
