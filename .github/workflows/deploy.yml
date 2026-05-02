@@ -1,0 +1,89 @@
+name: Deploy to Tencent Lighthouse
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      SERVER_USER: ${{ secrets.SERVER_USER }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+      SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+      REMOTE_APP_DIR: /www/study-plan
+      SERVICE_NAME: study-plan
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check deployment secrets
+        id: preflight
+        shell: bash
+        run: |
+          missing=0
+
+          for name in SERVER_HOST SERVER_USER SERVER_SSH_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::warning::Required secret $name is not configured; skipping deployment."
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -eq 0 ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Ensure rsync is available
+        if: steps.preflight.outputs.ready == 'true'
+        shell: bash
+        run: |
+          if ! command -v rsync >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y rsync
+          fi
+
+      - name: Configure SSH
+        if: steps.preflight.outputs.ready == 'true'
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SERVER_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$SERVER_PORT" "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+      - name: Sync application files
+        if: steps.preflight.outputs.ready == 'true'
+        shell: bash
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p $SERVER_PORT" \
+            --exclude ".env*" \
+            --exclude "node_modules/" \
+            --exclude ".next/" \
+            --exclude "*.log" \
+            study-plan/ "$SERVER_USER@$SERVER_HOST:$REMOTE_APP_DIR/"
+
+      - name: Install, build, and restart service
+        if: steps.preflight.outputs.ready == 'true'
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" "
+            set -e
+            cd '$REMOTE_APP_DIR'
+            npm ci
+            npm run build
+            sudo systemctl restart '$SERVICE_NAME'
+            sudo systemctl is-active --quiet '$SERVICE_NAME'
+          "
