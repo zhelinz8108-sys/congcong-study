@@ -15,9 +15,12 @@ coverage/
 # Logs and local runtime files
 *.log
 *.tsbuildinfo
+*.db-shm
+*.db-wal
 next-env.d.ts
 
 # Temporary/generated working files
+.npm-cache/
 tmp/
 **/.tmp/
 **/.tmp-*/

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { InteractiveMemorizeMode } from "@/components/interactive-memorize-mode";
 import type { Subject, Unit, Material, Word } from "@/lib/types";
 
 /* ── Helpers ── */
@@ -1685,7 +1686,8 @@ function ReviewMode({
   );
 }
 
-/* ── Memorize Mode: book-based multiple choice with spaced repetition ── */
+/* eslint-disable @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect */
+/* ── Legacy Memorize Mode kept as a fallback while the interactive version is rolled out. ── */
 function MemorizeMode({
   subjectName,
   books,
@@ -2145,6 +2147,7 @@ function MemorizeMode({
     </div>
   );
 }
+/* eslint-enable @typescript-eslint/no-unused-vars, react-hooks/set-state-in-effect */
 
 /* ── Add Word Form ── */
 function AddWordForm({
@@ -2594,7 +2597,7 @@ export default function VocabPage() {
 
   if (memorizing && subject) {
     return (
-      <MemorizeMode
+      <InteractiveMemorizeMode
         subjectName={subject.name || "英语"}
         books={wordBooks}
         words={memoryWords}
