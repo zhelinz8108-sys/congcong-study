@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Material, Unit, Word } from "@/lib/types";
 
 type ListeningSentenceText = {
@@ -20,572 +20,659 @@ type EnglishListeningPanelProps = {
   playWordAudio: (src: string, start: number, end: number) => void;
 };
 
-type ListeningBandConfig = {
-  key: string;
+type ListeningQuestionType = "main" | "detail" | "inference";
+type ListeningFilter = "all" | ListeningQuestionType;
+
+type ListeningBand = {
+  key: "primary" | "junior";
   match: string;
   title: string;
   subtitle: string;
   badge: string;
-  focus: string;
-  border: string;
-  bg: string;
-  text: string;
-  keywordLimit: number;
-  checkpoints: string[];
-  retellPrompt: string;
+  wordLimit: string;
+  tone: string;
 };
 
-const LISTENING_METHODS = [
-  {
-    title: "1. 先听词和词组",
-    desc: "先抓能听出来的关键词，不急着逐词翻译，先建立声音和意思的连接。",
-  },
-  {
-    title: "2. 再做句子精听",
-    desc: "同一句至少听 3 遍：先抓大意，再抓关键词，最后看原句核对。",
-  },
-  {
-    title: "3. 练信息抓取",
-    desc: "听完后回答谁、做什么、在哪里、为什么，逐步建立听力题思维。",
-  },
-  {
-    title: "4. 最后跟读复述",
-    desc: "模仿语音语调，再用自己的话说一遍，听力才能真正转成输出能力。",
-  },
-];
+type ListeningQuestion = {
+  id: string;
+  type: ListeningQuestionType;
+  unit: ListeningUnit;
+  prompt: string;
+  options: string[];
+  answer: string;
+  explanation: string;
+  english: string;
+  chinese: string;
+  audioSrc: string;
+  audioStart: number;
+  audioEnd: number;
+};
 
-const LISTENING_BANDS: ListeningBandConfig[] = [
+const QUESTION_COUNT_PER_BAND = 500;
+
+const LISTENING_BANDS: ListeningBand[] = [
   {
     key: "primary",
     match: "1200",
-    title: "小学 1200 词听力",
-    subtitle: "先抓词块，再听完整句子。",
-    badge: "基础输入",
-    focus: "适合先做词块辨音、句子大意和简单复述。",
-    border: "border-emerald-200",
-    bg: "bg-emerald-50",
-    text: "text-emerald-800",
-    keywordLimit: 4,
-    checkpoints: [
-      "先听一遍，只判断这句话在说谁、在做什么。",
-      "第二遍抓 2 到 3 个你能听出来的关键词。",
-      "第三遍再核对原句，看看漏掉的是动作还是地点。",
-    ],
-    retellPrompt: "先用中文说一句大意，再用英语复述主语 + 动作。",
+    title: "小学听力",
+    subtitle: "一句话到短句听辨，先练主旨，再练细节和简单推断。",
+    badge: "1200词以内",
+    wordLimit: "小学词汇",
+    tone: "emerald",
   },
   {
     key: "junior",
     match: "2000",
-    title: "初中 2000 词听力",
-    subtitle: "开始练原因、结果和场景理解。",
-    badge: "信息抓取",
-    focus: "适合训练细节定位、逻辑关系和句子里的重点信息。",
-    border: "border-amber-200",
-    bg: "bg-amber-50",
-    text: "text-amber-800",
-    keywordLimit: 5,
-    checkpoints: [
-      "第一遍先听主题，不急着记每个词。",
-      "第二遍找出时间、地点、动作或原因词。",
-      "第三遍判断句子里有没有 because、but、when、if 这类逻辑信号。",
-    ],
-    retellPrompt: "用中文说出事件，再尝试用英语复述“原因 / 结果 / 场景”中的一个重点。",
-  },
-  {
-    key: "senior",
-    match: "7000",
-    title: "高中 7000 词听力",
-    subtitle: "训练长句拆解、逻辑判断和简短复述。",
-    badge: "长句理解",
-    focus: "适合练主干识别、修饰信息筛选和听后概括。",
-    border: "border-sky-200",
-    bg: "bg-sky-50",
-    text: "text-sky-800",
-    keywordLimit: 6,
-    checkpoints: [
-      "先听主干：主语、核心动作、结果是什么。",
-      "再听补充信息：时间、条件、让步、举例等附加部分。",
-      "最后用一句话概括整句想表达的中心意思。",
-    ],
-    retellPrompt: "先说这句话的主干，再补一个附加信息，尽量别逐词翻译。",
+    title: "初中听力",
+    subtitle: "短句和小段理解，加入时间、原因、转折和说话意图。",
+    badge: "2000词以内",
+    wordLimit: "初中词汇",
+    tone: "amber",
   },
 ];
 
-function getBandConfig(groupName?: string): ListeningBandConfig {
-  const matched =
-    LISTENING_BANDS.find((band) => (groupName ?? "").includes(band.match)) ??
-    LISTENING_BANDS[0];
+const QUESTION_META: Record<
+  ListeningQuestionType,
+  { label: string; hint: string; badgeClass: string }
+> = {
+  main: {
+    label: "主旨题",
+    hint: "先抓整段大意，不要逐词翻译。",
+    badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  },
+  detail: {
+    label: "细节题",
+    hint: "听清谁、做什么、在哪里、什么时候。",
+    badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+  },
+  inference: {
+    label: "推断题",
+    hint: "根据语气、因果、转折和上下文判断意图。",
+    badgeClass: "bg-amber-50 text-amber-700 border-amber-200",
+  },
+};
 
-  return matched;
+const INFERENCE_OPTIONS = [
+  "说话人在说明原因或解释情况",
+  "说话人在表达一个计划",
+  "说话人在询问信息",
+  "说话人在给出建议或提醒",
+  "说话人在描述日常事实",
+  "说话人在表达转折后的重点",
+  "说话人在说明事情发生的顺序",
+  "说话人在表达条件关系",
+  "说话人在描述地点或位置",
+  "说话人在表达自己的感受",
+];
+
+function getBandConfig(groupName?: string | null) {
+  const normalized = groupName ?? "";
+  return LISTENING_BANDS.find((band) => normalized.includes(band.match)) ?? null;
 }
 
-function getAudioMaterial(unit: ListeningUnit): Material | null {
-  return unit.materials?.find((material) => material.file_type === "audio") ?? null;
+function getAudioMaterial(unit: ListeningUnit) {
+  return (
+    unit.materials?.find(
+      (material) => material.file_type === "audio" && Boolean(material.file_path),
+    ) ?? null
+  );
 }
 
-function getKeywordWords(unit: ListeningUnit, limit: number): Word[] {
-  return [...(unit.words ?? [])]
-    .filter((word) => word.audio_start != null && word.audio_end != null)
-    .sort((a, b) => {
-      if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
-      return a.created_at.localeCompare(b.created_at);
-    })
-    .slice(0, limit);
+function getSentenceEnglish(unit: ListeningUnit) {
+  return unit.sentenceText?.english?.trim() || unit.name || "";
 }
 
-function getSentenceClipEnd(unit: ListeningUnit): number {
-  const firstWordWithAudio = [...(unit.words ?? [])]
-    .filter((word) => word.audio_start != null)
-    .sort((a, b) => {
-      const aStart = a.audio_start ?? Number.MAX_SAFE_INTEGER;
-      const bStart = b.audio_start ?? Number.MAX_SAFE_INTEGER;
-      return aStart - bStart;
-    })[0];
+function getSentenceChinese(unit: ListeningUnit) {
+  return unit.sentenceText?.chinese?.trim() || "这段音频的主要意思";
+}
 
-  if (firstWordWithAudio?.audio_start == null) {
-    return 8;
+function getSentenceClipEnd(unit: ListeningUnit) {
+  const firstWordWithAudio = unit.words
+    ?.filter((word) => word.audio_start !== null && word.audio_start !== undefined)
+    .sort((a, b) => Number(a.audio_start) - Number(b.audio_start))[0];
+
+  if (firstWordWithAudio?.audio_start !== null && firstWordWithAudio?.audio_start !== undefined) {
+    return Math.max(3.8, Math.min(Number(firstWordWithAudio.audio_start) - 0.4, 40));
   }
 
-  return Math.max(3.8, Math.min(firstWordWithAudio.audio_start - 0.4, 12));
+  return 12;
 }
 
-export default function EnglishListeningPanel({
-  subjectId,
-  playWordAudio,
-}: EnglishListeningPanelProps) {
+function seededValue(seed: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash ^= seed.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function shuffleBySeed<T>(items: T[], seed: string) {
+  return [...items].sort((a, b) => {
+    const valueA = seededValue(`${seed}:${JSON.stringify(a)}`);
+    const valueB = seededValue(`${seed}:${JSON.stringify(b)}`);
+    return valueA - valueB;
+  });
+}
+
+function uniqueOptions(options: string[]) {
+  const seen = new Set<string>();
+  return options.filter((option) => {
+    const cleaned = option.trim();
+    if (!cleaned || seen.has(cleaned)) return false;
+    seen.add(cleaned);
+    return true;
+  });
+}
+
+function cleanMeaning(meaning?: string | null) {
+  return (
+    meaning
+      ?.replace(/\s+/g, " ")
+      .replace(/^\/[^/]+\/\s*/, "")
+      .trim() || "相关词义"
+  );
+}
+
+function getMeaningOption(word: Word) {
+  return `${word.word}：${cleanMeaning(word.meaning)}`;
+}
+
+function getUsableWords(unit: ListeningUnit) {
+  return (
+    unit.words
+      ?.filter((word) => Boolean(word.word?.trim()) && Boolean(word.meaning?.trim()))
+      .sort((a, b) => a.sort_order - b.sort_order) ?? []
+  );
+}
+
+function getOtherChineseOptions(unit: ListeningUnit, units: ListeningUnit[], seed: string) {
+  return shuffleBySeed(
+    units
+      .filter((candidate) => candidate.id !== unit.id)
+      .map(getSentenceChinese)
+      .filter(Boolean),
+    seed,
+  );
+}
+
+function getOtherWordOptions(unit: ListeningUnit, units: ListeningUnit[], seed: string) {
+  return shuffleBySeed(
+    units
+      .filter((candidate) => candidate.id !== unit.id)
+      .flatMap(getUsableWords)
+      .map(getMeaningOption),
+    seed,
+  );
+}
+
+function getQuestionType(index: number): ListeningQuestionType {
+  if (index < 165) return "main";
+  if (index < 335) return "detail";
+  return "inference";
+}
+
+function inferListeningPurpose(english: string, chinese: string) {
+  const lowerEnglish = english.toLowerCase();
+  const text = `${lowerEnglish} ${chinese}`;
+
+  if (/[?？]/.test(text) || /\b(what|where|when|who|why|how|can you|would you)\b/.test(lowerEnglish)) {
+    return "说话人在询问信息";
+  }
+  if (/\b(because|so)\b/.test(lowerEnglish) || /因为|所以|原因/.test(chinese)) {
+    return "说话人在说明原因或解释情况";
+  }
+  if (/\bbut\b/.test(lowerEnglish) || /但是|可是|然而/.test(chinese)) {
+    return "说话人在表达转折后的重点";
+  }
+  if (/\b(should|must|need|please|be careful)\b/.test(lowerEnglish) || /应该|必须|请|小心/.test(chinese)) {
+    return "说话人在给出建议或提醒";
+  }
+  if (/\b(will|going to|tomorrow|next)\b/.test(lowerEnglish) || /将|明天|下周|计划/.test(chinese)) {
+    return "说话人在表达一个计划";
+  }
+  if (/\b(if|when|after|before|then)\b/.test(lowerEnglish) || /如果|当|之后|以前|然后/.test(chinese)) {
+    return "说话人在说明事情发生的顺序";
+  }
+  if (/\b(in|on|at|near|under|behind|between)\b/.test(lowerEnglish) || /在|旁边|下面|后面|之间/.test(chinese)) {
+    return "说话人在描述地点或位置";
+  }
+  if (/\b(happy|sad|tired|hungry|excited|afraid)\b/.test(lowerEnglish) || /高兴|难过|累|饿|兴奋|害怕/.test(chinese)) {
+    return "说话人在表达自己的感受";
+  }
+
+  return "说话人在描述日常事实";
+}
+
+function buildMainQuestion(
+  unit: ListeningUnit,
+  units: ListeningUnit[],
+  index: number,
+  band: ListeningBand,
+): Omit<ListeningQuestion, "id" | "type" | "unit" | "audioSrc" | "audioStart" | "audioEnd"> {
+  const english = getSentenceEnglish(unit);
+  const chinese = getSentenceChinese(unit);
+  const distractors = getOtherChineseOptions(unit, units, `main:${band.key}:${index}`).slice(0, 6);
+  const fallback = ["介绍一个日常活动", "询问一个简单问题", "说明一个地点", "表达一个计划"];
+  const options = shuffleBySeed(
+    uniqueOptions([chinese, ...distractors, ...fallback]).slice(0, 4),
+    `main-options:${unit.id}:${index}`,
+  );
+
+  return {
+    prompt: "听音频，选择最符合这段内容主旨的一项。",
+    options,
+    answer: chinese,
+    explanation: `主旨题先听完整意思，再选最贴近整句的中文。原句是：${english}`,
+    english,
+    chinese,
+  };
+}
+
+function buildDetailQuestion(
+  unit: ListeningUnit,
+  units: ListeningUnit[],
+  index: number,
+  band: ListeningBand,
+): Omit<ListeningQuestion, "id" | "type" | "unit" | "audioSrc" | "audioStart" | "audioEnd"> {
+  const words = getUsableWords(unit);
+
+  if (words.length === 0) {
+    return buildMainQuestion(unit, units, index, band);
+  }
+
+  const target = words[index % words.length];
+  const answer = getMeaningOption(target);
+  const distractors = getOtherWordOptions(unit, units, `detail:${band.key}:${index}`).slice(0, 8);
+  const options = shuffleBySeed(
+    uniqueOptions([answer, ...distractors]).slice(0, 4),
+    `detail-options:${unit.id}:${index}`,
+  );
+  const english = getSentenceEnglish(unit);
+  const chinese = getSentenceChinese(unit);
+
+  return {
+    prompt: "听音频，选择这段中出现过的关键词或关键信息。",
+    options,
+    answer,
+    explanation: `细节题要定位音频里的关键词。“${target.word}”出现在这段内容中，结合原句可判断答案。原句是：${english}`,
+    english,
+    chinese,
+  };
+}
+
+function buildInferenceQuestion(
+  unit: ListeningUnit,
+  units: ListeningUnit[],
+  index: number,
+  band: ListeningBand,
+): Omit<ListeningQuestion, "id" | "type" | "unit" | "audioSrc" | "audioStart" | "audioEnd"> {
+  const english = getSentenceEnglish(unit);
+  const chinese = getSentenceChinese(unit);
+  const answer = inferListeningPurpose(english, chinese);
+  const distractors = shuffleBySeed(
+    INFERENCE_OPTIONS.filter((option) => option !== answer),
+    `inference:${band.key}:${index}`,
+  ).slice(0, 3);
+  const options = shuffleBySeed([answer, ...distractors], `inference-options:${unit.id}:${index}`);
+
+  return {
+    prompt: "听音频，判断说话人更可能想表达什么。",
+    options,
+    answer,
+    explanation: `推断题不能只看单词，要结合整句关系。这里更合理的判断是：${answer}。原句是：${english}`,
+    english,
+    chinese,
+  };
+}
+
+function buildListeningQuestionsForBand(band: ListeningBand, allUnits: ListeningUnit[]) {
+  const units = allUnits
+    .filter((unit) => getBandConfig(unit.group_name)?.key === band.key)
+    .filter((unit) => getAudioMaterial(unit)?.file_path && getSentenceEnglish(unit))
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+  if (units.length === 0) return [];
+
+  return Array.from({ length: QUESTION_COUNT_PER_BAND }, (_, index) => {
+    const unit = units[index % units.length];
+    const type = getQuestionType(index);
+    const audioMaterial = getAudioMaterial(unit);
+    const base =
+      type === "main"
+        ? buildMainQuestion(unit, units, index, band)
+        : type === "detail"
+          ? buildDetailQuestion(unit, units, index, band)
+          : buildInferenceQuestion(unit, units, index, band);
+
+    return {
+      ...base,
+      id: `${band.key}-${type}-${unit.id}-${index}`,
+      type,
+      unit,
+      audioSrc: audioMaterial?.file_path ?? "",
+      audioStart: 0,
+      audioEnd: getSentenceClipEnd(unit),
+    };
+  });
+}
+
+function getToneClasses(tone: string) {
+  if (tone === "amber") {
+    return {
+      border: "border-amber-200",
+      bg: "bg-amber-50",
+      text: "text-amber-700",
+      button: "bg-amber-500 hover:bg-amber-600",
+      progress: "bg-amber-500",
+    };
+  }
+
+  return {
+    border: "border-emerald-200",
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    button: "bg-emerald-500 hover:bg-emerald-600",
+    progress: "bg-emerald-500",
+  };
+}
+
+export function EnglishListeningPanel({ subjectId, playWordAudio }: EnglishListeningPanelProps) {
   const [units, setUnits] = useState<ListeningUnit[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [query, setQuery] = useState("");
-  const [expandedBands, setExpandedBands] = useState<Set<string>>(
-    () => new Set(["primary"])
-  );
-  const [expandedUnits, setExpandedUnits] = useState<Set<string>>(
-    () => new Set()
-  );
-  const [revealedTexts, setRevealedTexts] = useState<Set<string>>(
-    () => new Set()
-  );
+  const [error, setError] = useState<string | null>(null);
+  const [activeBandKey, setActiveBandKey] = useState<ListeningBand["key"] | null>(null);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [filter, setFilter] = useState<ListeningFilter>("all");
 
   useEffect(() => {
     let cancelled = false;
 
-    const loadListeningUnits = async () => {
-      setLoading(true);
-      setLoadError("");
-
+    async function loadUnits() {
       try {
-        const res = await fetch(`/api/subjects/${subjectId}`);
-        if (!res.ok) {
-          throw new Error(`Failed to load listening materials (${res.status})`);
+        setLoading(true);
+        setError(null);
+        const response = await fetch(`/api/subjects/${subjectId}`);
+        if (!response.ok) {
+          throw new Error("听力内容加载失败");
         }
-
-        const data = await res.json();
-        if (cancelled) {
-          return;
-        }
-
-        const nextUnits = ((data.units ?? []) as ListeningUnit[]).filter(
-          (unit) => getAudioMaterial(unit) && unit.sentenceText?.english
-        );
-
-        setUnits(nextUnits);
-      } catch (error) {
+        const data = await response.json();
         if (!cancelled) {
-          setLoadError(
-            error instanceof Error ? error.message : "Failed to load listening materials"
-          );
+          setUnits(data.units ?? []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "听力内容加载失败");
         }
       } finally {
         if (!cancelled) {
           setLoading(false);
         }
       }
-    };
+    }
 
-    loadListeningUnits();
+    loadUnits();
 
     return () => {
       cancelled = true;
     };
   }, [subjectId]);
 
-  const searchText = query.trim().toLowerCase();
-  const filteredUnits = !searchText
-    ? units
-    : units.filter((unit) => {
-        const haystack = [
-          unit.name,
-          unit.group_name,
-          unit.sentenceText?.english ?? "",
-          unit.sentenceText?.chinese ?? "",
-          ...(unit.words ?? []).flatMap((word) => [word.word, word.meaning]),
-        ]
-          .join(" ")
-          .toLowerCase();
-
-        return haystack.includes(searchText);
-      });
-
-  const groupedBands = LISTENING_BANDS.map((band) => ({
-    ...band,
-    units: filteredUnits.filter((unit) => (unit.group_name ?? "").includes(band.match)),
-  })).filter((band) => band.units.length > 0);
-
-  const totalAudioUnits = units.length;
-  const totalKeywordItems = units.reduce(
-    (sum, unit) => sum + getKeywordWords(unit, getBandConfig(unit.group_name).keywordLimit).length,
-    0
+  const bandSummaries = useMemo(
+    () =>
+      LISTENING_BANDS.map((band) => {
+        const questions = buildListeningQuestionsForBand(band, units);
+        const audioCount = new Set(questions.map((question) => question.unit.id)).size;
+        return { band, questions, audioCount };
+      }),
+    [units],
   );
 
-  const toggleBand = (bandKey: string) => {
-    setExpandedBands((prev) => {
-      const next = new Set(prev);
-      if (next.has(bandKey)) {
-        next.delete(bandKey);
-      } else {
-        next.add(bandKey);
-      }
-      return next;
-    });
-  };
+  const activeSummary = bandSummaries.find((summary) => summary.band.key === activeBandKey);
+  const activeQuestions = activeSummary?.questions ?? [];
+  const filteredQuestions =
+    filter === "all"
+      ? activeQuestions
+      : activeQuestions.filter((question) => question.type === filter);
+  const currentQuestion = filteredQuestions[questionIndex] ?? filteredQuestions[0];
+  const isCorrect = selectedOption === currentQuestion?.answer;
 
-  const toggleUnit = (unitId: string) => {
-    setExpandedUnits((prev) => {
-      const next = new Set(prev);
-      if (next.has(unitId)) {
-        next.delete(unitId);
-      } else {
-        next.add(unitId);
-      }
-      return next;
-    });
-  };
+  useEffect(() => {
+    setQuestionIndex(0);
+    setSelectedOption(null);
+  }, [activeBandKey, filter]);
 
-  const toggleReveal = (unitId: string) => {
-    setRevealedTexts((prev) => {
-      const next = new Set(prev);
-      if (next.has(unitId)) {
-        next.delete(unitId);
-      } else {
-        next.add(unitId);
-      }
-      return next;
-    });
-  };
+  function startBand(bandKey: ListeningBand["key"]) {
+    setActiveBandKey(bandKey);
+    setFilter("all");
+    setQuestionIndex(0);
+    setSelectedOption(null);
+  }
+
+  function goNext() {
+    setQuestionIndex((current) => Math.min(current + 1, filteredQuestions.length - 1));
+    setSelectedOption(null);
+  }
+
+  function playCurrentAudio() {
+    if (!currentQuestion?.audioSrc) return;
+    playWordAudio(currentQuestion.audioSrc, currentQuestion.audioStart, currentQuestion.audioEnd);
+  }
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-white px-6 py-10 text-center text-stone-500">
+      <div className="rounded-3xl border border-amber-200 bg-amber-50 p-10 text-center text-stone-500 shadow-sm">
         正在加载听力训练内容...
       </div>
     );
   }
 
-  if (loadError) {
+  if (error) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-white px-6 py-10 text-center">
-        <p className="text-sm text-red-500">{loadError}</p>
+      <div className="rounded-3xl border border-red-200 bg-red-50 p-10 text-center text-red-600 shadow-sm">
+        {error}
+      </div>
+    );
+  }
+
+  if (activeSummary && currentQuestion) {
+    const tone = getToneClasses(activeSummary.band.tone);
+    const progress = Math.round(((questionIndex + 1) / filteredQuestions.length) * 100);
+
+    return (
+      <div className="space-y-8">
+        <button
+          type="button"
+          onClick={() => setActiveBandKey(null)}
+          className="text-sm font-semibold text-stone-500 transition hover:text-stone-900"
+        >
+          ← 返回听力选择
+        </button>
+
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className={`text-sm font-semibold ${tone.text}`}>{activeSummary.band.wordLimit}</p>
+            <h2 className="mt-2 text-3xl font-black text-slate-950">{activeSummary.band.title}</h2>
+          </div>
+          <div className="rounded-full border border-stone-200 bg-white px-5 py-2 text-lg font-semibold text-stone-600 shadow-sm">
+            {questionIndex + 1} / {filteredQuestions.length}
+          </div>
+        </div>
+
+        <div className="h-3 overflow-hidden rounded-full bg-stone-100">
+          <div
+            className={`h-full rounded-full ${tone.progress} transition-all duration-300`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          {[
+            ["all", "全部 500 题"],
+            ["main", "主旨题"],
+            ["detail", "细节题"],
+            ["inference", "推断题"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setFilter(value as ListeningFilter)}
+              className={`rounded-full border px-5 py-2 text-sm font-semibold transition ${
+                filter === value
+                  ? "border-slate-950 bg-slate-950 text-white"
+                  : "border-stone-200 bg-white text-stone-600 hover:border-stone-400"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <section className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div>
+              <div
+                className={`inline-flex rounded-full border px-3 py-1 text-sm font-semibold ${QUESTION_META[currentQuestion.type].badgeClass}`}
+              >
+                {QUESTION_META[currentQuestion.type].label}
+              </div>
+              <p className="mt-5 text-sm font-semibold text-stone-500">
+                {QUESTION_META[currentQuestion.type].hint}
+              </p>
+              <h3 className="mt-3 text-2xl font-black text-slate-950">
+                {currentQuestion.prompt}
+              </h3>
+            </div>
+
+            <button
+              type="button"
+              onClick={playCurrentAudio}
+              className={`flex h-16 w-16 items-center justify-center rounded-full text-2xl text-white shadow-lg transition ${tone.button}`}
+              aria-label="播放听力音频"
+            >
+              ▶
+            </button>
+          </div>
+
+          <div className="mt-8 space-y-4">
+            {currentQuestion.options.map((option, optionIndex) => {
+              const isSelected = selectedOption === option;
+              const isAnswer = option === currentQuestion.answer;
+              const showAnswer = selectedOption !== null;
+
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  disabled={showAnswer}
+                  onClick={() => setSelectedOption(option)}
+                  className={`flex w-full items-center gap-4 rounded-2xl border p-4 text-left text-lg font-semibold transition ${
+                    showAnswer && isAnswer
+                      ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                      : showAnswer && isSelected
+                        ? "border-red-300 bg-red-50 text-red-700"
+                        : "border-stone-200 bg-white text-slate-900 hover:border-stone-400"
+                  }`}
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-stone-200 bg-white text-sm font-black text-stone-500">
+                    {String.fromCharCode(65 + optionIndex)}
+                  </span>
+                  <span>{option}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedOption && (
+            <div className="mt-8 rounded-3xl bg-stone-50 p-6">
+              <p className={`text-lg font-black ${isCorrect ? "text-emerald-700" : "text-red-600"}`}>
+                {isCorrect ? "答对了" : "这题选错了"}
+              </p>
+              <p className="mt-3 text-base leading-8 text-stone-700">{currentQuestion.explanation}</p>
+              <div className="mt-5 rounded-2xl border border-stone-200 bg-white p-5">
+                <p className="font-semibold text-slate-950">{currentQuestion.english}</p>
+                <p className="mt-2 text-stone-500">{currentQuestion.chinese}</p>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={goNext}
+                  disabled={questionIndex >= filteredQuestions.length - 1}
+                  className="rounded-2xl bg-slate-950 px-6 py-3 font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+                >
+                  下一题
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-[28px] border border-amber-100 bg-white p-6 shadow-sm">
-          <p className="text-sm font-semibold text-amber-600">Listening Roadmap</p>
-          <h3 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
-            听力训练
-          </h3>
-          <p className="mt-4 text-sm leading-7 text-stone-600">
-            这里不再只是放音频，而是按真正的听力训练顺序来做：先听出关键词，
-            再做句子精听，再抓信息，最后跟读复述。现有素材以句子音频为主，
-            所以这一版重点先把“词块辨音 + 句子理解 + 复述输出”练扎实。
-          </p>
-
-          <div className="mt-6 rounded-[22px] border border-amber-100 bg-amber-50/70 p-4 text-sm leading-7 text-stone-700">
-            推荐每次练习只做 3 到 5 条。每条至少听 3 遍：
-            第 1 遍抓大意，第 2 遍抓关键词，第 3 遍核对原文并跟读。
-          </div>
-
-          <div className="mt-6">
-            <label
-              htmlFor="listening-search"
-              className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-stone-400"
-            >
-              搜索句子 / 主题 / 关键词
-            </label>
-            <input
-              id="listening-search"
-              type="text"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="例如：because / school / family / travel"
-              className="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-300 focus:ring-4 focus:ring-amber-100"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-2">
-          <div className="rounded-[24px] border border-white/80 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-              训练阶段
-            </p>
-            <p className="mt-3 text-3xl font-semibold text-amber-600">4</p>
-            <p className="mt-2 text-sm leading-6 text-stone-500">
-              听词块 / 精听 / 抓信息 / 复述
-            </p>
-          </div>
-          <div className="rounded-[24px] border border-white/80 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-              可练音频
-            </p>
-            <p className="mt-3 text-3xl font-semibold text-amber-600">
-              {totalAudioUnits}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-stone-500">
-              来自现有句子音频素材
-            </p>
-          </div>
-          <div className="rounded-[24px] border border-white/80 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-              关键词按钮
-            </p>
-            <p className="mt-3 text-3xl font-semibold text-amber-600">
-              {totalKeywordItems}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-stone-500">
-              可直接点按做辨音
-            </p>
-          </div>
-          <div className="rounded-[24px] border border-white/80 bg-white p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-              词汇阶段
-            </p>
-            <p className="mt-3 text-3xl font-semibold text-amber-600">3</p>
-            <p className="mt-2 text-sm leading-6 text-stone-500">
-              1200 / 2000 / 7000
-            </p>
-          </div>
-        </div>
+    <div className="space-y-8">
+      <section className="rounded-[2rem] border border-stone-200 bg-white p-8 shadow-sm">
+        <p className="text-sm font-bold text-emerald-600">English Listening Workspace</p>
+        <h2 className="mt-2 text-4xl font-black text-slate-950">英语听力训练</h2>
+        <p className="mt-4 max-w-2xl text-lg leading-9 text-stone-600">
+          按词汇量分成小学和初中两个训练板块，每个板块 500 题。题型从主旨题开始，再进入细节题和推断题，适合循序渐进练听力。
+        </p>
       </section>
 
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {LISTENING_METHODS.map((step) => (
-          <div
-            key={step.title}
-            className="rounded-[24px] border border-stone-200 bg-white p-5 shadow-sm"
-          >
-            <div className="text-sm font-semibold text-slate-900">{step.title}</div>
-            <p className="mt-3 text-sm leading-7 text-stone-500">{step.desc}</p>
-          </div>
-        ))}
-      </section>
-
-      <div className="space-y-4">
-        {groupedBands.map((band) => {
-          const isBandOpen = expandedBands.has(band.key);
+      <div className="grid gap-5 md:grid-cols-2">
+        {bandSummaries.map(({ band, questions, audioCount }) => {
+          const tone = getToneClasses(band.tone);
+          const disabled = questions.length === 0;
 
           return (
             <section
               key={band.key}
-              className={`overflow-hidden rounded-[28px] border ${band.border} bg-white shadow-sm`}
+              className={`rounded-[2rem] border bg-white p-7 shadow-sm transition ${
+                disabled ? "border-stone-200 opacity-50" : `${tone.border} hover:-translate-y-1`
+              }`}
             >
-              <button
-                type="button"
-                onClick={() => toggleBand(band.key)}
-                className="flex w-full items-start justify-between gap-4 px-5 py-5 text-left transition hover:bg-stone-50"
-              >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className={`text-xl font-semibold ${band.text}`}>{band.title}</h3>
-                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${band.bg} ${band.text}`}>
-                      {band.badge}
-                    </span>
-                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-600">
-                      {band.units.length} 条
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-stone-500">
-                    {band.subtitle} {band.focus}
-                  </p>
+              <div className="flex items-start justify-between gap-5">
+                <div>
+                  <span className={`rounded-full px-3 py-1 text-sm font-bold ${tone.bg} ${tone.text}`}>
+                    {band.badge}
+                  </span>
+                  <h3 className="mt-5 text-2xl font-black text-slate-950">{band.title}</h3>
+                  <p className="mt-3 text-stone-600">{band.subtitle}</p>
                 </div>
-
-                <span className="shrink-0 rounded-full bg-white px-3 py-1 text-sm font-medium text-stone-500 shadow-sm ring-1 ring-stone-200/80">
-                  {isBandOpen ? "收起" : "展开"}
-                </span>
-              </button>
-
-              {isBandOpen && (
-                <div className="border-t border-stone-100 bg-stone-50/60 p-4 sm:p-5">
-                  <div className="space-y-3">
-                    {band.units.map((unit) => {
-                      const isUnitOpen = expandedUnits.has(unit.id);
-                      const audioMaterial = getAudioMaterial(unit);
-                      const keywords = getKeywordWords(unit, band.keywordLimit);
-                      const sentenceEnd = getSentenceClipEnd(unit);
-                      const textRevealed = revealedTexts.has(unit.id);
-
-                      return (
-                        <article
-                          key={unit.id}
-                          className="overflow-hidden rounded-[24px] border border-stone-200 bg-white shadow-sm"
-                        >
-                          <button
-                            type="button"
-                            onClick={() => toggleUnit(unit.id)}
-                            className="flex w-full items-start justify-between gap-4 px-4 py-4 text-left transition hover:bg-stone-50"
-                          >
-                            <div className="min-w-0">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${band.bg} ${band.text}`}>
-                                  {unit.name}
-                                </span>
-                                <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-500">
-                                  {unit.word_count ?? keywords.length} 个词
-                                </span>
-                              </div>
-                              <p className="mt-2 truncate text-sm font-medium text-slate-900">
-                                {unit.sentenceText?.english ?? audioMaterial?.name ?? "Listening item"}
-                              </p>
-                              <p className="mt-1 text-xs leading-6 text-stone-400">
-                                先点“播放原句”做盲听，再点关键词做辨音，最后揭晓原文复述。
-                              </p>
-                            </div>
-
-                            <span className="shrink-0 text-sm font-medium text-stone-400">
-                              {isUnitOpen ? "收起" : "展开"}
-                            </span>
-                          </button>
-
-                          {isUnitOpen && audioMaterial && (
-                            <div className="border-t border-stone-100 px-4 py-4">
-                              <div className="space-y-4">
-                                <div className="flex flex-wrap items-center gap-3">
-                                  <button
-                                    type="button"
-                                    onClick={() => playWordAudio(audioMaterial.file_path!, 0, sentenceEnd)}
-                                    className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
-                                  >
-                                    播放原句
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleReveal(unit.id)}
-                                    className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-300 hover:bg-stone-50"
-                                  >
-                                    {textRevealed ? "收起原文" : "揭晓原文"}
-                                  </button>
-                                  <span className="text-xs text-stone-400">
-                                    建议至少听 3 遍再看原文
-                                  </span>
-                                </div>
-
-                                <div className={`rounded-[20px] border ${band.border} ${band.bg} p-4`}>
-                                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-                                    这一条怎么练
-                                  </p>
-                                  <div className="mt-3 space-y-2">
-                                    {band.checkpoints.map((checkpoint) => (
-                                      <div
-                                        key={`${unit.id}-${checkpoint}`}
-                                        className="rounded-2xl bg-white px-4 py-3 text-sm leading-7 text-stone-700 shadow-sm ring-1 ring-stone-200/80"
-                                      >
-                                        {checkpoint}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                <div className="rounded-[20px] border border-stone-200 bg-stone-50/70 p-4">
-                                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-                                    听词块
-                                  </p>
-                                  <div className="mt-3 flex flex-wrap gap-2">
-                                    {keywords.length > 0 ? (
-                                      keywords.map((word) => (
-                                        <button
-                                          key={word.id}
-                                          type="button"
-                                          onClick={() =>
-                                            playWordAudio(
-                                              audioMaterial.file_path!,
-                                              word.audio_start!,
-                                              word.audio_end!
-                                            )
-                                          }
-                                          className="rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
-                                        >
-                                          {word.word}
-                                        </button>
-                                      ))
-                                    ) : (
-                                      <span className="text-sm text-stone-400">
-                                        这一条还没有单独切词时间点
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {textRevealed && (
-                                  <div className="rounded-[20px] border border-stone-200 bg-white p-4 shadow-sm">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-                                      原文核对
-                                    </p>
-                                    <p className="mt-3 overflow-x-auto whitespace-nowrap text-sm font-medium leading-7 text-slate-900">
-                                      {unit.sentenceText?.english}
-                                    </p>
-                                    <p className="mt-2 overflow-x-auto whitespace-nowrap text-sm leading-7 text-stone-500">
-                                      {unit.sentenceText?.chinese}
-                                    </p>
-                                  </div>
-                                )}
-
-                                <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
-                                  <div className="rounded-[20px] border border-stone-200 bg-white p-4 shadow-sm">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-                                      听后抓信息
-                                    </p>
-                                    <div className="mt-3 space-y-2">
-                                      <div className="rounded-2xl bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                                        谁或什么是这句话的主角？
-                                      </div>
-                                      <div className="rounded-2xl bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                                        主要动作或事件是什么？
-                                      </div>
-                                      <div className="rounded-2xl bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                                        有没有时间、地点、原因或结果信息？
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="rounded-[20px] border border-stone-200 bg-white p-4 shadow-sm">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-                                      跟读复述
-                                    </p>
-                                    <div className="mt-3 space-y-2">
-                                      <div className="rounded-2xl bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                                        先跟读 2 到 3 遍，尽量模仿停顿和重音。
-                                      </div>
-                                      <div className="rounded-2xl bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                                        {band.retellPrompt}
-                                      </div>
-                                      <div className="rounded-2xl bg-stone-50 px-4 py-3 text-sm leading-7 text-stone-700">
-                                        如果能复述，再试着把人物、时间或地点替换掉重新说一遍。
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </article>
-                      );
-                    })}
-                  </div>
+                <div className="rounded-2xl bg-stone-50 px-4 py-3 text-right">
+                  <p className="text-2xl font-black text-slate-950">{questions.length}</p>
+                  <p className="text-sm text-stone-500">道题</p>
                 </div>
-              )}
+              </div>
+
+              <div className="mt-8 grid grid-cols-3 gap-3 text-center text-sm">
+                <div className="rounded-2xl bg-stone-50 p-4">
+                  <p className="font-black text-slate-950">主旨</p>
+                  <p className="mt-1 text-stone-500">先听大意</p>
+                </div>
+                <div className="rounded-2xl bg-stone-50 p-4">
+                  <p className="font-black text-slate-950">细节</p>
+                  <p className="mt-1 text-stone-500">定位信息</p>
+                </div>
+                <div className="rounded-2xl bg-stone-50 p-4">
+                  <p className="font-black text-slate-950">推断</p>
+                  <p className="mt-1 text-stone-500">判断意图</p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-between border-t border-stone-100 pt-5">
+                <span className="text-sm text-stone-500">可用音频 {audioCount} 条</span>
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => startBand(band.key)}
+                  className={`rounded-full px-5 py-3 text-sm font-bold text-white transition ${tone.button} disabled:cursor-not-allowed disabled:bg-stone-300`}
+                >
+                  开始训练 →
+                </button>
+              </div>
             </section>
           );
         })}
@@ -593,3 +680,5 @@ export default function EnglishListeningPanel({
     </div>
   );
 }
+
+export default EnglishListeningPanel;

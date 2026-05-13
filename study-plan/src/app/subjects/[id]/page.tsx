@@ -6,6 +6,7 @@ import Link from "next/link";
 import EnglishListeningPanel from "@/components/english-listening-panel";
 import { countMathCurriculumItems } from "@/lib/math-curriculum";
 import { countMathGradeFivePoints } from "@/lib/math-grade-five";
+import { countChineseTopics } from "@/lib/chinese-curriculum";
 import type { Subject, Unit, Material, Word } from "@/lib/types";
 
 const FILE_TYPE_LABELS: Record<string, { label: string; badge: string }> = {
@@ -683,6 +684,7 @@ export default function SubjectPage() {
 
   const isEnglish = subject.name === "英语";
   const isMath = subject.name === "数学";
+  const isChinese = subject.name === "语文";
   const totalMaterials = units.reduce((sum, u) => sum + (u.materials?.length ?? 0), 0);
 
   const ENGLISH_SKILLS = [
@@ -1034,8 +1036,44 @@ export default function SubjectPage() {
         </div>
       )}
 
+      {isChinese && (
+        <div className="space-y-4">
+          <Link
+            href={`/subjects/${id}/chinese`}
+            className="block rounded-2xl border border-rose-200 bg-white p-5 shadow-sm transition-colors hover:border-rose-300 hover:bg-rose-50"
+            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-stone-900">语文学习体系</h2>
+                <p className="mt-1 text-sm text-stone-400">
+                  小学 6 个年级 · 初中 3 个年级 · 基础 / 阅读 / 古诗文 / 作文 / 朗读
+                </p>
+                <p className="mt-3 text-sm leading-6 text-stone-500">
+                  按能力板块进入，不在首页展开细节；点击后查看完整学习地图。
+                </p>
+              </div>
+              <span className="text-stone-400">→</span>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["基础积累", "阅读理解", "古诗文", "作文训练", "朗读背诵"].map((label) => (
+                <span
+                  key={label}
+                  className="rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700"
+                >
+                  {label}
+                </span>
+              ))}
+              <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-500">
+                {countChineseTopics()} 个主题
+              </span>
+            </div>
+          </Link>
+        </div>
+      )}
+
       {/* Units grouped by section then sub-group (non-English only) */}
-      {!isEnglish && !isMath && (() => {
+      {!isEnglish && !isMath && !isChinese && (() => {
         // Split groups into sections by "｜" prefix
         const groups = new Map<string, typeof units>();
         for (const u of units) {
@@ -1315,7 +1353,7 @@ export default function SubjectPage() {
       })()}
 
       {/* Add unit inline */}
-      {addingUnit && !isMath && (
+      {addingUnit && !isMath && !isChinese && (
         <div className="mt-5 bg-white rounded-2xl border border-stone-200 p-4">
           <input
             type="text"
@@ -1333,7 +1371,7 @@ export default function SubjectPage() {
         </div>
       )}
 
-      {units.length === 0 && !addingUnit && !isEnglish && !isMath && !activeSkill && (
+      {units.length === 0 && !addingUnit && !isEnglish && !isMath && !isChinese && !activeSkill && (
         <p className="text-stone-400 text-center py-16">点右下角 + 添加第一个单元</p>
       )}
 
@@ -1347,7 +1385,7 @@ export default function SubjectPage() {
           ↑
         </button>
         {/* Add unit */}
-        {!addingUnit && !isMath && (
+        {!addingUnit && !isMath && !isChinese && (
           <button
             onClick={() => setAddingUnit(true)}
             className="w-14 h-14 bg-stone-800 text-white rounded-full text-2xl shadow-lg flex items-center justify-center cursor-pointer active:scale-95"

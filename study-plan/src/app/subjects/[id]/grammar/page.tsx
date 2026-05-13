@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useDeferredValue, useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   ENGLISH_GRAMMAR_CHAPTERS,
   type GrammarExample,
@@ -21,6 +21,28 @@ type GrammarPracticeCard = {
   task: string;
   sample: string;
   hint: string;
+};
+
+type GrammarDifficulty = "medium" | "hard" | "super";
+type GrammarDifficultyFilter = GrammarDifficulty | "all";
+
+type GrammarQuizQuestion = {
+  id: string;
+  unitId: number;
+  difficulty: GrammarDifficulty;
+  prompt: string;
+  instruction: string;
+  options: string[];
+  answer: string;
+  explanation: string;
+  sourceSentence: string;
+};
+
+type GrammarQuizAnswer = {
+  questionId: string;
+  selected: string;
+  answer: string;
+  correct: boolean;
 };
 
 function getEnglishVoice(): SpeechSynthesisVoice | null {
@@ -910,6 +932,691 @@ function countRichGrammarExamples(): number {
   );
 }
 
+const GRAMMAR_QUIZ_COUNT_PER_UNIT = 500;
+
+const GRAMMAR_DIFFICULTIES: {
+  value: GrammarDifficulty;
+  label: string;
+  hint: string;
+}[] = [
+  { value: "medium", label: "中等", hint: "单句完形，补 1 个语法空" },
+  { value: "hard", label: "困难", hint: "双空完形，判断句子结构" },
+  { value: "super", label: "超级困难", hint: "多空综合完形，结合上下文" },
+];
+
+const GRAMMAR_DIFFICULTY_META: Record<GrammarDifficulty, { label: string; badge: string }> = {
+  medium: { label: "中等", badge: "bg-emerald-50 text-emerald-700 ring-emerald-100" },
+  hard: { label: "困难", badge: "bg-amber-50 text-amber-700 ring-amber-100" },
+  super: { label: "超级困难", badge: "bg-rose-50 text-rose-700 ring-rose-100" },
+};
+
+type ReplacementGroup = {
+  key: string;
+  label: string;
+  tokens: string[];
+  explanation: string;
+  signals: string[];
+};
+
+type ClozeCandidate = {
+  token: string;
+  group: ReplacementGroup;
+};
+
+const REPLACEMENT_GROUPS: ReplacementGroup[] = [
+  {
+    key: "be",
+    label: "be 动词",
+    tokens: ["am", "is", "are", "was", "were", "be"],
+    explanation: "先看主语和时间。I 用 am，单数常用 is / was，复数和 you 常用 are / were。",
+    signals: ["am", "is", "are", "was", "were", "be "],
+  },
+  {
+    key: "do",
+    label: "do / does / did",
+    tokens: ["do", "does", "did", "don't", "doesn't", "didn't"],
+    explanation: "一般现在时看主语是否第三人称单数；一般过去时用 did 后面接动词原形。",
+    signals: ["do", "does", "did", "don't", "doesn't", "didn't"],
+  },
+  {
+    key: "perfect",
+    label: "完成时",
+    tokens: ["have", "has", "had", "just", "already", "yet", "ever", "never", "for", "since", "ago"],
+    explanation: "现在完成时常用 have / has + 过去分词；for 接一段时间，since 接起点，ago 常配一般过去时。",
+    signals: ["have done", "just", "already", "yet", "ever", "for / since", "since", "ago"],
+  },
+  {
+    key: "modal",
+    label: "情态动词",
+    tokens: ["can", "could", "must", "mustn't", "should", "might", "may", "will", "would", "shall"],
+    explanation: "情态动词后面接动词原形；语气从可能、建议、必须到将来要分清。",
+    signals: ["can", "could", "must", "should", "might", "will", "would", "shall"],
+  },
+  {
+    key: "article",
+    label: "冠词",
+    tokens: ["a", "an", "the", "some", "any"],
+    explanation: "第一次说到一个可数单数名词常用 a / an；特指时用 the；some / any 常看肯定句、否定句和疑问句。",
+    signals: ["a / an", "the", "some", "any", "可数", "不可数"],
+  },
+  {
+    key: "pronoun",
+    label: "代词",
+    tokens: ["I", "me", "my", "mine", "he", "him", "his", "she", "her", "we", "us", "our", "they", "them", "their"],
+    explanation: "主语位置用主格，动词或介词后常用宾格，表示“谁的”要用物主代词。",
+    signals: ["I / me", "my", "mine", "him", "their", "myself", "whose"],
+  },
+  {
+    key: "quantity",
+    label: "数量词",
+    tokens: ["some", "any", "many", "much", "few", "little", "all", "both", "either", "neither", "no", "none"],
+    explanation: "many / few 修饰可数名词，much / little 修饰不可数名词；both 表示两者都，neither 表示两者都不。",
+    signals: ["some", "any", "many", "much", "few", "little", "both", "either", "neither", "all"],
+  },
+  {
+    key: "comparison",
+    label: "比较结构",
+    tokens: ["than", "as", "more", "most", "older", "oldest", "too", "enough"],
+    explanation: "比较级常和 than 连用；最高级前常用 the；too 表示过于，enough 通常放在形容词后。",
+    signals: ["than", "more", "most", "as...as", "too", "enough", "比较级", "最高级"],
+  },
+  {
+    key: "connector",
+    label: "连词",
+    tokens: ["and", "but", "or", "so", "because", "when", "if", "that", "who", "which"],
+    explanation: "and 表并列，but 表转折，because 表原因，if 表条件，who / which / that 可引导定语从句。",
+    signals: ["and", "but", "or", "so", "because", "when", "if", "that", "who", "which"],
+  },
+  {
+    key: "preposition",
+    label: "介词",
+    tokens: ["in", "on", "at", "to", "from", "for", "since", "until", "before", "after", "during", "while", "under", "behind", "opposite", "through", "over", "by", "with", "about", "of"],
+    explanation: "介词要看时间、地点、方向或固定搭配。at 多指点，on 多指面或具体日期，in 多指范围。",
+    signals: ["in / at / on", "from", "until", "before", "after", "during", "under", "behind", "through", "with", "about", "of"],
+  },
+  {
+    key: "adverb",
+    label: "副词",
+    tokens: ["always", "usually", "often", "sometimes", "never", "still", "yet", "already", "quickly", "slowly", "well"],
+    explanation: "频率副词表示动作发生的频率；副词修饰动作时，要注意放在合适的位置。",
+    signals: ["always", "usually", "often", "still", "yet", "already", "quickly", "well"],
+  },
+  {
+    key: "verb-form",
+    label: "动词形式",
+    tokens: ["work", "works", "worked", "working", "go", "goes", "went", "gone", "going", "do", "does", "did", "done", "doing", "make", "makes", "made", "making", "get", "gets", "got", "getting", "have", "has", "had", "having"],
+    explanation: "动词形式要跟时间和结构一致；to 后常接动词原形，进行时用 -ing，完成时用过去分词。",
+    signals: ["work / working", "to do", "doing", "规则动词", "不规则动词", "get", "make", "have"],
+  },
+];
+
+function normalizeSentence(sentence: string): string {
+  return sentence.replace(/\s+/g, " ").trim();
+}
+
+function seededNumber(seed: number): number {
+  const x = Math.sin(seed * 9301 + 49297) * 233280;
+  return x - Math.floor(x);
+}
+
+function shuffleBySeed<T>(items: T[], seed: number): T[] {
+  return [...items]
+    .map((item, index) => ({ item, order: seededNumber(seed + index * 37) }))
+    .sort((a, b) => a.order - b.order)
+    .map(({ item }) => item);
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function tokenRegex(token: string): RegExp {
+  const escaped = escapeRegExp(token).replace(/\s+/g, "\\s+");
+  if (/^[A-Za-z']+$/.test(token)) {
+    return new RegExp(`\\b${escaped}\\b`, "i");
+  }
+  return new RegExp(escaped, "i");
+}
+
+function uniqueTexts(items: string[]): string[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = normalizeSentence(item).toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function rankReplacementGroups(unit: GrammarUnit): ReplacementGroup[] {
+  const context = `${unit.title} ${unit.summary} ${unit.patterns.join(" ")}`.toLowerCase();
+  return [...REPLACEMENT_GROUPS].sort((a, b) => {
+    const aHit = a.signals.some((signal) => context.includes(signal.toLowerCase())) ? 0 : 1;
+    const bHit = b.signals.some((signal) => context.includes(signal.toLowerCase())) ? 0 : 1;
+    return aHit - bHit;
+  });
+}
+
+function replaceFirstToken(sentence: string, from: string, to: string): string {
+  return normalizeSentence(sentence.replace(tokenRegex(from), to));
+}
+
+function buildSentenceDistractors(sentence: string, unit: GrammarUnit, seed: number): string[] {
+  const candidates: string[] = [];
+  const groups = rankReplacementGroups(unit);
+
+  groups.forEach((group, groupIndex) => {
+    group.tokens.forEach((token, tokenIndex) => {
+      if (!tokenRegex(token).test(sentence)) return;
+      shuffleBySeed(group.tokens, seed + groupIndex + tokenIndex)
+        .filter((replacement) => replacement.toLowerCase() !== token.toLowerCase())
+        .slice(0, 3)
+        .forEach((replacement) => {
+          candidates.push(replaceFirstToken(sentence, token, replacement));
+        });
+    });
+  });
+
+  const genericMistakes = [
+    sentence.replace(/\bI am\b/i, "I is"),
+    sentence.replace(/\bHe is\b/i, "He are"),
+    sentence.replace(/\bShe is\b/i, "She are"),
+    sentence.replace(/\bWe are\b/i, "We is"),
+    sentence.replace(/\bThey are\b/i, "They is"),
+    sentence.replace(/\bdoesn't\b/i, "don't"),
+    sentence.replace(/\bdidn't\b/i, "doesn't"),
+    sentence.replace(/\bhave\b/i, "has"),
+    sentence.replace(/\bhas\b/i, "have"),
+    sentence.replace(/\ba\b/i, "an"),
+    sentence.replace(/\ban\b/i, "a"),
+    sentence.replace(/\bin\b/i, "on"),
+    sentence.replace(/\bon\b/i, "in"),
+  ];
+
+  return uniqueTexts([...candidates, ...genericMistakes])
+    .filter((item) => item !== normalizeSentence(sentence))
+    .slice(0, 3);
+}
+
+function fallbackDistractors(sentence: string, seed: number): string[] {
+  const clean = normalizeSentence(sentence);
+  const words = clean.split(" ");
+  const swapped = words.length > 4
+    ? [...words.slice(0, 1), words[2], words[1], ...words.slice(3)].join(" ")
+    : `${clean} now`;
+  return uniqueTexts([
+    swapped,
+    clean.replace(/\.$/, "") + " yesterday.",
+    clean.replace(/\.$/, "") + " very.",
+    clean.replace(/\bthe\b/i, "a"),
+  ]).filter((item) => item !== clean).slice(0, 3);
+}
+
+function makeGrammarExplanation(unit: GrammarUnit, question: string, answer: string, extra: string): string {
+  return `本题考查 Unit ${unit.id}「${unit.title}」。${extra} 正确答案是「${answer}」。${unit.summary}`;
+}
+
+function getGrammarPattern(unit: GrammarUnit, index: number): string {
+  return unit.patterns[index % Math.max(1, unit.patterns.length)] ?? unit.title;
+}
+
+function buildGrammarOptions(sentence: string, unit: GrammarUnit, seed: number): string[] {
+  const distractors = uniqueTexts([
+    ...buildSentenceDistractors(sentence, unit, seed),
+    ...fallbackDistractors(sentence, seed + 19),
+  ]).filter((item) => item !== sentence);
+  const compactSentence = sentence.replace(/\.$/, "");
+  const reversedSentence = normalizeSentence(sentence.split(" ").reverse().join(" "));
+
+  const safeDistractors = distractors.length >= 3
+    ? distractors
+    : uniqueTexts([
+        ...distractors,
+        `${compactSentence} yesterday.`,
+        `${compactSentence} very.`,
+        `${compactSentence} not.`,
+        `${compactSentence} to.`,
+        reversedSentence,
+        sentence.replace(/\bI\b/i, "Me"),
+        sentence.replace(/\bis\b/i, "are"),
+        sentence.replace(/\bare\b/i, "is"),
+      ]).filter((item) => item !== sentence);
+
+  const optionPool = uniqueTexts([
+    sentence,
+    ...safeDistractors,
+    `${compactSentence} in.`,
+    `${compactSentence} at.`,
+    `${compactSentence} do.`,
+  ]);
+
+  while (optionPool.length < 4) {
+    optionPool.push(`${compactSentence} ${optionPool.length}.`);
+  }
+
+  return shuffleBySeed(optionPool.slice(0, 4), seed);
+}
+
+function getTokenMatches(sentence: string, token: string): string[] {
+  const regex = new RegExp(tokenRegex(token).source, "gi");
+  return Array.from(sentence.matchAll(regex)).map((match) => match[0]);
+}
+
+function findClozeCandidates(sentence: string, unit: GrammarUnit, seed: number): ClozeCandidate[] {
+  const candidates = rankReplacementGroups(unit).flatMap((group) =>
+    group.tokens.flatMap((token) =>
+      getTokenMatches(sentence, token).map((matchedToken) => ({
+        token: matchedToken,
+        group,
+      }))
+    )
+  );
+
+  if (candidates.length <= 1) return candidates;
+
+  const offset = Math.floor(seededNumber(seed) * Math.min(3, candidates.length));
+  return [...candidates.slice(offset), ...candidates.slice(0, offset)];
+}
+
+function buildClozeText(sentence: string, candidates: ClozeCandidate[]): string {
+  return candidates.reduce((text, candidate, index) => {
+    const blank = candidates.length === 1 ? "____" : `(${index + 1}) ____`;
+    return replaceFirstToken(text, candidate.token, blank);
+  }, sentence);
+}
+
+function buildSingleClozeOptions(candidate: ClozeCandidate, seed: number): string[] {
+  const fallbackTokens = ["am", "is", "are", "was", "were", "do", "does", "did", "a", "an", "the", "in", "on", "at"];
+  const distractors = shuffleBySeed(
+    [...candidate.group.tokens, ...fallbackTokens].filter(
+      (token) => token.toLowerCase() !== candidate.token.toLowerCase()
+    ),
+    seed
+  );
+
+  return shuffleBySeed(uniqueTexts([candidate.token, ...distractors]).slice(0, 4), seed + 31);
+}
+
+function buildMultiClozeOptions(candidates: ClozeCandidate[], seed: number): string[] {
+  const answer = candidates.map((candidate) => candidate.token).join(" / ");
+  const options = [answer];
+  const fallbackTokens = ["am", "is", "are", "was", "were", "do", "does", "did", "a", "an", "the", "in", "on", "at"];
+  let attempt = 0;
+
+  while (options.length < 4 && attempt < 24) {
+    const option = candidates
+      .map((candidate, index) => {
+        const pool = shuffleBySeed(
+          [...candidate.group.tokens, ...fallbackTokens].filter(
+            (token) => token.toLowerCase() !== candidate.token.toLowerCase()
+          ),
+          seed + attempt * 17 + index
+        );
+        return index === attempt % candidates.length || attempt >= candidates.length
+          ? pool[0] ?? candidate.token
+          : candidate.token;
+      })
+      .join(" / ");
+
+    if (!options.some((item) => item.toLowerCase() === option.toLowerCase())) {
+      options.push(option);
+    }
+    attempt += 1;
+  }
+
+  return shuffleBySeed(options.slice(0, 4), seed + 53);
+}
+
+function buildGrammarClozeQuestion(
+  unit: GrammarUnit,
+  example: GrammarExample,
+  index: number,
+  difficulty: GrammarDifficulty
+): GrammarQuizQuestion {
+  const fallbackGroup = REPLACEMENT_GROUPS[0];
+  const originalSentence = normalizeSentence(example.english);
+  const candidates = findClozeCandidates(originalSentence, unit, unit.id * 1000 + index);
+  const sentence = candidates.length > 0 ? originalSentence : "This is a good sentence.";
+  const availableCandidates = candidates.length > 0
+    ? candidates
+    : [{ token: "is", group: fallbackGroup }];
+  const blankCount = difficulty === "medium"
+    ? 1
+    : difficulty === "hard"
+      ? Math.min(2, availableCandidates.length)
+      : Math.min(3, availableCandidates.length);
+  const selectedCandidates = availableCandidates.slice(0, Math.max(1, blankCount));
+  const answer = selectedCandidates.map((candidate) => candidate.token).join(" / ");
+  const clozeText = buildClozeText(sentence, selectedCandidates);
+  const pattern = getGrammarPattern(unit, index);
+  const testedLabels = uniqueTexts(selectedCandidates.map((candidate) => candidate.group.label)).join("、");
+  const grammarTips = uniqueTexts(selectedCandidates.map((candidate) => candidate.group.explanation)).join(" ");
+  const options = selectedCandidates.length === 1
+    ? buildSingleClozeOptions(selectedCandidates[0], unit.id * 2000 + index)
+    : buildMultiClozeOptions(selectedCandidates, unit.id * 3000 + index);
+  const instruction = difficulty === "medium"
+    ? "完形填空：读英文句子，选择最合适的语法形式填入空格。"
+    : difficulty === "hard"
+      ? "完形填空：根据上下文，一次补全两个语法空。"
+      : "综合完形：结合整句结构和上下文，选择所有空格的正确组合。";
+
+  return {
+    id: `${unit.id}-${difficulty}-${index}`,
+    unitId: unit.id,
+    difficulty,
+    instruction,
+    prompt: `${selectedCandidates.length === 1 ? "Complete the sentence:" : "Complete the blanks:"}\n${clozeText}`,
+    options,
+    answer,
+    sourceSentence: sentence,
+    explanation: makeGrammarExplanation(
+      unit,
+      clozeText,
+      answer,
+      `这是一道完形填空题，重点不是翻译，而是看空格前后的语法关系。本题对应「${pattern}」，主要考查${testedLabels}。${grammarTips}`
+    ),
+  };
+}
+
+function buildGrammarMeaningQuestion(unit: GrammarUnit, example: GrammarExample, index: number): GrammarQuizQuestion {
+  return buildGrammarClozeQuestion(unit, example, index, "medium");
+}
+
+function buildGrammarStructureQuestion(unit: GrammarUnit, example: GrammarExample, index: number): GrammarQuizQuestion {
+  return buildGrammarClozeQuestion(unit, example, index, "hard");
+}
+
+function buildCorrectionQuestion(unit: GrammarUnit, example: GrammarExample, index: number): GrammarQuizQuestion {
+  return buildGrammarClozeQuestion(unit, example, index, "super");
+}
+
+function buildGrammarQuizQuestions(unit: GrammarUnit): GrammarQuizQuestion[] {
+  const examples = buildDisplayExamples(unit);
+  const sourceExamples = examples.length > 0
+    ? examples
+    : unit.examples.length > 0
+      ? unit.examples
+      : [ex("I like English.", "我喜欢英语。")];
+  const questions: GrammarQuizQuestion[] = [];
+  let sourceIndex = 0;
+
+  while (questions.length < GRAMMAR_QUIZ_COUNT_PER_UNIT) {
+    const example = sourceExamples[sourceIndex % sourceExamples.length];
+    const difficulty = GRAMMAR_DIFFICULTIES[sourceIndex % GRAMMAR_DIFFICULTIES.length].value;
+    const serial = questions.length + 1;
+
+    if (difficulty === "medium") {
+      questions.push(buildGrammarMeaningQuestion(unit, example, serial));
+    } else if (difficulty === "hard") {
+      questions.push(buildGrammarStructureQuestion(unit, example, serial));
+    } else {
+      questions.push(buildCorrectionQuestion(unit, example, serial));
+    }
+
+    sourceIndex += 1;
+  }
+
+  return questions;
+}
+
+function GrammarQuizMode({
+  unit,
+  onExit,
+}: {
+  unit: GrammarUnit;
+  onExit: () => void;
+}) {
+  const [difficultyFilter, setDifficultyFilter] = useState<GrammarDifficultyFilter>("all");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<GrammarQuizAnswer[]>([]);
+
+  const questionBank = useMemo(() => buildGrammarQuizQuestions(unit), [unit]);
+  const questions = useMemo(() => {
+    if (difficultyFilter === "all") return questionBank;
+    return questionBank.filter((question) => question.difficulty === difficultyFilter);
+  }, [difficultyFilter, questionBank]);
+  const current = questions[currentIndex];
+  const answered = selected !== null;
+  const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
+
+  useEffect(() => {
+    setCurrentIndex(0);
+    setSelected(null);
+    setAnswers([]);
+  }, [difficultyFilter, unit.id]);
+
+  const chooseOption = (option: string) => {
+    if (answered || !current) return;
+    setSelected(option);
+    setAnswers((prev) => [
+      ...prev,
+      {
+        questionId: current.id,
+        selected: option,
+        answer: current.answer,
+        correct: option === current.answer,
+      },
+    ]);
+  };
+
+  const goNext = () => {
+    setSelected(null);
+    setCurrentIndex((index) => index + 1);
+  };
+
+  const restart = () => {
+    setCurrentIndex(0);
+    setSelected(null);
+    setAnswers([]);
+  };
+
+  if (questions.length === 0 || currentIndex >= questions.length) {
+    const correctCount = answers.filter((answer) => answer.correct).length;
+    const accuracy = answers.length > 0 ? Math.round((correctCount / answers.length) * 100) : 0;
+
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-[#fbfaf7]">
+        <div className="mx-auto min-h-screen w-full max-w-4xl px-4 py-6 sm:px-6">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={onExit}
+              className="rounded-full px-3 py-2 text-sm font-medium text-stone-500 transition hover:bg-white hover:text-slate-900"
+            >
+              ← 返回语法
+            </button>
+            <button
+              type="button"
+              onClick={restart}
+              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+            >
+              再练一轮
+            </button>
+          </div>
+
+          <section className="mt-8 rounded-[32px] border border-stone-200 bg-white p-7 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+            <p className="text-sm font-medium text-amber-600">Unit {unit.id} · {unit.title}</p>
+            <h1 className="mt-3 text-3xl font-semibold text-slate-950">
+              本轮完成 {answers.length} 题，正确率 {accuracy}%
+            </h1>
+            <p className="mt-3 text-sm leading-7 text-stone-500">
+              语法题不会自动跳题，答完后需要手动点“下一题”。建议先看解析，再继续下一题。
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-emerald-50 p-4">
+                <p className="text-xs font-semibold text-emerald-700">答对</p>
+                <p className="mt-2 text-2xl font-semibold text-emerald-700">{correctCount}</p>
+              </div>
+              <div className="rounded-2xl bg-rose-50 p-4">
+                <p className="text-xs font-semibold text-rose-700">答错</p>
+                <p className="mt-2 text-2xl font-semibold text-rose-700">
+                  {Math.max(0, answers.length - correctCount)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-stone-50 p-4">
+                <p className="text-xs font-semibold text-stone-500">题库</p>
+                <p className="mt-2 text-2xl font-semibold text-slate-900">
+                  {GRAMMAR_QUIZ_COUNT_PER_UNIT} 题 / unit
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
+  const difficultyMeta = GRAMMAR_DIFFICULTY_META[current.difficulty];
+  const isCorrect = selected === current.answer;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#fbfaf7]">
+      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-5 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={onExit}
+            className="rounded-full px-3 py-2 text-sm font-medium text-stone-500 transition hover:bg-white hover:text-slate-900"
+          >
+            ← 返回语法
+          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-medium text-stone-500 ring-1 ring-stone-200">
+              {currentIndex + 1} / {questions.length}
+            </span>
+            <span className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${difficultyMeta.badge}`}>
+              {difficultyMeta.label}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-5 h-2 overflow-hidden rounded-full bg-stone-200">
+          <div
+            className="h-full rounded-full bg-amber-500 transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setDifficultyFilter("all")}
+            className={`rounded-full px-4 py-2 text-sm font-medium ring-1 transition ${
+              difficultyFilter === "all"
+                ? "bg-slate-900 text-white ring-slate-900"
+                : "bg-white text-stone-500 ring-stone-200 hover:text-slate-900"
+            }`}
+          >
+            全部 500 题
+          </button>
+          {GRAMMAR_DIFFICULTIES.map((difficulty) => (
+            <button
+              key={difficulty.value}
+              type="button"
+              onClick={() => setDifficultyFilter(difficulty.value)}
+              className={`rounded-full px-4 py-2 text-sm font-medium ring-1 transition ${
+                difficultyFilter === difficulty.value
+                  ? "bg-amber-600 text-white ring-amber-600"
+                  : "bg-white text-stone-500 ring-stone-200 hover:text-slate-900"
+              }`}
+              title={difficulty.hint}
+            >
+              {difficulty.label}
+            </button>
+          ))}
+        </div>
+
+        <main className="flex flex-1 items-center justify-center py-8">
+          <div className="w-full rounded-[34px] border border-stone-200 bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.07)] sm:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-amber-600">Unit {unit.id}</p>
+                <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                  {unit.title}
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-7 text-stone-500">
+                  {unit.summary}
+                </p>
+              </div>
+              <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                句法训练：1200 词以内
+              </span>
+            </div>
+
+            <section className="mt-8 rounded-[26px] border border-amber-100 bg-amber-50/60 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+                {current.instruction}
+              </p>
+              <p className="mt-4 whitespace-pre-line text-xl font-semibold leading-9 text-slate-950">
+                {current.prompt}
+              </p>
+            </section>
+
+            <div className="mt-6 grid gap-3">
+              {current.options.map((option, index) => {
+                const isAnswer = option === current.answer;
+                const isSelected = option === selected;
+                const stateClass = !answered
+                  ? "border-stone-200 bg-white hover:border-amber-300 hover:bg-amber-50"
+                  : isAnswer
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                    : isSelected
+                      ? "border-rose-400 bg-rose-50 text-rose-700"
+                      : "border-stone-200 bg-stone-50 text-stone-400";
+
+                return (
+                  <button
+                    key={`${current.id}-${option}-${index}`}
+                    type="button"
+                    onClick={() => chooseOption(option)}
+                    disabled={answered}
+                    className={`flex min-h-16 items-center gap-4 rounded-2xl border px-4 py-3 text-left text-base font-medium transition ${stateClass}`}
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sm font-semibold text-stone-500 ring-1 ring-stone-200">
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <span className="leading-7">{option}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {answered && (
+              <div className="mt-6 rounded-[24px] bg-stone-50 p-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p
+                      className={`text-sm font-semibold ${
+                        isCorrect ? "text-emerald-700" : "text-rose-700"
+                      }`}
+                    >
+                      {isCorrect ? "答对了。" : "这题选错了。"}
+                    </p>
+                    <p className="mt-2 text-sm leading-7 text-slate-700">
+                      {current.explanation}
+                    </p>
+                    <p className="mt-3 text-sm font-medium leading-7 text-emerald-700">
+                      正确句子：{current.sourceSentence}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    className="shrink-0 rounded-xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-700"
+                  >
+                    {currentIndex + 1 >= questions.length ? "查看结果" : "下一题"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 export default function GrammarPage() {
   const { id } = useParams<{ id: string }>();
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(
@@ -921,6 +1628,7 @@ export default function GrammarPage() {
   const [query, setQuery] = useState("");
   const [playingExampleId, setPlayingExampleId] = useState<string | null>(null);
   const [speechAvailable, setSpeechAvailable] = useState(false);
+  const [activeQuizUnit, setActiveQuizUnit] = useState<GrammarUnit | null>(null);
   const deferredQuery = useDeferredValue(query);
   const searchText = deferredQuery.trim().toLowerCase();
   const isSearching = searchText.length > 0;
@@ -1053,6 +1761,15 @@ export default function GrammarPage() {
       }
     };
   }, []);
+
+  if (activeQuizUnit) {
+    return (
+      <GrammarQuizMode
+        unit={activeQuizUnit}
+        onExit={() => setActiveQuizUnit(null)}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -1215,6 +1932,19 @@ export default function GrammarPage() {
                                   {isUnitOpen ? "收起" : "展开"}
                                 </span>
                               </button>
+
+                              <div className="border-t border-stone-100 bg-white px-4 py-3 sm:px-5">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveQuizUnit(unit)}
+                                  className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                                >
+                                  语法出题 · 500 题
+                                </button>
+                                <span className="ml-3 text-xs text-stone-400">
+                                  中等 / 困难 / 超级困难，答后看解析，手动下一题
+                                </span>
+                              </div>
 
                               {isUnitOpen && (
                                 <div className="border-t border-stone-100 bg-white px-4 py-4 sm:px-5">
