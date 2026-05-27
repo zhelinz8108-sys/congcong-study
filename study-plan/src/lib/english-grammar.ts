@@ -1357,6 +1357,85 @@ export const ENGLISH_GRAMMAR_CHAPTERS: GrammarChapter[] = [
       ]
     ),
   ]),
+  chapter("appendix", "附录", "7 个附录 · 语态、不规则动词、缩略形式、拼写和短语动词表", [
+    unit(
+      116,
+      "主动语态与被动语态比较",
+      "主动语态强调谁做了动作，被动语态强调谁或什么承受了动作。先找动作，再判断重点放在执行者还是承受者上。",
+      ["Somebody cleans the room.", "The room is cleaned.", "The room was cleaned yesterday."],
+      [
+        ex("The students planted the tree.", "学生们种了这棵树。"),
+        ex("The tree was planted by the students.", "这棵树是学生们种的。"),
+        ex("People use English in many countries.", "许多国家的人使用英语。"),
+      ]
+    ),
+    unit(
+      117,
+      "不规则动词表",
+      "不规则动词不能只靠加 -ed，要把原形、过去式和过去分词放在一起记，并放进句子里复习。",
+      ["go / went / gone", "see / saw / seen", "take / took / taken"],
+      [
+        ex("I went to the library after school.", "放学后我去了图书馆。"),
+        ex("She has seen this film before.", "她以前看过这部电影。"),
+        ex("Dad took the wrong bus yesterday.", "爸爸昨天坐错了公交车。"),
+      ]
+    ),
+    unit(
+      118,
+      "不规则动词分类",
+      "有些不规则动词有相似变化，可以按变化方式分组记，比如三种形式相同、过去式和过去分词相同、元音变化等。",
+      ["cut / cut / cut", "buy / bought / bought", "sing / sang / sung"],
+      [
+        ex("Please cut the paper carefully.", "请小心地剪纸。"),
+        ex("We bought some fruit on the way home.", "回家路上我们买了一些水果。"),
+        ex("The children have sung this song many times.", "孩子们已经唱过这首歌很多次了。"),
+      ]
+    ),
+    unit(
+      119,
+      "缩略形式",
+      "缩略形式在口语和日常书写里很常见。学习时要能还原完整形式，特别注意 's 可能表示 is 或 has。",
+      ["he's = he is / he has", "I'd = I would / I had", "don't = do not"],
+      [
+        ex("She's in the kitchen now.", "她现在在厨房里。"),
+        ex("I've finished the first page.", "我已经完成第一页了。"),
+        ex("They didn't hear the question.", "他们没有听到这个问题。"),
+      ]
+    ),
+    unit(
+      120,
+      "拼写变化",
+      "动词加 -ing、-ed 或名词变复数时，常会遇到去 e、双写辅音、y 变 i 等拼写变化。",
+      ["make / making", "stop / stopped", "city / cities"],
+      [
+        ex("She is making a birthday card.", "她正在做一张生日卡片。"),
+        ex("The bus stopped near our school.", "公交车停在我们学校附近。"),
+        ex("Many cities have museums for children.", "许多城市都有儿童博物馆。"),
+      ]
+    ),
+    unit(
+      121,
+      "短语动词表",
+      "短语动词要把动词和小词连在一起理解。小词不同，整体意思常常会变。",
+      ["take off", "give up", "look after", "find out"],
+      [
+        ex("Please take off your wet shoes.", "请脱下你的湿鞋。"),
+        ex("Don't give up after one mistake.", "不要因为一个错误就放弃。"),
+        ex("Can you look after the plants today?", "你今天能照看这些植物吗？"),
+      ]
+    ),
+    unit(
+      122,
+      "短语动词 + 宾语",
+      "短语动词带宾语时，要注意宾语的位置。名词有时可放后面或中间，代词通常放在动词和小词中间。",
+      ["put out a fire", "put it out", "give up your job", "give it up"],
+      [
+        ex("The firefighters put out the fire quickly.", "消防员很快扑灭了火。"),
+        ex("This jacket is too small. Please take it off.", "这件夹克太小了。请把它脱下来。"),
+        ex("Write down the address before you forget it.", "趁你还没忘，写下这个地址。"),
+      ]
+    ),
+  ]),
 ];
 
 export const countGrammarUnits = (chapter?: GrammarChapter): number =>

@@ -932,16 +932,25 @@ function countRichGrammarExamples(): number {
   );
 }
 
-const GRAMMAR_QUIZ_COUNT_PER_UNIT = 500;
+const GRAMMAR_QUIZ_DIFFICULTY_COUNTS: Record<GrammarDifficulty, number> = {
+  medium: 200,
+  hard: 300,
+  super: 500,
+};
+
+const GRAMMAR_QUIZ_COUNT_PER_UNIT = Object.values(GRAMMAR_QUIZ_DIFFICULTY_COUNTS).reduce(
+  (sum, count) => sum + count,
+  0
+);
 
 const GRAMMAR_DIFFICULTIES: {
   value: GrammarDifficulty;
   label: string;
   hint: string;
 }[] = [
-  { value: "medium", label: "中等", hint: "单句完形，补 1 个语法空" },
-  { value: "hard", label: "困难", hint: "双空完形，判断句子结构" },
-  { value: "super", label: "超级困难", hint: "多空综合完形，结合上下文" },
+  { value: "medium", label: "中等", hint: "200 题 · 基础词汇范围，补 1 个语法空" },
+  { value: "hard", label: "困难", hint: "300 题 · 扩展词汇范围，判断句子结构" },
+  { value: "super", label: "超级困难", hint: "500 题 · 综合词汇范围，结合上下文" },
 ];
 
 const GRAMMAR_DIFFICULTY_META: Record<GrammarDifficulty, { label: string; badge: string }> = {
@@ -949,106 +958,6 @@ const GRAMMAR_DIFFICULTY_META: Record<GrammarDifficulty, { label: string; badge:
   hard: { label: "困难", badge: "bg-amber-50 text-amber-700 ring-amber-100" },
   super: { label: "超级困难", badge: "bg-rose-50 text-rose-700 ring-rose-100" },
 };
-
-type ReplacementGroup = {
-  key: string;
-  label: string;
-  tokens: string[];
-  explanation: string;
-  signals: string[];
-};
-
-type ClozeCandidate = {
-  token: string;
-  group: ReplacementGroup;
-};
-
-const REPLACEMENT_GROUPS: ReplacementGroup[] = [
-  {
-    key: "be",
-    label: "be 动词",
-    tokens: ["am", "is", "are", "was", "were", "be"],
-    explanation: "先看主语和时间。I 用 am，单数常用 is / was，复数和 you 常用 are / were。",
-    signals: ["am", "is", "are", "was", "were", "be "],
-  },
-  {
-    key: "do",
-    label: "do / does / did",
-    tokens: ["do", "does", "did", "don't", "doesn't", "didn't"],
-    explanation: "一般现在时看主语是否第三人称单数；一般过去时用 did 后面接动词原形。",
-    signals: ["do", "does", "did", "don't", "doesn't", "didn't"],
-  },
-  {
-    key: "perfect",
-    label: "完成时",
-    tokens: ["have", "has", "had", "just", "already", "yet", "ever", "never", "for", "since", "ago"],
-    explanation: "现在完成时常用 have / has + 过去分词；for 接一段时间，since 接起点，ago 常配一般过去时。",
-    signals: ["have done", "just", "already", "yet", "ever", "for / since", "since", "ago"],
-  },
-  {
-    key: "modal",
-    label: "情态动词",
-    tokens: ["can", "could", "must", "mustn't", "should", "might", "may", "will", "would", "shall"],
-    explanation: "情态动词后面接动词原形；语气从可能、建议、必须到将来要分清。",
-    signals: ["can", "could", "must", "should", "might", "will", "would", "shall"],
-  },
-  {
-    key: "article",
-    label: "冠词",
-    tokens: ["a", "an", "the", "some", "any"],
-    explanation: "第一次说到一个可数单数名词常用 a / an；特指时用 the；some / any 常看肯定句、否定句和疑问句。",
-    signals: ["a / an", "the", "some", "any", "可数", "不可数"],
-  },
-  {
-    key: "pronoun",
-    label: "代词",
-    tokens: ["I", "me", "my", "mine", "he", "him", "his", "she", "her", "we", "us", "our", "they", "them", "their"],
-    explanation: "主语位置用主格，动词或介词后常用宾格，表示“谁的”要用物主代词。",
-    signals: ["I / me", "my", "mine", "him", "their", "myself", "whose"],
-  },
-  {
-    key: "quantity",
-    label: "数量词",
-    tokens: ["some", "any", "many", "much", "few", "little", "all", "both", "either", "neither", "no", "none"],
-    explanation: "many / few 修饰可数名词，much / little 修饰不可数名词；both 表示两者都，neither 表示两者都不。",
-    signals: ["some", "any", "many", "much", "few", "little", "both", "either", "neither", "all"],
-  },
-  {
-    key: "comparison",
-    label: "比较结构",
-    tokens: ["than", "as", "more", "most", "older", "oldest", "too", "enough"],
-    explanation: "比较级常和 than 连用；最高级前常用 the；too 表示过于，enough 通常放在形容词后。",
-    signals: ["than", "more", "most", "as...as", "too", "enough", "比较级", "最高级"],
-  },
-  {
-    key: "connector",
-    label: "连词",
-    tokens: ["and", "but", "or", "so", "because", "when", "if", "that", "who", "which"],
-    explanation: "and 表并列，but 表转折，because 表原因，if 表条件，who / which / that 可引导定语从句。",
-    signals: ["and", "but", "or", "so", "because", "when", "if", "that", "who", "which"],
-  },
-  {
-    key: "preposition",
-    label: "介词",
-    tokens: ["in", "on", "at", "to", "from", "for", "since", "until", "before", "after", "during", "while", "under", "behind", "opposite", "through", "over", "by", "with", "about", "of"],
-    explanation: "介词要看时间、地点、方向或固定搭配。at 多指点，on 多指面或具体日期，in 多指范围。",
-    signals: ["in / at / on", "from", "until", "before", "after", "during", "under", "behind", "through", "with", "about", "of"],
-  },
-  {
-    key: "adverb",
-    label: "副词",
-    tokens: ["always", "usually", "often", "sometimes", "never", "still", "yet", "already", "quickly", "slowly", "well"],
-    explanation: "频率副词表示动作发生的频率；副词修饰动作时，要注意放在合适的位置。",
-    signals: ["always", "usually", "often", "still", "yet", "already", "quickly", "well"],
-  },
-  {
-    key: "verb-form",
-    label: "动词形式",
-    tokens: ["work", "works", "worked", "working", "go", "goes", "went", "gone", "going", "do", "does", "did", "done", "doing", "make", "makes", "made", "making", "get", "gets", "got", "getting", "have", "has", "had", "having"],
-    explanation: "动词形式要跟时间和结构一致；to 后常接动词原形，进行时用 -ing，完成时用过去分词。",
-    signals: ["work / working", "to do", "doing", "规则动词", "不规则动词", "get", "make", "have"],
-  },
-];
 
 function normalizeSentence(sentence: string): string {
   return sentence.replace(/\s+/g, " ").trim();
@@ -1066,16 +975,55 @@ function shuffleBySeed<T>(items: T[], seed: number): T[] {
     .map(({ item }) => item);
 }
 
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+type QuizTemplate = {
+  stem: string;
+  answer: string;
+  distractors: string[];
+  note: string;
+};
 
-function tokenRegex(token: string): RegExp {
-  const escaped = escapeRegExp(token).replace(/\s+/g, "\\s+");
-  if (/^[A-Za-z']+$/.test(token)) {
-    return new RegExp(`\\b${escaped}\\b`, "i");
-  }
-  return new RegExp(escaped, "i");
+const qt = (stem: string, answer: string, distractors: string[], note: string): QuizTemplate => ({
+  stem,
+  answer,
+  distractors,
+  note,
+});
+
+const TEMPLATE_SLOTS: Record<GrammarDifficulty, Record<string, string[]>> = {
+  medium: {
+    name: ["Tom", "Amy", "Lucy", "Ben", "Nina", "Leo"],
+    plural: ["the children", "my friends", "the students", "we", "they"],
+    place: ["the classroom", "the library", "the park", "the kitchen", "school"],
+    object: ["book", "bag", "pencil", "photo", "ticket", "umbrella"],
+    objectPlural: ["books", "bags", "pencils", "photos", "tickets", "umbrellas"],
+    food: ["bread", "rice", "water", "milk", "fruit"],
+    adjective: ["happy", "ready", "tired", "quiet", "careful"],
+    time: ["today", "now", "yesterday", "every day", "last night"],
+  },
+  hard: {
+    name: ["Daniel", "Mia", "Oliver", "Sophie", "Henry", "Emma"],
+    plural: ["the volunteers", "my classmates", "the players", "our neighbours", "the teachers"],
+    place: ["the science room", "the bus station", "the city museum", "the sports centre", "the dining hall"],
+    object: ["notebook", "dictionary", "message", "project", "camera", "report"],
+    objectPlural: ["notebooks", "dictionaries", "messages", "projects", "cameras", "reports"],
+    food: ["coffee", "cheese", "information", "homework", "advice"],
+    adjective: ["careful", "nervous", "useful", "important", "expensive"],
+    time: ["this morning", "last weekend", "before dinner", "after the lesson", "since Monday"],
+  },
+  super: {
+    name: ["Christopher", "Isabella", "Jonathan", "Victoria", "Eleanor", "Nathan"],
+    plural: ["the exchange students", "the project members", "the school reporters", "the volunteers", "the winners"],
+    place: ["the exhibition hall", "the community centre", "the railway platform", "the language lab", "the history gallery"],
+    object: ["presentation file", "travel schedule", "interview question", "experiment result", "application form"],
+    objectPlural: ["presentation files", "travel schedules", "interview questions", "experiment results", "application forms"],
+    food: ["equipment", "research", "evidence", "luggage", "progress"],
+    adjective: ["confident", "responsible", "valuable", "accurate", "challenging"],
+    time: ["before the final presentation", "during the discussion", "after the meeting", "since the timetable changed", "while the team waited"],
+  },
+};
+
+function pickBySeed<T>(items: T[], seed: number): T {
+  return items[Math.floor(seededNumber(seed) * items.length) % items.length];
 }
 
 function uniqueTexts(items: string[]): string[] {
@@ -1088,273 +1036,381 @@ function uniqueTexts(items: string[]): string[] {
   });
 }
 
-function rankReplacementGroups(unit: GrammarUnit): ReplacementGroup[] {
-  const context = `${unit.title} ${unit.summary} ${unit.patterns.join(" ")}`.toLowerCase();
-  return [...REPLACEMENT_GROUPS].sort((a, b) => {
-    const aHit = a.signals.some((signal) => context.includes(signal.toLowerCase())) ? 0 : 1;
-    const bHit = b.signals.some((signal) => context.includes(signal.toLowerCase())) ? 0 : 1;
-    return aHit - bHit;
-  });
-}
-
-function replaceFirstToken(sentence: string, from: string, to: string): string {
-  return normalizeSentence(sentence.replace(tokenRegex(from), to));
-}
-
-function buildSentenceDistractors(sentence: string, unit: GrammarUnit, seed: number): string[] {
-  const candidates: string[] = [];
-  const groups = rankReplacementGroups(unit);
-
-  groups.forEach((group, groupIndex) => {
-    group.tokens.forEach((token, tokenIndex) => {
-      if (!tokenRegex(token).test(sentence)) return;
-      shuffleBySeed(group.tokens, seed + groupIndex + tokenIndex)
-        .filter((replacement) => replacement.toLowerCase() !== token.toLowerCase())
-        .slice(0, 3)
-        .forEach((replacement) => {
-          candidates.push(replaceFirstToken(sentence, token, replacement));
-        });
-    });
-  });
-
-  const genericMistakes = [
-    sentence.replace(/\bI am\b/i, "I is"),
-    sentence.replace(/\bHe is\b/i, "He are"),
-    sentence.replace(/\bShe is\b/i, "She are"),
-    sentence.replace(/\bWe are\b/i, "We is"),
-    sentence.replace(/\bThey are\b/i, "They is"),
-    sentence.replace(/\bdoesn't\b/i, "don't"),
-    sentence.replace(/\bdidn't\b/i, "doesn't"),
-    sentence.replace(/\bhave\b/i, "has"),
-    sentence.replace(/\bhas\b/i, "have"),
-    sentence.replace(/\ba\b/i, "an"),
-    sentence.replace(/\ban\b/i, "a"),
-    sentence.replace(/\bin\b/i, "on"),
-    sentence.replace(/\bon\b/i, "in"),
-  ];
-
-  return uniqueTexts([...candidates, ...genericMistakes])
-    .filter((item) => item !== normalizeSentence(sentence))
-    .slice(0, 3);
-}
-
-function fallbackDistractors(sentence: string, seed: number): string[] {
-  const clean = normalizeSentence(sentence);
-  const words = clean.split(" ");
-  const swapped = words.length > 4
-    ? [...words.slice(0, 1), words[2], words[1], ...words.slice(3)].join(" ")
-    : `${clean} now`;
-  return uniqueTexts([
-    swapped,
-    clean.replace(/\.$/, "") + " yesterday.",
-    clean.replace(/\.$/, "") + " very.",
-    clean.replace(/\bthe\b/i, "a"),
-  ]).filter((item) => item !== clean).slice(0, 3);
-}
-
 function makeGrammarExplanation(unit: GrammarUnit, question: string, answer: string, extra: string): string {
   return `本题考查 Unit ${unit.id}「${unit.title}」。${extra} 正确答案是「${answer}」。${unit.summary}`;
 }
 
-function getGrammarPattern(unit: GrammarUnit, index: number): string {
-  return unit.patterns[index % Math.max(1, unit.patterns.length)] ?? unit.title;
+const DEFAULT_DISTRACTORS = ["do", "does", "is"];
+
+const TEMPLATE_BANK: Record<string, QuizTemplate[]> = {
+  bePresent: [
+    qt("I ____ ready for class.", "am", ["is", "are", "be"], "I 后面用 am。"),
+    qt("{name} ____ in {place} now.", "is", ["are", "am", "be"], "单数主语后面用 is。"),
+    qt("{plural} ____ late today.", "are", ["is", "am", "be"], "复数主语和 you 后面用 are。"),
+    qt("The {objectPlural} ____ on the desk.", "are", ["is", "am", "be"], "复数名词作主语时用 are。"),
+  ],
+  beQuestion: [
+    qt("____ you ready?", "Are", ["Is", "Am", "Do"], "be 动词一般疑问句要把 be 放到主语前。"),
+    qt("____ {name} at home?", "Is", ["Are", "Am", "Does"], "单数主语提问用 Is。"),
+    qt("____ I late?", "Am", ["Is", "Are", "Do"], "I 的 be 动词是 am，疑问句写 Am I...?"),
+  ],
+  presentContinuous: [
+    qt("Look! {name} ____ a picture.", "is drawing", ["draws", "draw", "drawing"], "现在进行时用 be + -ing。"),
+    qt("{plural} ____ football now.", "are playing", ["play", "plays", "played"], "复数主语现在进行时用 are + -ing。"),
+    qt("I ____ for my {object}.", "am looking", ["look", "looks", "looking"], "I 的现在进行时用 am + -ing。"),
+  ],
+  presentContinuousQuestion: [
+    qt("____ you listening to me?", "Are", ["Do", "Is", "Does"], "现在进行时疑问句把 be 动词提前。"),
+    qt("What ____ {plural} doing?", "are", ["is", "do", "does"], "主语是复数时用 are doing。"),
+    qt("____ {name} studying now?", "Is", ["Does", "Are", "Do"], "单数主语现在进行时疑问句用 Is。"),
+  ],
+  presentSimple: [
+    qt("{name} ____ to school by bus every day.", "goes", ["go", "going", "is going"], "第三人称单数的一般现在时动词常加 -s 或 -es。"),
+    qt("{plural} ____ English on Monday.", "have", ["has", "having", "are have"], "复数主语用动词原形。"),
+    qt("The sun ____ in the east.", "rises", ["rise", "is rising", "rising"], "客观事实用一般现在时。"),
+  ],
+  presentSimpleNegative: [
+    qt("{name} ____ coffee.", "doesn't drink", ["don't drink", "isn't drink", "doesn't drinks"], "第三人称单数否定用 doesn't + 动词原形。"),
+    qt("{plural} ____ late on school days.", "don't stay", ["doesn't stay", "aren't stay", "don't stays"], "复数主语否定用 don't + 动词原形。"),
+    qt("I ____ meat.", "don't eat", ["doesn't eat", "am not eat", "don't eats"], "I 的一般现在时否定用 don't。"),
+  ],
+  presentSimpleQuestion: [
+    qt("____ {name} like music?", "Does", ["Do", "Is", "Are"], "第三人称单数一般现在时疑问句用 Does。"),
+    qt("Where ____ {plural} live?", "do", ["does", "are", "is"], "复数主语一般现在时疑问句用 do。"),
+    qt("____ you walk to school?", "Do", ["Does", "Are", "Is"], "you 的一般现在时疑问句用 Do。"),
+  ],
+  presentVsContinuous: [
+    qt("Usually I walk, but today I ____ the bus.", "am taking", ["take", "takes", "took"], "today 表示临时情况时常用现在进行时。"),
+    qt("{name} ____ tennis every Saturday.", "plays", ["is playing", "play", "played"], "every Saturday 表示习惯，用一般现在时。"),
+    qt("Listen! Someone ____ outside.", "is singing", ["sings", "sing", "sang"], "Listen! 提示此刻正在发生，用现在进行时。"),
+  ],
+  have: [
+    qt("I ____ two {objectPlural}.", "have", ["has", "am", "having"], "I / you / we / they 用 have。"),
+    qt("{name} ____ a new {object}.", "has", ["have", "is have", "having"], "第三人称单数用 has。"),
+    qt("____ you got a pen?", "Have", ["Has", "Do", "Are"], "have got 的疑问句把 Have / Has 提前。"),
+  ],
+  wasWere: [
+    qt("The weather ____ cold yesterday.", "was", ["were", "is", "are"], "单数或不可数主语过去状态用 was。"),
+    qt("{plural} ____ at {place} last night.", "were", ["was", "are", "is"], "复数主语过去状态用 were。"),
+    qt("I ____ tired after the game.", "was", ["were", "am", "are"], "I 的过去式 be 用 was。"),
+  ],
+  pastSimple: [
+    qt("We ____ the museum yesterday.", "visited", ["visit", "visits", "are visiting"], "yesterday 表示过去，规则动词常加 -ed。"),
+    qt("{name} ____ a letter last night.", "wrote", ["writes", "write", "written"], "write 的过去式是 wrote。"),
+    qt("They ____ home late.", "came", ["come", "comes", "coming"], "come 的过去式是 came。"),
+  ],
+  pastQuestionNegative: [
+    qt("I ____ see John at school yesterday.", "didn't", ["don't", "doesn't", "wasn't"], "一般过去时否定用 didn't + 动词原形。"),
+    qt("____ you finish the homework?", "Did", ["Do", "Does", "Were"], "一般过去时疑问句用 Did。"),
+    qt("{name} didn't ____ the answer.", "know", ["knew", "knows", "known"], "didn't 后面接动词原形。"),
+  ],
+  pastContinuous: [
+    qt("At eight o'clock, I ____ breakfast.", "was having", ["had", "am having", "have"], "过去某一时刻正在进行，用 was/were + -ing。"),
+    qt("{plural} ____ football when it started to rain.", "were playing", ["played", "are playing", "play"], "复数主语过去进行时用 were + -ing。"),
+    qt("{name} ____ when I called.", "was sleeping", ["slept", "is sleeping", "sleeps"], "when I called 提供过去时间点。"),
+  ],
+  pastVsContinuous: [
+    qt("When I arrived, {name} ____ dinner.", "was cooking", ["cooked", "cooks", "is cooking"], "背景动作正在进行，用过去进行时。"),
+    qt("After dinner, {name} ____ the dishes.", "washed", ["was washing", "washes", "is washing"], "完成的过去动作常用一般过去时。"),
+    qt("I ____ my homework when the phone rang.", "was doing", ["did", "do", "have done"], "一个过去动作被另一个动作打断，用过去进行时。"),
+  ],
+  presentPerfect: [
+    qt("I ____ my homework.", "have finished", ["finished", "has finished", "finish"], "现在完成时用 have/has + 过去分词。"),
+    qt("{name} ____ her key.", "has lost", ["lost", "have lost", "loses"], "第三人称单数现在完成时用 has + 过去分词。"),
+    qt("{plural} ____ the room.", "have cleaned", ["cleaned", "has cleaned", "are cleaning"], "复数主语现在完成时用 have + 过去分词。"),
+  ],
+  perfectMarkers: [
+    qt("I have ____ finished lunch.", "just", ["yet", "ever", "ago"], "just 表示刚刚。"),
+    qt("Have you finished ____?", "yet", ["already", "just", "ago"], "yet 常用于疑问句和否定句句末。"),
+    qt("{name} has ____ left.", "already", ["yet", "ever", "ago"], "already 表示已经。"),
+  ],
+  perfectExperience: [
+    qt("Have you ____ been to Beijing?", "ever", ["never", "yet", "ago"], "ever 常用于询问经历。"),
+    qt("{name} has ____ seen snow.", "never", ["ever", "yet", "ago"], "never 表示从未。"),
+    qt("This is the best film I have ____ seen.", "ever", ["never", "ago", "yet"], "最高级后谈经历时常用 ever。"),
+  ],
+  perfectDuration: [
+    qt("How long ____ you lived here?", "have", ["did", "do", "are"], "How long 与现在完成时连用时用 have/has。"),
+    qt("{name} has lived here ____ 2020.", "since", ["for", "ago", "during"], "since 后接时间起点。"),
+    qt("We have known each other ____ five years.", "for", ["since", "ago", "from"], "for 后接一段时间。"),
+  ],
+  forSinceAgo: [
+    qt("I have known him ____ five years.", "for", ["since", "ago", "during"], "for 后接一段时间。"),
+    qt("He moved here two years ____.", "ago", ["since", "for", "before"], "ago 与一般过去时连用。"),
+    qt("She has studied here ____ September.", "since", ["for", "ago", "during"], "since 后接起点。"),
+  ],
+  perfectVsPast: [
+    qt("I ____ my homework yesterday.", "did", ["have done", "has done", "do"], "yesterday 要用一般过去时。"),
+    qt("I ____ my homework, so I can go out now.", "have done", ["did", "do", "was doing"], "过去动作影响现在，用现在完成时。"),
+    qt("{name} ____ to London in 2022.", "went", ["has gone", "goes", "has been"], "具体过去时间用一般过去时。"),
+  ],
+  passive: [
+    qt("This room ____ every day.", "is cleaned", ["cleans", "cleaned", "is cleaning"], "被动语态用 be + 过去分词。"),
+    qt("The window ____ broken yesterday.", "was", ["is", "has", "were"], "过去被动语态用 was/were + 过去分词。"),
+    qt("The letter has ____ sent.", "been", ["be", "being", "was"], "现在完成时被动语态用 has/have been done。"),
+  ],
+  futureGoing: [
+    qt("I ____ visit my aunt tomorrow.", "am going to", ["go to", "went to", "going"], "be going to 表示计划或打算。"),
+    qt("Look at the clouds. It ____ rain.", "is going to", ["will to", "goes to", "is"], "根据现在迹象预测常用 be going to。"),
+    qt("{plural} ____ have a test next week.", "are going to", ["is going to", "will to", "going"], "主语是复数时用 are going to。"),
+  ],
+  futureWill: [
+    qt("I think it ____ be sunny tomorrow.", "will", ["is going", "does", "was"], "will 常用于预测。"),
+    qt("____ I open the window?", "Shall", ["Will", "Do", "Am"], "Shall I...? 可用于主动提出做某事。"),
+    qt("Don't worry. I ____ help you.", "will", ["am", "was", "do"], "临时决定或愿意帮忙常用 will。"),
+  ],
+  modal: [
+    qt("Take an umbrella. It ____ rain later.", "might", ["must", "should", "can"], "might 表示可能。"),
+    qt("You ____ touch that wire. It is dangerous.", "mustn't", ["don't need to", "should", "can"], "mustn't 表示禁止。"),
+    qt("You look tired. You ____ go to bed early.", "should", ["mustn't", "might", "can"], "should 表示建议。"),
+    qt("I ____ get up early tomorrow.", "have to", ["mustn't", "can", "might"], "have to 表示客观需要。"),
+    qt("____ you like some tea?", "Would", ["Do", "Are", "Have"], "Would you like...? 是礼貌邀请。"),
+    qt("When I was five, I ____ swim.", "couldn't", ["can't", "mustn't", "don't"], "could/couldn't 表示过去能力。"),
+  ],
+  imperative: [
+    qt("____ quiet, please.", "Be", ["Are", "Do", "You"], "祈使句用动词原形开头。"),
+    qt("____ run in the classroom.", "Don't", ["Doesn't", "No", "Not"], "否定祈使句用 Don't + 动词原形。"),
+    qt("____ do this exercise together.", "Let's", ["Let", "We", "Shall"], "Let's + 动词原形表示一起做。"),
+  ],
+  usedTo: [
+    qt("My father ____ live in a small village.", "used to", ["uses to", "is used to", "use to"], "used to 表示过去常常。"),
+    qt("We didn't ____ play computer games.", "use to", ["used to", "using to", "uses to"], "否定句 did not 后用 use to。"),
+    qt("Did you ____ walk to school?", "use to", ["used to", "using to", "uses to"], "疑问句 Did 后用 use to。"),
+  ],
+  thereIt: [
+    qt("There ____ a book on the desk.", "is", ["are", "am", "be"], "There is 后接单数名词。"),
+    qt("There ____ many people at the station.", "are", ["is", "was", "be"], "There are 后接复数名词。"),
+    qt("____ is cold today.", "It", ["There", "This", "That"], "谈天气常用 It 作主语。"),
+    qt("There ____ be a meeting tomorrow.", "will", ["is", "was", "has"], "There will be 表示将会有。"),
+  ],
+  auxiliary: [
+    qt("I like tea, and my sister ____ too.", "does", ["is", "do", "has"], "第三人称单数用 does 代替前面的动作。"),
+    qt("Tom isn't here, ____ he?", "is", ["isn't", "does", "has"], "反意疑问句前否后肯。"),
+    qt("I don't like coffee. ____ do I.", "Neither", ["So", "Too", "Either"], "Neither do I 表示我也不。"),
+  ],
+  questions: [
+    qt("____ did you meet yesterday?", "Who", ["Which", "Where", "How"], "问人用 Who。"),
+    qt("How long ____ it take to get there?", "does", ["do", "is", "are"], "it 作主语时一般现在时疑问句用 does。"),
+    qt("Do you know where she ____?", "lives", ["does live", "live", "is live"], "间接疑问句用陈述语序。"),
+    qt("____ book is this?", "Whose", ["Who", "Which", "What"], "询问所属关系用 Whose。"),
+  ],
+  reported: [
+    qt("She said that she ____ tired.", "was", ["is", "has", "were"], "转述过去说的话，时态常后移。"),
+    qt("He told me that he ____ busy.", "was", ["is", "has", "will"], "told me 后接 that 从句。"),
+    qt("They said they ____ come later.", "would", ["will", "can", "shall"], "直接引语 will 转述时常变 would。"),
+  ],
+  ingInfinitive: [
+    qt("I enjoy ____ music.", "listening to", ["to listen", "listen", "listened"], "enjoy 后接动词 -ing。"),
+    qt("I want ____ home.", "to go", ["going", "go", "went"], "want 后常接 to do。"),
+    qt("She asked me ____ quiet.", "to be", ["being", "be", "was"], "ask somebody to do something。"),
+    qt("I went to the shop ____ some bread.", "to buy", ["buying", "buy", "bought"], "to do 可表示目的。"),
+  ],
+  commonVerbs: [
+    qt("Let's ____ for a walk.", "go", ["get", "make", "have"], "go for a walk 是固定搭配。"),
+    qt("I ____ a mistake in the test.", "made", ["did", "had", "got"], "make a mistake 是固定搭配。"),
+    qt("She ____ lunch at noon.", "has", ["does", "makes", "gets"], "have lunch 表示吃午饭。"),
+    qt("It is getting ____.", "dark", ["darkly", "darkness", "darkerly"], "get + 形容词表示变得。"),
+  ],
+  pronouns: [
+    qt("Please help ____.", "me", ["I", "my", "mine"], "动词后用宾格。"),
+    qt("This is ____ book.", "my", ["me", "mine", "I"], "名词前用形容词性物主代词。"),
+    qt("This bag is ____.", "mine", ["my", "me", "I"], "单独表示“我的”用名词性物主代词 mine。"),
+    qt("{name} cut ____ while cooking.", "herself", ["her", "she", "hers"], "反身代词表示动作回到主语自己身上。"),
+    qt("This is ____ camera.", "Kate's", ["Kate", "Kates", "Kates'"], "'s 表示所属关系。"),
+  ],
+  articlesNouns: [
+    qt("I saw ____ elephant.", "an", ["a", "the", "some"], "elephant 以元音音素开头，用 an。"),
+    qt("She bought ____ book.", "a", ["an", "some", "any"], "第一次提到一个可数单数名词，用 a/an。"),
+    qt("____ sun is bright today.", "The", ["A", "An", "Some"], "独一无二的事物常用 the。"),
+    qt("There is ____ water in the bottle.", "some", ["a", "many", "any"], "water 不可数，肯定句常用 some。"),
+    qt("I have two ____.", "buses", ["bus", "busies", "buss"], "bus 的复数是 buses。"),
+  ],
+  determiners: [
+    qt("I don't have ____ money.", "any", ["some", "a", "many"], "否定句里常用 any。"),
+    qt("____ students passed the test.", "All", ["Every", "Each", "Both"], "students 是复数，all 可直接修饰复数名词。"),
+    qt("There is ____ in the room. It is empty.", "nobody", ["somebody", "anybody", "everybody"], "empty 表示没有人。"),
+    qt("We have ____ time. Hurry up!", "little", ["few", "many", "a few"], "time 不可数，表示几乎没有用 little。"),
+  ],
+  adjectivesAdverbs: [
+    qt("This book is very ____.", "interesting", ["interestingly", "interestedly", "interest"], "be 动词后常接形容词。"),
+    qt("She speaks English ____.", "well", ["good", "betterly", "best"], "修饰 speaks 用副词 well。"),
+    qt("This bag is ____ than mine.", "heavier", ["heavy", "heaviest", "more heavy"], "than 前常用比较级。"),
+    qt("This is ____ book in the shop.", "the most expensive", ["more expensive", "expensive", "most expensive"], "最高级前常用 the。"),
+    qt("She is old ____ to go alone.", "enough", ["too", "very", "so"], "形容词 + enough 表示足够。"),
+  ],
+  wordOrder: [
+    qt("Choose the correct sentence: ____", "She speaks English very well.", ["She speaks very well English.", "Very well she speaks English.", "She English speaks very well."], "英语基本词序通常是主语 + 谓语 + 宾语/状语。"),
+    qt("Choose the correct sentence: ____", "I gave Mary the book.", ["I gave the book Mary.", "I Mary gave the book.", "Gave I Mary the book."], "give 后可以接双宾语：give somebody something。"),
+    qt("Choose the correct sentence: ____", "I always get up early.", ["I get up always early.", "Always I get up early.", "I get always up early."], "频率副词常放在实义动词前。"),
+  ],
+  clauses: [
+    qt("I was tired, ____ I went to bed early.", "so", ["because", "but", "or"], "so 表示结果。"),
+    qt("I stayed at home ____ it rained.", "because", ["so", "but", "or"], "because 表示原因。"),
+    qt("Call me ____ you arrive.", "when", ["because", "although", "but"], "when 引导时间状语从句。"),
+    qt("If it rains, we ____ at home.", "will stay", ["stay", "stayed", "would stay"], "真实条件句常用 if + 一般现在时，主句用 will。"),
+    qt("If I had more time, I ____ learn French.", "would", ["will", "can", "am"], "虚拟条件句常用 would。"),
+    qt("The woman ____ lives next door is a nurse.", "who", ["which", "where", "when"], "指人时定语从句可用 who。"),
+  ],
+  prepositions: [
+    qt("The lesson starts ____ eight o'clock.", "at", ["on", "in", "to"], "具体时刻用 at。"),
+    qt("We have music ____ Monday.", "on", ["in", "at", "to"], "星期几前用 on。"),
+    qt("Flowers bloom ____ spring.", "in", ["on", "at", "to"], "季节前用 in。"),
+    qt("The shop is open ____ Monday to Friday.", "from", ["since", "until", "for"], "from ... to 表示从...到...。"),
+    qt("Please wait here ____ I come back.", "until", ["since", "for", "during"], "until 表示直到。"),
+    qt("Wash your hands ____ lunch.", "before", ["during", "while", "until"], "before 表示在...之前。"),
+    qt("The cat is ____ the bed.", "under", ["through", "over", "opposite"], "under 表示在...下面。"),
+    qt("We walked ____ the forest.", "through", ["over", "under", "at"], "through 表示穿过内部空间。"),
+    qt("{name} is good ____ drawing.", "at", ["in", "on", "for"], "good at 是固定搭配。"),
+    qt("Please listen ____ the teacher.", "to", ["at", "for", "with"], "listen to 是固定搭配。"),
+  ],
+  phrasalVerbs: [
+    qt("Please come ____ and sit down.", "in", ["off", "away", "up"], "come in 表示进来。"),
+    qt("Turn ____ the light before you leave.", "off", ["on", "up", "away"], "turn off 表示关掉。"),
+    qt("Put ____ your coat. It is cold.", "on", ["off", "up", "away"], "put on 表示穿上。"),
+    qt("This music is loud. Turn it ____.", "down", ["off", "away", "in"], "turn it down 表示调低音量。"),
+  ],
+  spellingIrregular: [
+    qt("The past tense of go is ____.", "went", ["goed", "gone", "going"], "go 是不规则动词，过去式是 went。"),
+    qt("The past participle of see is ____.", "seen", ["saw", "seed", "seeing"], "see 的过去分词是 seen。"),
+    qt("The -ing form of make is ____.", "making", ["makeing", "madeing", "makes"], "以不发音 e 结尾的动词加 -ing 常去 e。"),
+    qt("The past tense of stop is ____.", "stopped", ["stoped", "stopping", "stops"], "重读闭音节结尾常双写辅音再加 -ed。"),
+    qt("She's can mean she is or ____.", "she has", ["she does", "she was", "she have"], "'s 可能表示 is 或 has。"),
+  ],
+};
+
+function fillTemplate(text: string, unit: GrammarUnit, serial: number, difficulty: GrammarDifficulty): string {
+  const slots = TEMPLATE_SLOTS[difficulty];
+  return text.replace(/\{(\w+)\}/g, (_match, key: string, offset: number, fullText: string) => {
+    const values = slots[key] ?? TEMPLATE_SLOTS.medium[key] ?? [unit.title];
+    const value = pickBySeed(values, unit.id * 1009 + serial * 41 + key.length * 17);
+    const startsSentence = offset === 0 || /[.!?]\s*$/.test(fullText.slice(0, offset));
+    return startsSentence ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+  });
 }
 
-function buildGrammarOptions(sentence: string, unit: GrammarUnit, seed: number): string[] {
-  const distractors = uniqueTexts([
-    ...buildSentenceDistractors(sentence, unit, seed),
-    ...fallbackDistractors(sentence, seed + 19),
-  ]).filter((item) => item !== sentence);
-  const compactSentence = sentence.replace(/\.$/, "");
-  const reversedSentence = normalizeSentence(sentence.split(" ").reverse().join(" "));
+function getTemplateKey(unit: GrammarUnit): keyof typeof TEMPLATE_BANK {
+  const title = unit.title.toLowerCase();
+  const text = `${unit.title} ${unit.summary} ${unit.patterns.join(" ")}`.toLowerCase();
 
-  const safeDistractors = distractors.length >= 3
-    ? distractors
-    : uniqueTexts([
-        ...distractors,
-        `${compactSentence} yesterday.`,
-        `${compactSentence} very.`,
-        `${compactSentence} not.`,
-        `${compactSentence} to.`,
-        reversedSentence,
-        sentence.replace(/\bI\b/i, "Me"),
-        sentence.replace(/\bis\b/i, "are"),
-        sentence.replace(/\bare\b/i, "is"),
-      ]).filter((item) => item !== sentence);
+  if (unit.id >= 117 && unit.id <= 120) return "spellingIrregular";
+  if (unit.id === 116) return "passive";
+  if (unit.id >= 121) return "phrasalVerbs";
+  if (title.includes("疑问句") && title.includes("am / is / are")) return "beQuestion";
+  if (title.includes("am / is / are")) return "bePresent";
+  if (title.includes("are you doing")) return "presentContinuousQuestion";
+  if (title.includes("i am doing 与 i do")) return "presentVsContinuous";
+  if (title.includes("i am doing") || text.includes("现在进行时")) return "presentContinuous";
+  if (title.includes("do you")) return "presentSimpleQuestion";
+  if (title.includes("don't")) return "presentSimpleNegative";
+  if (title.includes("i do") || text.includes("一般现在时")) return "presentSimple";
+  if (title.includes("have...") || title.includes("i've got")) return "have";
+  if (title.includes("was / were")) return "wasWere";
+  if (title.includes("i was doing 与 i did")) return "pastVsContinuous";
+  if (title.includes("i was doing") || text.includes("过去进行时")) return "pastContinuous";
+  if (title.includes("didn't") || title.includes("did you")) return "pastQuestionNegative";
+  if (title.includes("worked") || text.includes("一般过去时")) return "pastSimple";
+  if (title.includes("have done 与 i did")) return "perfectVsPast";
+  if (title.includes("for / since / ago")) return "forSinceAgo";
+  if (title.includes("how long have")) return "perfectDuration";
+  if (title.includes("ever")) return "perfectExperience";
+  if (title.includes("just") || title.includes("already") || title.includes("yet")) return "perfectMarkers";
+  if (title.includes("have done") || text.includes("现在完成时")) return "presentPerfect";
+  if (/is done|was done|being done|has been done|被动/.test(text)) return "passive";
+  if (/will\/shall|will|shall/.test(text)) return "futureWill";
+  if (/going to|tomorrow/.test(text)) return "futureGoing";
+  if (/might|can|could|must|should|have to|would you like|情态动词/.test(text)) return "modal";
+  if (/do this|don't do|let's/.test(text)) return "imperative";
+  if (title.includes("used to")) return "usedTo";
+  if (/there|it \.\.\.|there will be/.test(text)) return "thereIt";
+  if (/too\/either|neither|so am|have you|are you|don't you|助动词|否定句/.test(text)) return "auxiliary";
+  if (/who saw|who did|what|which|how long|where|疑问句/.test(text)) return "questions";
+  if (text.includes("间接引语") || title.includes("said that") || title.includes("told me")) return "reported";
+  if (/work\/working|to do|doing|want somebody|动词 -ing|不定式/.test(text)) return "ingInfinitive";
+  if (/go \/ get \/ do \/ make \/ have|go to|go on|go for|go -ing|do 与 make|have$/.test(text)) return "commonVerbs";
+  if (/i\/me|my\/his|mine|myself|'s|所有格|代词/.test(text)) return "pronouns";
+  if (text.includes("短语动词") || title.includes("put on")) return "phrasalVerbs";
+  if (
+    text.includes("介词") ||
+    /\bat\b|\bon\b|\bin\b|\bto\b|from|until|since|for|before|after|during|while|under|behind|opposite|through|over|by|with|about|listen to|look at|good at|afraid of|in \/ at \/ on|to \/ in \/ at/.test(text)
+  ) return "prepositions";
+  if (title.includes("who") || title.includes("which") || title.includes("when") || title.includes("if ") || /and|but|because|定语从句|从句/.test(text)) return "clauses";
+  if (text.includes("词序") || title.includes("give me") || title.includes("always")) return "wordOrder";
+  if (/形容词|副词|older|more expensive|than|enough|too|well/.test(text)) return "adjectivesAdverbs";
+  if (/\bsome\b|\bany\b|\bevery\b|\ball\b|\bboth\b|\beither\b|\bneither\b|\bmuch\b|\bmany\b|\blittle\b|\bfew\b|限定词/.test(text)) return "determiners";
+  if (/a \/ an|\bthe\b|单数|复数|可数|不可数|名词/.test(text)) return "articlesNouns";
 
-  const optionPool = uniqueTexts([
-    sentence,
-    ...safeDistractors,
-    `${compactSentence} in.`,
-    `${compactSentence} at.`,
-    `${compactSentence} do.`,
-  ]);
-
-  while (optionPool.length < 4) {
-    optionPool.push(`${compactSentence} ${optionPool.length}.`);
-  }
-
-  return shuffleBySeed(optionPool.slice(0, 4), seed);
-}
-
-function getTokenMatches(sentence: string, token: string): string[] {
-  const regex = new RegExp(tokenRegex(token).source, "gi");
-  return Array.from(sentence.matchAll(regex)).map((match) => match[0]);
-}
-
-function findClozeCandidates(sentence: string, unit: GrammarUnit, seed: number): ClozeCandidate[] {
-  const candidates = rankReplacementGroups(unit).flatMap((group) =>
-    group.tokens.flatMap((token) =>
-      getTokenMatches(sentence, token).map((matchedToken) => ({
-        token: matchedToken,
-        group,
-      }))
-    )
-  );
-
-  if (candidates.length <= 1) return candidates;
-
-  const offset = Math.floor(seededNumber(seed) * Math.min(3, candidates.length));
-  return [...candidates.slice(offset), ...candidates.slice(0, offset)];
-}
-
-function buildClozeText(sentence: string, candidates: ClozeCandidate[]): string {
-  return candidates.reduce((text, candidate, index) => {
-    const blank = candidates.length === 1 ? "____" : `(${index + 1}) ____`;
-    return replaceFirstToken(text, candidate.token, blank);
-  }, sentence);
-}
-
-function buildSingleClozeOptions(candidate: ClozeCandidate, seed: number): string[] {
-  const fallbackTokens = ["am", "is", "are", "was", "were", "do", "does", "did", "a", "an", "the", "in", "on", "at"];
-  const distractors = shuffleBySeed(
-    [...candidate.group.tokens, ...fallbackTokens].filter(
-      (token) => token.toLowerCase() !== candidate.token.toLowerCase()
-    ),
-    seed
-  );
-
-  return shuffleBySeed(uniqueTexts([candidate.token, ...distractors]).slice(0, 4), seed + 31);
-}
-
-function buildMultiClozeOptions(candidates: ClozeCandidate[], seed: number): string[] {
-  const answer = candidates.map((candidate) => candidate.token).join(" / ");
-  const options = [answer];
-  const fallbackTokens = ["am", "is", "are", "was", "were", "do", "does", "did", "a", "an", "the", "in", "on", "at"];
-  let attempt = 0;
-
-  while (options.length < 4 && attempt < 24) {
-    const option = candidates
-      .map((candidate, index) => {
-        const pool = shuffleBySeed(
-          [...candidate.group.tokens, ...fallbackTokens].filter(
-            (token) => token.toLowerCase() !== candidate.token.toLowerCase()
-          ),
-          seed + attempt * 17 + index
-        );
-        return index === attempt % candidates.length || attempt >= candidates.length
-          ? pool[0] ?? candidate.token
-          : candidate.token;
-      })
-      .join(" / ");
-
-    if (!options.some((item) => item.toLowerCase() === option.toLowerCase())) {
-      options.push(option);
-    }
-    attempt += 1;
-  }
-
-  return shuffleBySeed(options.slice(0, 4), seed + 53);
+  return "presentSimple";
 }
 
 function buildGrammarClozeQuestion(
   unit: GrammarUnit,
-  example: GrammarExample,
   index: number,
   difficulty: GrammarDifficulty
 ): GrammarQuizQuestion {
-  const fallbackGroup = REPLACEMENT_GROUPS[0];
-  const originalSentence = normalizeSentence(example.english);
-  const candidates = findClozeCandidates(originalSentence, unit, unit.id * 1000 + index);
-  const sentence = candidates.length > 0 ? originalSentence : "This is a good sentence.";
-  const availableCandidates = candidates.length > 0
-    ? candidates
-    : [{ token: "is", group: fallbackGroup }];
-  const blankCount = difficulty === "medium"
-    ? 1
-    : difficulty === "hard"
-      ? Math.min(2, availableCandidates.length)
-      : Math.min(3, availableCandidates.length);
-  const selectedCandidates = availableCandidates.slice(0, Math.max(1, blankCount));
-  const answer = selectedCandidates.map((candidate) => candidate.token).join(" / ");
-  const clozeText = buildClozeText(sentence, selectedCandidates);
-  const pattern = getGrammarPattern(unit, index);
-  const testedLabels = uniqueTexts(selectedCandidates.map((candidate) => candidate.group.label)).join("、");
-  const grammarTips = uniqueTexts(selectedCandidates.map((candidate) => candidate.group.explanation)).join(" ");
-  const options = selectedCandidates.length === 1
-    ? buildSingleClozeOptions(selectedCandidates[0], unit.id * 2000 + index)
-    : buildMultiClozeOptions(selectedCandidates, unit.id * 3000 + index);
+  const templateKey = getTemplateKey(unit);
+  const templates = TEMPLATE_BANK[templateKey] ?? TEMPLATE_BANK.presentSimple;
+  const template = templates[(index + unit.id) % templates.length];
+  const stem = fillTemplate(template.stem, unit, index, difficulty);
+  const answer = fillTemplate(template.answer, unit, index, difficulty);
+  const distractors = template.distractors.map((option) => fillTemplate(option, unit, index, difficulty));
+  const options = shuffleBySeed(
+    uniqueTexts([answer, ...distractors, ...DEFAULT_DISTRACTORS]).slice(0, 4),
+    unit.id * 4000 + index
+  );
   const instruction = difficulty === "medium"
-    ? "完形填空：读英文句子，选择最合适的语法形式填入空格。"
+    ? "选择最合适的答案补全句子。"
     : difficulty === "hard"
-      ? "完形填空：根据上下文，一次补全两个语法空。"
-      : "综合完形：结合整句结构和上下文，选择所有空格的正确组合。";
+      ? "选择最符合语法和语境的答案。"
+      : "选择最自然、最准确的答案。";
 
   return {
     id: `${unit.id}-${difficulty}-${index}`,
     unitId: unit.id,
     difficulty,
     instruction,
-    prompt: `${selectedCandidates.length === 1 ? "Complete the sentence:" : "Complete the blanks:"}\n${clozeText}`,
+    prompt: stem,
     options,
     answer,
-    sourceSentence: sentence,
+    sourceSentence: stem.replace("____", answer),
     explanation: makeGrammarExplanation(
       unit,
-      clozeText,
+      stem,
       answer,
-      `这是一道完形填空题，重点不是翻译，而是看空格前后的语法关系。本题对应「${pattern}」，主要考查${testedLabels}。${grammarTips}`
+      `这道题采用常见语法选择题形式，核心是「${unit.title}」。${template.note}`
     ),
   };
 }
 
-function buildGrammarMeaningQuestion(unit: GrammarUnit, example: GrammarExample, index: number): GrammarQuizQuestion {
-  return buildGrammarClozeQuestion(unit, example, index, "medium");
+function buildGrammarMeaningQuestion(unit: GrammarUnit, index: number): GrammarQuizQuestion {
+  return buildGrammarClozeQuestion(unit, index, "medium");
 }
 
-function buildGrammarStructureQuestion(unit: GrammarUnit, example: GrammarExample, index: number): GrammarQuizQuestion {
-  return buildGrammarClozeQuestion(unit, example, index, "hard");
+function buildGrammarStructureQuestion(unit: GrammarUnit, index: number): GrammarQuizQuestion {
+  return buildGrammarClozeQuestion(unit, index, "hard");
 }
 
-function buildCorrectionQuestion(unit: GrammarUnit, example: GrammarExample, index: number): GrammarQuizQuestion {
-  return buildGrammarClozeQuestion(unit, example, index, "super");
+function buildCorrectionQuestion(unit: GrammarUnit, index: number): GrammarQuizQuestion {
+  return buildGrammarClozeQuestion(unit, index, "super");
 }
 
 function buildGrammarQuizQuestions(unit: GrammarUnit): GrammarQuizQuestion[] {
-  const examples = buildDisplayExamples(unit);
-  const sourceExamples = examples.length > 0
-    ? examples
-    : unit.examples.length > 0
-      ? unit.examples
-      : [ex("I like English.", "我喜欢英语。")];
   const questions: GrammarQuizQuestion[] = [];
-  let sourceIndex = 0;
 
-  while (questions.length < GRAMMAR_QUIZ_COUNT_PER_UNIT) {
-    const example = sourceExamples[sourceIndex % sourceExamples.length];
-    const difficulty = GRAMMAR_DIFFICULTIES[sourceIndex % GRAMMAR_DIFFICULTIES.length].value;
-    const serial = questions.length + 1;
+  GRAMMAR_DIFFICULTIES.forEach((difficulty) => {
+    const targetCount = GRAMMAR_QUIZ_DIFFICULTY_COUNTS[difficulty.value];
 
-    if (difficulty === "medium") {
-      questions.push(buildGrammarMeaningQuestion(unit, example, serial));
-    } else if (difficulty === "hard") {
-      questions.push(buildGrammarStructureQuestion(unit, example, serial));
-    } else {
-      questions.push(buildCorrectionQuestion(unit, example, serial));
+    for (let index = 0; index < targetCount; index += 1) {
+      const serial = questions.length + 1;
+
+      if (difficulty.value === "medium") {
+        questions.push(buildGrammarMeaningQuestion(unit, serial));
+      } else if (difficulty.value === "hard") {
+        questions.push(buildGrammarStructureQuestion(unit, serial));
+      } else {
+        questions.push(buildCorrectionQuestion(unit, serial));
+      }
     }
-
-    sourceIndex += 1;
-  }
+  });
 
   return questions;
 }
@@ -1379,12 +1435,25 @@ function GrammarQuizMode({
   const current = questions[currentIndex];
   const answered = selected !== null;
   const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
+  const answeredCount = answers.length;
+  const correctCount = answers.filter((answer) => answer.correct).length;
+  const wrongCount = Math.max(0, answeredCount - correctCount);
+  const accuracy = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+  const accuracyTone =
+    answeredCount === 0
+      ? "bg-white text-stone-500 ring-stone-200"
+      : accuracy >= 80
+        ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+        : accuracy >= 60
+          ? "bg-amber-50 text-amber-700 ring-amber-100"
+          : "bg-rose-50 text-rose-700 ring-rose-100";
 
-  useEffect(() => {
+  const chooseDifficulty = (nextDifficultyFilter: GrammarDifficultyFilter) => {
+    setDifficultyFilter(nextDifficultyFilter);
     setCurrentIndex(0);
     setSelected(null);
     setAnswers([]);
-  }, [difficultyFilter, unit.id]);
+  };
 
   const chooseOption = (option: string) => {
     if (answered || !current) return;
@@ -1412,9 +1481,6 @@ function GrammarQuizMode({
   };
 
   if (questions.length === 0 || currentIndex >= questions.length) {
-    const correctCount = answers.filter((answer) => answer.correct).length;
-    const accuracy = answers.length > 0 ? Math.round((correctCount / answers.length) * 100) : 0;
-
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto bg-[#fbfaf7]">
         <div className="mx-auto min-h-screen w-full max-w-4xl px-4 py-6 sm:px-6">
@@ -1438,21 +1504,23 @@ function GrammarQuizMode({
           <section className="mt-8 rounded-[32px] border border-stone-200 bg-white p-7 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
             <p className="text-sm font-medium text-amber-600">Unit {unit.id} · {unit.title}</p>
             <h1 className="mt-3 text-3xl font-semibold text-slate-950">
-              本轮完成 {answers.length} 题，正确率 {accuracy}%
+              本轮完成 {answeredCount} 题，正确率 {accuracy}%
             </h1>
             <p className="mt-3 text-sm leading-7 text-stone-500">
               语法题不会自动跳题，答完后需要手动点“下一题”。建议先看解析，再继续下一题。
             </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="mt-6 grid gap-3 sm:grid-cols-4">
               <div className="rounded-2xl bg-emerald-50 p-4">
                 <p className="text-xs font-semibold text-emerald-700">答对</p>
                 <p className="mt-2 text-2xl font-semibold text-emerald-700">{correctCount}</p>
               </div>
               <div className="rounded-2xl bg-rose-50 p-4">
                 <p className="text-xs font-semibold text-rose-700">答错</p>
-                <p className="mt-2 text-2xl font-semibold text-rose-700">
-                  {Math.max(0, answers.length - correctCount)}
-                </p>
+                <p className="mt-2 text-2xl font-semibold text-rose-700">{wrongCount}</p>
+              </div>
+              <div className="rounded-2xl bg-amber-50 p-4">
+                <p className="text-xs font-semibold text-amber-700">正确率</p>
+                <p className="mt-2 text-2xl font-semibold text-amber-700">{accuracy}%</p>
               </div>
               <div className="rounded-2xl bg-stone-50 p-4">
                 <p className="text-xs font-semibold text-stone-500">题库</p>
@@ -1485,6 +1553,18 @@ function GrammarQuizMode({
             <span className="rounded-full bg-white px-3 py-1 text-sm font-medium text-stone-500 ring-1 ring-stone-200">
               {currentIndex + 1} / {questions.length}
             </span>
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-medium text-stone-500 ring-1 ring-stone-200">
+              已答 {answeredCount}
+            </span>
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-100">
+              答对 {correctCount}
+            </span>
+            <span className="rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-700 ring-1 ring-rose-100">
+              答错 {wrongCount}
+            </span>
+            <span className={`rounded-full px-3 py-1 text-sm font-semibold ring-1 ${accuracyTone}`}>
+              正确率 {answeredCount > 0 ? `${accuracy}%` : "--"}
+            </span>
             <span className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${difficultyMeta.badge}`}>
               {difficultyMeta.label}
             </span>
@@ -1501,20 +1581,20 @@ function GrammarQuizMode({
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setDifficultyFilter("all")}
+            onClick={() => chooseDifficulty("all")}
             className={`rounded-full px-4 py-2 text-sm font-medium ring-1 transition ${
               difficultyFilter === "all"
                 ? "bg-slate-900 text-white ring-slate-900"
                 : "bg-white text-stone-500 ring-stone-200 hover:text-slate-900"
             }`}
           >
-            全部 500 题
+            全部 {GRAMMAR_QUIZ_COUNT_PER_UNIT} 题
           </button>
           {GRAMMAR_DIFFICULTIES.map((difficulty) => (
             <button
               key={difficulty.value}
               type="button"
-              onClick={() => setDifficultyFilter(difficulty.value)}
+              onClick={() => chooseDifficulty(difficulty.value)}
               className={`rounded-full px-4 py-2 text-sm font-medium ring-1 transition ${
                 difficultyFilter === difficulty.value
                   ? "bg-amber-600 text-white ring-amber-600"
@@ -1522,7 +1602,7 @@ function GrammarQuizMode({
               }`}
               title={difficulty.hint}
             >
-              {difficulty.label}
+              {difficulty.label} {GRAMMAR_QUIZ_DIFFICULTY_COUNTS[difficulty.value]} 题
             </button>
           ))}
         </div>
@@ -1540,7 +1620,7 @@ function GrammarQuizMode({
                 </p>
               </div>
               <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-                句法训练：1200 词以内
+                题量分配：中等 200 / 困难 300 / 超级困难 500
               </span>
             </div>
 
@@ -1735,16 +1815,15 @@ export default function GrammarPage() {
       !("speechSynthesis" in window) ||
       !("SpeechSynthesisUtterance" in window)
     ) {
-      setSpeechAvailable(false);
       return;
     }
 
     const synth = window.speechSynthesis;
+    const readyTimer = window.setTimeout(() => setSpeechAvailable(true), 0);
     const handleVoicesChanged = () => {
       synth.getVoices();
     };
 
-    setSpeechAvailable(true);
     synth.getVoices();
     if (typeof synth.addEventListener === "function") {
       synth.addEventListener("voiceschanged", handleVoicesChanged);
@@ -1753,6 +1832,7 @@ export default function GrammarPage() {
     }
 
     return () => {
+      window.clearTimeout(readyTimer);
       synth.cancel();
       if (typeof synth.removeEventListener === "function") {
         synth.removeEventListener("voiceschanged", handleVoicesChanged);
@@ -1795,13 +1875,12 @@ export default function GrammarPage() {
               英语语法
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-600 sm:text-base">
-              基于《剑桥初级英语语法》115 个 unit 的目录重组，内容改写成适合小学生的学习笔记。
-              每个 unit 都补了更清楚的句型提示和中等偏难的进阶例句，便于自己复习，也便于家长带着学。
+              基于《剑桥初级英语语法》115 个 unit 和 7 个附录的目录重组，内容改写成适合小学生的学习笔记。
+              每个 unit 都配 1000 道选择题：中等 200、困难 300、超级困难 500。
             </p>
 
             <div className="mt-6 rounded-[24px] border border-amber-100 bg-amber-50/60 p-4 text-sm leading-7 text-stone-700">
-              词汇尽量控制在常见基础 1200 词范围内，句法难度整体提到中等偏难，
-              更适合做“理解规则 + 放进真实场景”的训练。
+              出题会按难度切换词汇范围和场景复杂度，更适合做“理解规则 + 放进真实场景”的训练。
             </div>
 
             <div className="mt-6">
@@ -1939,7 +2018,7 @@ export default function GrammarPage() {
                                   onClick={() => setActiveQuizUnit(unit)}
                                   className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
                                 >
-                                  语法出题 · 500 题
+                                  语法出题 · 1000 题
                                 </button>
                                 <span className="ml-3 text-xs text-stone-400">
                                   中等 / 困难 / 超级困难，答后看解析，手动下一题
