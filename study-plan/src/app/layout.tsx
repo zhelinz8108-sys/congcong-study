@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
 import "./globals.css";
-
-const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "聪聪学习计划",
@@ -28,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh" className={`${geist.variable} h-full antialiased`}>
+    <html lang="zh" className="h-full antialiased">
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

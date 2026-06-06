@@ -7,9 +7,15 @@
     "build": "next build",
     "start": "next start",
     "db:seed": "node scripts/seed-postgres.mjs",
+    "math:import": "node scripts/import-math-question-bank.mjs",
+    "math:import:local": "node scripts/import-math-question-bank.mjs --dry-run",
+    "math:import:dry": "node scripts/import-math-question-bank.mjs --dry-run",
+    "math:import:reset": "node scripts/import-math-question-bank.mjs --reset",
     "lint": "eslint"
   },
   "dependencies": {
+    "adm-zip": "^0.5.17",
+    "mammoth": "^1.12.0",
     "next": "16.2.1",
     "pg": "^8.20.0",
     "react": "19.2.4",
@@ -19,6 +25,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/adm-zip": "^0.5.8",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",
     "@types/react": "^19",

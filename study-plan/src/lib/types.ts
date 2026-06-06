@@ -53,3 +53,45 @@ export interface Material {
   sort_order: number;
   created_at: string;
 }
+
+export interface MathQuestionSet {
+  id: string;
+  title: string;
+  grade: string;
+  semester: string;
+  subject: string;
+  category: string;
+  unit_label: string;
+  source_root: string;
+  source_dir: string;
+  source_files: string[];
+  answer_files: string[];
+  import_status: "ready" | "needs_review" | "pending";
+  question_count: number;
+  ready_count: number;
+  needs_review_count: number;
+  source_only_count: number;
+  latest_attempt_id?: string | null;
+  latest_attempt_status?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MathQuestion {
+  id: string;
+  set_id: string;
+  question_number: string;
+  question_order: number;
+  question_type: "choice" | "true_false" | "fill_blank" | "calculation" | "subjective" | "source_only";
+  prompt: string;
+  options: { key: string; text: string }[];
+  correct_answer?: unknown;
+  explanation?: string;
+  score: number;
+  source_anchor: string;
+  source_excerpt: string;
+  render_mode: "structured" | "source";
+  review_status: "ready" | "needs_review" | "source_only";
+  auto_grade: boolean;
+  created_at: string;
+}

@@ -152,8 +152,8 @@ export default function SentenceTrainingPage() {
       !("speechSynthesis" in window) ||
       !("SpeechSynthesisUtterance" in window)
     ) {
-      setSpeechAvailable(false);
-      return;
+      const timer = globalThis.setTimeout(() => setSpeechAvailable(false), 0);
+      return () => globalThis.clearTimeout(timer);
     }
 
     const synth = window.speechSynthesis;
@@ -161,7 +161,7 @@ export default function SentenceTrainingPage() {
       synth.getVoices();
     };
 
-    setSpeechAvailable(true);
+    const availabilityTimer = globalThis.setTimeout(() => setSpeechAvailable(true), 0);
     synth.getVoices();
     if (typeof synth.addEventListener === "function") {
       synth.addEventListener("voiceschanged", handleVoicesChanged);
@@ -170,6 +170,7 @@ export default function SentenceTrainingPage() {
     }
 
     return () => {
+      globalThis.clearTimeout(availabilityTimer);
       synth.cancel();
       if (typeof synth.removeEventListener === "function") {
         synth.removeEventListener("voiceschanged", handleVoicesChanged);

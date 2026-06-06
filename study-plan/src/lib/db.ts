@@ -3,6 +3,8 @@ import path from "node:path";
 import { Pool } from "pg";
 
 type DbError = { message: string };
+// This small Supabase-like adapter intentionally returns loosely typed rows.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DbResult<T = any> = {
   data: T | T[] | null;
   error: DbError | null;

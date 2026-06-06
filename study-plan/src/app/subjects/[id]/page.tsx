@@ -345,7 +345,7 @@ function VocabSection({ subjectId }: { subjectId: string }) {
           ) : (
             <div className="text-center py-4">
               <p className="text-sm text-stone-400">没有解析到单词</p>
-              <p className="text-xs text-stone-300 mt-1">支持格式：每行一个 "单词 - 中文意思" 或 "单词  中文意思"</p>
+              <p className="text-xs text-stone-300 mt-1">支持格式：每行一个 &quot;单词 - 中文意思&quot; 或 &quot;单词  中文意思&quot;</p>
               <button onClick={() => setImporting(false)} className="text-xs text-stone-400 mt-2">关闭</button>
             </div>
           )}
@@ -1028,6 +1028,38 @@ export default function SubjectPage() {
                 <h2 className="text-2xl font-bold text-stone-900">五年级</h2>
                 <p className="mt-1 text-sm text-stone-400">
                   8 个单元 · {countMathGradeFivePoints()} 个知识点
+                </p>
+              </div>
+              <span className="text-stone-400">→</span>
+            </div>
+          </Link>
+
+          <Link
+            href={`/subjects/${id}/math/generated-practice`}
+            className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
+            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-stone-900">五下数学新题训练</h2>
+                <p className="mt-1 text-sm text-stone-400">
+                  基于 PDF 出题思路 · 8 个单元 · 每单元 300 题
+                </p>
+              </div>
+              <span className="text-stone-400">→</span>
+            </div>
+          </Link>
+
+          <Link
+            href={`/subjects/${id}/math/question-bank`}
+            className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
+            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-stone-900">数学互动题库</h2>
+                <p className="mt-1 text-sm text-stone-400">
+                  按卷练习 · 自动判分 · 错题复习
                 </p>
               </div>
               <span className="text-stone-400">→</span>

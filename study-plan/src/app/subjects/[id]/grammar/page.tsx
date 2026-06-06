@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import {
   ENGLISH_GRAMMAR_CHAPTERS,
+  type GrammarChapter,
   type GrammarExample,
   type GrammarUnit,
   countGrammarUnits,
@@ -25,17 +26,20 @@ type GrammarPracticeCard = {
 
 type GrammarDifficulty = "medium" | "hard" | "super";
 type GrammarDifficultyFilter = GrammarDifficulty | "all";
+type GrammarQuestionKind = "sentence" | "dialogue" | "scenario" | "mini_context" | "pattern";
 
 type GrammarQuizQuestion = {
   id: string;
   unitId: number;
   difficulty: GrammarDifficulty;
+  kind: GrammarQuestionKind;
   prompt: string;
   instruction: string;
   options: string[];
   answer: string;
   explanation: string;
   sourceSentence: string;
+  choiceExplanations?: Record<string, string>;
 };
 
 type GrammarQuizAnswer = {
@@ -44,6 +48,58 @@ type GrammarQuizAnswer = {
   answer: string;
   correct: boolean;
 };
+
+type ActiveGrammarQuiz =
+  | { type: "unit"; unit: GrammarUnit }
+  | { type: "mixed"; sessionIndex: number };
+
+type GrammarQuizSource = {
+  key: string;
+  eyebrow: string;
+  title: string;
+  summary: string;
+  totalLabel: string;
+  questions: GrammarQuizQuestion[];
+  showDifficultyFilters: boolean;
+};
+
+const grammarUnitRange = (start: number, end: number) =>
+  Array.from({ length: end - start + 1 }, (_, index) => start + index);
+
+const PINNED_GRAMMAR_ORDER_LABEL =
+  "1-12 -> 24 -> 25-28 -> 30-35 -> 37-49 -> 59-96 -> 103-115";
+
+const PINNED_GRAMMAR_UNIT_IDS = [
+  ...grammarUnitRange(1, 12),
+  24,
+  ...grammarUnitRange(25, 28),
+  ...grammarUnitRange(30, 35),
+  ...grammarUnitRange(37, 49),
+  ...grammarUnitRange(59, 96),
+  ...grammarUnitRange(103, 115),
+];
+
+const PINNED_GRAMMAR_UNIT_ID_SET = new Set(PINNED_GRAMMAR_UNIT_IDS);
+
+const GRAMMAR_UNITS_BY_ID = new Map<number, GrammarUnit>(
+  ENGLISH_GRAMMAR_CHAPTERS.flatMap((chapter) =>
+    chapter.units.map((unit) => [unit.id, unit] as const)
+  )
+);
+
+const PINNED_GRAMMAR_UNITS = PINNED_GRAMMAR_UNIT_IDS.reduce<GrammarUnit[]>(
+  (units, unitId) => {
+    const unit = GRAMMAR_UNITS_BY_ID.get(unitId);
+    if (unit) {
+      units.push(unit);
+    }
+    return units;
+  },
+  []
+);
+
+const canPracticeGrammarUnit = (unitId: number) =>
+  PINNED_GRAMMAR_UNIT_ID_SET.has(unitId);
 
 function getEnglishVoice(): SpeechSynthesisVoice | null {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
@@ -932,10 +988,33 @@ function countRichGrammarExamples(): number {
   );
 }
 
+function grammarUnitMatchesSearch(unit: GrammarUnit, searchText: string): boolean {
+  const formCards = buildFormCards(unit);
+  const practiceCards = buildPracticeCards(unit);
+  const displayExamples = buildDisplayExamples(unit);
+  const haystack = [
+    unit.title,
+    unit.summary,
+    ...unit.patterns,
+    ...formCards.flatMap((formCard) => [formCard.label, formCard.value, formCard.hint]),
+    ...practiceCards.flatMap((practiceCard) => [
+      practiceCard.label,
+      practiceCard.task,
+      practiceCard.sample,
+      practiceCard.hint,
+    ]),
+    ...displayExamples.flatMap((example) => [example.english, example.chinese]),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(searchText);
+}
+
 const GRAMMAR_QUIZ_DIFFICULTY_COUNTS: Record<GrammarDifficulty, number> = {
   medium: 200,
-  hard: 300,
-  super: 500,
+  hard: 200,
+  super: 100,
 };
 
 const GRAMMAR_QUIZ_COUNT_PER_UNIT = Object.values(GRAMMAR_QUIZ_DIFFICULTY_COUNTS).reduce(
@@ -943,20 +1022,40 @@ const GRAMMAR_QUIZ_COUNT_PER_UNIT = Object.values(GRAMMAR_QUIZ_DIFFICULTY_COUNTS
   0
 );
 
+const MIXED_GRAMMAR_QUIZ_TOTAL = 1000;
+const MIXED_GRAMMAR_SESSION_SIZE = 100;
+const MIXED_GRAMMAR_SESSION_COUNT = Math.ceil(
+  MIXED_GRAMMAR_QUIZ_TOTAL / MIXED_GRAMMAR_SESSION_SIZE
+);
+
 const GRAMMAR_DIFFICULTIES: {
   value: GrammarDifficulty;
   label: string;
   hint: string;
 }[] = [
-  { value: "medium", label: "中等", hint: "200 题 · 基础词汇范围，补 1 个语法空" },
-  { value: "hard", label: "困难", hint: "300 题 · 扩展词汇范围，判断句子结构" },
-  { value: "super", label: "超级困难", hint: "500 题 · 综合词汇范围，结合上下文" },
+  { value: "medium", label: "基础选择", hint: "200 题 · 句子、对话、情景选择" },
+  { value: "hard", label: "变式选择", hint: "200 题 · 换场景考同一语法点" },
+  { value: "super", label: "综合选择", hint: "100 题 · 短上下文和句型变式" },
 ];
 
 const GRAMMAR_DIFFICULTY_META: Record<GrammarDifficulty, { label: string; badge: string }> = {
-  medium: { label: "中等", badge: "bg-emerald-50 text-emerald-700 ring-emerald-100" },
-  hard: { label: "困难", badge: "bg-amber-50 text-amber-700 ring-amber-100" },
-  super: { label: "超级困难", badge: "bg-rose-50 text-rose-700 ring-rose-100" },
+  medium: { label: "基础选择", badge: "bg-emerald-50 text-emerald-700 ring-emerald-100" },
+  hard: { label: "变式选择", badge: "bg-amber-50 text-amber-700 ring-amber-100" },
+  super: { label: "综合选择", badge: "bg-sky-50 text-sky-700 ring-sky-100" },
+};
+
+const GRAMMAR_QUESTION_KIND_META: Record<GrammarQuestionKind, { label: string; badge: string }> = {
+  sentence: { label: "句子选择", badge: "bg-slate-100 text-slate-700 ring-slate-200" },
+  dialogue: { label: "对话选择", badge: "bg-emerald-50 text-emerald-700 ring-emerald-100" },
+  scenario: { label: "情景选择", badge: "bg-amber-50 text-amber-700 ring-amber-100" },
+  mini_context: { label: "短文选择", badge: "bg-sky-50 text-sky-700 ring-sky-100" },
+  pattern: { label: "变式选择", badge: "bg-violet-50 text-violet-700 ring-violet-100" },
+};
+
+const GRAMMAR_KIND_SEQUENCE: Record<GrammarDifficulty, GrammarQuestionKind[]> = {
+  medium: ["sentence", "dialogue", "scenario", "sentence", "pattern"],
+  hard: ["scenario", "pattern", "dialogue", "mini_context", "sentence"],
+  super: ["mini_context", "scenario", "pattern", "dialogue", "sentence"],
 };
 
 function normalizeSentence(sentence: string): string {
@@ -991,34 +1090,34 @@ const qt = (stem: string, answer: string, distractors: string[], note: string): 
 
 const TEMPLATE_SLOTS: Record<GrammarDifficulty, Record<string, string[]>> = {
   medium: {
-    name: ["Tom", "Amy", "Lucy", "Ben", "Nina", "Leo"],
-    plural: ["the children", "my friends", "the students", "we", "they"],
-    place: ["the classroom", "the library", "the park", "the kitchen", "school"],
-    object: ["book", "bag", "pencil", "photo", "ticket", "umbrella"],
-    objectPlural: ["books", "bags", "pencils", "photos", "tickets", "umbrellas"],
-    food: ["bread", "rice", "water", "milk", "fruit"],
-    adjective: ["happy", "ready", "tired", "quiet", "careful"],
-    time: ["today", "now", "yesterday", "every day", "last night"],
+    name: ["Tom", "Amy", "Lucy", "Ben", "Nina", "Leo", "Mike", "Lily"],
+    plural: ["the children", "my friends", "the students", "we", "they", "the boys"],
+    place: ["the classroom", "the library", "the park", "the kitchen", "school", "home"],
+    object: ["book", "bag", "pencil", "pen", "photo", "ball", "cup", "box"],
+    objectPlural: ["books", "bags", "pencils", "pens", "photos", "balls", "cups", "boxes"],
+    food: ["bread", "rice", "water", "milk", "fruit", "eggs", "apples"],
+    adjective: ["happy", "ready", "tired", "quiet", "careful", "clean", "cold"],
+    time: ["today", "now", "yesterday", "every day", "last night", "this morning"],
   },
   hard: {
-    name: ["Daniel", "Mia", "Oliver", "Sophie", "Henry", "Emma"],
-    plural: ["the volunteers", "my classmates", "the players", "our neighbours", "the teachers"],
-    place: ["the science room", "the bus station", "the city museum", "the sports centre", "the dining hall"],
-    object: ["notebook", "dictionary", "message", "project", "camera", "report"],
-    objectPlural: ["notebooks", "dictionaries", "messages", "projects", "cameras", "reports"],
-    food: ["coffee", "cheese", "information", "homework", "advice"],
-    adjective: ["careful", "nervous", "useful", "important", "expensive"],
-    time: ["this morning", "last weekend", "before dinner", "after the lesson", "since Monday"],
+    name: ["Jack", "Mary", "Sam", "Anna", "David", "Grace", "Tony", "Kate"],
+    plural: ["my classmates", "the players", "the teachers", "the girls", "my parents", "our friends"],
+    place: ["the music room", "the bus stop", "the zoo", "the shop", "the playground", "the dining room"],
+    object: ["notebook", "story book", "toy", "bike", "map", "letter", "key", "cake"],
+    objectPlural: ["notebooks", "story books", "toys", "bikes", "maps", "letters", "keys", "cakes"],
+    food: ["noodles", "cakes", "tea", "juice", "chicken", "fish", "vegetables"],
+    adjective: ["busy", "early", "late", "warm", "young", "old", "easy", "hard"],
+    time: ["this morning", "last weekend", "before dinner", "after class", "on Monday", "next week"],
   },
   super: {
-    name: ["Christopher", "Isabella", "Jonathan", "Victoria", "Eleanor", "Nathan"],
-    plural: ["the exchange students", "the project members", "the school reporters", "the volunteers", "the winners"],
-    place: ["the exhibition hall", "the community centre", "the railway platform", "the language lab", "the history gallery"],
-    object: ["presentation file", "travel schedule", "interview question", "experiment result", "application form"],
-    objectPlural: ["presentation files", "travel schedules", "interview questions", "experiment results", "application forms"],
-    food: ["equipment", "research", "evidence", "luggage", "progress"],
-    adjective: ["confident", "responsible", "valuable", "accurate", "challenging"],
-    time: ["before the final presentation", "during the discussion", "after the meeting", "since the timetable changed", "while the team waited"],
+    name: ["Peter", "Helen", "John", "May", "Eric", "Jane", "Paul", "Susan"],
+    plural: ["the children", "the students", "the singers", "the runners", "the family", "the class"],
+    place: ["the art room", "the sports field", "the school gate", "the book shop", "the small garden", "the dining hall"],
+    object: ["picture", "school bag", "watch", "shirt", "card", "toy car", "water bottle", "homework"],
+    objectPlural: ["pictures", "school bags", "watches", "shirts", "cards", "toy cars", "water bottles", "homework books"],
+    food: ["soup", "cakes", "milk", "rice", "bread", "fruit", "water"],
+    adjective: ["kind", "safe", "right", "wrong", "slow", "fast", "strong", "weak"],
+    time: ["after school", "before lunch", "while we waited", "when class began", "after the game", "before bed"],
   },
 };
 
@@ -1036,8 +1135,205 @@ function uniqueTexts(items: string[]): string[] {
   });
 }
 
-function makeGrammarExplanation(unit: GrammarUnit, question: string, answer: string, extra: string): string {
-  return `本题考查 Unit ${unit.id}「${unit.title}」。${extra} 正确答案是「${answer}」。${unit.summary}`;
+function endWithPeriod(note: string): string {
+  const trimmed = note.trim();
+  return trimmed.endsWith("。") ? trimmed : `${trimmed}。`;
+}
+
+function simplifySubjectPhrase(subject: string): string {
+  return subject
+    .replace(/\s+/g, " ")
+    .replace(/^(and|but|so)\s+/i, "")
+    .replace(/^(today|usually|now|then|yesterday)\s+/i, "")
+    .trim();
+}
+
+function extractSubjectBeforeBlank(prompt: string): string {
+  const beforeBlank = prompt.split("____")[0]?.trim() ?? "";
+  if (!beforeBlank) return "";
+
+  const lastPart = beforeBlank
+    .split(/[,;.!?]\s*/)
+    .filter(Boolean)
+    .pop() ?? beforeBlank;
+
+  return simplifySubjectPhrase(lastPart);
+}
+
+function extractSubjectAfterBlank(prompt: string): string {
+  const afterBlank = prompt.split("____")[1]?.trim() ?? "";
+  if (!afterBlank) return "";
+
+  const words = afterBlank.replace(/[?.!,]/g, "").split(/\s+/).filter(Boolean);
+  const first = words[0] ?? "";
+  const second = words[1] ?? "";
+  if (!first) return "";
+  if (/^(the|my|your|our|his|her|this|that)$/i.test(first) && second) {
+    return `${first} ${second}`;
+  }
+
+  return first;
+}
+
+function extractBlankSubject(prompt: string): string {
+  return extractSubjectBeforeBlank(prompt) || extractSubjectAfterBlank(prompt);
+}
+
+function isPluralSubject(subject: string): boolean {
+  const lower = subject.toLowerCase();
+  return (
+    /^(you|we|they)$/.test(lower) ||
+    /\b(children|people|friends|students|boys|girls|players|teachers|parents|classmates|runners|singers|photos|books|bags|pencils|pens|balls|cups|boxes|notebooks|toys|bikes|maps|letters|keys|cakes|pictures|shirts|cards|cars|bottles)\b/.test(lower) ||
+    /\b\w+s\b/.test(lower)
+  );
+}
+
+function describeSubject(subject: string): string {
+  const lower = subject.toLowerCase();
+  if (!subject) return "这句话的主语";
+  if (lower === "i") return "主语是 I";
+  if (lower === "you") return "主语是 you";
+  if (lower === "we" || lower === "they") return `主语是 ${subject}`;
+  if (isPluralSubject(subject)) return `${subject} 表示复数或多人`;
+  if (/^[A-Z][a-z]+$/.test(subject)) return `${subject} 是一个人名，属于 he/she`;
+  return `${subject} 是单数主语`;
+}
+
+function getTimeClue(prompt: string): string {
+  const lower = prompt.toLowerCase();
+  if (/\b(now|look|listen)\b/.test(lower)) return "题目有 now / Look / Listen，说明动作正在进行";
+  if (/\b(yesterday|last night|last weekend|ago)\b/.test(lower)) return "题目有过去时间，说明动作发生在过去";
+  if (/\b(every day|every saturday|usually|on monday)\b/.test(lower)) return "题目有习惯性时间，说明用一般现在时";
+  if (/\b(tomorrow|next week)\b/.test(lower)) return "题目有将来时间，说明说的是之后的事";
+  return "";
+}
+
+function describeBeUse(choice: string): string {
+  const lower = choice.toLowerCase();
+  if (lower === "am") return "am 只和 I 搭配";
+  if (lower === "is") return "is 和 he/she/it 或单数主语搭配";
+  if (lower === "are") return "are 和 you/we/they 或复数主语搭配";
+  if (lower === "be") return "be 是原形，不能直接跟普通主语作谓语";
+  if (lower === "was") return "was 表示过去，和 I/he/she/it 或单数主语搭配";
+  if (lower === "were") return "were 表示过去，和 you/we/they 或复数主语搭配";
+  return "";
+}
+
+function parseDoNegative(choice: string): { helper: string; verb: string } | null {
+  const match = choice
+    .toLowerCase()
+    .match(/^(don't|doesn't|didn't|do not|does not|did not)\s+([a-z]+)\b/);
+
+  if (!match) return null;
+
+  return {
+    helper: match[1],
+    verb: match[2],
+  };
+}
+
+function parseBeNotVerb(choice: string): { helper: string; verb: string } | null {
+  const match = choice
+    .toLowerCase()
+    .match(/^(am|is|are|was|were)\s+not\s+([a-z]+)\b/);
+
+  if (!match) return null;
+
+  return {
+    helper: match[1],
+    verb: match[2],
+  };
+}
+
+function describeDoHelper(helper: string): string {
+  if (helper === "don't" || helper === "do not") return "I / you / we / they 或复数主语";
+  if (helper === "doesn't" || helper === "does not") return "he / she / it 或单数第三人称";
+  if (helper === "didn't" || helper === "did not") return "过去时";
+  return "这个主语";
+}
+
+function makeGrammarExplanation(prompt: string, answer: string, note: string): string {
+  const subject = extractBlankSubject(prompt);
+  const subjectDescription = describeSubject(subject);
+  const answerLower = answer.toLowerCase();
+  const timeClue = getTimeClue(prompt);
+
+  if (/^(am|is|are|was|were)$/i.test(answer)) {
+    return `${subjectDescription}，所以这里用 ${answer}。`;
+  }
+
+  const beDoing = answerLower.match(/^(am|is|are|was|were)\s+\w+ing\b/);
+  if (beDoing) {
+    const clue = timeClue ? `${timeClue}，` : "";
+    return `${clue}${subjectDescription}，所以用 ${answer}。`;
+  }
+
+  if (/^(do|does|did|have|has)$/i.test(answer) || /^don't|^doesn't|^didn't/i.test(answer)) {
+    const clue = timeClue ? `${timeClue}；` : "";
+    return `${clue}${subjectDescription}，所以这里用 ${answer}。`;
+  }
+
+  if (/\b(goes|plays|likes|rises|has)\b/i.test(answer)) {
+    const clue = timeClue ? `${timeClue}；` : "";
+    return `${clue}${subjectDescription}，动词要跟着主语变化，所以用 ${answer}。`;
+  }
+
+  return endWithPeriod(note);
+}
+
+function makeWrongChoiceExplanation(prompt: string, answer: string, selected: string): string {
+  const subject = extractBlankSubject(prompt);
+  const subjectText = subject ? subject : "这里的主语";
+  const selectedUse = describeBeUse(selected);
+  const answerLower = answer.toLowerCase();
+  const selectedLower = selected.toLowerCase();
+  const answerDoNegative = parseDoNegative(answer);
+  const selectedDoNegative = parseDoNegative(selected);
+  const selectedBeNotVerb = parseBeNotVerb(selected);
+
+  if (answerDoNegative && selectedDoNegative) {
+    if (selectedDoNegative.verb !== answerDoNegative.verb) {
+      return `你选的 ${selected} 错在 ${selectedDoNegative.helper} 后面用了 ${selectedDoNegative.verb}；助动词后面要接动词原形 ${answerDoNegative.verb}。`;
+    }
+
+    if (selectedDoNegative.helper !== answerDoNegative.helper) {
+      return `${subjectText} 要用 ${answerDoNegative.helper}，不用 ${selectedDoNegative.helper}；${selectedDoNegative.helper} 是给 ${describeDoHelper(selectedDoNegative.helper)} 用的。`;
+    }
+  }
+
+  if (answerDoNegative && selectedBeNotVerb) {
+    return `你选的 ${selected} 是 be 动词否定，后面不能直接接动词原形 ${selectedBeNotVerb.verb}；这题要用 ${answerDoNegative.helper} + ${answerDoNegative.verb}。`;
+  }
+
+  if (selectedUse && describeBeUse(answer)) {
+    return `你选的 ${selected} 不适合 ${subjectText}：${selectedUse}。`;
+  }
+
+  if (answerLower.startsWith("does") && selectedLower.startsWith("do")) {
+    return `${subjectText} 是第三人称单数，所以不能用 ${selected}。`;
+  }
+
+  if (answerLower.startsWith("do") && selectedLower.startsWith("does")) {
+    return `${subjectText} 不是第三人称单数，所以不能用 ${selected}。`;
+  }
+
+  if (answerLower.includes("ing") && !selectedLower.includes("ing")) {
+    return `题目是在说正在发生的动作，所以不能用 ${selected}。`;
+  }
+
+  if (!answerLower.includes("ing") && selectedLower.includes("ing")) {
+    return `题目不是“正在做”，所以不能用 ${selected}。`;
+  }
+
+  return "";
+}
+
+function buildGrammarFeedback(question: GrammarQuizQuestion, selected: string): string {
+  const wrongExplanation = selected === question.answer
+    ? ""
+    : question.choiceExplanations?.[selected] ?? makeWrongChoiceExplanation(question.prompt, question.answer, selected);
+
+  return [question.explanation, wrongExplanation].filter(Boolean).join(" ");
 }
 
 const DEFAULT_DISTRACTORS = ["do", "does", "is"];
@@ -1230,18 +1526,39 @@ const TEMPLATE_BANK: Record<string, QuizTemplate[]> = {
     qt("____ students passed the test.", "All", ["Every", "Each", "Both"], "students 是复数，all 可直接修饰复数名词。"),
     qt("There is ____ in the room. It is empty.", "nobody", ["somebody", "anybody", "everybody"], "empty 表示没有人。"),
     qt("We have ____ time. Hurry up!", "little", ["few", "many", "a few"], "time 不可数，表示几乎没有用 little。"),
+    qt("Do you have ____ questions?", "any", ["some", "a", "much"], "疑问句里问“有没有”常用 any。"),
+    qt("____ child needs a pencil.", "Every", ["All", "Both", "Many"], "child 是单数，every 后接单数名词。"),
+    qt("____ of the two answers is right.", "Neither", ["All", "Every", "Many"], "两者都不，用 neither。"),
+    qt("There are ____ apples in the bag.", "a few", ["a little", "much", "any"], "apples 是可数复数，少量几个用 a few。"),
+  ],
+  demonstratives: [
+    qt("____ is my pencil.", "This", ["These", "Those", "They"], "this 指近处单数。"),
+    qt("____ are my shoes.", "These", ["This", "That", "It"], "these 指近处复数。"),
+    qt("I like ____ red apple.", "that", ["those", "these", "they"], "apple 是单数，用 this / that。"),
+    qt("____ books are on the desk.", "Those", ["That", "This", "It"], "books 是复数，用 these / those。"),
+  ],
+  oneOnes: [
+    qt("This pen is blue. I want the red ____.", "one", ["ones", "it", "them"], "one 代替前面提过的单数名词。"),
+    qt("These shoes are old. I like the new ____.", "ones", ["one", "it", "that"], "ones 代替前面提过的复数名词。"),
+    qt("Which cup do you want? The small ____.", "one", ["ones", "them", "these"], "cup 是单数，所以用 one。"),
+    qt("Which books are yours? The two green ____.", "ones", ["one", "it", "that"], "books 是复数，所以用 ones。"),
   ],
   adjectivesAdverbs: [
     qt("This book is very ____.", "interesting", ["interestingly", "interestedly", "interest"], "be 动词后常接形容词。"),
     qt("She speaks English ____.", "well", ["good", "betterly", "best"], "修饰 speaks 用副词 well。"),
     qt("This bag is ____ than mine.", "heavier", ["heavy", "heaviest", "more heavy"], "than 前常用比较级。"),
-    qt("This is ____ book in the shop.", "the most expensive", ["more expensive", "expensive", "most expensive"], "最高级前常用 the。"),
+    qt("This is ____ bag in the shop.", "the biggest", ["bigger", "big", "biggest"], "最高级前常用 the。"),
     qt("She is old ____ to go alone.", "enough", ["too", "very", "so"], "形容词 + enough 表示足够。"),
+    qt("This box is not ____ heavy as that one.", "as", ["than", "so", "too"], "not as ... as 表示“不如……”。"),
+    qt("The tea is ____ hot to drink.", "too", ["enough", "very much", "as"], "too + 形容词 + to do 表示“太……而不能”。"),
+    qt("This is the ____ story in the book.", "most interesting", ["more interesting", "interesting", "interestingly"], "多音节形容词最高级用 the most + 形容词。"),
   ],
   wordOrder: [
     qt("Choose the correct sentence: ____", "She speaks English very well.", ["She speaks very well English.", "Very well she speaks English.", "She English speaks very well."], "英语基本词序通常是主语 + 谓语 + 宾语/状语。"),
     qt("Choose the correct sentence: ____", "I gave Mary the book.", ["I gave the book Mary.", "I Mary gave the book.", "Gave I Mary the book."], "give 后可以接双宾语：give somebody something。"),
     qt("Choose the correct sentence: ____", "I always get up early.", ["I get up always early.", "Always I get up early.", "I get always up early."], "频率副词常放在实义动词前。"),
+    qt("Choose the correct sentence: ____", "Give it to me.", ["Give me it.", "Give to me it.", "It give to me."], "代词 it 作宾语时常用 give it to me。"),
+    qt("Choose the correct sentence: ____", "Please put your shoes on.", ["Please put on your shoes them.", "Please your shoes put on.", "Put please your shoes on."], "短语动词和宾语的位置要自然。"),
   ],
   clauses: [
     qt("I was tired, ____ I went to bed early.", "so", ["because", "but", "or"], "so 表示结果。"),
@@ -1268,6 +1585,10 @@ const TEMPLATE_BANK: Record<string, QuizTemplate[]> = {
     qt("Turn ____ the light before you leave.", "off", ["on", "up", "away"], "turn off 表示关掉。"),
     qt("Put ____ your coat. It is cold.", "on", ["off", "up", "away"], "put on 表示穿上。"),
     qt("This music is loud. Turn it ____.", "down", ["off", "away", "in"], "turn it down 表示调低音量。"),
+    qt("Take ____ your shoes before bed.", "off", ["on", "up", "in"], "take off 表示脱下。"),
+    qt("Please put your hat ____.", "on", ["off", "away", "down"], "put on 可以把宾语放在中间或后面。"),
+    qt("The boy fell ____ the bike.", "off", ["on", "in", "up"], "fall off 表示从……掉下来。"),
+    qt("The dog ran ____ quickly.", "away", ["off", "in", "on"], "run away 表示跑开。"),
   ],
   spellingIrregular: [
     qt("The past tense of go is ____.", "went", ["goed", "gone", "going"], "go 是不规则动词，过去式是 went。"),
@@ -1276,6 +1597,81 @@ const TEMPLATE_BANK: Record<string, QuizTemplate[]> = {
     qt("The past tense of stop is ____.", "stopped", ["stoped", "stopping", "stops"], "重读闭音节结尾常双写辅音再加 -ed。"),
     qt("She's can mean she is or ____.", "she has", ["she does", "she was", "she have"], "'s 可能表示 is 或 has。"),
   ],
+};
+
+const UNIT_TEMPLATE_OVERRIDES: Partial<Record<number, keyof typeof TEMPLATE_BANK>> = {
+  24: "spellingIrregular",
+  25: "futureGoing",
+  30: "modal",
+  31: "modal",
+  32: "modal",
+  33: "modal",
+  34: "modal",
+  35: "imperative",
+  37: "thereIt",
+  38: "thereIt",
+  39: "thereIt",
+  40: "auxiliary",
+  41: "auxiliary",
+  42: "auxiliary",
+  43: "auxiliary",
+  44: "questions",
+  45: "questions",
+  46: "questions",
+  47: "questions",
+  48: "questions",
+  49: "questions",
+  59: "pronouns",
+  60: "pronouns",
+  61: "pronouns",
+  62: "pronouns",
+  63: "pronouns",
+  64: "pronouns",
+  65: "articlesNouns",
+  66: "articlesNouns",
+  67: "articlesNouns",
+  68: "articlesNouns",
+  69: "articlesNouns",
+  70: "articlesNouns",
+  71: "commonVerbs",
+  72: "articlesNouns",
+  73: "articlesNouns",
+  74: "demonstratives",
+  75: "oneOnes",
+  76: "determiners",
+  77: "determiners",
+  78: "determiners",
+  79: "determiners",
+  80: "determiners",
+  81: "determiners",
+  82: "determiners",
+  83: "determiners",
+  84: "determiners",
+  85: "adjectivesAdverbs",
+  86: "adjectivesAdverbs",
+  87: "adjectivesAdverbs",
+  88: "adjectivesAdverbs",
+  89: "adjectivesAdverbs",
+  90: "adjectivesAdverbs",
+  91: "adjectivesAdverbs",
+  92: "adjectivesAdverbs",
+  93: "adjectivesAdverbs",
+  94: "wordOrder",
+  95: "perfectMarkers",
+  96: "wordOrder",
+  103: "prepositions",
+  104: "prepositions",
+  105: "prepositions",
+  106: "prepositions",
+  107: "prepositions",
+  108: "prepositions",
+  109: "prepositions",
+  110: "prepositions",
+  111: "prepositions",
+  112: "prepositions",
+  113: "prepositions",
+  114: "phrasalVerbs",
+  115: "phrasalVerbs",
 };
 
 function fillTemplate(text: string, unit: GrammarUnit, serial: number, difficulty: GrammarDifficulty): string {
@@ -1289,6 +1685,9 @@ function fillTemplate(text: string, unit: GrammarUnit, serial: number, difficult
 }
 
 function getTemplateKey(unit: GrammarUnit): keyof typeof TEMPLATE_BANK {
+  const override = UNIT_TEMPLATE_OVERRIDES[unit.id];
+  if (override) return override;
+
   const title = unit.title.toLowerCase();
   const text = `${unit.title} ${unit.summary} ${unit.patterns.join(" ")}`.toLowerCase();
 
@@ -1335,65 +1734,171 @@ function getTemplateKey(unit: GrammarUnit): keyof typeof TEMPLATE_BANK {
   ) return "prepositions";
   if (title.includes("who") || title.includes("which") || title.includes("when") || title.includes("if ") || /and|but|because|定语从句|从句/.test(text)) return "clauses";
   if (text.includes("词序") || title.includes("give me") || title.includes("always")) return "wordOrder";
-  if (/形容词|副词|older|more expensive|than|enough|too|well/.test(text)) return "adjectivesAdverbs";
+  if (/形容词|副词|older|bigger|biggest|than|enough|too|well/.test(text)) return "adjectivesAdverbs";
   if (/\bsome\b|\bany\b|\bevery\b|\ball\b|\bboth\b|\beither\b|\bneither\b|\bmuch\b|\bmany\b|\blittle\b|\bfew\b|限定词/.test(text)) return "determiners";
   if (/a \/ an|\bthe\b|单数|复数|可数|不可数|名词/.test(text)) return "articlesNouns";
 
   return "presentSimple";
 }
 
-function buildGrammarClozeQuestion(
+type FilledQuizTemplate = {
+  stem: string;
+  answer: string;
+  distractors: string[];
+  sourceSentence: string;
+  explanation: string;
+};
+
+const GRAMMAR_SCENARIO_PROMPTS = [
+  "课堂练习里出现了这句话，空格处应该选什么？",
+  "老师让学生补全这句英文，选最自然的一项。",
+  "做练习册时遇到这句，空格处选哪一个？",
+  "根据这句话的主语和语境，选正确形式。",
+  "把这句英文说完整，空格处应该填哪一项？",
+];
+
+const GRAMMAR_DIALOGUE_PROMPTS = [
+  "A: 这里应该怎么填？\nB: {stem}",
+  "A: 哪个选项最合适？\nB: {stem}",
+  "A: 请把这句英文补完整。\nB: {stem}",
+  "A: 这句话要注意语法形式。\nB: {stem}",
+];
+
+function makeSourceSentence(stem: string, answer: string): string {
+  return stem.includes("Choose the correct sentence") ? answer : stem.replace("____", answer);
+}
+
+function getFilledQuizTemplate(
   unit: GrammarUnit,
   index: number,
   difficulty: GrammarDifficulty
-): GrammarQuizQuestion {
+): FilledQuizTemplate {
   const templateKey = getTemplateKey(unit);
   const templates = TEMPLATE_BANK[templateKey] ?? TEMPLATE_BANK.presentSimple;
   const template = templates[(index + unit.id) % templates.length];
   const stem = fillTemplate(template.stem, unit, index, difficulty);
   const answer = fillTemplate(template.answer, unit, index, difficulty);
   const distractors = template.distractors.map((option) => fillTemplate(option, unit, index, difficulty));
-  const options = shuffleBySeed(
-    uniqueTexts([answer, ...distractors, ...DEFAULT_DISTRACTORS]).slice(0, 4),
-    unit.id * 4000 + index
+  const sourceSentence = makeSourceSentence(stem, answer);
+  const explanation = makeGrammarExplanation(stem, answer, template.note);
+
+  return { stem, answer, distractors, sourceSentence, explanation };
+}
+
+function getQuestionKind(unit: GrammarUnit, index: number, difficulty: GrammarDifficulty): GrammarQuestionKind {
+  const sequence = GRAMMAR_KIND_SEQUENCE[difficulty];
+  return sequence[(index + unit.id) % sequence.length];
+}
+
+function explainWrongChoice(prompt: string, answer: string, selected: string): string {
+  if (selected === answer) return "";
+
+  return (
+    makeWrongChoiceExplanation(prompt, answer, selected) ||
+    `你选的 ${selected} 不符合这题的语法位置；这里应使用 ${answer}。`
   );
-  const instruction = difficulty === "medium"
-    ? "选择最合适的答案补全句子。"
-    : difficulty === "hard"
-      ? "选择最符合语法和语境的答案。"
-      : "选择最自然、最准确的答案。";
+}
+
+function buildPhraseChoiceExplanations(
+  stem: string,
+  answer: string,
+  options: string[]
+): Record<string, string> {
+  return options.reduce<Record<string, string>>((explanations, option) => {
+    if (option !== answer) {
+      explanations[option] = explainWrongChoice(stem, answer, option);
+    }
+    return explanations;
+  }, {});
+}
+
+function buildChoicePrompt(
+  data: FilledQuizTemplate,
+  unit: GrammarUnit,
+  index: number,
+  difficulty: GrammarDifficulty,
+  kind: GrammarQuestionKind
+): { instruction: string; prompt: string } {
+  const isSentenceChoice = data.stem.includes("Choose the correct sentence");
+  const scenario = pickBySeed(GRAMMAR_SCENARIO_PROMPTS, unit.id * 13 + index * 7);
+  const dialogue = pickBySeed(GRAMMAR_DIALOGUE_PROMPTS, unit.id * 17 + index * 11);
+  const example = unit.examples[(index + unit.id) % Math.max(1, unit.examples.length)]?.english;
+  const pattern = unit.patterns[index % Math.max(1, unit.patterns.length)];
+
+  if (isSentenceChoice) {
+    return {
+      instruction: "四选一：选出语序或表达最正确的一句。",
+      prompt: "哪一句英文最自然、语法最正确？",
+    };
+  }
+
+  if (kind === "dialogue") {
+    return {
+      instruction: "四选一：读对话，选空格处最合适的答案。",
+      prompt: dialogue.replace("{stem}", data.stem),
+    };
+  }
+
+  if (kind === "scenario") {
+    return {
+      instruction: "四选一：根据情景选择正确答案。",
+      prompt: `${scenario}\n${data.stem}`,
+    };
+  }
+
+  if (kind === "mini_context") {
+    return {
+      instruction: "四选一：先看例句，再完成新句子。",
+      prompt: `例句：${example ?? data.sourceSentence}\n新句：${data.stem}`,
+    };
+  }
+
+  if (kind === "pattern") {
+    return {
+      instruction: "四选一：同一语法点换个句子来选。",
+      prompt: `语法形式：${pattern ?? unit.title}\n${data.stem}`,
+    };
+  }
 
   return {
-    id: `${unit.id}-${difficulty}-${index}`,
-    unitId: unit.id,
-    difficulty,
-    instruction,
-    prompt: stem,
-    options,
-    answer,
-    sourceSentence: stem.replace("____", answer),
-    explanation: makeGrammarExplanation(
-      unit,
-      stem,
-      answer,
-      `这道题采用常见语法选择题形式，核心是「${unit.title}」。${template.note}`
-    ),
+    instruction: "四选一：选择最合适的答案补全句子。",
+    prompt: data.stem,
   };
 }
 
-function buildGrammarMeaningQuestion(unit: GrammarUnit, index: number): GrammarQuizQuestion {
-  return buildGrammarClozeQuestion(unit, index, "medium");
-}
+function buildGrammarQuestion(
+  unit: GrammarUnit,
+  index: number,
+  difficulty: GrammarDifficulty
+): GrammarQuizQuestion {
+  const kind = getQuestionKind(unit, index, difficulty);
+  const data = getFilledQuizTemplate(unit, index, difficulty);
+  const options = shuffleBySeed(
+    uniqueTexts([data.answer, ...data.distractors, ...DEFAULT_DISTRACTORS]).slice(0, 4),
+    unit.id * 4000 + index
+  );
+  const prompt = buildChoicePrompt(data, unit, index, difficulty, kind);
 
-function buildGrammarStructureQuestion(unit: GrammarUnit, index: number): GrammarQuizQuestion {
-  return buildGrammarClozeQuestion(unit, index, "hard");
-}
-
-function buildCorrectionQuestion(unit: GrammarUnit, index: number): GrammarQuizQuestion {
-  return buildGrammarClozeQuestion(unit, index, "super");
+  return {
+    id: `${unit.id}-${difficulty}-${index}-${kind}`,
+    unitId: unit.id,
+    difficulty,
+    kind,
+    instruction: prompt.instruction,
+    prompt: prompt.prompt,
+    options,
+    answer: data.answer,
+    sourceSentence: data.sourceSentence,
+    explanation: data.explanation,
+    choiceExplanations: buildPhraseChoiceExplanations(data.stem, data.answer, options),
+  };
 }
 
 function buildGrammarQuizQuestions(unit: GrammarUnit): GrammarQuizQuestion[] {
+  if (!canPracticeGrammarUnit(unit.id)) {
+    return [];
+  }
+
   const questions: GrammarQuizQuestion[] = [];
 
   GRAMMAR_DIFFICULTIES.forEach((difficulty) => {
@@ -1402,24 +1907,48 @@ function buildGrammarQuizQuestions(unit: GrammarUnit): GrammarQuizQuestion[] {
     for (let index = 0; index < targetCount; index += 1) {
       const serial = questions.length + 1;
 
-      if (difficulty.value === "medium") {
-        questions.push(buildGrammarMeaningQuestion(unit, serial));
-      } else if (difficulty.value === "hard") {
-        questions.push(buildGrammarStructureQuestion(unit, serial));
-      } else {
-        questions.push(buildCorrectionQuestion(unit, serial));
-      }
+      questions.push(buildGrammarQuestion(unit, serial, difficulty.value));
     }
   });
 
   return questions;
 }
 
+function getMixedGrammarDifficulty(index: number): GrammarDifficulty {
+  const slot = index % 10;
+  if (slot < 4) return "medium";
+  if (slot < 8) return "hard";
+  return "super";
+}
+
+function buildMixedGrammarQuestion(index: number): GrammarQuizQuestion {
+  const unit = PINNED_GRAMMAR_UNITS[(index * 37 + Math.floor(index / 7)) % PINNED_GRAMMAR_UNITS.length];
+  const difficulty = getMixedGrammarDifficulty(index);
+  const serial = Math.floor(index / PINNED_GRAMMAR_UNITS.length) * 17 + index + 1;
+  const question = buildGrammarQuestion(unit, serial, difficulty);
+
+  return {
+    ...question,
+    id: `mixed-${index + 1}-${question.id}`,
+  };
+}
+
+function buildMixedGrammarQuestionPool(): GrammarQuizQuestion[] {
+  return Array.from({ length: MIXED_GRAMMAR_QUIZ_TOTAL }, (_item, index) =>
+    buildMixedGrammarQuestion(index)
+  );
+}
+
+function buildMixedGrammarSessionQuestions(sessionIndex: number): GrammarQuizQuestion[] {
+  const start = sessionIndex * MIXED_GRAMMAR_SESSION_SIZE;
+  return buildMixedGrammarQuestionPool().slice(start, start + MIXED_GRAMMAR_SESSION_SIZE);
+}
+
 function GrammarQuizMode({
-  unit,
+  source,
   onExit,
 }: {
-  unit: GrammarUnit;
+  source: GrammarQuizSource;
   onExit: () => void;
 }) {
   const [difficultyFilter, setDifficultyFilter] = useState<GrammarDifficultyFilter>("all");
@@ -1427,11 +1956,21 @@ function GrammarQuizMode({
   const [selected, setSelected] = useState<string | null>(null);
   const [answers, setAnswers] = useState<GrammarQuizAnswer[]>([]);
 
-  const questionBank = useMemo(() => buildGrammarQuizQuestions(unit), [unit]);
+  const questionBank = source.questions;
+  const difficultyCounts = useMemo(
+    () =>
+      GRAMMAR_DIFFICULTIES.reduce<Record<GrammarDifficulty, number>>((counts, difficulty) => {
+        counts[difficulty.value] = questionBank.filter(
+          (question) => question.difficulty === difficulty.value
+        ).length;
+        return counts;
+      }, { medium: 0, hard: 0, super: 0 }),
+    [questionBank]
+  );
   const questions = useMemo(() => {
-    if (difficultyFilter === "all") return questionBank;
+    if (!source.showDifficultyFilters || difficultyFilter === "all") return questionBank;
     return questionBank.filter((question) => question.difficulty === difficultyFilter);
-  }, [difficultyFilter, questionBank]);
+  }, [difficultyFilter, questionBank, source.showDifficultyFilters]);
   const current = questions[currentIndex];
   const answered = selected !== null;
   const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
@@ -1502,12 +2041,12 @@ function GrammarQuizMode({
           </div>
 
           <section className="mt-8 rounded-[32px] border border-stone-200 bg-white p-7 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-            <p className="text-sm font-medium text-amber-600">Unit {unit.id} · {unit.title}</p>
+            <p className="text-sm font-medium text-amber-600">{source.eyebrow}</p>
             <h1 className="mt-3 text-3xl font-semibold text-slate-950">
               本轮完成 {answeredCount} 题，正确率 {accuracy}%
             </h1>
             <p className="mt-3 text-sm leading-7 text-stone-500">
-              语法题不会自动跳题，答完后需要手动点“下一题”。建议先看解析，再继续下一题。
+              每题选完立即判分并显示解析；不会自动跳题，建议先看懂解析再点“下一题”。
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-4">
               <div className="rounded-2xl bg-emerald-50 p-4">
@@ -1525,7 +2064,7 @@ function GrammarQuizMode({
               <div className="rounded-2xl bg-stone-50 p-4">
                 <p className="text-xs font-semibold text-stone-500">题库</p>
                 <p className="mt-2 text-2xl font-semibold text-slate-900">
-                  {GRAMMAR_QUIZ_COUNT_PER_UNIT} 题 / unit
+                  {source.totalLabel}
                 </p>
               </div>
             </div>
@@ -1536,7 +2075,9 @@ function GrammarQuizMode({
   }
 
   const difficultyMeta = GRAMMAR_DIFFICULTY_META[current.difficulty];
+  const kindMeta = GRAMMAR_QUESTION_KIND_META[current.kind];
   const isCorrect = selected === current.answer;
+  const feedbackExplanation = selected ? buildGrammarFeedback(current, selected) : current.explanation;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#fbfaf7]">
@@ -1568,6 +2109,12 @@ function GrammarQuizMode({
             <span className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${difficultyMeta.badge}`}>
               {difficultyMeta.label}
             </span>
+            <span className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${kindMeta.badge}`}>
+              {kindMeta.label}
+            </span>
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-stone-500 ring-1 ring-stone-200">
+              Unit {current.unitId}
+            </span>
           </div>
         </div>
 
@@ -1578,6 +2125,7 @@ function GrammarQuizMode({
           />
         </div>
 
+        {source.showDifficultyFilters && (
         <div className="mt-5 flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -1588,7 +2136,7 @@ function GrammarQuizMode({
                 : "bg-white text-stone-500 ring-stone-200 hover:text-slate-900"
             }`}
           >
-            全部 {GRAMMAR_QUIZ_COUNT_PER_UNIT} 题
+            全部 {questionBank.length} 题
           </button>
           {GRAMMAR_DIFFICULTIES.map((difficulty) => (
             <button
@@ -1602,25 +2150,26 @@ function GrammarQuizMode({
               }`}
               title={difficulty.hint}
             >
-              {difficulty.label} {GRAMMAR_QUIZ_DIFFICULTY_COUNTS[difficulty.value]} 题
+              {difficulty.label} {difficultyCounts[difficulty.value]} 题
             </button>
           ))}
         </div>
+        )}
 
         <main className="flex flex-1 items-center justify-center py-8">
           <div className="w-full rounded-[34px] border border-stone-200 bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.07)] sm:p-8">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-medium text-amber-600">Unit {unit.id}</p>
+                <p className="text-sm font-medium text-amber-600">{source.eyebrow}</p>
                 <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-                  {unit.title}
+                  {source.title}
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-7 text-stone-500">
-                  {unit.summary}
+                  {source.summary}
                 </p>
               </div>
               <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-                题量分配：中等 200 / 困难 300 / 超级困难 500
+                {source.totalLabel} · 小学 1200 词内 · 多场景选择
               </span>
             </div>
 
@@ -1673,8 +2222,18 @@ function GrammarQuizMode({
                     >
                       {isCorrect ? "答对了。" : "这题选错了。"}
                     </p>
+                    <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+                      <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-stone-200">
+                        <p className="text-xs font-semibold text-stone-400">你的选择</p>
+                        <p className="mt-1 font-semibold text-slate-800">{selected}</p>
+                      </div>
+                      <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-emerald-100">
+                        <p className="text-xs font-semibold text-emerald-600">正确答案</p>
+                        <p className="mt-1 font-semibold text-emerald-700">{current.answer}</p>
+                      </div>
+                    </div>
                     <p className="mt-2 text-sm leading-7 text-slate-700">
-                      {current.explanation}
+                      {feedbackExplanation}
                     </p>
                     <p className="mt-3 text-sm font-medium leading-7 text-emerald-700">
                       正确句子：{current.sourceSentence}
@@ -1700,7 +2259,7 @@ function GrammarQuizMode({
 export default function GrammarPage() {
   const { id } = useParams<{ id: string }>();
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(
-    () => new Set(["present"])
+    () => new Set(["pinned", "present"])
   );
   const [expandedUnits, setExpandedUnits] = useState<Set<number>>(
     () => new Set([1])
@@ -1708,41 +2267,65 @@ export default function GrammarPage() {
   const [query, setQuery] = useState("");
   const [playingExampleId, setPlayingExampleId] = useState<string | null>(null);
   const [speechAvailable, setSpeechAvailable] = useState(false);
-  const [activeQuizUnit, setActiveQuizUnit] = useState<GrammarUnit | null>(null);
+  const [activeQuiz, setActiveQuiz] = useState<ActiveGrammarQuiz | null>(null);
   const deferredQuery = useDeferredValue(query);
   const searchText = deferredQuery.trim().toLowerCase();
   const isSearching = searchText.length > 0;
 
-  const filteredChapters = ENGLISH_GRAMMAR_CHAPTERS.map((chapter) => {
+  const pinnedChapter: GrammarChapter = {
+    key: "pinned",
+    name: "置顶学习顺序",
+    subtitle: `按 ${PINNED_GRAMMAR_ORDER_LABEL} 固定排列，先练这些核心 unit。`,
+    units: PINNED_GRAMMAR_UNITS,
+  };
+
+  const grammarChaptersForDisplay = [
+    pinnedChapter,
+    ...ENGLISH_GRAMMAR_CHAPTERS.map((chapter) => ({
+      ...chapter,
+      units: chapter.units.filter((unit) => !PINNED_GRAMMAR_UNIT_ID_SET.has(unit.id)),
+    })),
+  ];
+
+  const filteredChapters = grammarChaptersForDisplay.map((chapter) => {
     if (!isSearching) {
       return chapter;
     }
 
-    const units = chapter.units.filter((unit) => {
-      const formCards = buildFormCards(unit);
-      const practiceCards = buildPracticeCards(unit);
-      const displayExamples = buildDisplayExamples(unit);
-      const haystack = [
-        unit.title,
-        unit.summary,
-        ...unit.patterns,
-        ...formCards.flatMap((formCard) => [formCard.label, formCard.value, formCard.hint]),
-        ...practiceCards.flatMap((practiceCard) => [
-          practiceCard.label,
-          practiceCard.task,
-          practiceCard.sample,
-          practiceCard.hint,
-        ]),
-        ...displayExamples.flatMap((example) => [example.english, example.chinese]),
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return haystack.includes(searchText);
-    });
+    const units = chapter.units.filter((unit) => grammarUnitMatchesSearch(unit, searchText));
 
     return { ...chapter, units };
   }).filter((chapter) => chapter.units.length > 0);
+
+  const activeQuizSource = useMemo<GrammarQuizSource | null>(() => {
+    if (!activeQuiz) return null;
+
+    if (activeQuiz.type === "unit") {
+      const questions = buildGrammarQuizQuestions(activeQuiz.unit);
+      return {
+        key: `unit-${activeQuiz.unit.id}`,
+        eyebrow: `Unit ${activeQuiz.unit.id}`,
+        title: activeQuiz.unit.title,
+        summary: activeQuiz.unit.summary,
+        totalLabel: `${GRAMMAR_QUIZ_COUNT_PER_UNIT} 题 / unit`,
+        questions,
+        showDifficultyFilters: true,
+      };
+    }
+
+    const sessionNumber = activeQuiz.sessionIndex + 1;
+    const questions = buildMixedGrammarSessionQuestions(activeQuiz.sessionIndex);
+
+    return {
+      key: `mixed-${activeQuiz.sessionIndex}`,
+      eyebrow: `Mixed Session ${sessionNumber}/${MIXED_GRAMMAR_SESSION_COUNT}`,
+      title: `混合练习 Session ${sessionNumber}`,
+      summary: `从 ${PINNED_GRAMMAR_UNITS.length} 个置顶 unit 中混合抽题，本 session 固定 ${questions.length} 道四选一选择题。`,
+      totalLabel: `${questions.length} 题 / session`,
+      questions,
+      showDifficultyFilters: false,
+    };
+  }, [activeQuiz]);
 
   const toggleChapter = (chapterKey: string) => {
     setExpandedChapters((prev) => {
@@ -1842,11 +2425,12 @@ export default function GrammarPage() {
     };
   }, []);
 
-  if (activeQuizUnit) {
+  if (activeQuizSource) {
     return (
       <GrammarQuizMode
-        unit={activeQuizUnit}
-        onExit={() => setActiveQuizUnit(null)}
+        key={activeQuizSource.key}
+        source={activeQuizSource}
+        onExit={() => setActiveQuiz(null)}
       />
     );
   }
@@ -1876,11 +2460,11 @@ export default function GrammarPage() {
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-600 sm:text-base">
               基于《剑桥初级英语语法》115 个 unit 和 7 个附录的目录重组，内容改写成适合小学生的学习笔记。
-              每个 unit 都配 1000 道选择题：中等 200、困难 300、超级困难 500。
+              只给置顶学习顺序里的 {PINNED_GRAMMAR_UNITS.length} 个 unit 出多场景语法选择题；单 unit 可练 500 题，混合练习另有 1000 题，按 100 题一个 session 切分。
             </p>
 
             <div className="mt-6 rounded-[24px] border border-amber-100 bg-amber-50/60 p-4 text-sm leading-7 text-stone-700">
-              出题会按难度切换词汇范围和场景复杂度，更适合做“理解规则 + 放进真实场景”的训练。
+              非置顶 unit 只保留学习笔记，不显示出题入口；出题范围固定为 1-12、24、25-28、30-35、37-49、59-96、103-115。
             </div>
 
             <div className="mt-6">
@@ -1904,18 +2488,18 @@ export default function GrammarPage() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-2">
             <div className="rounded-[28px] border border-white/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-                Unit 总数
+                出题 Unit
               </p>
               <p className="mt-3 text-3xl font-semibold text-amber-600">
-                {countGrammarUnits()}
+                {PINNED_GRAMMAR_UNITS.length}
               </p>
             </div>
             <div className="rounded-[28px] border border-white/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-                章节数量
+                目录 Unit
               </p>
               <p className="mt-3 text-3xl font-semibold text-sky-600">
-                {ENGLISH_GRAMMAR_CHAPTERS.length}
+                {countGrammarUnits()}
               </p>
             </div>
             <div className="rounded-[28px] border border-white/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
@@ -1934,6 +2518,46 @@ export default function GrammarPage() {
                 小学进阶
               </p>
             </div>
+          </div>
+        </section>
+
+        <section className="mt-6 rounded-[28px] border border-amber-100 bg-amber-50/60 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.04)]">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+                Mixed Grammar Sessions
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-slate-950">
+                混合 1000 题
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-stone-600">
+                从置顶的 {PINNED_GRAMMAR_UNITS.length} 个 unit 混合出题，全部仍是四选一选择题；每个 session 固定 {MIXED_GRAMMAR_SESSION_SIZE} 道。
+              </p>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-amber-700 ring-1 ring-amber-100">
+              {MIXED_GRAMMAR_SESSION_COUNT} sessions
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+            {Array.from({ length: MIXED_GRAMMAR_SESSION_COUNT }, (_item, sessionIndex) => {
+              const start = sessionIndex * MIXED_GRAMMAR_SESSION_SIZE + 1;
+              const end = Math.min(start + MIXED_GRAMMAR_SESSION_SIZE - 1, MIXED_GRAMMAR_QUIZ_TOTAL);
+
+              return (
+                <button
+                  key={`mixed-session-${sessionIndex}`}
+                  type="button"
+                  onClick={() => setActiveQuiz({ type: "mixed", sessionIndex })}
+                  className="rounded-2xl bg-white px-4 py-3 text-left ring-1 ring-amber-100 transition hover:-translate-y-0.5 hover:bg-slate-900 hover:text-white hover:ring-slate-900"
+                >
+                  <span className="block text-sm font-semibold">Session {sessionIndex + 1}</span>
+                  <span className="mt-1 block text-xs opacity-70">
+                    第 {start}-{end} 题 · {MIXED_GRAMMAR_SESSION_SIZE} 道
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
@@ -1980,6 +2604,7 @@ export default function GrammarPage() {
                       <div className="space-y-3">
                         {chapter.units.map((unit) => {
                           const isUnitOpen = isSearching || expandedUnits.has(unit.id);
+                          const canPractice = canPracticeGrammarUnit(unit.id);
                           const formCards = buildFormCards(unit);
                           const practiceCards = buildPracticeCards(unit);
                           const displayExamples = buildDisplayExamples(unit);
@@ -1989,40 +2614,53 @@ export default function GrammarPage() {
                               key={unit.id}
                               className="overflow-hidden rounded-[28px] border border-stone-200 bg-white shadow-sm"
                             >
-                              <button
-                                onClick={() => toggleUnit(unit.id)}
-                                className="flex w-full items-start justify-between gap-4 px-4 py-4 text-left transition hover:bg-stone-50 sm:px-5"
-                              >
-                                <div className="flex min-w-0 items-start gap-3">
-                                  <span className="mt-0.5 rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700">
-                                    {unit.id}
-                                  </span>
-                                  <div className="min-w-0">
+                              <div className="flex w-full items-start justify-between gap-4 px-4 py-4 text-left transition hover:bg-stone-50 sm:px-5">
+                                <div className="flex min-w-0 flex-1 items-start gap-3">
+                                  <div className="flex shrink-0 flex-col items-start gap-2 sm:flex-row sm:items-center">
+                                    {canPractice ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => setActiveQuiz({ type: "unit", unit })}
+                                        className="inline-flex items-center whitespace-nowrap rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                                      >
+                                        选择题 · 500 题
+                                      </button>
+                                    ) : (
+                                      <span className="inline-flex items-center rounded-full bg-stone-100 px-4 py-2 text-sm font-medium text-stone-500">
+                                        仅学习笔记
+                                      </span>
+                                    )}
+                                    <span className="rounded-full bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700">
+                                      {unit.id}
+                                    </span>
+                                  </div>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleUnit(unit.id)}
+                                    className="min-w-0 flex-1 text-left"
+                                  >
                                     <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
                                       {unit.title}
                                     </h3>
                                     <p className="mt-1 text-sm leading-6 text-stone-500">
                                       {unit.summary}
                                     </p>
-                                  </div>
+                                    <p className="mt-2 text-xs text-stone-400">
+                                      {canPractice
+                                        ? "小学 1200 词内，选完立即判分和解析"
+                                        : "这个 unit 暂不出题"}
+                                    </p>
+                                  </button>
                                 </div>
 
-                                <span className="shrink-0 text-sm font-medium text-stone-400">
-                                  {isUnitOpen ? "收起" : "展开"}
-                                </span>
-                              </button>
-
-                              <div className="border-t border-stone-100 bg-white px-4 py-3 sm:px-5">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveQuizUnit(unit)}
-                                  className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                                  onClick={() => toggleUnit(unit.id)}
+                                  className="shrink-0 text-sm font-medium text-stone-400"
                                 >
-                                  语法出题 · 1000 题
+                                  {isUnitOpen ? "收起" : "展开"}
                                 </button>
-                                <span className="ml-3 text-xs text-stone-400">
-                                  中等 / 困难 / 超级困难，答后看解析，手动下一题
-                                </span>
                               </div>
 
                               {isUnitOpen && (
@@ -2033,9 +2671,9 @@ export default function GrammarPage() {
                                         常用句型
                                       </p>
                                       <div className="mt-3 space-y-2">
-                                        {unit.patterns.map((pattern) => (
+                                        {unit.patterns.map((pattern, index) => (
                                           <div
-                                            key={pattern}
+                                            key={`${unit.id}-${index}-${pattern}`}
                                             className="rounded-2xl bg-white px-4 py-3 text-sm font-medium leading-7 text-slate-800 shadow-sm ring-1 ring-stone-200/80"
                                           >
                                             {pattern}
