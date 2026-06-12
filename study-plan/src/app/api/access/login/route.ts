@@ -12,6 +12,12 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function shouldUseSecureCookie(request: NextRequest) {
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  if (forwardedProto) return forwardedProto.split(",")[0]?.trim() === "https";
+  return new URL(request.url).protocol === "https:";
+}
+
 export async function POST(request: NextRequest) {
   if (!isFamilyAccessConfigured()) {
     return NextResponse.json({ error: "访问密码还没有配置" }, { status: 503 });
@@ -26,7 +32,7 @@ export async function POST(request: NextRequest) {
 
   const profile = normalizeStudentProfile(body.profile);
   const response = NextResponse.json({ ok: true, profile });
-  const secure = process.env.NODE_ENV === "production";
+  const secure = shouldUseSecureCookie(request);
 
   response.cookies.set(FAMILY_ACCESS_COOKIE, createFamilyAccessToken(), {
     httpOnly: true,
