@@ -1,7 +1,8 @@
 import { pool } from "@/lib/db";
+import { DEFAULT_STUDENT_PROFILE } from "@/lib/family-access";
 
 export const MATH_STUDENT_ID = "congcong";
-export const MATH_STUDENT_NAME = "聪聪";
+export const MATH_STUDENT_NAME = DEFAULT_STUDENT_PROFILE.name;
 
 export type MathQuestionType =
   | "choice"

@@ -2,6 +2,10 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { v4 as uuid } from "uuid";
 import {
+  DEFAULT_STUDENT_PROFILE,
+  type StudentProfile,
+} from "@/lib/family-access";
+import {
   gradeMathResponse,
   MATH_STUDENT_ID,
   MATH_STUDENT_NAME,
@@ -504,7 +508,10 @@ export async function getLocalQuestionSourceFile(
   };
 }
 
-export async function createLocalAttempt(setId: string) {
+export async function createLocalAttempt(
+  setId: string,
+  profile: StudentProfile = DEFAULT_STUDENT_PROFILE
+) {
   const dataset = await readDataset();
   const set = dataset.sets.find((item) => item.id === setId);
   if (!set) return null;
@@ -513,8 +520,8 @@ export async function createLocalAttempt(setId: string) {
     const attempt: LocalAttempt = {
       id: uuid(),
       set_id: setId,
-      student_id: MATH_STUDENT_ID,
-      student_name: MATH_STUDENT_NAME,
+      student_id: profile.id || MATH_STUDENT_ID,
+      student_name: profile.name || MATH_STUDENT_NAME,
       started_at: new Date().toISOString(),
       submitted_at: null,
       total_score: 0,
