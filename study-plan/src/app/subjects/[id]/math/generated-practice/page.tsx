@@ -12,6 +12,7 @@ import {
   gradeGeneratedMathQuestion,
   type MathGeneratedDifficulty,
   type MathGeneratedQuestion,
+  type MathGeneratedUnit,
 } from "@/lib/math-generated-practice";
 
 type AnswerRecord = {
@@ -30,11 +31,115 @@ const difficultyTone: Record<MathGeneratedDifficulty, string> = {
   super: "border-rose-200 bg-rose-50 text-rose-700",
 };
 
+function UnitReviewPanel({
+  unit,
+  compact = false,
+}: {
+  unit: MathGeneratedUnit;
+  compact?: boolean;
+}) {
+  return (
+    <section
+      className={`rounded-2xl border border-amber-100 bg-amber-50/70 ${
+        compact ? "p-4" : "p-5"
+      }`}
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">
+            课前复习
+          </p>
+          <h3 className="mt-2 text-lg font-black tracking-tight text-neutral-950">
+            {unit.shortTitle}知识总结
+          </h3>
+        </div>
+        <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-bold text-amber-700">
+          先复习，再做题
+        </span>
+      </div>
+
+      <p className="mt-4 text-sm leading-7 text-neutral-700">{unit.review.overview}</p>
+
+      <div className={`mt-5 grid gap-4 ${compact ? "" : "lg:grid-cols-2"}`}>
+        <div className="rounded-2xl bg-white p-4">
+          <h4 className="text-sm font-black text-neutral-950">核心知识点</h4>
+          <div className="mt-3 space-y-4">
+            {unit.review.knowledge.map((section) => (
+              <div key={section.title}>
+                <p className="text-sm font-bold text-blue-700">{section.title}</p>
+                <ul className="mt-2 space-y-2 text-sm leading-6 text-neutral-700">
+                  {section.items.map((item) => (
+                    <li key={item} className="flex gap-2">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="rounded-2xl bg-white p-4">
+            <h4 className="text-sm font-black text-neutral-950">解题思路</h4>
+            <div className="mt-3 space-y-4">
+              {unit.review.strategies.map((section) => (
+                <div key={section.title}>
+                  <p className="text-sm font-bold text-emerald-700">{section.title}</p>
+                  <ul className="mt-2 space-y-2 text-sm leading-6 text-neutral-700">
+                    {section.items.map((item) => (
+                      <li key={item} className="flex gap-2">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
+            <div className="rounded-2xl bg-white p-4">
+              <h4 className="text-sm font-black text-rose-700">易错提醒</h4>
+              <ul className="mt-3 space-y-2 text-sm leading-6 text-neutral-700">
+                {unit.review.commonMistakes.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-2xl bg-white p-4">
+              <h4 className="text-sm font-black text-amber-700">做题前检查</h4>
+              <ol className="mt-3 space-y-2 text-sm leading-6 text-neutral-700">
+                {unit.review.beforePractice.map((item, index) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-black text-amber-700">
+                      {index + 1}
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function GeneratedMathPracticePage() {
   const { id } = useParams<{ id: string }>();
   const [selectedUnitId, setSelectedUnitId] = useState(MATH_GENERATED_UNITS[0].id);
   const [difficulty, setDifficulty] = useState<MathGeneratedDifficulty>("medium");
   const [started, setStarted] = useState(false);
+  const [openReviewUnitId, setOpenReviewUnitId] = useState(MATH_GENERATED_UNITS[0].id);
+  const [showSessionReview, setShowSessionReview] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AnswerRecord>>({});
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -58,6 +163,7 @@ export default function GeneratedMathPracticePage() {
     setSelectedUnitId(unitId);
     setDifficulty(nextDifficulty);
     setStarted(true);
+    setShowSessionReview(true);
     setCurrentIndex(0);
     setAnswers({});
     setDrafts({});
@@ -158,7 +264,7 @@ export default function GeneratedMathPracticePage() {
                 key={unit.id}
                 className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
@@ -183,6 +289,15 @@ export default function GeneratedMathPracticePage() {
                         </span>
                       ))}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenReviewUnitId((current) => (current === unit.id ? "" : unit.id))
+                      }
+                      className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700 transition hover:border-amber-300 hover:bg-amber-100"
+                    >
+                      {openReviewUnitId === unit.id ? "收起知识总结" : "展开知识总结与解题思路"}
+                    </button>
                   </div>
                   <div className="grid shrink-0 gap-2 sm:grid-cols-3 lg:w-[420px]">
                     {MATH_GENERATED_DIFFICULTIES.map((item) => (
@@ -197,6 +312,11 @@ export default function GeneratedMathPracticePage() {
                     ))}
                   </div>
                 </div>
+                {openReviewUnitId === unit.id && (
+                  <div className="mt-5">
+                    <UnitReviewPanel unit={unit} />
+                  </div>
+                )}
               </article>
             ))}
           </section>
@@ -257,6 +377,29 @@ export default function GeneratedMathPracticePage() {
             />
           </div>
         </header>
+
+        <section className="mb-5 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600">
+                Review First
+              </p>
+              <h2 className="mt-1 text-lg font-black">{selectedUnit.shortTitle}课前复习</h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSessionReview((value) => !value)}
+              className="w-fit rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700 transition hover:border-amber-300 hover:bg-amber-100"
+            >
+              {showSessionReview ? "收起复习内容" : "展开复习内容"}
+            </button>
+          </div>
+          {showSessionReview && (
+            <div className="mt-4">
+              <UnitReviewPanel unit={selectedUnit} compact />
+            </div>
+          )}
+        </section>
 
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
           <section className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
