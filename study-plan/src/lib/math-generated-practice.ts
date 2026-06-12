@@ -14,8 +14,15 @@ export type MathGeneratedUnitReview = {
   beforePractice: string[];
 };
 
+export type MathGeneratedUnitVisual = {
+  src: string;
+  alt: string;
+  caption: string;
+};
+
 export type MathGeneratedUnit = {
   id: string;
+  visual: MathGeneratedUnitVisual;
   order: number;
   title: string;
   shortTitle: string;
@@ -73,6 +80,11 @@ export const PDF_MATH_SOURCE_SUMMARY = {
 export const MATH_GENERATED_UNITS: MathGeneratedUnit[] = [
   {
     id: "unit-1",
+    visual: {
+      src: "/math-review/unit-1-equations.png",
+      alt: "A balanced scale with colorful blocks representing simple equations.",
+      caption: "用天平理解等式两边平衡，先找未知量，再保持两边同做同一步。",
+    },
     order: 1,
     title: "第一单元：简易方程",
     shortTitle: "简易方程",
@@ -145,6 +157,11 @@ export const MATH_GENERATED_UNITS: MathGeneratedUnit[] = [
   },
   {
     id: "unit-2",
+    visual: {
+      src: "/math-review/unit-2-line-graphs.png",
+      alt: "A clean line graph board with rising and falling trends.",
+      caption: "看折线图时先读点，再读线段，最后比较变化趋势和快慢。",
+    },
     order: 2,
     title: "第二单元：折线统计图",
     shortTitle: "折线统计图",
@@ -218,6 +235,11 @@ export const MATH_GENERATED_UNITS: MathGeneratedUnit[] = [
   },
   {
     id: "unit-3",
+    visual: {
+      src: "/math-review/unit-3-factors-multiples.png",
+      alt: "Grouped colorful cubes, factor trees, and overlapping circles.",
+      caption: "把整数拆成有序的因数组合，再用倍数特征快速排除。",
+    },
     order: 3,
     title: "第三单元：因数与倍数",
     shortTitle: "因数与倍数",
@@ -299,6 +321,11 @@ export const MATH_GENERATED_UNITS: MathGeneratedUnit[] = [
   },
   {
     id: "unit-4",
+    visual: {
+      src: "/math-review/unit-4-fractions-meaning.png",
+      alt: "Fraction pies and bars with highlighted equal parts.",
+      caption: "分数题先确定单位“1”，再看平均分成几份、取了几份。",
+    },
     order: 4,
     title: "第四单元：分数的意义和性质",
     shortTitle: "分数的意义和性质",
@@ -380,6 +407,11 @@ export const MATH_GENERATED_UNITS: MathGeneratedUnit[] = [
   },
   {
     id: "unit-5",
+    visual: {
+      src: "/math-review/unit-5-fraction-add-subtract.png",
+      alt: "Fraction bars aligned for addition and subtraction.",
+      caption: "异分母加减先通分，计算后再约分，结果要回到最简形式。",
+    },
     order: 5,
     title: "第五单元：分数加法和减法",
     shortTitle: "分数加法和减法",
@@ -462,6 +494,11 @@ export const MATH_GENERATED_UNITS: MathGeneratedUnit[] = [
   },
   {
     id: "unit-6",
+    visual: {
+      src: "/math-review/unit-6-cuboids-cubes.png",
+      alt: "Transparent cuboids, cubes, nets, rulers, and volume blocks.",
+      caption: "长正方体题先判断求表面积、体积还是容积，再选对应公式。",
+    },
     order: 6,
     title: "第六单元：长方体和正方体",
     shortTitle: "长方体和正方体",
@@ -544,6 +581,11 @@ export const MATH_GENERATED_UNITS: MathGeneratedUnit[] = [
   },
   {
     id: "unit-7",
+    visual: {
+      src: "/math-review/unit-7-fraction-multiplication.png",
+      alt: "Layered fraction grids showing part of a part.",
+      caption: "分数乘法抓住“求一个数的几分之几”，先约分再相乘更稳。",
+    },
     order: 7,
     title: "第七单元：分数乘法",
     shortTitle: "分数乘法",
@@ -626,6 +668,11 @@ export const MATH_GENERATED_UNITS: MathGeneratedUnit[] = [
   },
   {
     id: "unit-8",
+    visual: {
+      src: "/math-review/unit-8-review-map.png",
+      alt: "A study desk with visual cards for equations, graphs, fractions, and cubes.",
+      caption: "综合复习先识别题目属于哪类知识点，再选择最合适的方法。",
+    },
     order: 8,
     title: "第八单元：整理与复习",
     shortTitle: "整理与复习",

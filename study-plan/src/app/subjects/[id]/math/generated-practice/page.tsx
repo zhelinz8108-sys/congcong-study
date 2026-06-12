@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -57,6 +58,21 @@ function UnitReviewPanel({
           先复习，再做题
         </span>
       </div>
+
+      <figure className="mt-5 overflow-hidden rounded-2xl border border-white bg-white shadow-sm">
+        <div className={`relative w-full ${compact ? "aspect-[16/7]" : "aspect-video"}`}>
+          <Image
+            src={unit.visual.src}
+            alt={unit.visual.alt}
+            fill
+            sizes={compact ? "(max-width: 768px) 100vw, 900px" : "(max-width: 1024px) 100vw, 960px"}
+            className="object-cover"
+          />
+        </div>
+        <figcaption className="border-t border-amber-50 px-4 py-3 text-xs font-bold leading-5 text-amber-800">
+          {unit.visual.caption}
+        </figcaption>
+      </figure>
 
       <p className="mt-4 text-sm leading-7 text-neutral-700">{unit.review.overview}</p>
 
