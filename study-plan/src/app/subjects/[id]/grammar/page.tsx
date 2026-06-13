@@ -34,6 +34,12 @@ type GrammarLearningGuide = {
 
 type SpeechLang = "en-US" | "zh-CN";
 
+type SpeechTune = {
+  rate: number;
+  pitch: number;
+  volume: number;
+};
+
 type GrammarDifficulty = "medium" | "hard" | "super";
 type GrammarDifficultyFilter = GrammarDifficulty | "all";
 type GrammarQuestionKind = "sentence" | "dialogue" | "scenario" | "mini_context" | "pattern";
@@ -111,6 +117,74 @@ const PINNED_GRAMMAR_UNITS = PINNED_GRAMMAR_UNIT_IDS.reduce<GrammarUnit[]>(
 const canPracticeGrammarUnit = (unitId: number) =>
   PINNED_GRAMMAR_UNIT_ID_SET.has(unitId);
 
+const preferredVoiceHints: Record<SpeechLang, string[]> = {
+  "zh-CN": [
+    "xiaoxiao",
+    "xiaoyi",
+    "xiaohan",
+    "xiaobei",
+    "yunxi",
+    "yunjian",
+    "natural",
+    "online",
+    "neural",
+    "microsoft",
+    "huihui",
+    "yaoyao",
+  ],
+  "en-US": [
+    "jenny",
+    "aria",
+    "michelle",
+    "sonia",
+    "libby",
+    "ava",
+    "emma",
+    "natural",
+    "online",
+    "neural",
+    "premium",
+    "microsoft",
+    "google us english",
+  ],
+};
+
+const voicePenaltyHints = ["desktop", "legacy", "compact"];
+
+function getVoiceScore(voice: SpeechSynthesisVoice, lang: SpeechLang): number {
+  const name = `${voice.name} ${voice.voiceURI}`.toLowerCase();
+  const voiceLang = voice.lang.toLowerCase();
+  const targetLang = lang.toLowerCase();
+  const langPrefix = targetLang.split("-")[0];
+  let score = 0;
+
+  if (voiceLang === targetLang) {
+    score += 120;
+  } else if (voiceLang.startsWith(targetLang)) {
+    score += 100;
+  } else if (voiceLang.startsWith(langPrefix)) {
+    score += 70;
+  }
+
+  preferredVoiceHints[lang].forEach((hint, index) => {
+    if (name.includes(hint)) {
+      score += Math.max(48 - index * 3, 12);
+    }
+  });
+
+  voicePenaltyHints.forEach((hint) => {
+    if (name.includes(hint)) {
+      score -= 16;
+    }
+  });
+
+  if (!voice.localService) {
+    score += 10;
+  }
+
+  return score;
+}
+
 function getVoiceForLang(lang: SpeechLang): SpeechSynthesisVoice | null {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
     return null;
@@ -118,12 +192,29 @@ function getVoiceForLang(lang: SpeechLang): SpeechSynthesisVoice | null {
 
   const voices = window.speechSynthesis.getVoices();
   const langPrefix = lang.toLowerCase().split("-")[0];
+  const matchingVoices = voices
+    .filter((voice) => voice.lang.toLowerCase().startsWith(langPrefix))
+    .sort((a, b) => getVoiceScore(b, lang) - getVoiceScore(a, lang));
 
-  return (
-    voices.find((voice) => voice.lang.toLowerCase().startsWith(lang.toLowerCase())) ??
-    voices.find((voice) => voice.lang.toLowerCase().startsWith(langPrefix)) ??
-    null
-  );
+  return matchingVoices[0] ?? null;
+}
+
+function getSpeechTune(lang: SpeechLang): SpeechTune {
+  return lang === "en-US"
+    ? { rate: 0.78, pitch: 1.04, volume: 0.95 }
+    : { rate: 0.86, pitch: 1.08, volume: 0.95 };
+}
+
+function softenChineseSpeech(text: string): string {
+  return text
+    .replace(/[：:]/g, "，")
+    .replace(/[；;]/g, "。")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function prepareSpeechText(text: string, lang: SpeechLang): string {
+  return lang === "en-US" ? speakableEnglish(text) : softenChineseSpeech(text);
 }
 
 function speakableEnglish(text: string): string {
@@ -2484,6 +2575,7 @@ export default function GrammarPage() {
   const [query, setQuery] = useState("");
   const [playingSpeechId, setPlayingSpeechId] = useState<string | null>(null);
   const [speechAvailable, setSpeechAvailable] = useState(false);
+  const [, setVoiceRefreshKey] = useState(0);
   const [activeQuiz, setActiveQuiz] = useState<ActiveGrammarQuiz | null>(null);
   const deferredQuery = useDeferredValue(query);
   const searchText = deferredQuery.trim().toLowerCase();
@@ -2587,11 +2679,14 @@ export default function GrammarPage() {
 
     synth.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(prepareSpeechText(text, lang));
     const voice = getVoiceForLang(lang);
+    const tune = getSpeechTune(lang);
 
     utterance.lang = lang;
-    utterance.rate = lang === "en-US" ? 0.85 : 0.92;
+    utterance.rate = tune.rate;
+    utterance.pitch = tune.pitch;
+    utterance.volume = tune.volume;
     if (voice) {
       utterance.voice = voice;
     }
@@ -2619,9 +2714,13 @@ export default function GrammarPage() {
     }
 
     const synth = window.speechSynthesis;
-    const readyTimer = window.setTimeout(() => setSpeechAvailable(true), 0);
+    const readyTimer = window.setTimeout(() => {
+      setSpeechAvailable(true);
+      setVoiceRefreshKey((key) => key + 1);
+    }, 0);
     const handleVoicesChanged = () => {
       synth.getVoices();
+      setVoiceRefreshKey((key) => key + 1);
     };
 
     synth.getVoices();
