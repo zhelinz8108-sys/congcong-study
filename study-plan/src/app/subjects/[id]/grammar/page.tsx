@@ -24,6 +24,16 @@ type GrammarPracticeCard = {
   hint: string;
 };
 
+type GrammarLearningGuide = {
+  headline: string;
+  learningCopy: string;
+  teacherScript: string;
+  keyMoves: string[];
+  checkpoints: string[];
+};
+
+type SpeechLang = "en-US" | "zh-CN";
+
 type GrammarDifficulty = "medium" | "hard" | "super";
 type GrammarDifficultyFilter = GrammarDifficulty | "all";
 type GrammarQuestionKind = "sentence" | "dialogue" | "scenario" | "mini_context" | "pattern";
@@ -101,18 +111,27 @@ const PINNED_GRAMMAR_UNITS = PINNED_GRAMMAR_UNIT_IDS.reduce<GrammarUnit[]>(
 const canPracticeGrammarUnit = (unitId: number) =>
   PINNED_GRAMMAR_UNIT_ID_SET.has(unitId);
 
-function getEnglishVoice(): SpeechSynthesisVoice | null {
+function getVoiceForLang(lang: SpeechLang): SpeechSynthesisVoice | null {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) {
     return null;
   }
 
   const voices = window.speechSynthesis.getVoices();
+  const langPrefix = lang.toLowerCase().split("-")[0];
 
   return (
-    voices.find((voice) => voice.lang.toLowerCase().startsWith("en-us")) ??
-    voices.find((voice) => voice.lang.toLowerCase().startsWith("en")) ??
+    voices.find((voice) => voice.lang.toLowerCase().startsWith(lang.toLowerCase())) ??
+    voices.find((voice) => voice.lang.toLowerCase().startsWith(langPrefix)) ??
     null
   );
+}
+
+function speakableEnglish(text: string): string {
+  return text
+    .replace(/\.\.\./g, " something ")
+    .replace(/\/+/g, " or ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function ex(english: string, chinese: string): GrammarExample {
@@ -968,6 +987,198 @@ function buildPracticeCards(unit: GrammarUnit): GrammarPracticeCard[] {
   return cards.slice(0, 4);
 }
 
+function buildLearningGuide(unit: GrammarUnit): GrammarLearningGuide {
+  const normalized = `${unit.title} ${unit.summary} ${unit.patterns.join(" ")}`.toLowerCase();
+  const firstPattern = unit.patterns[0] ?? unit.title;
+  const baseCopy =
+    "学习这个知识点时，不要只背中文意思，要先判断它在句子里承担什么作用，再把结构放回完整语境中检查。";
+
+  let focus = "句子结构";
+  let learningCopy = `${baseCopy}${unit.summary} 训练时先读完整句，再定位关键词，最后用一个自己的生活场景重新说一遍。`;
+  let keyMoves = [
+    "先看句子想表达的是状态、动作、数量、地点还是原因。",
+    "再找主语、时间词和关键词，判断需要哪一种语法结构。",
+    `最后套入常用句型：${firstPattern}，并把句子读顺。`,
+  ];
+  let checkpoints = [
+    "主语和动词形式是否一致。",
+    "时间词、地点词或数量词是否和语法结构匹配。",
+    "句子读出来是否完整自然，不只剩一个孤立答案。",
+  ];
+
+  if (/there is|there are|there was|there will be|there has/.test(normalized)) {
+    focus = "there be 存在句";
+    learningCopy =
+      "这一类句子专门用来说明“某处有某物”或“某时会有某事”。学习时先找地点或时间，再看后面的名词是单数还是复数，最后决定 is、are、was、were 或 will be。";
+    keyMoves = [
+      "先圈出地点或时间，例如 in the room、next Friday。",
+      "再看真正被介绍的名词，单数用 is / was，复数用 are / were。",
+      "如果是将来发生，用 there will be，不要受后面名词影响乱改 will。",
+    ];
+    checkpoints = [
+      "不要把 there 当成真正主语，真正决定形式的是后面的名词。",
+      "地点短语通常放在句末，读题时要把句子读完整。",
+      "否定和疑问句也要保持 there be 的结构。",
+    ];
+  } else if (/am \/ is \/ are|was \/ were|be 动词|be /.test(normalized)) {
+    focus = "be 动词搭配";
+    learningCopy =
+      "be 动词的核心是说明身份、状态、地点或正在发生的动作。关键不是死记 am、is、are，而是先判断主语是谁，再看句子是不是现在、过去或正在进行。";
+    keyMoves = [
+      "先找主语：I 配 am，he / she / it 或单数名词配 is，you / we / they 或复数名词配 are。",
+      "再看时间：过去状态用 was / were，正在进行用 be + 动词 ing。",
+      "疑问句把 be 动词提前，回答时也用同一个 be 动词。",
+    ];
+    checkpoints = [
+      "不要把 be 原形直接放在普通主语后面。",
+      "看到复数名词或 they，要优先想到 are / were。",
+      "疑问句和回答要保持同一套 be 动词。",
+    ];
+  } else if (/doing|ing|present continuous|past continuous/.test(normalized)) {
+    focus = "进行时";
+    learningCopy =
+      "进行时用来强调动作正在发生，结构重点是“be 动词 + 动词 ing”。做题时先判断动作是不是正在进行，再根据主语选择 am、is、are、was 或 were。";
+    keyMoves = [
+      "先找 now、Look、Listen、at that time 等动作进行的提示。",
+      "再根据主语选择正确的 be 动词。",
+      "最后检查动词是否变成 ing 形式，不能只写原形。",
+    ];
+    checkpoints = [
+      "有 be 还不够，后面的动作必须用 ing。",
+      "不要把习惯动作误判成正在进行。",
+      "疑问句把 be 提到主语前，动词 ing 保持不变。",
+    ];
+  } else if (/do you|does|don't|doesn't|do \/ work \/ like|一般现在/.test(normalized)) {
+    focus = "一般现在时";
+    learningCopy =
+      "一般现在时表达习惯、事实和经常发生的事情。它最容易错在第三人称单数：主语变成 he、she、it 或单数名词时，动词和助动词都要跟着变。";
+    keyMoves = [
+      "先找 every day、usually、often 等习惯性时间词。",
+      "再判断主语是不是第三人称单数。",
+      "肯定句注意动词 -s / -es，否定和疑问句用 do / does 后接动词原形。",
+    ];
+    checkpoints = [
+      "用了 does / doesn't 后，后面的实义动词要回到原形。",
+      "I / you / we / they 不用 does。",
+      "不要把 now 的正在动作误写成一般现在时。",
+    ];
+  } else if (/did|worked|went|used to|过去|last |yesterday|ago/.test(normalized)) {
+    focus = "过去时间线";
+    learningCopy =
+      "过去相关结构都要先建立时间线：事情发生在过去、是否已经结束、当时是否正在进行。判断清楚时间线后，再选择一般过去时、过去进行时或 used to。";
+    keyMoves = [
+      "先圈出 yesterday、last week、ago、when 等过去提示。",
+      "已完成的动作用一般过去时，过去某一刻正在做用 was / were + ing。",
+      "否定和疑问句用 did 后，实义动词回到原形。",
+    ];
+    checkpoints = [
+      "不要在 did 后继续使用过去式。",
+      "was / were 后接 ing 时，强调当时正在进行。",
+      "used to 表示过去常常如此，现在未必如此。",
+    ];
+  } else if (/have done|has done|already|yet|ever|never|since|for|present perfect/.test(normalized)) {
+    focus = "现在完成时";
+    learningCopy =
+      "现在完成时关注“过去发生的事对现在仍有影响”。它不是单纯讲过去，而是把过去和现在连起来，所以要特别留意 already、yet、ever、for、since 等信号。";
+    keyMoves = [
+      "先判断结果是否和现在有关。",
+      "再根据主语选择 have 或 has，并使用过去分词。",
+      "遇到 for / since 时，分清一段时间和起点时间。",
+    ];
+    checkpoints = [
+      "has 只给第三人称单数使用。",
+      "already 常用于肯定，yet 常用于否定和疑问。",
+      "不要把现在完成时简单当成一般过去时。",
+    ];
+  } else if (/will|shall|going to|might|can|could|should|must|have to|need to/.test(normalized)) {
+    focus = "情态与计划表达";
+    learningCopy =
+      "情态动词和计划表达用来说明能力、可能、建议、义务或将来安排。学习时先问自己：这句话是在说能不能、应不应该、必须不必须，还是将要发生。";
+    keyMoves = [
+      "先判断语气：能力、建议、规则、可能性或计划。",
+      "情态动词后面接动词原形，不随主语变形。",
+      "be going to 强调计划，will 更常用于预测或临时决定。",
+    ];
+    checkpoints = [
+      "can / should / must 后不要加 to。",
+      "have to 会随主语变成 has to。",
+      "might 表示可能性，不等于一定会发生。",
+    ];
+  } else if (/a \/ an|a\/an|the|some|any|much|many|few|little|single|plural|mine|myself|my \/ his/.test(normalized)) {
+    focus = "名词与限定词";
+    learningCopy =
+      "名词、冠词、代词和数量词的重点是先看名词能不能数、是不是特指、是否单复数一致。判断越细，选项越不容易混。";
+    keyMoves = [
+      "先判断名词是可数还是不可数。",
+      "再看是否特指：第一次提到常用 a / an，已知对象常用 the。",
+      "最后检查代词、数量词和名词单复数是否一致。",
+    ];
+    checkpoints = [
+      "a / an 不能直接修饰复数名词或不可数名词。",
+      "some 多用于肯定句，any 常用于否定和疑问句。",
+      "much 修饰不可数，many 修饰可数复数。",
+    ];
+  } else if (/than|as\.\.\.as|more|most|enough|too|形容词|副词|比较/.test(normalized)) {
+    focus = "形容词副词与比较";
+    learningCopy =
+      "形容词和副词要先分清修饰对象：修饰名词多用形容词，修饰动作多用副词。比较结构要把比较双方说完整，最高级要看比较范围。";
+    keyMoves = [
+      "先看被修饰的是名词还是动词。",
+      "有 than 时用比较级，有 of / in 等范围时常用最高级。",
+      "too 表示过于，enough 表示足够，位置和意思都要检查。",
+    ];
+    checkpoints = [
+      "不要用 good 修饰动作，通常要用 well。",
+      "比较级后面常接 than。",
+      "最高级前常有 the，但副词最高级要看具体结构。",
+    ];
+  } else if (/because|when|if|who|which|that|said that|told me that/.test(normalized)) {
+    focus = "从句与连接";
+    learningCopy =
+      "从句类知识点的核心是把两个意思连接成一个更完整的句子。先判断两句话之间是原因、时间、条件、转述还是修饰关系，再选择连接词和语序。";
+    keyMoves = [
+      "先找两层意思：主句说什么，从句补充什么。",
+      "原因用 because，时间用 when，条件用 if，修饰名词常用 who / which / that。",
+      "转述句要注意人称、时态和语序的变化。",
+    ];
+    checkpoints = [
+      "because 和 so 通常不要在同一句里重复使用。",
+      "if 引导条件时，主句和从句的时态要配合。",
+      "定语从句要紧跟被修饰的名词。",
+    ];
+  } else if (/at |in |on |behind|under|through|with|look at|listen to|put on|run away|介词|短语动词/.test(normalized)) {
+    focus = "介词与固定搭配";
+    learningCopy =
+      "介词和短语动词不能只靠中文直译，要放在具体场景里记。学习时先判断时间、地点、方向或动作搭配，再把整个短语当作一个整体使用。";
+    keyMoves = [
+      "先判断介词表达时间、地点、方向还是方式。",
+      "遇到固定搭配时，把动词和小词一起记。",
+      "短语动词后接代词时，注意代词常放在中间。",
+    ];
+    checkpoints = [
+      "不要把中文里的“在”全部翻成 in。",
+      "on / in / at 的时间和地点范围不同。",
+      "look at、listen to 这类搭配要整体记。",
+    ];
+  }
+
+  const teacherScript = [
+    `现在我们学习 Unit ${unit.id}：${unit.title}。`,
+    `这一讲的重点是${focus}。`,
+    learningCopy,
+    `做题时按三步来：第一，判断句子场景；第二，找主语、时间词和关键词；第三，套入结构后把整句读一遍。`,
+    `下面的句型和例句都可以单独点播放，建议先听一遍，再自己跟读一遍。`,
+  ].join("");
+
+  return {
+    headline: `${unit.title}：先懂用法，再套句型`,
+    learningCopy,
+    teacherScript,
+    keyMoves,
+    checkpoints,
+  };
+}
+
 function buildDisplayExamples(unit: GrammarUnit): GrammarExample[] {
   return dedupeExamples([
     ...buildChallengeExamples(unit),
@@ -992,10 +1203,16 @@ function grammarUnitMatchesSearch(unit: GrammarUnit, searchText: string): boolea
   const formCards = buildFormCards(unit);
   const practiceCards = buildPracticeCards(unit);
   const displayExamples = buildDisplayExamples(unit);
+  const learningGuide = buildLearningGuide(unit);
   const haystack = [
     unit.title,
     unit.summary,
     ...unit.patterns,
+    learningGuide.headline,
+    learningGuide.learningCopy,
+    learningGuide.teacherScript,
+    ...learningGuide.keyMoves,
+    ...learningGuide.checkpoints,
     ...formCards.flatMap((formCard) => [formCard.label, formCard.value, formCard.hint]),
     ...practiceCards.flatMap((practiceCard) => [
       practiceCard.label,
@@ -2265,7 +2482,7 @@ export default function GrammarPage() {
     () => new Set([1])
   );
   const [query, setQuery] = useState("");
-  const [playingExampleId, setPlayingExampleId] = useState<string | null>(null);
+  const [playingSpeechId, setPlayingSpeechId] = useState<string | null>(null);
   const [speechAvailable, setSpeechAvailable] = useState(false);
   const [activeQuiz, setActiveQuiz] = useState<ActiveGrammarQuiz | null>(null);
   const deferredQuery = useDeferredValue(query);
@@ -2351,7 +2568,7 @@ export default function GrammarPage() {
     });
   };
 
-  const playExampleAudio = (exampleId: string, sentence: string) => {
+  const playSpeechAudio = (speechId: string, text: string, lang: SpeechLang) => {
     if (
       typeof window === "undefined" ||
       !("speechSynthesis" in window) ||
@@ -2362,31 +2579,31 @@ export default function GrammarPage() {
 
     const synth = window.speechSynthesis;
 
-    if (playingExampleId === exampleId) {
+    if (playingSpeechId === speechId) {
       synth.cancel();
-      setPlayingExampleId(null);
+      setPlayingSpeechId(null);
       return;
     }
 
     synth.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(sentence);
-    const voice = getEnglishVoice();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = getVoiceForLang(lang);
 
-    utterance.lang = "en-US";
-    utterance.rate = 0.85;
+    utterance.lang = lang;
+    utterance.rate = lang === "en-US" ? 0.85 : 0.92;
     if (voice) {
       utterance.voice = voice;
     }
 
     utterance.onend = () => {
-      setPlayingExampleId((current) => (current === exampleId ? null : current));
+      setPlayingSpeechId((current) => (current === speechId ? null : current));
     };
     utterance.onerror = () => {
-      setPlayingExampleId((current) => (current === exampleId ? null : current));
+      setPlayingSpeechId((current) => (current === speechId ? null : current));
     };
 
-    setPlayingExampleId(exampleId);
+    setPlayingSpeechId(speechId);
     window.setTimeout(() => {
       synth.speak(utterance);
     }, 0);
@@ -2608,6 +2825,7 @@ export default function GrammarPage() {
                           const formCards = buildFormCards(unit);
                           const practiceCards = buildPracticeCards(unit);
                           const displayExamples = buildDisplayExamples(unit);
+                          const learningGuide = buildLearningGuide(unit);
 
                           return (
                             <article
@@ -2666,19 +2884,112 @@ export default function GrammarPage() {
                               {isUnitOpen && (
                                 <div className="border-t border-stone-100 bg-white px-4 py-4 sm:px-5">
                                   <div className="space-y-4">
+                                    <div className="rounded-[24px] border border-amber-100 bg-amber-50/80 p-4">
+                                      <div className="flex flex-wrap items-start justify-between gap-3">
+                                        <div>
+                                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+                                            学习讲解
+                                          </p>
+                                          <h4 className="mt-2 text-base font-semibold text-slate-950">
+                                            {learningGuide.headline}
+                                          </h4>
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={(event) => {
+                                            event.stopPropagation();
+                                            playSpeechAudio(
+                                              `unit-${unit.id}-guide`,
+                                              learningGuide.teacherScript,
+                                              "zh-CN"
+                                            );
+                                          }}
+                                          disabled={!speechAvailable}
+                                          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                                            playingSpeechId === `unit-${unit.id}-guide`
+                                              ? "bg-amber-600 text-white shadow-sm shadow-amber-200"
+                                              : "bg-white text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100"
+                                          } disabled:cursor-not-allowed disabled:opacity-50`}
+                                        >
+                                          {playingSpeechId === `unit-${unit.id}-guide` ? "停止" : "听讲解"}
+                                        </button>
+                                      </div>
+
+                                      <p className="mt-4 text-sm leading-7 text-stone-700">
+                                        {learningGuide.learningCopy}
+                                      </p>
+
+                                      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                                        <div className="rounded-[20px] bg-white p-4 shadow-sm ring-1 ring-amber-100">
+                                          <p className="text-xs font-semibold text-amber-700">
+                                            三步判断
+                                          </p>
+                                          <ol className="mt-3 space-y-2 text-sm leading-6 text-stone-700">
+                                            {learningGuide.keyMoves.map((move, index) => (
+                                              <li key={move} className="flex gap-2">
+                                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-semibold text-amber-700">
+                                                  {index + 1}
+                                                </span>
+                                                <span>{move}</span>
+                                              </li>
+                                            ))}
+                                          </ol>
+                                        </div>
+
+                                        <div className="rounded-[20px] bg-white p-4 shadow-sm ring-1 ring-amber-100">
+                                          <p className="text-xs font-semibold text-rose-700">
+                                            易错检查
+                                          </p>
+                                          <ul className="mt-3 space-y-2 text-sm leading-6 text-stone-700">
+                                            {learningGuide.checkpoints.map((checkpoint) => (
+                                              <li key={checkpoint} className="flex gap-2">
+                                                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-400" />
+                                                <span>{checkpoint}</span>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      </div>
+                                    </div>
+
                                     <div className="rounded-[24px] border border-stone-200 bg-stone-50/70 p-4">
                                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
                                         常用句型
                                       </p>
                                       <div className="mt-3 space-y-2">
-                                        {unit.patterns.map((pattern, index) => (
-                                          <div
-                                            key={`${unit.id}-${index}-${pattern}`}
-                                            className="rounded-2xl bg-white px-4 py-3 text-sm font-medium leading-7 text-slate-800 shadow-sm ring-1 ring-stone-200/80"
-                                          >
-                                            {pattern}
-                                          </div>
-                                        ))}
+                                        {unit.patterns.map((pattern, index) => {
+                                          const speechId = `unit-${unit.id}-pattern-${index}`;
+
+                                          return (
+                                            <div
+                                              key={`${unit.id}-${index}-${pattern}`}
+                                              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-sm font-medium leading-7 text-slate-800 shadow-sm ring-1 ring-stone-200/80"
+                                            >
+                                              <span className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap">
+                                                {pattern}
+                                              </span>
+                                              <button
+                                                type="button"
+                                                onClick={(event) => {
+                                                  event.stopPropagation();
+                                                  playSpeechAudio(
+                                                    speechId,
+                                                    speakableEnglish(pattern),
+                                                    "en-US"
+                                                  );
+                                                }}
+                                                disabled={!speechAvailable}
+                                                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                                                  playingSpeechId === speechId
+                                                    ? "bg-emerald-600 text-white"
+                                                    : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 hover:bg-emerald-100"
+                                                } disabled:cursor-not-allowed disabled:opacity-50`}
+                                              >
+                                                {playingSpeechId === speechId ? "停" : "听句型"}
+                                              </button>
+                                            </div>
+                                          );
+                                        })}
                                       </div>
                                     </div>
 
@@ -2687,24 +2998,49 @@ export default function GrammarPage() {
                                         句型形式
                                       </p>
                                       <div className="mt-3 space-y-3">
-                                        {formCards.map((formCard) => (
-                                          <div
-                                            key={`${unit.id}-${formCard.label}-${formCard.value}`}
-                                            className="rounded-[22px] border border-stone-200 bg-white px-4 py-4 shadow-sm"
-                                          >
-                                            <div className="space-y-3">
-                                              <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700">
-                                                {formCard.label}
-                                              </span>
-                                              <p className="text-sm font-medium leading-7 text-slate-900">
-                                                {formCard.value}
-                                              </p>
-                                              <p className="text-sm leading-7 text-stone-500">
-                                                {formCard.hint}
-                                              </p>
+                                        {formCards.map((formCard, index) => {
+                                          const speechId = `unit-${unit.id}-form-${index}`;
+
+                                          return (
+                                            <div
+                                              key={`${unit.id}-${formCard.label}-${formCard.value}`}
+                                              className="rounded-[22px] border border-stone-200 bg-white px-4 py-4 shadow-sm"
+                                            >
+                                              <div className="space-y-3">
+                                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                                  <span className="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700">
+                                                    {formCard.label}
+                                                  </span>
+                                                  <button
+                                                    type="button"
+                                                    onClick={(event) => {
+                                                      event.stopPropagation();
+                                                      playSpeechAudio(
+                                                        speechId,
+                                                        speakableEnglish(formCard.value),
+                                                        "en-US"
+                                                      );
+                                                    }}
+                                                    disabled={!speechAvailable}
+                                                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                                                      playingSpeechId === speechId
+                                                        ? "bg-emerald-600 text-white"
+                                                        : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 hover:bg-emerald-100"
+                                                    } disabled:cursor-not-allowed disabled:opacity-50`}
+                                                  >
+                                                    {playingSpeechId === speechId ? "停" : "听形式"}
+                                                  </button>
+                                                </div>
+                                                <p className="overflow-x-auto whitespace-nowrap text-sm font-medium leading-7 text-slate-900">
+                                                  {formCard.value}
+                                                </p>
+                                                <p className="text-sm leading-7 text-stone-500">
+                                                  {formCard.hint}
+                                                </p>
+                                              </div>
                                             </div>
-                                          </div>
-                                        ))}
+                                          );
+                                        })}
                                       </div>
                                     </div>
 
@@ -2714,8 +3050,8 @@ export default function GrammarPage() {
                                       </p>
                                       <div className="mt-3 space-y-3">
                                         {displayExamples.map((example, index) => {
-                                          const exampleId = `${unit.id}-${index}`;
-                                          const isPlaying = playingExampleId === exampleId;
+                                          const exampleId = `unit-${unit.id}-example-${index}`;
+                                          const isPlaying = playingSpeechId === exampleId;
 
                                           return (
                                             <div
@@ -2737,18 +3073,19 @@ export default function GrammarPage() {
                                                 type="button"
                                                 onClick={(event) => {
                                                   event.stopPropagation();
-                                                  playExampleAudio(exampleId, example.english);
+                                                  playSpeechAudio(exampleId, example.english, "en-US");
                                                 }}
                                                 disabled={!speechAvailable}
-                                                className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs transition ${
+                                                className={`relative z-10 inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                                                   isPlaying
-                                                    ? "bg-emerald-500 text-white shadow-sm shadow-emerald-200"
-                                                    : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                                                    ? "bg-emerald-600 text-white"
+                                                    : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 hover:bg-emerald-100"
                                                 } disabled:cursor-not-allowed disabled:opacity-50`}
                                                 title={isPlaying ? "停止朗读" : `播放 ${example.english}`}
                                                 aria-label={isPlaying ? "停止朗读例句" : `播放例句 ${index + 1}`}
                                               >
                                                 {isPlaying ? "■" : "▶"}
+                                                <span>{isPlaying ? "停" : "听例句"}</span>
                                               </button>
                                             </div>
                                             <p className="overflow-x-auto whitespace-nowrap text-sm font-medium leading-7 text-slate-900">
@@ -2769,27 +3106,52 @@ export default function GrammarPage() {
                                         变式练习
                                       </p>
                                       <div className="mt-3 space-y-3">
-                                        {practiceCards.map((practiceCard) => (
-                                          <div
-                                            key={`${unit.id}-${practiceCard.label}-${practiceCard.sample}`}
-                                            className="rounded-[22px] border border-stone-200 bg-white px-4 py-4 shadow-sm"
-                                          >
-                                            <div className="space-y-3">
-                                              <span className="inline-flex rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-700">
-                                                {practiceCard.label}
-                                              </span>
-                                              <p className="text-sm font-medium leading-7 text-slate-900">
-                                                {practiceCard.task}
-                                              </p>
-                                              <p className="overflow-x-auto whitespace-nowrap text-sm leading-7 text-stone-500">
-                                                {practiceCard.sample}
-                                              </p>
-                                              <p className="text-xs leading-6 text-stone-400">
-                                                {practiceCard.hint}
-                                              </p>
+                                        {practiceCards.map((practiceCard, index) => {
+                                          const speechId = `unit-${unit.id}-practice-${index}`;
+
+                                          return (
+                                            <div
+                                              key={`${unit.id}-${practiceCard.label}-${practiceCard.sample}`}
+                                              className="rounded-[22px] border border-stone-200 bg-white px-4 py-4 shadow-sm"
+                                            >
+                                              <div className="space-y-3">
+                                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                                  <span className="inline-flex rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-700">
+                                                    {practiceCard.label}
+                                                  </span>
+                                                  <button
+                                                    type="button"
+                                                    onClick={(event) => {
+                                                      event.stopPropagation();
+                                                      playSpeechAudio(
+                                                        speechId,
+                                                        speakableEnglish(practiceCard.sample),
+                                                        "en-US"
+                                                      );
+                                                    }}
+                                                    disabled={!speechAvailable}
+                                                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                                                      playingSpeechId === speechId
+                                                        ? "bg-emerald-600 text-white"
+                                                        : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 hover:bg-emerald-100"
+                                                    } disabled:cursor-not-allowed disabled:opacity-50`}
+                                                  >
+                                                    {playingSpeechId === speechId ? "停" : "听样例"}
+                                                  </button>
+                                                </div>
+                                                <p className="text-sm font-medium leading-7 text-slate-900">
+                                                  {practiceCard.task}
+                                                </p>
+                                                <p className="overflow-x-auto whitespace-nowrap text-sm leading-7 text-stone-500">
+                                                  {practiceCard.sample}
+                                                </p>
+                                                <p className="text-xs leading-6 text-stone-400">
+                                                  {practiceCard.hint}
+                                                </p>
+                                              </div>
                                             </div>
-                                          </div>
-                                        ))}
+                                          );
+                                        })}
                                       </div>
                                     </div>
                                   </div>
