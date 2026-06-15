@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   MATH_GENERATED_DIFFICULTIES,
   MATH_GENERATED_UNITS,
@@ -35,6 +35,9 @@ type SpeechSegment = {
 type SpeechPayload = string | SpeechSegment[];
 
 const optionLetters = ["A", "B", "C", "D"];
+const GENERATED_MATH_AUDIO_BASE = "/generated-audio/math";
+
+const mathAudioSrc = (speechId: string) => `${GENERATED_MATH_AUDIO_BASE}/${speechId}.mp3`;
 
 const typeLabel = (type: MathGeneratedQuestion["type"]) =>
   type === "choice" ? "选择题" : "填空题";
@@ -236,6 +239,7 @@ function SpeechButton({
   speechId,
   text,
   label,
+  audioSrc,
   playingSpeechId,
   speechAvailable,
   onPlay,
@@ -243,17 +247,18 @@ function SpeechButton({
   speechId: string;
   text: SpeechPayload;
   label: string;
+  audioSrc?: string;
   playingSpeechId: string | null;
   speechAvailable: boolean;
-  onPlay: (speechId: string, text: SpeechPayload) => void;
+  onPlay: (speechId: string, text: SpeechPayload, audioSrc?: string) => void;
 }) {
   const isPlaying = playingSpeechId === speechId;
 
   return (
     <button
       type="button"
-      disabled={!speechAvailable}
-      onClick={() => onPlay(speechId, text)}
+      disabled={!speechAvailable && !audioSrc}
+      onClick={() => onPlay(speechId, text, audioSrc)}
       className={`w-fit rounded-full border px-3 py-1.5 text-xs font-black transition ${
         isPlaying
           ? "border-neutral-900 bg-neutral-950 text-white"
@@ -276,7 +281,7 @@ function UnitReviewPanel({
   compact?: boolean;
   playingSpeechId: string | null;
   speechAvailable: boolean;
-  onPlaySpeech: (speechId: string, text: SpeechPayload) => void;
+  onPlaySpeech: (speechId: string, text: SpeechPayload, audioSrc?: string) => void;
 }) {
   const fullSpeechId = `${unit.id}-review-full`;
 
@@ -302,6 +307,7 @@ function UnitReviewPanel({
           speechId={fullSpeechId}
           text={buildUnitReviewSpeechSegments(unit)}
           label="听完整讲解"
+          audioSrc={mathAudioSrc(fullSpeechId)}
           playingSpeechId={playingSpeechId}
           speechAvailable={speechAvailable}
           onPlay={onPlaySpeech}
@@ -330,6 +336,7 @@ function UnitReviewPanel({
             speechId={`${unit.id}-review-overview`}
             text={`单元概览。${unit.review.overview}`}
             label="听概览"
+            audioSrc={mathAudioSrc(`${unit.id}-review-overview`)}
             playingSpeechId={playingSpeechId}
             speechAvailable={speechAvailable}
             onPlay={onPlaySpeech}
@@ -348,20 +355,22 @@ function UnitReviewPanel({
                 ...unit.review.knowledge.map((section) => buildSectionSpeechText("知识点", section)),
               ].join(" ")}
               label="听知识点"
+              audioSrc={mathAudioSrc(`${unit.id}-review-knowledge-all`)}
               playingSpeechId={playingSpeechId}
               speechAvailable={speechAvailable}
               onPlay={onPlaySpeech}
             />
           </div>
           <div className="mt-3 space-y-4">
-            {unit.review.knowledge.map((section) => (
+            {unit.review.knowledge.map((section, index) => (
               <div key={section.title}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-bold text-blue-700">{section.title}</p>
                   <SpeechButton
-                    speechId={`${unit.id}-knowledge-${section.title}`}
+                    speechId={`${unit.id}-review-knowledge-${index + 1}`}
                     text={buildSectionSpeechText("知识点", section)}
                     label="听本段"
+                    audioSrc={mathAudioSrc(`${unit.id}-review-knowledge-${index + 1}`)}
                     playingSpeechId={playingSpeechId}
                     speechAvailable={speechAvailable}
                     onPlay={onPlaySpeech}
@@ -388,23 +397,25 @@ function UnitReviewPanel({
                 speechId={`${unit.id}-review-strategies-all`}
                 text={[
                   "解题思路。",
-                  ...unit.review.strategies.map((section) => buildSectionSpeechText("解题思路", section)),
-                ].join(" ")}
-                label="听思路"
-                playingSpeechId={playingSpeechId}
-                speechAvailable={speechAvailable}
-                onPlay={onPlaySpeech}
-              />
-            </div>
-            <div className="mt-3 space-y-4">
-              {unit.review.strategies.map((section) => (
+                ...unit.review.strategies.map((section) => buildSectionSpeechText("解题思路", section)),
+              ].join(" ")}
+              label="听思路"
+              audioSrc={mathAudioSrc(`${unit.id}-review-strategies-all`)}
+              playingSpeechId={playingSpeechId}
+              speechAvailable={speechAvailable}
+              onPlay={onPlaySpeech}
+            />
+          </div>
+          <div className="mt-3 space-y-4">
+              {unit.review.strategies.map((section, index) => (
                 <div key={section.title}>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-sm font-bold text-emerald-700">{section.title}</p>
                     <SpeechButton
-                      speechId={`${unit.id}-strategy-${section.title}`}
+                      speechId={`${unit.id}-review-strategy-${index + 1}`}
                       text={buildSectionSpeechText("解题思路", section)}
                       label="听本段"
+                      audioSrc={mathAudioSrc(`${unit.id}-review-strategy-${index + 1}`)}
                       playingSpeechId={playingSpeechId}
                       speechAvailable={speechAvailable}
                       onPlay={onPlaySpeech}
@@ -431,6 +442,7 @@ function UnitReviewPanel({
                   speechId={`${unit.id}-review-mistakes`}
                   text={buildChecklistSpeechText("易错提醒", unit.review.commonMistakes)}
                   label="听易错"
+                  audioSrc={mathAudioSrc(`${unit.id}-review-mistakes`)}
                   playingSpeechId={playingSpeechId}
                   speechAvailable={speechAvailable}
                   onPlay={onPlaySpeech}
@@ -453,6 +465,7 @@ function UnitReviewPanel({
                   speechId={`${unit.id}-review-checklist`}
                   text={buildChecklistSpeechText("做题前检查", unit.review.beforePractice)}
                   label="听检查"
+                  audioSrc={mathAudioSrc(`${unit.id}-review-checklist`)}
                   playingSpeechId={playingSpeechId}
                   speechAvailable={speechAvailable}
                   onPlay={onPlaySpeech}
@@ -490,6 +503,7 @@ export default function GeneratedMathPracticePage() {
   const [speechAvailable, setSpeechAvailable] = useState(false);
   const [, setVoiceRefreshKey] = useState(0);
   const speechRunRef = useRef(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const selectedUnit =
     MATH_GENERATED_UNITS.find((unit) => unit.id === selectedUnitId) ?? MATH_GENERATED_UNITS[0];
@@ -541,7 +555,66 @@ export default function GeneratedMathPracticePage() {
     recordAnswer(question, value);
   };
 
-  const playMathSpeech = (speechId: string, text: SpeechPayload) => {
+  const stopGeneratedAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+    audio.onended = null;
+    audio.onerror = null;
+    audio.pause();
+    audioRef.current = null;
+  }, []);
+
+  const playMathSpeech = (speechId: string, text: SpeechPayload, audioSrc?: string) => {
+    const stopSpeechSynthesis = () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+
+    if (playingSpeechId === speechId) {
+      speechRunRef.current += 1;
+      stopSpeechSynthesis();
+      stopGeneratedAudio();
+      setPlayingSpeechId(null);
+      return;
+    }
+
+    if (audioSrc && typeof window !== "undefined") {
+      speechRunRef.current += 1;
+      const runId = speechRunRef.current;
+      stopSpeechSynthesis();
+      stopGeneratedAudio();
+
+      const audio = new Audio(audioSrc);
+      audioRef.current = audio;
+      audio.preload = "auto";
+      audio.onended = () => {
+        if (speechRunRef.current === runId) {
+          setPlayingSpeechId((current) => (current === speechId ? null : current));
+          audioRef.current = null;
+        }
+      };
+      audio.onerror = () => {
+        if (speechRunRef.current === runId) {
+          audioRef.current = null;
+          setPlayingSpeechId((current) => (current === speechId ? null : current));
+          playMathSpeech(speechId, text);
+        }
+      };
+
+      setPlayingSpeechId(speechId);
+      void audio.play().catch(() => {
+        if (speechRunRef.current === runId) {
+          audioRef.current = null;
+          setPlayingSpeechId((current) => (current === speechId ? null : current));
+          playMathSpeech(speechId, text);
+        }
+      });
+      return;
+    }
+
     if (
       typeof window === "undefined" ||
       !("speechSynthesis" in window) ||
@@ -552,16 +625,10 @@ export default function GeneratedMathPracticePage() {
 
     const synth = window.speechSynthesis;
 
-    if (playingSpeechId === speechId) {
-      speechRunRef.current += 1;
-      synth.cancel();
-      setPlayingSpeechId(null);
-      return;
-    }
-
     speechRunRef.current += 1;
     const runId = speechRunRef.current;
     synth.cancel();
+    stopGeneratedAudio();
 
     const voice = getMathVoice();
     const tune = getMathSpeechTune();
@@ -633,6 +700,7 @@ export default function GeneratedMathPracticePage() {
     return () => {
       window.clearTimeout(readyTimer);
       speechRunRef.current += 1;
+      stopGeneratedAudio();
       synth.cancel();
       if (typeof synth.removeEventListener === "function") {
         synth.removeEventListener("voiceschanged", handleVoicesChanged);
@@ -640,7 +708,14 @@ export default function GeneratedMathPracticePage() {
         synth.onvoiceschanged = null;
       }
     };
-  }, []);
+  }, [stopGeneratedAudio]);
+
+  useEffect(() => {
+    return () => {
+      speechRunRef.current += 1;
+      stopGeneratedAudio();
+    };
+  }, [stopGeneratedAudio]);
 
   const goNext = () => setCurrentIndex((index) => Math.min(index + 1, questions.length - 1));
   const goPrev = () => setCurrentIndex((index) => Math.max(index - 1, 0));

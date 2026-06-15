@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import {
   ENGLISH_GRAMMAR_CHAPTERS,
   type GrammarChapter,
@@ -33,6 +33,8 @@ type GrammarLearningGuide = {
 };
 
 type SpeechLang = "en-US" | "zh-CN";
+
+const GENERATED_GRAMMAR_AUDIO_BASE = "/generated-audio/grammar";
 
 type SpeechTune = {
   rate: number;
@@ -96,6 +98,9 @@ const PINNED_GRAMMAR_UNIT_IDS = [
 ];
 
 const PINNED_GRAMMAR_UNIT_ID_SET = new Set(PINNED_GRAMMAR_UNIT_IDS);
+
+const grammarAudioUnitPrefix = (unitId: number) =>
+  `${GENERATED_GRAMMAR_AUDIO_BASE}/unit-${String(unitId).padStart(3, "0")}`;
 
 const GRAMMAR_UNITS_BY_ID = new Map<number, GrammarUnit>(
   ENGLISH_GRAMMAR_CHAPTERS.flatMap((chapter) =>
@@ -2577,6 +2582,7 @@ export default function GrammarPage() {
   const [speechAvailable, setSpeechAvailable] = useState(false);
   const [, setVoiceRefreshKey] = useState(0);
   const [activeQuiz, setActiveQuiz] = useState<ActiveGrammarQuiz | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const deferredQuery = useDeferredValue(query);
   const searchText = deferredQuery.trim().toLowerCase();
   const isSearching = searchText.length > 0;
@@ -2660,7 +2666,71 @@ export default function GrammarPage() {
     });
   };
 
-  const playSpeechAudio = (speechId: string, text: string, lang: SpeechLang) => {
+  const stopGeneratedAudio = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+    audio.onended = null;
+    audio.onerror = null;
+    audio.pause();
+    audioRef.current = null;
+  }, []);
+
+  const playSpeechAudio = (
+    speechId: string,
+    text: string,
+    lang: SpeechLang,
+    audioSrc?: string
+  ) => {
+    const stopSpeechSynthesis = () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+
+    if (playingSpeechId === speechId) {
+      stopSpeechSynthesis();
+      stopGeneratedAudio();
+      setPlayingSpeechId(null);
+      return;
+    }
+
+    if (audioSrc && typeof window !== "undefined") {
+      stopSpeechSynthesis();
+      stopGeneratedAudio();
+
+      const audio = new Audio(audioSrc);
+      audioRef.current = audio;
+      audio.preload = "auto";
+      audio.onended = () => {
+        if (audioRef.current !== audio) {
+          return;
+        }
+        setPlayingSpeechId((current) => (current === speechId ? null : current));
+        audioRef.current = null;
+      };
+      audio.onerror = () => {
+        if (audioRef.current !== audio) {
+          return;
+        }
+        audioRef.current = null;
+        setPlayingSpeechId((current) => (current === speechId ? null : current));
+        playSpeechAudio(speechId, text, lang);
+      };
+
+      setPlayingSpeechId(speechId);
+      void audio.play().catch(() => {
+        if (audioRef.current !== audio) {
+          return;
+        }
+        audioRef.current = null;
+        setPlayingSpeechId((current) => (current === speechId ? null : current));
+        playSpeechAudio(speechId, text, lang);
+      });
+      return;
+    }
+
     if (
       typeof window === "undefined" ||
       !("speechSynthesis" in window) ||
@@ -2671,13 +2741,8 @@ export default function GrammarPage() {
 
     const synth = window.speechSynthesis;
 
-    if (playingSpeechId === speechId) {
-      synth.cancel();
-      setPlayingSpeechId(null);
-      return;
-    }
-
     synth.cancel();
+    stopGeneratedAudio();
 
     const utterance = new SpeechSynthesisUtterance(prepareSpeechText(text, lang));
     const voice = getVoiceForLang(lang);
@@ -2732,6 +2797,7 @@ export default function GrammarPage() {
 
     return () => {
       window.clearTimeout(readyTimer);
+      stopGeneratedAudio();
       synth.cancel();
       if (typeof synth.removeEventListener === "function") {
         synth.removeEventListener("voiceschanged", handleVoicesChanged);
@@ -2739,7 +2805,13 @@ export default function GrammarPage() {
         synth.onvoiceschanged = null;
       }
     };
-  }, []);
+  }, [stopGeneratedAudio]);
+
+  useEffect(() => {
+    return () => {
+      stopGeneratedAudio();
+    };
+  }, [stopGeneratedAudio]);
 
   if (activeQuizSource) {
     return (
@@ -2925,6 +2997,7 @@ export default function GrammarPage() {
                           const practiceCards = buildPracticeCards(unit);
                           const displayExamples = buildDisplayExamples(unit);
                           const learningGuide = buildLearningGuide(unit);
+                          const unitAudioPrefix = canPractice ? grammarAudioUnitPrefix(unit.id) : "";
 
                           return (
                             <article
@@ -3000,10 +3073,11 @@ export default function GrammarPage() {
                                             playSpeechAudio(
                                               `unit-${unit.id}-guide`,
                                               learningGuide.teacherScript,
-                                              "zh-CN"
+                                              "zh-CN",
+                                              unitAudioPrefix ? `${unitAudioPrefix}-guide.mp3` : undefined
                                             );
                                           }}
-                                          disabled={!speechAvailable}
+                                          disabled={!speechAvailable && !unitAudioPrefix}
                                           className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                                             playingSpeechId === `unit-${unit.id}-guide`
                                               ? "bg-amber-600 text-white shadow-sm shadow-amber-200"
@@ -3074,10 +3148,13 @@ export default function GrammarPage() {
                                                   playSpeechAudio(
                                                     speechId,
                                                     speakableEnglish(pattern),
-                                                    "en-US"
+                                                    "en-US",
+                                                    unitAudioPrefix
+                                                      ? `${unitAudioPrefix}-pattern-${index + 1}.mp3`
+                                                      : undefined
                                                   );
                                                 }}
-                                                disabled={!speechAvailable}
+                                                disabled={!speechAvailable && !unitAudioPrefix}
                                                 className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                                                   playingSpeechId === speechId
                                                     ? "bg-emerald-600 text-white"
@@ -3117,10 +3194,13 @@ export default function GrammarPage() {
                                                       playSpeechAudio(
                                                         speechId,
                                                         speakableEnglish(formCard.value),
-                                                        "en-US"
+                                                        "en-US",
+                                                        unitAudioPrefix
+                                                          ? `${unitAudioPrefix}-form-${index + 1}.mp3`
+                                                          : undefined
                                                       );
                                                     }}
-                                                    disabled={!speechAvailable}
+                                                    disabled={!speechAvailable && !unitAudioPrefix}
                                                     className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                                                       playingSpeechId === speechId
                                                         ? "bg-emerald-600 text-white"
@@ -3172,9 +3252,16 @@ export default function GrammarPage() {
                                                 type="button"
                                                 onClick={(event) => {
                                                   event.stopPropagation();
-                                                  playSpeechAudio(exampleId, example.english, "en-US");
+                                                  playSpeechAudio(
+                                                    exampleId,
+                                                    example.english,
+                                                    "en-US",
+                                                    unitAudioPrefix
+                                                      ? `${unitAudioPrefix}-example-${index + 1}.mp3`
+                                                      : undefined
+                                                  );
                                                 }}
-                                                disabled={!speechAvailable}
+                                                disabled={!speechAvailable && !unitAudioPrefix}
                                                 className={`relative z-10 inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                                                   isPlaying
                                                     ? "bg-emerald-600 text-white"
@@ -3225,10 +3312,13 @@ export default function GrammarPage() {
                                                       playSpeechAudio(
                                                         speechId,
                                                         speakableEnglish(practiceCard.sample),
-                                                        "en-US"
+                                                        "en-US",
+                                                        unitAudioPrefix
+                                                          ? `${unitAudioPrefix}-practice-${index + 1}.mp3`
+                                                          : undefined
                                                       );
                                                     }}
-                                                    disabled={!speechAvailable}
+                                                    disabled={!speechAvailable && !unitAudioPrefix}
                                                     className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
                                                       playingSpeechId === speechId
                                                         ? "bg-emerald-600 text-white"
