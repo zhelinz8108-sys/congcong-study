@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MATH_GENERATED_DIFFICULTIES,
   MATH_GENERATED_UNITS,
@@ -26,6 +26,13 @@ type SpeechTune = {
   pitch: number;
   volume: number;
 };
+
+type SpeechSegment = {
+  text: string;
+  gapMs?: number;
+};
+
+type SpeechPayload = string | SpeechSegment[];
 
 const optionLetters = ["A", "B", "C", "D"];
 
@@ -99,11 +106,14 @@ function getMathVoice(): SpeechSynthesisVoice | null {
 }
 
 function getMathSpeechTune(): SpeechTune {
-  return { rate: 0.86, pitch: 1.08, volume: 0.95 };
+  return { rate: 0.9, pitch: 1.04, volume: 0.95 };
 }
 
-function normalizeMathSpeechText(text: string): string {
+function mathFormulaToSpeech(text: string): string {
   return text
+    .replace(/(\d+)\/(\d+)/g, (_, numerator: string, denominator: string) => {
+      return `${denominator}分之${numerator}`;
+    })
     .replace(/cm²/g, "平方厘米")
     .replace(/dm²/g, "平方分米")
     .replace(/m²/g, "平方米")
@@ -114,31 +124,112 @@ function normalizeMathSpeechText(text: string): string {
     .replace(/÷/g, "除以")
     .replace(/=/g, "等于")
     .replace(/\+/g, "加")
-    .replace(/[：:]/g, "，")
-    .replace(/[；;]/g, "。")
+    .replace(/-/g, "减")
+    .replace(/x/g, "未知数 x")
+    .replace(/X/g, "未知数 x");
+}
+
+function normalizeMathSpeechText(text: string): string {
+  return mathFormulaToSpeech(text)
+    .replace(/[：:；;。]/g, "，")
+    .replace(/[、]/g, "和")
+    .replace(/[（）()]/g, "，")
+    .replace(/“|”|「|」|《|》/g, "")
+    .replace(/第\s*(\d+)\s*点/g, "第 $1 点")
+    .replace(/，+/g, "，")
     .replace(/\s+/g, " ")
+    .replace(/\s*，\s*/g, "，")
     .trim();
 }
 
+function compactMathSpeechText(text: string): string {
+  return normalizeMathSpeechText(text)
+    .replace(/，$/g, "")
+    .replace(/，/g, "， ");
+}
+
+function makeSpeechSegment(text: string, gapMs = 35): SpeechSegment {
+  return { text: compactMathSpeechText(text), gapMs };
+}
+
+function splitLongSpeechSegment(segment: SpeechSegment): SpeechSegment[] {
+  if (segment.text.length <= 150) {
+    return [segment];
+  }
+
+  const parts = segment.text.split("，").filter(Boolean);
+  const chunks: SpeechSegment[] = [];
+  let current = "";
+
+  parts.forEach((part) => {
+    const next = current ? `${current}，${part}` : part;
+    if (next.length > 135 && current) {
+      chunks.push({ text: current, gapMs: 20 });
+      current = part;
+    } else {
+      current = next;
+    }
+  });
+
+  if (current) {
+    chunks.push({ text: current, gapMs: segment.gapMs ?? 35 });
+  }
+
+  return chunks;
+}
+
+function buildMathSpeechSegments(payload: SpeechPayload): SpeechSegment[] {
+  const segments = Array.isArray(payload)
+    ? payload
+    : payload
+        .split(/[。；;]+/)
+        .map((part) => makeSpeechSegment(part))
+        .filter((segment) => segment.text.length > 0);
+
+  return segments.flatMap(splitLongSpeechSegment);
+}
+
 function buildSectionSpeechText(prefix: string, section: { title: string; items: string[] }) {
-  return `${prefix}，${section.title}。${section.items.join("。")}。`;
+  return `${prefix}，${section.title}。${section.items.join("。")}`;
 }
 
 function buildChecklistSpeechText(title: string, items: string[]) {
-  return `${title}。${items.map((item, index) => `第 ${index + 1} 点，${item}`).join("。")}。`;
+  return `${title}。${items.map((item, index) => `第 ${index + 1} 点，${item}`).join("。")}`;
 }
 
-function buildUnitReviewSpeechText(unit: MathGeneratedUnit) {
+function buildUnitReviewSpeechSegments(unit: MathGeneratedUnit): SpeechSegment[] {
   return [
-    `现在开始复习 ${unit.title}。本单元重点是：${unit.focus}`,
-    unit.review.overview,
-    "下面讲核心知识点。",
-    ...unit.review.knowledge.map((section) => buildSectionSpeechText("核心知识点", section)),
-    "下面讲解题思路。",
-    ...unit.review.strategies.map((section) => buildSectionSpeechText("解题思路", section)),
-    buildChecklistSpeechText("易错提醒", unit.review.commonMistakes),
-    buildChecklistSpeechText("做题前检查", unit.review.beforePractice),
-  ].join(" ");
+    makeSpeechSegment(`现在复习 ${unit.shortTitle}，重点是 ${unit.focus}`, 120),
+    makeSpeechSegment(unit.review.overview, 120),
+    ...unit.review.knowledge.map((section) =>
+      makeSpeechSegment(
+        `知识点，${section.title}。${section.items
+          .map((item, index) => `${index === 0 ? "先记住" : "再看"}，${item}`)
+          .join("。")}`,
+        100
+      )
+    ),
+    ...unit.review.strategies.map((section) =>
+      makeSpeechSegment(
+        `解题思路，${section.title}。${section.items
+          .map((item, index) => `${index === 0 ? "第一步" : index === 1 ? "接着" : "然后"}，${item}`)
+          .join("。")}`,
+        100
+      )
+    ),
+    makeSpeechSegment(
+      `容易错的地方，${unit.review.commonMistakes
+        .map((item, index) => `${index + 1}，${item}`)
+        .join("。")}`,
+      100
+    ),
+    makeSpeechSegment(
+      `做题前这样检查，${unit.review.beforePractice
+        .map((item, index) => `${index + 1}，${item}`)
+        .join("。")}`,
+      80
+    ),
+  ];
 }
 
 function SpeechButton({
@@ -150,11 +241,11 @@ function SpeechButton({
   onPlay,
 }: {
   speechId: string;
-  text: string;
+  text: SpeechPayload;
   label: string;
   playingSpeechId: string | null;
   speechAvailable: boolean;
-  onPlay: (speechId: string, text: string) => void;
+  onPlay: (speechId: string, text: SpeechPayload) => void;
 }) {
   const isPlaying = playingSpeechId === speechId;
 
@@ -185,7 +276,7 @@ function UnitReviewPanel({
   compact?: boolean;
   playingSpeechId: string | null;
   speechAvailable: boolean;
-  onPlaySpeech: (speechId: string, text: string) => void;
+  onPlaySpeech: (speechId: string, text: SpeechPayload) => void;
 }) {
   const fullSpeechId = `${unit.id}-review-full`;
 
@@ -209,7 +300,7 @@ function UnitReviewPanel({
         </span>
         <SpeechButton
           speechId={fullSpeechId}
-          text={buildUnitReviewSpeechText(unit)}
+          text={buildUnitReviewSpeechSegments(unit)}
           label="听完整讲解"
           playingSpeechId={playingSpeechId}
           speechAvailable={speechAvailable}
@@ -398,6 +489,7 @@ export default function GeneratedMathPracticePage() {
   const [playingSpeechId, setPlayingSpeechId] = useState<string | null>(null);
   const [speechAvailable, setSpeechAvailable] = useState(false);
   const [, setVoiceRefreshKey] = useState(0);
+  const speechRunRef = useRef(0);
 
   const selectedUnit =
     MATH_GENERATED_UNITS.find((unit) => unit.id === selectedUnitId) ?? MATH_GENERATED_UNITS[0];
@@ -449,7 +541,7 @@ export default function GeneratedMathPracticePage() {
     recordAnswer(question, value);
   };
 
-  const playMathSpeech = (speechId: string, text: string) => {
+  const playMathSpeech = (speechId: string, text: SpeechPayload) => {
     if (
       typeof window === "undefined" ||
       !("speechSynthesis" in window) ||
@@ -461,35 +553,54 @@ export default function GeneratedMathPracticePage() {
     const synth = window.speechSynthesis;
 
     if (playingSpeechId === speechId) {
+      speechRunRef.current += 1;
       synth.cancel();
       setPlayingSpeechId(null);
       return;
     }
 
+    speechRunRef.current += 1;
+    const runId = speechRunRef.current;
     synth.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(normalizeMathSpeechText(text));
     const voice = getMathVoice();
     const tune = getMathSpeechTune();
+    const segments = buildMathSpeechSegments(text);
 
-    utterance.lang = "zh-CN";
-    utterance.rate = tune.rate;
-    utterance.pitch = tune.pitch;
-    utterance.volume = tune.volume;
-    if (voice) {
-      utterance.voice = voice;
-    }
+    const speakSegment = (index: number) => {
+      if (speechRunRef.current !== runId) {
+        return;
+      }
 
-    utterance.onend = () => {
-      setPlayingSpeechId((current) => (current === speechId ? null : current));
-    };
-    utterance.onerror = () => {
-      setPlayingSpeechId((current) => (current === speechId ? null : current));
+      const segment = segments[index];
+      if (!segment) {
+        setPlayingSpeechId((current) => (current === speechId ? null : current));
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(segment.text);
+
+      utterance.lang = "zh-CN";
+      utterance.rate = tune.rate;
+      utterance.pitch = tune.pitch;
+      utterance.volume = tune.volume;
+      if (voice) {
+        utterance.voice = voice;
+      }
+
+      utterance.onend = () => {
+        window.setTimeout(() => speakSegment(index + 1), segment.gapMs ?? 20);
+      };
+      utterance.onerror = () => {
+        setPlayingSpeechId((current) => (current === speechId ? null : current));
+      };
+
+      synth.speak(utterance);
     };
 
     setPlayingSpeechId(speechId);
     window.setTimeout(() => {
-      synth.speak(utterance);
+      speakSegment(0);
     }, 0);
   };
 
@@ -521,6 +632,7 @@ export default function GeneratedMathPracticePage() {
 
     return () => {
       window.clearTimeout(readyTimer);
+      speechRunRef.current += 1;
       synth.cancel();
       if (typeof synth.removeEventListener === "function") {
         synth.removeEventListener("voiceschanged", handleVoicesChanged);
