@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MATH_GENERATED_DIFFICULTIES,
   MATH_GENERATED_UNITS,
@@ -21,6 +21,12 @@ type AnswerRecord = {
   isCorrect: boolean;
 };
 
+type SpeechTune = {
+  rate: number;
+  pitch: number;
+  volume: number;
+};
+
 const optionLetters = ["A", "B", "C", "D"];
 
 const typeLabel = (type: MathGeneratedQuestion["type"]) =>
@@ -32,13 +38,157 @@ const difficultyTone: Record<MathGeneratedDifficulty, string> = {
   super: "border-rose-200 bg-rose-50 text-rose-700",
 };
 
+const preferredMathVoiceHints = [
+  "xiaoxiao",
+  "xiaoyi",
+  "xiaohan",
+  "xiaobei",
+  "yunxi",
+  "yunjian",
+  "natural",
+  "online",
+  "neural",
+  "microsoft",
+  "huihui",
+  "yaoyao",
+];
+
+const voicePenaltyHints = ["desktop", "legacy", "compact"];
+
+function getMathVoiceScore(voice: SpeechSynthesisVoice): number {
+  const name = `${voice.name} ${voice.voiceURI}`.toLowerCase();
+  const voiceLang = voice.lang.toLowerCase();
+  let score = 0;
+
+  if (voiceLang === "zh-cn") {
+    score += 120;
+  } else if (voiceLang.startsWith("zh")) {
+    score += 80;
+  }
+
+  preferredMathVoiceHints.forEach((hint, index) => {
+    if (name.includes(hint)) {
+      score += Math.max(48 - index * 3, 12);
+    }
+  });
+
+  voicePenaltyHints.forEach((hint) => {
+    if (name.includes(hint)) {
+      score -= 16;
+    }
+  });
+
+  if (!voice.localService) {
+    score += 10;
+  }
+
+  return score;
+}
+
+function getMathVoice(): SpeechSynthesisVoice | null {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    return null;
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+  const matchingVoices = voices
+    .filter((voice) => voice.lang.toLowerCase().startsWith("zh"))
+    .sort((a, b) => getMathVoiceScore(b) - getMathVoiceScore(a));
+
+  return matchingVoices[0] ?? null;
+}
+
+function getMathSpeechTune(): SpeechTune {
+  return { rate: 0.86, pitch: 1.08, volume: 0.95 };
+}
+
+function normalizeMathSpeechText(text: string): string {
+  return text
+    .replace(/cm²/g, "平方厘米")
+    .replace(/dm²/g, "平方分米")
+    .replace(/m²/g, "平方米")
+    .replace(/cm³/g, "立方厘米")
+    .replace(/dm³/g, "立方分米")
+    .replace(/m³/g, "立方米")
+    .replace(/×/g, "乘以")
+    .replace(/÷/g, "除以")
+    .replace(/=/g, "等于")
+    .replace(/\+/g, "加")
+    .replace(/[：:]/g, "，")
+    .replace(/[；;]/g, "。")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function buildSectionSpeechText(prefix: string, section: { title: string; items: string[] }) {
+  return `${prefix}，${section.title}。${section.items.join("。")}。`;
+}
+
+function buildChecklistSpeechText(title: string, items: string[]) {
+  return `${title}。${items.map((item, index) => `第 ${index + 1} 点，${item}`).join("。")}。`;
+}
+
+function buildUnitReviewSpeechText(unit: MathGeneratedUnit) {
+  return [
+    `现在开始复习 ${unit.title}。本单元重点是：${unit.focus}`,
+    unit.review.overview,
+    "下面讲核心知识点。",
+    ...unit.review.knowledge.map((section) => buildSectionSpeechText("核心知识点", section)),
+    "下面讲解题思路。",
+    ...unit.review.strategies.map((section) => buildSectionSpeechText("解题思路", section)),
+    buildChecklistSpeechText("易错提醒", unit.review.commonMistakes),
+    buildChecklistSpeechText("做题前检查", unit.review.beforePractice),
+  ].join(" ");
+}
+
+function SpeechButton({
+  speechId,
+  text,
+  label,
+  playingSpeechId,
+  speechAvailable,
+  onPlay,
+}: {
+  speechId: string;
+  text: string;
+  label: string;
+  playingSpeechId: string | null;
+  speechAvailable: boolean;
+  onPlay: (speechId: string, text: string) => void;
+}) {
+  const isPlaying = playingSpeechId === speechId;
+
+  return (
+    <button
+      type="button"
+      disabled={!speechAvailable}
+      onClick={() => onPlay(speechId, text)}
+      className={`w-fit rounded-full border px-3 py-1.5 text-xs font-black transition ${
+        isPlaying
+          ? "border-neutral-900 bg-neutral-950 text-white"
+          : "border-amber-200 bg-white text-amber-700 hover:border-amber-300 hover:bg-amber-50"
+      } disabled:cursor-not-allowed disabled:opacity-40`}
+    >
+      {isPlaying ? "停止" : label}
+    </button>
+  );
+}
+
 function UnitReviewPanel({
   unit,
   compact = false,
+  playingSpeechId,
+  speechAvailable,
+  onPlaySpeech,
 }: {
   unit: MathGeneratedUnit;
   compact?: boolean;
+  playingSpeechId: string | null;
+  speechAvailable: boolean;
+  onPlaySpeech: (speechId: string, text: string) => void;
 }) {
+  const fullSpeechId = `${unit.id}-review-full`;
+
   return (
     <section
       className={`rounded-2xl border border-amber-100 bg-amber-50/70 ${
@@ -57,6 +207,14 @@ function UnitReviewPanel({
         <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-bold text-amber-700">
           先复习，再做题
         </span>
+        <SpeechButton
+          speechId={fullSpeechId}
+          text={buildUnitReviewSpeechText(unit)}
+          label="听完整讲解"
+          playingSpeechId={playingSpeechId}
+          speechAvailable={speechAvailable}
+          onPlay={onPlaySpeech}
+        />
       </div>
 
       <figure className="mt-5 overflow-hidden rounded-2xl border border-white bg-white shadow-sm">
@@ -74,15 +232,50 @@ function UnitReviewPanel({
         </figcaption>
       </figure>
 
-      <p className="mt-4 text-sm leading-7 text-neutral-700">{unit.review.overview}</p>
+      <div className="mt-4 rounded-2xl bg-white/70 p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <p className="max-w-4xl text-sm leading-7 text-neutral-700">{unit.review.overview}</p>
+          <SpeechButton
+            speechId={`${unit.id}-review-overview`}
+            text={`单元概览。${unit.review.overview}`}
+            label="听概览"
+            playingSpeechId={playingSpeechId}
+            speechAvailable={speechAvailable}
+            onPlay={onPlaySpeech}
+          />
+        </div>
+      </div>
 
       <div className={`mt-5 grid gap-4 ${compact ? "" : "lg:grid-cols-2"}`}>
         <div className="rounded-2xl bg-white p-4">
-          <h4 className="text-sm font-black text-neutral-950">核心知识点</h4>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h4 className="text-sm font-black text-neutral-950">核心知识点</h4>
+            <SpeechButton
+              speechId={`${unit.id}-review-knowledge-all`}
+              text={[
+                "核心知识点。",
+                ...unit.review.knowledge.map((section) => buildSectionSpeechText("知识点", section)),
+              ].join(" ")}
+              label="听知识点"
+              playingSpeechId={playingSpeechId}
+              speechAvailable={speechAvailable}
+              onPlay={onPlaySpeech}
+            />
+          </div>
           <div className="mt-3 space-y-4">
             {unit.review.knowledge.map((section) => (
               <div key={section.title}>
-                <p className="text-sm font-bold text-blue-700">{section.title}</p>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-bold text-blue-700">{section.title}</p>
+                  <SpeechButton
+                    speechId={`${unit.id}-knowledge-${section.title}`}
+                    text={buildSectionSpeechText("知识点", section)}
+                    label="听本段"
+                    playingSpeechId={playingSpeechId}
+                    speechAvailable={speechAvailable}
+                    onPlay={onPlaySpeech}
+                  />
+                </div>
                 <ul className="mt-2 space-y-2 text-sm leading-6 text-neutral-700">
                   {section.items.map((item) => (
                     <li key={item} className="flex gap-2">
@@ -98,11 +291,34 @@ function UnitReviewPanel({
 
         <div className="space-y-4">
           <div className="rounded-2xl bg-white p-4">
-            <h4 className="text-sm font-black text-neutral-950">解题思路</h4>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h4 className="text-sm font-black text-neutral-950">解题思路</h4>
+              <SpeechButton
+                speechId={`${unit.id}-review-strategies-all`}
+                text={[
+                  "解题思路。",
+                  ...unit.review.strategies.map((section) => buildSectionSpeechText("解题思路", section)),
+                ].join(" ")}
+                label="听思路"
+                playingSpeechId={playingSpeechId}
+                speechAvailable={speechAvailable}
+                onPlay={onPlaySpeech}
+              />
+            </div>
             <div className="mt-3 space-y-4">
               {unit.review.strategies.map((section) => (
                 <div key={section.title}>
-                  <p className="text-sm font-bold text-emerald-700">{section.title}</p>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-bold text-emerald-700">{section.title}</p>
+                    <SpeechButton
+                      speechId={`${unit.id}-strategy-${section.title}`}
+                      text={buildSectionSpeechText("解题思路", section)}
+                      label="听本段"
+                      playingSpeechId={playingSpeechId}
+                      speechAvailable={speechAvailable}
+                      onPlay={onPlaySpeech}
+                    />
+                  </div>
                   <ul className="mt-2 space-y-2 text-sm leading-6 text-neutral-700">
                     {section.items.map((item) => (
                       <li key={item} className="flex gap-2">
@@ -118,7 +334,17 @@ function UnitReviewPanel({
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-2xl bg-white p-4">
-              <h4 className="text-sm font-black text-rose-700">易错提醒</h4>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h4 className="text-sm font-black text-rose-700">易错提醒</h4>
+                <SpeechButton
+                  speechId={`${unit.id}-review-mistakes`}
+                  text={buildChecklistSpeechText("易错提醒", unit.review.commonMistakes)}
+                  label="听易错"
+                  playingSpeechId={playingSpeechId}
+                  speechAvailable={speechAvailable}
+                  onPlay={onPlaySpeech}
+                />
+              </div>
               <ul className="mt-3 space-y-2 text-sm leading-6 text-neutral-700">
                 {unit.review.commonMistakes.map((item) => (
                   <li key={item} className="flex gap-2">
@@ -130,7 +356,17 @@ function UnitReviewPanel({
             </div>
 
             <div className="rounded-2xl bg-white p-4">
-              <h4 className="text-sm font-black text-amber-700">做题前检查</h4>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h4 className="text-sm font-black text-amber-700">做题前检查</h4>
+                <SpeechButton
+                  speechId={`${unit.id}-review-checklist`}
+                  text={buildChecklistSpeechText("做题前检查", unit.review.beforePractice)}
+                  label="听检查"
+                  playingSpeechId={playingSpeechId}
+                  speechAvailable={speechAvailable}
+                  onPlay={onPlaySpeech}
+                />
+              </div>
               <ol className="mt-3 space-y-2 text-sm leading-6 text-neutral-700">
                 {unit.review.beforePractice.map((item, index) => (
                   <li key={item} className="flex gap-2">
@@ -159,6 +395,9 @@ export default function GeneratedMathPracticePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, AnswerRecord>>({});
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [playingSpeechId, setPlayingSpeechId] = useState<string | null>(null);
+  const [speechAvailable, setSpeechAvailable] = useState(false);
+  const [, setVoiceRefreshKey] = useState(0);
 
   const selectedUnit =
     MATH_GENERATED_UNITS.find((unit) => unit.id === selectedUnitId) ?? MATH_GENERATED_UNITS[0];
@@ -209,6 +448,87 @@ export default function GeneratedMathPracticePage() {
     if (!value) return;
     recordAnswer(question, value);
   };
+
+  const playMathSpeech = (speechId: string, text: string) => {
+    if (
+      typeof window === "undefined" ||
+      !("speechSynthesis" in window) ||
+      !("SpeechSynthesisUtterance" in window)
+    ) {
+      return;
+    }
+
+    const synth = window.speechSynthesis;
+
+    if (playingSpeechId === speechId) {
+      synth.cancel();
+      setPlayingSpeechId(null);
+      return;
+    }
+
+    synth.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(normalizeMathSpeechText(text));
+    const voice = getMathVoice();
+    const tune = getMathSpeechTune();
+
+    utterance.lang = "zh-CN";
+    utterance.rate = tune.rate;
+    utterance.pitch = tune.pitch;
+    utterance.volume = tune.volume;
+    if (voice) {
+      utterance.voice = voice;
+    }
+
+    utterance.onend = () => {
+      setPlayingSpeechId((current) => (current === speechId ? null : current));
+    };
+    utterance.onerror = () => {
+      setPlayingSpeechId((current) => (current === speechId ? null : current));
+    };
+
+    setPlayingSpeechId(speechId);
+    window.setTimeout(() => {
+      synth.speak(utterance);
+    }, 0);
+  };
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      !("speechSynthesis" in window) ||
+      !("SpeechSynthesisUtterance" in window)
+    ) {
+      return;
+    }
+
+    const synth = window.speechSynthesis;
+    const readyTimer = window.setTimeout(() => {
+      setSpeechAvailable(true);
+      setVoiceRefreshKey((key) => key + 1);
+    }, 0);
+    const handleVoicesChanged = () => {
+      synth.getVoices();
+      setVoiceRefreshKey((key) => key + 1);
+    };
+
+    synth.getVoices();
+    if (typeof synth.addEventListener === "function") {
+      synth.addEventListener("voiceschanged", handleVoicesChanged);
+    } else {
+      synth.onvoiceschanged = handleVoicesChanged;
+    }
+
+    return () => {
+      window.clearTimeout(readyTimer);
+      synth.cancel();
+      if (typeof synth.removeEventListener === "function") {
+        synth.removeEventListener("voiceschanged", handleVoicesChanged);
+      } else if (synth.onvoiceschanged === handleVoicesChanged) {
+        synth.onvoiceschanged = null;
+      }
+    };
+  }, []);
 
   const goNext = () => setCurrentIndex((index) => Math.min(index + 1, questions.length - 1));
   const goPrev = () => setCurrentIndex((index) => Math.max(index - 1, 0));
@@ -330,7 +650,12 @@ export default function GeneratedMathPracticePage() {
                 </div>
                 {openReviewUnitId === unit.id && (
                   <div className="mt-5">
-                    <UnitReviewPanel unit={unit} />
+                    <UnitReviewPanel
+                      unit={unit}
+                      playingSpeechId={playingSpeechId}
+                      speechAvailable={speechAvailable}
+                      onPlaySpeech={playMathSpeech}
+                    />
                   </div>
                 )}
               </article>
@@ -412,7 +737,13 @@ export default function GeneratedMathPracticePage() {
           </div>
           {showSessionReview && (
             <div className="mt-4">
-              <UnitReviewPanel unit={selectedUnit} compact />
+              <UnitReviewPanel
+                unit={selectedUnit}
+                compact
+                playingSpeechId={playingSpeechId}
+                speechAvailable={speechAvailable}
+                onPlaySpeech={playMathSpeech}
+              />
             </div>
           )}
         </section>
