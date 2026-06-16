@@ -21,11 +21,13 @@ function FractionGlyph({
   return (
     <span
       aria-label={`${numerator}/${denominator}`}
-      className="mx-0.5 inline-grid translate-y-[0.08em] grid-rows-[auto_auto] items-center justify-items-center whitespace-nowrap align-middle text-[0.82em] font-[inherit] leading-none"
+      className="mx-0.5 inline-flex translate-y-[0.08em] flex-col items-stretch whitespace-nowrap align-middle text-[0.78em] font-[inherit] leading-none tabular-nums"
       role="text"
     >
-      <span className="px-0.5 pb-[2px] leading-none">{numerator}</span>
-      <span className="min-w-full border-t border-current px-0.5 pt-[2px] leading-none">
+      <span className="block min-w-[1.35em] px-[0.18em] pb-[1px] text-center leading-none">
+        {numerator}
+      </span>
+      <span className="block min-w-[1.35em] border-t-[1.5px] border-current px-[0.18em] pt-[1px] text-center leading-none">
         {denominator}
       </span>
     </span>
