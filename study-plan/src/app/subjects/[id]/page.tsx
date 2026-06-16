@@ -1065,6 +1065,22 @@ export default function SubjectPage() {
               <span className="text-stone-400">→</span>
             </div>
           </Link>
+
+          <Link
+            href={`/subjects/${id}/math/problem-bank`}
+            className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
+            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-stone-900">题库</h2>
+                <p className="mt-1 text-sm text-stone-400">
+                  分数 · 500 题 · 答案详解
+                </p>
+              </div>
+              <span className="text-stone-400">→</span>
+            </div>
+          </Link>
         </div>
       )}
 
