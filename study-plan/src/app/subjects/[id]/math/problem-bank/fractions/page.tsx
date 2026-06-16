@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { MathText } from "@/components/math-text";
 import fractionBankData from "@/lib/math-fraction-bank.json";
 
 type FractionQuestion = {
@@ -193,20 +194,20 @@ export default function FractionProblemBankPage() {
               </div>
 
               <p className="mt-4 text-lg font-semibold leading-8 text-neutral-950">
-                {question.prompt}
+                <MathText text={question.prompt} />
               </p>
 
               <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(180px,260px)_1fr]">
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                   <p className="text-xs font-bold text-emerald-700">答案</p>
                   <p className="mt-2 text-base font-bold leading-7 text-emerald-950">
-                    {question.answer}
+                    <MathText text={question.answer} />
                   </p>
                 </div>
                 <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
                   <p className="text-xs font-bold text-blue-700">详解</p>
                   <p className="mt-2 text-sm font-medium leading-7 text-neutral-700">
-                    {question.explanation}
+                    <MathText text={question.explanation} />
                   </p>
                 </div>
               </div>

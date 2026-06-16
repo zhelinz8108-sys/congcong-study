@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MathText } from "@/components/math-text";
 import {
   MATH_GENERATED_DIFFICULTIES,
   MATH_GENERATED_UNITS,
@@ -331,7 +332,9 @@ function UnitReviewPanel({
 
       <div className="mt-4 rounded-2xl bg-white/70 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <p className="max-w-4xl text-sm leading-7 text-neutral-700">{unit.review.overview}</p>
+          <p className="max-w-4xl text-sm leading-7 text-neutral-700">
+            <MathText text={unit.review.overview} />
+          </p>
           <SpeechButton
             speechId={`${unit.id}-review-overview`}
             text={`单元概览。${unit.review.overview}`}
@@ -380,7 +383,9 @@ function UnitReviewPanel({
                   {section.items.map((item) => (
                     <li key={item} className="flex gap-2">
                       <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                      <span>{item}</span>
+                      <span>
+                        <MathText text={item} />
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -425,7 +430,9 @@ function UnitReviewPanel({
                     {section.items.map((item) => (
                       <li key={item} className="flex gap-2">
                         <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                        <span>{item}</span>
+                        <span>
+                          <MathText text={item} />
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -452,7 +459,9 @@ function UnitReviewPanel({
                 {unit.review.commonMistakes.map((item) => (
                   <li key={item} className="flex gap-2">
                     <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />
-                    <span>{item}</span>
+                    <span>
+                      <MathText text={item} />
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -477,7 +486,9 @@ function UnitReviewPanel({
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xs font-black text-amber-700">
                       {index + 1}
                     </span>
-                    <span>{item}</span>
+                    <span>
+                      <MathText text={item} />
+                    </span>
                   </li>
                 ))}
               </ol>
@@ -801,7 +812,9 @@ export default function GeneratedMathPracticePage() {
                       </span>
                     </div>
                     <h2 className="mt-3 text-xl font-bold tracking-tight">{unit.title}</h2>
-                    <p className="mt-2 text-sm leading-6 text-neutral-600">{unit.focus}</p>
+                    <p className="mt-2 text-sm leading-6 text-neutral-600">
+                      <MathText text={unit.focus} />
+                    </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {unit.styleNotes.map((note) => (
                         <span
@@ -965,7 +978,7 @@ export default function GeneratedMathPracticePage() {
             </div>
 
             <p className="rounded-2xl border border-amber-100 bg-amber-50 px-5 py-6 text-2xl font-bold leading-relaxed tracking-tight text-neutral-950">
-              {currentQuestion.prompt}
+              <MathText text={currentQuestion.prompt} />
             </p>
 
             {currentQuestion.type === "choice" ? (
@@ -991,7 +1004,9 @@ export default function GeneratedMathPracticePage() {
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-sm font-bold text-neutral-600">
                         {optionLetters[optionIndex]}
                       </span>
-                      <span>{option}</span>
+                      <span>
+                        <MathText text={option} />
+                      </span>
                     </button>
                   );
                 })}
@@ -1048,18 +1063,24 @@ export default function GeneratedMathPracticePage() {
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <div className="rounded-2xl border border-white/80 bg-white p-4">
                         <p className="text-xs font-semibold text-neutral-400">你的答案</p>
-                        <p className="mt-1 text-lg font-bold">{currentAnswer.value}</p>
+                        <p className="mt-1 text-lg font-bold">
+                          <MathText text={currentAnswer.value} />
+                        </p>
                       </div>
                       <div className="rounded-2xl border border-emerald-200 bg-white p-4 text-emerald-800">
                         <p className="text-xs font-semibold text-emerald-600">正确答案</p>
-                        <p className="mt-1 text-lg font-bold">{currentQuestion.answer}</p>
+                        <p className="mt-1 text-lg font-bold">
+                          <MathText text={currentQuestion.answer} />
+                        </p>
                       </div>
                     </div>
                     {!currentAnswer.isCorrect && (
-                      <p className="mt-4 text-base leading-7 text-rose-800">{feedbackReason}</p>
+                      <p className="mt-4 text-base leading-7 text-rose-800">
+                        <MathText text={feedbackReason} />
+                      </p>
                     )}
                     <p className="mt-4 text-base leading-7 text-neutral-700">
-                      {currentQuestion.explanation}
+                      <MathText text={currentQuestion.explanation} />
                     </p>
                   </div>
                   <button

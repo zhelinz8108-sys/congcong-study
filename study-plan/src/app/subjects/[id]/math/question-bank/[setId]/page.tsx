@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { MathText } from "@/components/math-text";
 import { buildMathExplanation } from "@/lib/math-explanation-display";
 
 type Question = {
@@ -539,7 +540,7 @@ export default function MathPracticePage() {
                   </div>
 
                   <p className="whitespace-pre-wrap text-[17px] leading-8 text-neutral-950">
-                    {displayPrompt}
+                    <MathText text={displayPrompt} />
                   </p>
 
                   {question.question_type === "choice" && question.options?.length > 0 ? (
@@ -572,7 +573,9 @@ export default function MathPracticePage() {
                             >
                               {option.key}
                             </span>
-                            <span className="min-w-0 pt-0.5">{getOptionText(option)}</span>
+                            <span className="min-w-0 pt-0.5">
+                              <MathText text={getOptionText(option)} />
+                            </span>
                           </label>
                         );
                       })}
@@ -679,13 +682,13 @@ export default function MathPracticePage() {
                         <div className="border-l-2 border-white/80 pl-3">
                           <p className="text-xs font-semibold text-neutral-500">你的答案</p>
                           <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-neutral-900">
-                            {formatUserAnswer(question, draft)}
+                            <MathText text={formatUserAnswer(question, draft)} />
                           </p>
                         </div>
                         <div className="border-l-2 border-white/80 pl-3">
                           <p className="text-xs font-semibold text-neutral-500">标准答案</p>
                           <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-neutral-900">
-                            {formatAnswer(question.correct_answer)}
+                            <MathText text={formatAnswer(question.correct_answer)} />
                           </p>
                         </div>
                       </div>
@@ -693,7 +696,7 @@ export default function MathPracticePage() {
                       <div className="mt-3 border-t border-white/70 pt-3">
                         <p className="text-xs font-semibold text-neutral-500">解析</p>
                         <p className="mt-1 whitespace-pre-wrap text-sm leading-7 text-neutral-800">
-                          {displayExplanation}
+                          <MathText text={displayExplanation} />
                         </p>
                       </div>
                     </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { MathText } from "@/components/math-text";
 import { MATH_GRADE_FIVE_UNITS, countMathGradeFivePoints } from "@/lib/math-grade-five";
 
 const getPageRange = (pages: number[]): string => {
@@ -160,7 +161,7 @@ export default function MathGradeFivePage() {
                                 <section>
                                   <h5 className="text-sm font-semibold">讲解</h5>
                                   <p className="mt-2 text-sm leading-7 text-neutral-700">
-                                    {item.details.explanation}
+                                    <MathText text={item.details.explanation} />
                                   </p>
                                 </section>
 
@@ -170,7 +171,9 @@ export default function MathGradeFivePage() {
                                     {item.details.examPoints.map((examPoint) => (
                                       <li key={examPoint} className="flex gap-2 text-sm leading-6 text-neutral-700">
                                         <span className="mt-2.5 h-1 w-1 shrink-0 rounded-full bg-neutral-400" />
-                                        <span>{examPoint}</span>
+                                        <span>
+                                          <MathText text={examPoint} />
+                                        </span>
                                       </li>
                                     ))}
                                   </ul>
@@ -187,13 +190,13 @@ export default function MathGradeFivePage() {
                                     {item.details.examples.map((example, index) => (
                                       <div key={example.question} className="p-4">
                                         <p className="text-sm font-semibold leading-6">
-                                          {index + 1}. {example.question}
+                                          {index + 1}. <MathText text={example.question} />
                                         </p>
                                         <p className="mt-2 text-sm leading-6 text-neutral-600">
-                                          解析：{example.solution}
+                                          解析：<MathText text={example.solution} />
                                         </p>
                                         <p className="mt-1 text-sm font-semibold text-neutral-950">
-                                          答案：{example.answer}
+                                          答案：<MathText text={example.answer} />
                                         </p>
                                       </div>
                                     ))}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { MathText } from "@/components/math-text";
 import { buildMathExplanation, formatMathAnswer } from "@/lib/math-explanation-display";
 
 type ResultQuestion = {
@@ -147,20 +148,20 @@ export default function MathAttemptResultPage() {
 
                 <p className="whitespace-pre-wrap text-base leading-8 text-neutral-900">
                   {question.question_number ? `${question.question_number}. ` : ""}
-                  {question.prompt}
+                  <MathText text={question.prompt} />
                 </p>
 
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   <div className="rounded-lg bg-neutral-50 p-3">
                     <p className="text-xs font-semibold text-neutral-500">你的答案</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm leading-6">
-                      {question.response_text || question.self_rating || "未作答"}
+                      <MathText text={question.response_text || question.self_rating || "未作答"} />
                     </p>
                   </div>
                   <div className="rounded-lg bg-blue-50 p-3">
                     <p className="text-xs font-semibold text-blue-700">标准答案</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-blue-900">
-                      {formatMathAnswer(question.correct_answer)}
+                      <MathText text={formatMathAnswer(question.correct_answer)} />
                     </p>
                   </div>
                 </div>
@@ -169,7 +170,7 @@ export default function MathAttemptResultPage() {
                   <div className="mt-3 rounded-lg bg-neutral-50 p-3">
                     <p className="text-xs font-semibold text-neutral-500">解析与反馈</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm leading-7 text-neutral-700">
-                      {feedbackParts.join("\n\n")}
+                      <MathText text={feedbackParts.join("\n\n")} />
                     </p>
                   </div>
                 )}
