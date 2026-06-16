@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { FamilyAccessGate } from "@/components/family-access-gate";
 import { FamilyProfileBar } from "@/components/family-profile-bar";
+import { ScrollToTopButton } from "@/components/scroll-to-top-button";
 import {
   DEFAULT_STUDENT_PROFILE,
   FAMILY_ACCESS_COOKIE,
@@ -45,6 +46,7 @@ export default async function RootLayout({
           <>
             <FamilyProfileBar initialProfile={profile} />
             {children}
+            <ScrollToTopButton />
           </>
         ) : (
           <FamilyAccessGate

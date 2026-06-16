@@ -2827,13 +2827,6 @@ export default function VocabPage() {
         )}
       </div>
 
-      <button
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-[0_12px_30px_rgba(16,185,129,0.35)] transition hover:bg-emerald-700 active:scale-90 z-20"
-        title="回到顶部"
-      >
-        ↑
-      </button>
     </div>
   );
 }

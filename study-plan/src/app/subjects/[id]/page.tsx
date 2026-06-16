@@ -1424,14 +1424,7 @@ export default function SubjectPage() {
       )}
 
       {/* FABs */}
-      <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-50">
-        {/* Back to top */}
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="w-12 h-12 bg-stone-600 text-white rounded-full text-lg shadow-lg flex items-center justify-center cursor-pointer active:scale-95"
-        >
-          ↑
-        </button>
+      <div className="fixed bottom-24 right-8 z-50 flex flex-col gap-3">
         {/* Add unit */}
         {!addingUnit && !isMath && !isChinese && (
           <button
