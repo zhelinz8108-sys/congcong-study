@@ -101,7 +101,7 @@ export default function EquationProblemBankPage() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="例如：解方程、代入检验、周长、年龄"
+                placeholder="例如：分配合并、行程、两边括号、年龄"
                 className="min-h-11 rounded-xl border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-950 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
               />
             </label>
