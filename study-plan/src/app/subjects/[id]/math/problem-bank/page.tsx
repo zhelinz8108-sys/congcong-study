@@ -1,5 +1,6 @@
 import Link from "next/link";
 import equationBank from "@/lib/math-equation-bank.json";
+import factorBank from "@/lib/math-factor-bank.json";
 import fractionBank from "@/lib/math-fraction-bank.json";
 import solidBank from "@/lib/math-solid-bank.json";
 
@@ -26,6 +27,11 @@ const banks: Array<{
     href: "equations",
     action: "打开简易方程题库",
     bank: equationBank,
+  },
+  {
+    href: "factors",
+    action: "打开因数与倍数题库",
+    bank: factorBank,
   },
   {
     href: "fractions",
