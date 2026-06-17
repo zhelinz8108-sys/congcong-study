@@ -1,0 +1,4032 @@
+{
+  "slug": "equations",
+  "title": "简易方程",
+  "subtitle": "五年级下册简易方程题库 500 题",
+  "description": "覆盖等式性质、方程辨析、解方程、代入检验和列方程解决实际问题。每题含答案和详解，适合电脑端复习。",
+  "source": "基于五年级下册第一单元“简易方程”出题思路整理",
+  "pageCount": 16,
+  "questionCount": 500,
+  "difficultyCounts": {
+    "提高": 200,
+    "困难": 220,
+    "超级困难": 80
+  },
+  "categoryCounts": {
+    "一步加减": 80,
+    "一步乘除": 40,
+    "方程辨析": 40,
+    "代入检验": 40,
+    "两步方程": 44,
+    "逆向两步": 44,
+    "括号方程": 44,
+    "小数方程": 44,
+    "列方程应用": 44,
+    "三步方程": 16,
+    "两边含x": 16,
+    "图形应用": 16,
+    "年龄应用": 16,
+    "错因辨析": 16
+  },
+  "questions": [
+    {
+      "number": 1,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 5 = 13。",
+      "answer": "x = 8",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 5，得 x = 13−5 = 8。检验：8+5=13。"
+    },
+    {
+      "number": 2,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 8 = 17。",
+      "answer": "x = 9",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 8，得 x = 17−8 = 9。检验：9+8=17。"
+    },
+    {
+      "number": 3,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 11 = 21。",
+      "answer": "x = 10",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 11，得 x = 21−11 = 10。检验：10+11=21。"
+    },
+    {
+      "number": 4,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 14 = 25。",
+      "answer": "x = 11",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 14，得 x = 25−14 = 11。检验：11+14=25。"
+    },
+    {
+      "number": 5,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 17 = 29。",
+      "answer": "x = 12",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 17，得 x = 29−17 = 12。检验：12+17=29。"
+    },
+    {
+      "number": 6,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 20 = 33。",
+      "answer": "x = 13",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 20，得 x = 33−20 = 13。检验：13+20=33。"
+    },
+    {
+      "number": 7,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 23 = 37。",
+      "answer": "x = 14",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 23，得 x = 37−23 = 14。检验：14+23=37。"
+    },
+    {
+      "number": 8,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 26 = 41。",
+      "answer": "x = 15",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 26，得 x = 41−26 = 15。检验：15+26=41。"
+    },
+    {
+      "number": 9,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 5 = 21。",
+      "answer": "x = 16",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 5，得 x = 21−5 = 16。检验：16+5=21。"
+    },
+    {
+      "number": 10,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 8 = 25。",
+      "answer": "x = 17",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 8，得 x = 25−8 = 17。检验：17+8=25。"
+    },
+    {
+      "number": 11,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 11 = 29。",
+      "answer": "x = 18",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 11，得 x = 29−11 = 18。检验：18+11=29。"
+    },
+    {
+      "number": 12,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 14 = 33。",
+      "answer": "x = 19",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 14，得 x = 33−14 = 19。检验：19+14=33。"
+    },
+    {
+      "number": 13,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 17 = 37。",
+      "answer": "x = 20",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 17，得 x = 37−17 = 20。检验：20+17=37。"
+    },
+    {
+      "number": 14,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 20 = 41。",
+      "answer": "x = 21",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 20，得 x = 41−20 = 21。检验：21+20=41。"
+    },
+    {
+      "number": 15,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 23 = 45。",
+      "answer": "x = 22",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 23，得 x = 45−23 = 22。检验：22+23=45。"
+    },
+    {
+      "number": 16,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 26 = 49。",
+      "answer": "x = 23",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 26，得 x = 49−26 = 23。检验：23+26=49。"
+    },
+    {
+      "number": 17,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 5 = 29。",
+      "answer": "x = 24",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 5，得 x = 29−5 = 24。检验：24+5=29。"
+    },
+    {
+      "number": 18,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 8 = 33。",
+      "answer": "x = 25",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 8，得 x = 33−8 = 25。检验：25+8=33。"
+    },
+    {
+      "number": 19,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 11 = 37。",
+      "answer": "x = 26",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 11，得 x = 37−11 = 26。检验：26+11=37。"
+    },
+    {
+      "number": 20,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 14 = 41。",
+      "answer": "x = 27",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 14，得 x = 41−14 = 27。检验：27+14=41。"
+    },
+    {
+      "number": 21,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 17 = 45。",
+      "answer": "x = 28",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 17，得 x = 45−17 = 28。检验：28+17=45。"
+    },
+    {
+      "number": 22,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 20 = 49。",
+      "answer": "x = 29",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 20，得 x = 49−20 = 29。检验：29+20=49。"
+    },
+    {
+      "number": 23,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 23 = 53。",
+      "answer": "x = 30",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 23，得 x = 53−23 = 30。检验：30+23=53。"
+    },
+    {
+      "number": 24,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 26 = 34。",
+      "answer": "x = 8",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 26，得 x = 34−26 = 8。检验：8+26=34。"
+    },
+    {
+      "number": 25,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 5 = 14。",
+      "answer": "x = 9",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 5，得 x = 14−5 = 9。检验：9+5=14。"
+    },
+    {
+      "number": 26,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 8 = 18。",
+      "answer": "x = 10",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 8，得 x = 18−8 = 10。检验：10+8=18。"
+    },
+    {
+      "number": 27,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 11 = 22。",
+      "answer": "x = 11",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 11，得 x = 22−11 = 11。检验：11+11=22。"
+    },
+    {
+      "number": 28,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 14 = 26。",
+      "answer": "x = 12",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 14，得 x = 26−14 = 12。检验：12+14=26。"
+    },
+    {
+      "number": 29,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 17 = 30。",
+      "answer": "x = 13",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 17，得 x = 30−17 = 13。检验：13+17=30。"
+    },
+    {
+      "number": 30,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 20 = 34。",
+      "answer": "x = 14",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 20，得 x = 34−20 = 14。检验：14+20=34。"
+    },
+    {
+      "number": 31,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 23 = 38。",
+      "answer": "x = 15",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 23，得 x = 38−23 = 15。检验：15+23=38。"
+    },
+    {
+      "number": 32,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 26 = 42。",
+      "answer": "x = 16",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 26，得 x = 42−26 = 16。检验：16+26=42。"
+    },
+    {
+      "number": 33,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 5 = 22。",
+      "answer": "x = 17",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 5，得 x = 22−5 = 17。检验：17+5=22。"
+    },
+    {
+      "number": 34,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 8 = 26。",
+      "answer": "x = 18",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 8，得 x = 26−8 = 18。检验：18+8=26。"
+    },
+    {
+      "number": 35,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 11 = 30。",
+      "answer": "x = 19",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 11，得 x = 30−11 = 19。检验：19+11=30。"
+    },
+    {
+      "number": 36,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 14 = 34。",
+      "answer": "x = 20",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 14，得 x = 34−14 = 20。检验：20+14=34。"
+    },
+    {
+      "number": 37,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 17 = 38。",
+      "answer": "x = 21",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 17，得 x = 38−17 = 21。检验：21+17=38。"
+    },
+    {
+      "number": 38,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 20 = 42。",
+      "answer": "x = 22",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 20，得 x = 42−20 = 22。检验：22+20=42。"
+    },
+    {
+      "number": 39,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 23 = 46。",
+      "answer": "x = 23",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 23，得 x = 46−23 = 23。检验：23+23=46。"
+    },
+    {
+      "number": 40,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x + 26 = 50。",
+      "answer": "x = 24",
+      "explanation": "思路：让 x 单独留在等号一边。两边同时减 26，得 x = 50−26 = 24。检验：24+26=50。"
+    },
+    {
+      "number": 41,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 4 = 8。",
+      "answer": "x = 12",
+      "explanation": "思路：x 被减去 4，要用加法还原。两边同时加 4，得 x = 8+4 = 12。检验：12−4=8。"
+    },
+    {
+      "number": 42,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 9 = 4。",
+      "answer": "x = 13",
+      "explanation": "思路：x 被减去 9，要用加法还原。两边同时加 9，得 x = 4+9 = 13。检验：13−9=4。"
+    },
+    {
+      "number": 43,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 14 = 0。",
+      "answer": "x = 14",
+      "explanation": "思路：x 被减去 14，要用加法还原。两边同时加 14，得 x = 0+14 = 14。检验：14−14=0。"
+    },
+    {
+      "number": 44,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 19 = -4。",
+      "answer": "x = 15",
+      "explanation": "思路：x 被减去 19，要用加法还原。两边同时加 19，得 x = -4+19 = 15。检验：15−19=-4。"
+    },
+    {
+      "number": 45,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 24 = -8。",
+      "answer": "x = 16",
+      "explanation": "思路：x 被减去 24，要用加法还原。两边同时加 24，得 x = -8+24 = 16。检验：16−24=-8。"
+    },
+    {
+      "number": 46,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 6 = 11。",
+      "answer": "x = 17",
+      "explanation": "思路：x 被减去 6，要用加法还原。两边同时加 6，得 x = 11+6 = 17。检验：17−6=11。"
+    },
+    {
+      "number": 47,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 11 = 7。",
+      "answer": "x = 18",
+      "explanation": "思路：x 被减去 11，要用加法还原。两边同时加 11，得 x = 7+11 = 18。检验：18−11=7。"
+    },
+    {
+      "number": 48,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 16 = 3。",
+      "answer": "x = 19",
+      "explanation": "思路：x 被减去 16，要用加法还原。两边同时加 16，得 x = 3+16 = 19。检验：19−16=3。"
+    },
+    {
+      "number": 49,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 21 = -1。",
+      "answer": "x = 20",
+      "explanation": "思路：x 被减去 21，要用加法还原。两边同时加 21，得 x = -1+21 = 20。检验：20−21=-1。"
+    },
+    {
+      "number": 50,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 26 = -5。",
+      "answer": "x = 21",
+      "explanation": "思路：x 被减去 26，要用加法还原。两边同时加 26，得 x = -5+26 = 21。检验：21−26=-5。"
+    },
+    {
+      "number": 51,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 8 = 14。",
+      "answer": "x = 22",
+      "explanation": "思路：x 被减去 8，要用加法还原。两边同时加 8，得 x = 14+8 = 22。检验：22−8=14。"
+    },
+    {
+      "number": 52,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 13 = 10。",
+      "answer": "x = 23",
+      "explanation": "思路：x 被减去 13，要用加法还原。两边同时加 13，得 x = 10+13 = 23。检验：23−13=10。"
+    },
+    {
+      "number": 53,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 18 = 6。",
+      "answer": "x = 24",
+      "explanation": "思路：x 被减去 18，要用加法还原。两边同时加 18，得 x = 6+18 = 24。检验：24−18=6。"
+    },
+    {
+      "number": 54,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 23 = 2。",
+      "answer": "x = 25",
+      "explanation": "思路：x 被减去 23，要用加法还原。两边同时加 23，得 x = 2+23 = 25。检验：25−23=2。"
+    },
+    {
+      "number": 55,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 5 = 21。",
+      "answer": "x = 26",
+      "explanation": "思路：x 被减去 5，要用加法还原。两边同时加 5，得 x = 21+5 = 26。检验：26−5=21。"
+    },
+    {
+      "number": 56,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 10 = 17。",
+      "answer": "x = 27",
+      "explanation": "思路：x 被减去 10，要用加法还原。两边同时加 10，得 x = 17+10 = 27。检验：27−10=17。"
+    },
+    {
+      "number": 57,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 15 = 13。",
+      "answer": "x = 28",
+      "explanation": "思路：x 被减去 15，要用加法还原。两边同时加 15，得 x = 13+15 = 28。检验：28−15=13。"
+    },
+    {
+      "number": 58,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 20 = 9。",
+      "answer": "x = 29",
+      "explanation": "思路：x 被减去 20，要用加法还原。两边同时加 20，得 x = 9+20 = 29。检验：29−20=9。"
+    },
+    {
+      "number": 59,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 25 = 5。",
+      "answer": "x = 30",
+      "explanation": "思路：x 被减去 25，要用加法还原。两边同时加 25，得 x = 5+25 = 30。检验：30−25=5。"
+    },
+    {
+      "number": 60,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 7 = 24。",
+      "answer": "x = 31",
+      "explanation": "思路：x 被减去 7，要用加法还原。两边同时加 7，得 x = 24+7 = 31。检验：31−7=24。"
+    },
+    {
+      "number": 61,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 12 = 20。",
+      "answer": "x = 32",
+      "explanation": "思路：x 被减去 12，要用加法还原。两边同时加 12，得 x = 20+12 = 32。检验：32−12=20。"
+    },
+    {
+      "number": 62,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 17 = 16。",
+      "answer": "x = 33",
+      "explanation": "思路：x 被减去 17，要用加法还原。两边同时加 17，得 x = 16+17 = 33。检验：33−17=16。"
+    },
+    {
+      "number": 63,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 22 = 12。",
+      "answer": "x = 34",
+      "explanation": "思路：x 被减去 22，要用加法还原。两边同时加 22，得 x = 12+22 = 34。检验：34−22=12。"
+    },
+    {
+      "number": 64,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 4 = 31。",
+      "answer": "x = 35",
+      "explanation": "思路：x 被减去 4，要用加法还原。两边同时加 4，得 x = 31+4 = 35。检验：35−4=31。"
+    },
+    {
+      "number": 65,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 9 = 27。",
+      "answer": "x = 36",
+      "explanation": "思路：x 被减去 9，要用加法还原。两边同时加 9，得 x = 27+9 = 36。检验：36−9=27。"
+    },
+    {
+      "number": 66,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 14 = 23。",
+      "answer": "x = 37",
+      "explanation": "思路：x 被减去 14，要用加法还原。两边同时加 14，得 x = 23+14 = 37。检验：37−14=23。"
+    },
+    {
+      "number": 67,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 19 = -7。",
+      "answer": "x = 12",
+      "explanation": "思路：x 被减去 19，要用加法还原。两边同时加 19，得 x = -7+19 = 12。检验：12−19=-7。"
+    },
+    {
+      "number": 68,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 24 = -11。",
+      "answer": "x = 13",
+      "explanation": "思路：x 被减去 24，要用加法还原。两边同时加 24，得 x = -11+24 = 13。检验：13−24=-11。"
+    },
+    {
+      "number": 69,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 6 = 8。",
+      "answer": "x = 14",
+      "explanation": "思路：x 被减去 6，要用加法还原。两边同时加 6，得 x = 8+6 = 14。检验：14−6=8。"
+    },
+    {
+      "number": 70,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 11 = 4。",
+      "answer": "x = 15",
+      "explanation": "思路：x 被减去 11，要用加法还原。两边同时加 11，得 x = 4+11 = 15。检验：15−11=4。"
+    },
+    {
+      "number": 71,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 16 = 0。",
+      "answer": "x = 16",
+      "explanation": "思路：x 被减去 16，要用加法还原。两边同时加 16，得 x = 0+16 = 16。检验：16−16=0。"
+    },
+    {
+      "number": 72,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 21 = -4。",
+      "answer": "x = 17",
+      "explanation": "思路：x 被减去 21，要用加法还原。两边同时加 21，得 x = -4+21 = 17。检验：17−21=-4。"
+    },
+    {
+      "number": 73,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 26 = -8。",
+      "answer": "x = 18",
+      "explanation": "思路：x 被减去 26，要用加法还原。两边同时加 26，得 x = -8+26 = 18。检验：18−26=-8。"
+    },
+    {
+      "number": 74,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 8 = 11。",
+      "answer": "x = 19",
+      "explanation": "思路：x 被减去 8，要用加法还原。两边同时加 8，得 x = 11+8 = 19。检验：19−8=11。"
+    },
+    {
+      "number": 75,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 13 = 7。",
+      "answer": "x = 20",
+      "explanation": "思路：x 被减去 13，要用加法还原。两边同时加 13，得 x = 7+13 = 20。检验：20−13=7。"
+    },
+    {
+      "number": 76,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 18 = 3。",
+      "answer": "x = 21",
+      "explanation": "思路：x 被减去 18，要用加法还原。两边同时加 18，得 x = 3+18 = 21。检验：21−18=3。"
+    },
+    {
+      "number": 77,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 23 = -1。",
+      "answer": "x = 22",
+      "explanation": "思路：x 被减去 23，要用加法还原。两边同时加 23，得 x = -1+23 = 22。检验：22−23=-1。"
+    },
+    {
+      "number": 78,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 5 = 18。",
+      "answer": "x = 23",
+      "explanation": "思路：x 被减去 5，要用加法还原。两边同时加 5，得 x = 18+5 = 23。检验：23−5=18。"
+    },
+    {
+      "number": 79,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 10 = 14。",
+      "answer": "x = 24",
+      "explanation": "思路：x 被减去 10，要用加法还原。两边同时加 10，得 x = 14+10 = 24。检验：24−10=14。"
+    },
+    {
+      "number": 80,
+      "difficulty": "提高",
+      "category": "一步加减",
+      "prompt": "解方程：x − 15 = 10。",
+      "answer": "x = 25",
+      "explanation": "思路：x 被减去 15，要用加法还原。两边同时加 15，得 x = 10+15 = 25。检验：25−15=10。"
+    },
+    {
+      "number": 81,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：2x = 12。",
+      "answer": "x = 6",
+      "explanation": "思路：2x 表示 2×x。两边同时除以 2，得 x = 12÷2 = 6。检验：2×6=12。"
+    },
+    {
+      "number": 82,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 3 = 7。",
+      "answer": "x = 21",
+      "explanation": "思路：x 被 3 除，要用乘法还原。两边同时乘 3，得 x = 7×3 = 21。检验：21÷3=7。"
+    },
+    {
+      "number": 83,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：4x = 32。",
+      "answer": "x = 8",
+      "explanation": "思路：4x 表示 4×x。两边同时除以 4，得 x = 32÷4 = 8。检验：4×8=32。"
+    },
+    {
+      "number": 84,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 5 = 9。",
+      "answer": "x = 45",
+      "explanation": "思路：x 被 5 除，要用乘法还原。两边同时乘 5，得 x = 9×5 = 45。检验：45÷5=9。"
+    },
+    {
+      "number": 85,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：6x = 60。",
+      "answer": "x = 10",
+      "explanation": "思路：6x 表示 6×x。两边同时除以 6，得 x = 60÷6 = 10。检验：6×10=60。"
+    },
+    {
+      "number": 86,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 7 = 11。",
+      "answer": "x = 77",
+      "explanation": "思路：x 被 7 除，要用乘法还原。两边同时乘 7，得 x = 11×7 = 77。检验：77÷7=11。"
+    },
+    {
+      "number": 87,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：8x = 96。",
+      "answer": "x = 12",
+      "explanation": "思路：8x 表示 8×x。两边同时除以 8，得 x = 96÷8 = 12。检验：8×12=96。"
+    },
+    {
+      "number": 88,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 9 = 13。",
+      "answer": "x = 117",
+      "explanation": "思路：x 被 9 除，要用乘法还原。两边同时乘 9，得 x = 13×9 = 117。检验：117÷9=13。"
+    },
+    {
+      "number": 89,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：2x = 28。",
+      "answer": "x = 14",
+      "explanation": "思路：2x 表示 2×x。两边同时除以 2，得 x = 28÷2 = 14。检验：2×14=28。"
+    },
+    {
+      "number": 90,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 3 = 15。",
+      "answer": "x = 45",
+      "explanation": "思路：x 被 3 除，要用乘法还原。两边同时乘 3，得 x = 15×3 = 45。检验：45÷3=15。"
+    },
+    {
+      "number": 91,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：4x = 64。",
+      "answer": "x = 16",
+      "explanation": "思路：4x 表示 4×x。两边同时除以 4，得 x = 64÷4 = 16。检验：4×16=64。"
+    },
+    {
+      "number": 92,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 5 = 17。",
+      "answer": "x = 85",
+      "explanation": "思路：x 被 5 除，要用乘法还原。两边同时乘 5，得 x = 17×5 = 85。检验：85÷5=17。"
+    },
+    {
+      "number": 93,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：6x = 108。",
+      "answer": "x = 18",
+      "explanation": "思路：6x 表示 6×x。两边同时除以 6，得 x = 108÷6 = 18。检验：6×18=108。"
+    },
+    {
+      "number": 94,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 7 = 19。",
+      "answer": "x = 133",
+      "explanation": "思路：x 被 7 除，要用乘法还原。两边同时乘 7，得 x = 19×7 = 133。检验：133÷7=19。"
+    },
+    {
+      "number": 95,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：8x = 160。",
+      "answer": "x = 20",
+      "explanation": "思路：8x 表示 8×x。两边同时除以 8，得 x = 160÷8 = 20。检验：8×20=160。"
+    },
+    {
+      "number": 96,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 9 = 21。",
+      "answer": "x = 189",
+      "explanation": "思路：x 被 9 除，要用乘法还原。两边同时乘 9，得 x = 21×9 = 189。检验：189÷9=21。"
+    },
+    {
+      "number": 97,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：2x = 44。",
+      "answer": "x = 22",
+      "explanation": "思路：2x 表示 2×x。两边同时除以 2，得 x = 44÷2 = 22。检验：2×22=44。"
+    },
+    {
+      "number": 98,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 3 = 23。",
+      "answer": "x = 69",
+      "explanation": "思路：x 被 3 除，要用乘法还原。两边同时乘 3，得 x = 23×3 = 69。检验：69÷3=23。"
+    },
+    {
+      "number": 99,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：4x = 96。",
+      "answer": "x = 24",
+      "explanation": "思路：4x 表示 4×x。两边同时除以 4，得 x = 96÷4 = 24。检验：4×24=96。"
+    },
+    {
+      "number": 100,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 5 = 25。",
+      "answer": "x = 125",
+      "explanation": "思路：x 被 5 除，要用乘法还原。两边同时乘 5，得 x = 25×5 = 125。检验：125÷5=25。"
+    },
+    {
+      "number": 101,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：6x = 156。",
+      "answer": "x = 26",
+      "explanation": "思路：6x 表示 6×x。两边同时除以 6，得 x = 156÷6 = 26。检验：6×26=156。"
+    },
+    {
+      "number": 102,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 7 = 27。",
+      "answer": "x = 189",
+      "explanation": "思路：x 被 7 除，要用乘法还原。两边同时乘 7，得 x = 27×7 = 189。检验：189÷7=27。"
+    },
+    {
+      "number": 103,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：8x = 224。",
+      "answer": "x = 28",
+      "explanation": "思路：8x 表示 8×x。两边同时除以 8，得 x = 224÷8 = 28。检验：8×28=224。"
+    },
+    {
+      "number": 104,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 9 = 29。",
+      "answer": "x = 261",
+      "explanation": "思路：x 被 9 除，要用乘法还原。两边同时乘 9，得 x = 29×9 = 261。检验：261÷9=29。"
+    },
+    {
+      "number": 105,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：2x = 60。",
+      "answer": "x = 30",
+      "explanation": "思路：2x 表示 2×x。两边同时除以 2，得 x = 60÷2 = 30。检验：2×30=60。"
+    },
+    {
+      "number": 106,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 3 = 6。",
+      "answer": "x = 18",
+      "explanation": "思路：x 被 3 除，要用乘法还原。两边同时乘 3，得 x = 6×3 = 18。检验：18÷3=6。"
+    },
+    {
+      "number": 107,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：4x = 28。",
+      "answer": "x = 7",
+      "explanation": "思路：4x 表示 4×x。两边同时除以 4，得 x = 28÷4 = 7。检验：4×7=28。"
+    },
+    {
+      "number": 108,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 5 = 8。",
+      "answer": "x = 40",
+      "explanation": "思路：x 被 5 除，要用乘法还原。两边同时乘 5，得 x = 8×5 = 40。检验：40÷5=8。"
+    },
+    {
+      "number": 109,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：6x = 54。",
+      "answer": "x = 9",
+      "explanation": "思路：6x 表示 6×x。两边同时除以 6，得 x = 54÷6 = 9。检验：6×9=54。"
+    },
+    {
+      "number": 110,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 7 = 10。",
+      "answer": "x = 70",
+      "explanation": "思路：x 被 7 除，要用乘法还原。两边同时乘 7，得 x = 10×7 = 70。检验：70÷7=10。"
+    },
+    {
+      "number": 111,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：8x = 88。",
+      "answer": "x = 11",
+      "explanation": "思路：8x 表示 8×x。两边同时除以 8，得 x = 88÷8 = 11。检验：8×11=88。"
+    },
+    {
+      "number": 112,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 9 = 12。",
+      "answer": "x = 108",
+      "explanation": "思路：x 被 9 除，要用乘法还原。两边同时乘 9，得 x = 12×9 = 108。检验：108÷9=12。"
+    },
+    {
+      "number": 113,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：2x = 26。",
+      "answer": "x = 13",
+      "explanation": "思路：2x 表示 2×x。两边同时除以 2，得 x = 26÷2 = 13。检验：2×13=26。"
+    },
+    {
+      "number": 114,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 3 = 14。",
+      "answer": "x = 42",
+      "explanation": "思路：x 被 3 除，要用乘法还原。两边同时乘 3，得 x = 14×3 = 42。检验：42÷3=14。"
+    },
+    {
+      "number": 115,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：4x = 60。",
+      "answer": "x = 15",
+      "explanation": "思路：4x 表示 4×x。两边同时除以 4，得 x = 60÷4 = 15。检验：4×15=60。"
+    },
+    {
+      "number": 116,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 5 = 16。",
+      "answer": "x = 80",
+      "explanation": "思路：x 被 5 除，要用乘法还原。两边同时乘 5，得 x = 16×5 = 80。检验：80÷5=16。"
+    },
+    {
+      "number": 117,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：6x = 102。",
+      "answer": "x = 17",
+      "explanation": "思路：6x 表示 6×x。两边同时除以 6，得 x = 102÷6 = 17。检验：6×17=102。"
+    },
+    {
+      "number": 118,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 7 = 18。",
+      "answer": "x = 126",
+      "explanation": "思路：x 被 7 除，要用乘法还原。两边同时乘 7，得 x = 18×7 = 126。检验：126÷7=18。"
+    },
+    {
+      "number": 119,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：8x = 152。",
+      "answer": "x = 19",
+      "explanation": "思路：8x 表示 8×x。两边同时除以 8，得 x = 152÷8 = 19。检验：8×19=152。"
+    },
+    {
+      "number": 120,
+      "difficulty": "提高",
+      "category": "一步乘除",
+      "prompt": "解方程：x ÷ 9 = 20。",
+      "answer": "x = 180",
+      "explanation": "思路：x 被 9 除，要用乘法还原。两边同时乘 9，得 x = 20×9 = 180。检验：180÷9=20。"
+    },
+    {
+      "number": 121,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 3 = 8 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 122,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 4 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 123,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：5 + 9 = 14 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 124,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 6 > 17 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 125,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 7 = 20 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 126,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 8 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 127,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：9 + 17 = 26 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 128,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 10 > 29 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 129,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 11 = 32 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 130,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 12 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 131,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：13 + 5 = 18 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 132,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 14 > 21 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 133,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 15 = 24 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 134,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 16 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 135,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：17 + 13 = 30 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 136,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 18 > 33 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 137,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 19 = 36 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 138,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 20 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 139,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：3 + 21 = 24 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 140,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 4 > 27 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 141,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 5 = 10 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 142,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 6 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 143,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：7 + 9 = 16 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 144,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 8 > 19 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 145,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 9 = 22 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 146,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 10 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 147,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：11 + 17 = 28 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 148,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 12 > 31 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 149,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 13 = 34 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 150,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 14 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 151,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：15 + 5 = 20 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 152,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 16 > 23 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 153,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 17 = 26 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 154,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 18 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 155,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：19 + 13 = 32 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 156,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 20 > 35 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 157,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 3 = 20 是方程吗？",
+      "answer": "是方程",
+      "explanation": "它有未知数 x，也有等号，表示一个等量关系，所以是方程。"
+    },
+    {
+      "number": 158,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 4 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它虽然有未知数 x，但没有等号，不表示左右相等，所以不是方程。"
+    },
+    {
+      "number": 159,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：5 + 21 = 26 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "它有等号，但没有未知数，只是普通等式，所以不是方程。"
+    },
+    {
+      "number": 160,
+      "difficulty": "提高",
+      "category": "方程辨析",
+      "prompt": "判断：x + 6 > 29 是方程吗？",
+      "answer": "不是方程",
+      "explanation": "方程必须是含有未知数的等式，这里是不等式，不是方程。"
+    },
+    {
+      "number": 161,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 8 是方程 2x + 4 = 18 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=8 代入左边，2×8+4=20，不等于右边 18，所以不是方程的解。正确解是 x=7。"
+    },
+    {
+      "number": 162,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 8 是方程 3x + 8 = 32 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=8 代入左边，3×8+8=32，正好等于右边 32，所以是方程的解。"
+    },
+    {
+      "number": 163,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 9 是方程 4x + 12 = 48 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=9 代入左边，4×9+12=48，正好等于右边 48，所以是方程的解。"
+    },
+    {
+      "number": 164,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 11 是方程 5x + 16 = 66 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=11 代入左边，5×11+16=71，不等于右边 66，所以不是方程的解。正确解是 x=10。"
+    },
+    {
+      "number": 165,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 11 是方程 6x + 20 = 86 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=11 代入左边，6×11+20=86，正好等于右边 86，所以是方程的解。"
+    },
+    {
+      "number": 166,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 12 是方程 7x + 5 = 89 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=12 代入左边，7×12+5=89，正好等于右边 89，所以是方程的解。"
+    },
+    {
+      "number": 167,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 14 是方程 2x + 9 = 35 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=14 代入左边，2×14+9=37，不等于右边 35，所以不是方程的解。正确解是 x=13。"
+    },
+    {
+      "number": 168,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 14 是方程 3x + 13 = 55 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=14 代入左边，3×14+13=55，正好等于右边 55，所以是方程的解。"
+    },
+    {
+      "number": 169,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 15 是方程 4x + 17 = 77 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=15 代入左边，4×15+17=77，正好等于右边 77，所以是方程的解。"
+    },
+    {
+      "number": 170,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 17 是方程 5x + 21 = 101 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=17 代入左边，5×17+21=106，不等于右边 101，所以不是方程的解。正确解是 x=16。"
+    },
+    {
+      "number": 171,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 17 是方程 6x + 6 = 108 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=17 代入左边，6×17+6=108，正好等于右边 108，所以是方程的解。"
+    },
+    {
+      "number": 172,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 18 是方程 7x + 10 = 136 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=18 代入左边，7×18+10=136，正好等于右边 136，所以是方程的解。"
+    },
+    {
+      "number": 173,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 20 是方程 2x + 14 = 52 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=20 代入左边，2×20+14=54，不等于右边 52，所以不是方程的解。正确解是 x=19。"
+    },
+    {
+      "number": 174,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 20 是方程 3x + 18 = 78 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=20 代入左边，3×20+18=78，正好等于右边 78，所以是方程的解。"
+    },
+    {
+      "number": 175,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 21 是方程 4x + 22 = 106 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=21 代入左边，4×21+22=106，正好等于右边 106，所以是方程的解。"
+    },
+    {
+      "number": 176,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 23 是方程 5x + 7 = 117 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=23 代入左边，5×23+7=122，不等于右边 117，所以不是方程的解。正确解是 x=22。"
+    },
+    {
+      "number": 177,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 23 是方程 6x + 11 = 149 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=23 代入左边，6×23+11=149，正好等于右边 149，所以是方程的解。"
+    },
+    {
+      "number": 178,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 24 是方程 7x + 15 = 183 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=24 代入左边，7×24+15=183，正好等于右边 183，所以是方程的解。"
+    },
+    {
+      "number": 179,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 26 是方程 2x + 19 = 69 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=26 代入左边，2×26+19=71，不等于右边 69，所以不是方程的解。正确解是 x=25。"
+    },
+    {
+      "number": 180,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 26 是方程 3x + 4 = 82 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=26 代入左边，3×26+4=82，正好等于右边 82，所以是方程的解。"
+    },
+    {
+      "number": 181,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 27 是方程 4x + 8 = 116 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=27 代入左边，4×27+8=116，正好等于右边 116，所以是方程的解。"
+    },
+    {
+      "number": 182,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 29 是方程 5x + 12 = 152 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=29 代入左边，5×29+12=157，不等于右边 152，所以不是方程的解。正确解是 x=28。"
+    },
+    {
+      "number": 183,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 29 是方程 6x + 16 = 190 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=29 代入左边，6×29+16=190，正好等于右边 190，所以是方程的解。"
+    },
+    {
+      "number": 184,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 30 是方程 7x + 20 = 230 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=30 代入左边，7×30+20=230，正好等于右边 230，所以是方程的解。"
+    },
+    {
+      "number": 185,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 8 是方程 2x + 5 = 19 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=8 代入左边，2×8+5=21，不等于右边 19，所以不是方程的解。正确解是 x=7。"
+    },
+    {
+      "number": 186,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 8 是方程 3x + 9 = 33 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=8 代入左边，3×8+9=33，正好等于右边 33，所以是方程的解。"
+    },
+    {
+      "number": 187,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 9 是方程 4x + 13 = 49 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=9 代入左边，4×9+13=49，正好等于右边 49，所以是方程的解。"
+    },
+    {
+      "number": 188,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 11 是方程 5x + 17 = 67 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=11 代入左边，5×11+17=72，不等于右边 67，所以不是方程的解。正确解是 x=10。"
+    },
+    {
+      "number": 189,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 11 是方程 6x + 21 = 87 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=11 代入左边，6×11+21=87，正好等于右边 87，所以是方程的解。"
+    },
+    {
+      "number": 190,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 12 是方程 7x + 6 = 90 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=12 代入左边，7×12+6=90，正好等于右边 90，所以是方程的解。"
+    },
+    {
+      "number": 191,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 14 是方程 2x + 10 = 36 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=14 代入左边，2×14+10=38，不等于右边 36，所以不是方程的解。正确解是 x=13。"
+    },
+    {
+      "number": 192,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 14 是方程 3x + 14 = 56 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=14 代入左边，3×14+14=56，正好等于右边 56，所以是方程的解。"
+    },
+    {
+      "number": 193,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 15 是方程 4x + 18 = 78 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=15 代入左边，4×15+18=78，正好等于右边 78，所以是方程的解。"
+    },
+    {
+      "number": 194,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 17 是方程 5x + 22 = 102 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=17 代入左边，5×17+22=107，不等于右边 102，所以不是方程的解。正确解是 x=16。"
+    },
+    {
+      "number": 195,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 17 是方程 6x + 7 = 109 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=17 代入左边，6×17+7=109，正好等于右边 109，所以是方程的解。"
+    },
+    {
+      "number": 196,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 18 是方程 7x + 11 = 137 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=18 代入左边，7×18+11=137，正好等于右边 137，所以是方程的解。"
+    },
+    {
+      "number": 197,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 20 是方程 2x + 15 = 53 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=20 代入左边，2×20+15=55，不等于右边 53，所以不是方程的解。正确解是 x=19。"
+    },
+    {
+      "number": 198,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 20 是方程 3x + 19 = 79 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=20 代入左边，3×20+19=79，正好等于右边 79，所以是方程的解。"
+    },
+    {
+      "number": 199,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 21 是方程 4x + 4 = 88 的解吗？",
+      "answer": "是",
+      "explanation": "把 x=21 代入左边，4×21+4=88，正好等于右边 88，所以是方程的解。"
+    },
+    {
+      "number": 200,
+      "difficulty": "提高",
+      "category": "代入检验",
+      "prompt": "检验：x = 23 是方程 5x + 8 = 118 的解吗？",
+      "answer": "不是",
+      "explanation": "把 x=23 代入左边，5×23+8=123，不等于右边 118，所以不是方程的解。正确解是 x=22。"
+    },
+    {
+      "number": 201,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：2x + 5 = 17。",
+      "answer": "x = 6",
+      "explanation": "思路：先消去加上的 5，再消去乘的 2。计算：两边同时减 5，得 2x=12；再除以 2，得 x=6。"
+    },
+    {
+      "number": 202,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：3x + 12 = 33。",
+      "answer": "x = 7",
+      "explanation": "思路：先消去加上的 12，再消去乘的 3。计算：两边同时减 12，得 3x=21；再除以 3，得 x=7。"
+    },
+    {
+      "number": 203,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：4x + 19 = 51。",
+      "answer": "x = 8",
+      "explanation": "思路：先消去加上的 19，再消去乘的 4。计算：两边同时减 19，得 4x=32；再除以 4，得 x=8。"
+    },
+    {
+      "number": 204,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：5x + 26 = 71。",
+      "answer": "x = 9",
+      "explanation": "思路：先消去加上的 26，再消去乘的 5。计算：两边同时减 26，得 5x=45；再除以 5，得 x=9。"
+    },
+    {
+      "number": 205,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：6x + 33 = 93。",
+      "answer": "x = 10",
+      "explanation": "思路：先消去加上的 33，再消去乘的 6。计算：两边同时减 33，得 6x=60；再除以 6，得 x=10。"
+    },
+    {
+      "number": 206,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：7x + 9 = 86。",
+      "answer": "x = 11",
+      "explanation": "思路：先消去加上的 9，再消去乘的 7。计算：两边同时减 9，得 7x=77；再除以 7，得 x=11。"
+    },
+    {
+      "number": 207,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：8x + 16 = 112。",
+      "answer": "x = 12",
+      "explanation": "思路：先消去加上的 16，再消去乘的 8。计算：两边同时减 16，得 8x=96；再除以 8，得 x=12。"
+    },
+    {
+      "number": 208,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：2x + 23 = 49。",
+      "answer": "x = 13",
+      "explanation": "思路：先消去加上的 23，再消去乘的 2。计算：两边同时减 23，得 2x=26；再除以 2，得 x=13。"
+    },
+    {
+      "number": 209,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：3x + 30 = 72。",
+      "answer": "x = 14",
+      "explanation": "思路：先消去加上的 30，再消去乘的 3。计算：两边同时减 30，得 3x=42；再除以 3，得 x=14。"
+    },
+    {
+      "number": 210,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：4x + 6 = 66。",
+      "answer": "x = 15",
+      "explanation": "思路：先消去加上的 6，再消去乘的 4。计算：两边同时减 6，得 4x=60；再除以 4，得 x=15。"
+    },
+    {
+      "number": 211,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：5x + 13 = 93。",
+      "answer": "x = 16",
+      "explanation": "思路：先消去加上的 13，再消去乘的 5。计算：两边同时减 13，得 5x=80；再除以 5，得 x=16。"
+    },
+    {
+      "number": 212,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：6x + 20 = 122。",
+      "answer": "x = 17",
+      "explanation": "思路：先消去加上的 20，再消去乘的 6。计算：两边同时减 20，得 6x=102；再除以 6，得 x=17。"
+    },
+    {
+      "number": 213,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：7x + 27 = 153。",
+      "answer": "x = 18",
+      "explanation": "思路：先消去加上的 27，再消去乘的 7。计算：两边同时减 27，得 7x=126；再除以 7，得 x=18。"
+    },
+    {
+      "number": 214,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：8x + 34 = 186。",
+      "answer": "x = 19",
+      "explanation": "思路：先消去加上的 34，再消去乘的 8。计算：两边同时减 34，得 8x=152；再除以 8，得 x=19。"
+    },
+    {
+      "number": 215,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：2x + 10 = 50。",
+      "answer": "x = 20",
+      "explanation": "思路：先消去加上的 10，再消去乘的 2。计算：两边同时减 10，得 2x=40；再除以 2，得 x=20。"
+    },
+    {
+      "number": 216,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：3x + 17 = 80。",
+      "answer": "x = 21",
+      "explanation": "思路：先消去加上的 17，再消去乘的 3。计算：两边同时减 17，得 3x=63；再除以 3，得 x=21。"
+    },
+    {
+      "number": 217,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：4x + 24 = 112。",
+      "answer": "x = 22",
+      "explanation": "思路：先消去加上的 24，再消去乘的 4。计算：两边同时减 24，得 4x=88；再除以 4，得 x=22。"
+    },
+    {
+      "number": 218,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：5x + 31 = 146。",
+      "answer": "x = 23",
+      "explanation": "思路：先消去加上的 31，再消去乘的 5。计算：两边同时减 31，得 5x=115；再除以 5，得 x=23。"
+    },
+    {
+      "number": 219,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：6x + 7 = 151。",
+      "answer": "x = 24",
+      "explanation": "思路：先消去加上的 7，再消去乘的 6。计算：两边同时减 7，得 6x=144；再除以 6，得 x=24。"
+    },
+    {
+      "number": 220,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：7x + 14 = 189。",
+      "answer": "x = 25",
+      "explanation": "思路：先消去加上的 14，再消去乘的 7。计算：两边同时减 14，得 7x=175；再除以 7，得 x=25。"
+    },
+    {
+      "number": 221,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：8x + 21 = 229。",
+      "answer": "x = 26",
+      "explanation": "思路：先消去加上的 21，再消去乘的 8。计算：两边同时减 21，得 8x=208；再除以 8，得 x=26。"
+    },
+    {
+      "number": 222,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：2x + 28 = 82。",
+      "answer": "x = 27",
+      "explanation": "思路：先消去加上的 28，再消去乘的 2。计算：两边同时减 28，得 2x=54；再除以 2，得 x=27。"
+    },
+    {
+      "number": 223,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：3x + 35 = 119。",
+      "answer": "x = 28",
+      "explanation": "思路：先消去加上的 35，再消去乘的 3。计算：两边同时减 35，得 3x=84；再除以 3，得 x=28。"
+    },
+    {
+      "number": 224,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：4x + 11 = 127。",
+      "answer": "x = 29",
+      "explanation": "思路：先消去加上的 11，再消去乘的 4。计算：两边同时减 11，得 4x=116；再除以 4，得 x=29。"
+    },
+    {
+      "number": 225,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：5x + 18 = 168。",
+      "answer": "x = 30",
+      "explanation": "思路：先消去加上的 18，再消去乘的 5。计算：两边同时减 18，得 5x=150；再除以 5，得 x=30。"
+    },
+    {
+      "number": 226,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：6x + 25 = 211。",
+      "answer": "x = 31",
+      "explanation": "思路：先消去加上的 25，再消去乘的 6。计算：两边同时减 25，得 6x=186；再除以 6，得 x=31。"
+    },
+    {
+      "number": 227,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：7x + 32 = 256。",
+      "answer": "x = 32",
+      "explanation": "思路：先消去加上的 32，再消去乘的 7。计算：两边同时减 32，得 7x=224；再除以 7，得 x=32。"
+    },
+    {
+      "number": 228,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：8x + 8 = 272。",
+      "answer": "x = 33",
+      "explanation": "思路：先消去加上的 8，再消去乘的 8。计算：两边同时减 8，得 8x=264；再除以 8，得 x=33。"
+    },
+    {
+      "number": 229,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：2x + 15 = 83。",
+      "answer": "x = 34",
+      "explanation": "思路：先消去加上的 15，再消去乘的 2。计算：两边同时减 15，得 2x=68；再除以 2，得 x=34。"
+    },
+    {
+      "number": 230,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：3x + 22 = 127。",
+      "answer": "x = 35",
+      "explanation": "思路：先消去加上的 22，再消去乘的 3。计算：两边同时减 22，得 3x=105；再除以 3，得 x=35。"
+    },
+    {
+      "number": 231,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：4x + 29 = 173。",
+      "answer": "x = 36",
+      "explanation": "思路：先消去加上的 29，再消去乘的 4。计算：两边同时减 29，得 4x=144；再除以 4，得 x=36。"
+    },
+    {
+      "number": 232,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：5x + 5 = 190。",
+      "answer": "x = 37",
+      "explanation": "思路：先消去加上的 5，再消去乘的 5。计算：两边同时减 5，得 5x=185；再除以 5，得 x=37。"
+    },
+    {
+      "number": 233,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：6x + 12 = 48。",
+      "answer": "x = 6",
+      "explanation": "思路：先消去加上的 12，再消去乘的 6。计算：两边同时减 12，得 6x=36；再除以 6，得 x=6。"
+    },
+    {
+      "number": 234,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：7x + 19 = 68。",
+      "answer": "x = 7",
+      "explanation": "思路：先消去加上的 19，再消去乘的 7。计算：两边同时减 19，得 7x=49；再除以 7，得 x=7。"
+    },
+    {
+      "number": 235,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：8x + 26 = 90。",
+      "answer": "x = 8",
+      "explanation": "思路：先消去加上的 26，再消去乘的 8。计算：两边同时减 26，得 8x=64；再除以 8，得 x=8。"
+    },
+    {
+      "number": 236,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：2x + 33 = 51。",
+      "answer": "x = 9",
+      "explanation": "思路：先消去加上的 33，再消去乘的 2。计算：两边同时减 33，得 2x=18；再除以 2，得 x=9。"
+    },
+    {
+      "number": 237,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：3x + 9 = 39。",
+      "answer": "x = 10",
+      "explanation": "思路：先消去加上的 9，再消去乘的 3。计算：两边同时减 9，得 3x=30；再除以 3，得 x=10。"
+    },
+    {
+      "number": 238,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：4x + 16 = 60。",
+      "answer": "x = 11",
+      "explanation": "思路：先消去加上的 16，再消去乘的 4。计算：两边同时减 16，得 4x=44；再除以 4，得 x=11。"
+    },
+    {
+      "number": 239,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：5x + 23 = 83。",
+      "answer": "x = 12",
+      "explanation": "思路：先消去加上的 23，再消去乘的 5。计算：两边同时减 23，得 5x=60；再除以 5，得 x=12。"
+    },
+    {
+      "number": 240,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：6x + 30 = 108。",
+      "answer": "x = 13",
+      "explanation": "思路：先消去加上的 30，再消去乘的 6。计算：两边同时减 30，得 6x=78；再除以 6，得 x=13。"
+    },
+    {
+      "number": 241,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：7x + 6 = 104。",
+      "answer": "x = 14",
+      "explanation": "思路：先消去加上的 6，再消去乘的 7。计算：两边同时减 6，得 7x=98；再除以 7，得 x=14。"
+    },
+    {
+      "number": 242,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：8x + 13 = 133。",
+      "answer": "x = 15",
+      "explanation": "思路：先消去加上的 13，再消去乘的 8。计算：两边同时减 13，得 8x=120；再除以 8，得 x=15。"
+    },
+    {
+      "number": 243,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：2x + 20 = 52。",
+      "answer": "x = 16",
+      "explanation": "思路：先消去加上的 20，再消去乘的 2。计算：两边同时减 20，得 2x=32；再除以 2，得 x=16。"
+    },
+    {
+      "number": 244,
+      "difficulty": "困难",
+      "category": "两步方程",
+      "prompt": "解方程：3x + 27 = 78。",
+      "answer": "x = 17",
+      "explanation": "思路：先消去加上的 27，再消去乘的 3。计算：两边同时减 27，得 3x=51；再除以 3，得 x=17。"
+    },
+    {
+      "number": 245,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：30 − 2x = 20。",
+      "answer": "x = 5",
+      "explanation": "思路：先把减去的部分看成整体。2x=30−20=10；再两边同时除以 2，得 x=5。检验：30−2×5=20。"
+    },
+    {
+      "number": 246,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：41 − 3x = 23。",
+      "answer": "x = 6",
+      "explanation": "思路：先把减去的部分看成整体。3x=41−23=18；再两边同时除以 3，得 x=6。检验：41−3×6=23。"
+    },
+    {
+      "number": 247,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：54 − 4x = 26。",
+      "answer": "x = 7",
+      "explanation": "思路：先把减去的部分看成整体。4x=54−26=28；再两边同时除以 4，得 x=7。检验：54−4×7=26。"
+    },
+    {
+      "number": 248,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：69 − 5x = 29。",
+      "answer": "x = 8",
+      "explanation": "思路：先把减去的部分看成整体。5x=69−29=40；再两边同时除以 5，得 x=8。检验：69−5×8=29。"
+    },
+    {
+      "number": 249,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：86 − 6x = 32。",
+      "answer": "x = 9",
+      "explanation": "思路：先把减去的部分看成整体。6x=86−32=54；再两边同时除以 6，得 x=9。检验：86−6×9=32。"
+    },
+    {
+      "number": 250,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：55 − 2x = 35。",
+      "answer": "x = 10",
+      "explanation": "思路：先把减去的部分看成整体。2x=55−35=20；再两边同时除以 2，得 x=10。检验：55−2×10=35。"
+    },
+    {
+      "number": 251,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：71 − 3x = 38。",
+      "answer": "x = 11",
+      "explanation": "思路：先把减去的部分看成整体。3x=71−38=33；再两边同时除以 3，得 x=11。检验：71−3×11=38。"
+    },
+    {
+      "number": 252,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：89 − 4x = 41。",
+      "answer": "x = 12",
+      "explanation": "思路：先把减去的部分看成整体。4x=89−41=48；再两边同时除以 4，得 x=12。检验：89−4×12=41。"
+    },
+    {
+      "number": 253,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：109 − 5x = 44。",
+      "answer": "x = 13",
+      "explanation": "思路：先把减去的部分看成整体。5x=109−44=65；再两边同时除以 5，得 x=13。检验：109−5×13=44。"
+    },
+    {
+      "number": 254,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：131 − 6x = 47。",
+      "answer": "x = 14",
+      "explanation": "思路：先把减去的部分看成整体。6x=131−47=84；再两边同时除以 6，得 x=14。检验：131−6×14=47。"
+    },
+    {
+      "number": 255,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：80 − 2x = 50。",
+      "answer": "x = 15",
+      "explanation": "思路：先把减去的部分看成整体。2x=80−50=30；再两边同时除以 2，得 x=15。检验：80−2×15=50。"
+    },
+    {
+      "number": 256,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：101 − 3x = 53。",
+      "answer": "x = 16",
+      "explanation": "思路：先把减去的部分看成整体。3x=101−53=48；再两边同时除以 3，得 x=16。检验：101−3×16=53。"
+    },
+    {
+      "number": 257,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：89 − 4x = 21。",
+      "answer": "x = 17",
+      "explanation": "思路：先把减去的部分看成整体。4x=89−21=68；再两边同时除以 4，得 x=17。检验：89−4×17=21。"
+    },
+    {
+      "number": 258,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：114 − 5x = 24。",
+      "answer": "x = 18",
+      "explanation": "思路：先把减去的部分看成整体。5x=114−24=90；再两边同时除以 5，得 x=18。检验：114−5×18=24。"
+    },
+    {
+      "number": 259,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：141 − 6x = 27。",
+      "answer": "x = 19",
+      "explanation": "思路：先把减去的部分看成整体。6x=141−27=114；再两边同时除以 6，得 x=19。检验：141−6×19=27。"
+    },
+    {
+      "number": 260,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：70 − 2x = 30。",
+      "answer": "x = 20",
+      "explanation": "思路：先把减去的部分看成整体。2x=70−30=40；再两边同时除以 2，得 x=20。检验：70−2×20=30。"
+    },
+    {
+      "number": 261,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：96 − 3x = 33。",
+      "answer": "x = 21",
+      "explanation": "思路：先把减去的部分看成整体。3x=96−33=63；再两边同时除以 3，得 x=21。检验：96−3×21=33。"
+    },
+    {
+      "number": 262,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：124 − 4x = 36。",
+      "answer": "x = 22",
+      "explanation": "思路：先把减去的部分看成整体。4x=124−36=88；再两边同时除以 4，得 x=22。检验：124−4×22=36。"
+    },
+    {
+      "number": 263,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：154 − 5x = 39。",
+      "answer": "x = 23",
+      "explanation": "思路：先把减去的部分看成整体。5x=154−39=115；再两边同时除以 5，得 x=23。检验：154−5×23=39。"
+    },
+    {
+      "number": 264,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：186 − 6x = 42。",
+      "answer": "x = 24",
+      "explanation": "思路：先把减去的部分看成整体。6x=186−42=144；再两边同时除以 6，得 x=24。检验：186−6×24=42。"
+    },
+    {
+      "number": 265,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：95 − 2x = 45。",
+      "answer": "x = 25",
+      "explanation": "思路：先把减去的部分看成整体。2x=95−45=50；再两边同时除以 2，得 x=25。检验：95−2×25=45。"
+    },
+    {
+      "number": 266,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：126 − 3x = 48。",
+      "answer": "x = 26",
+      "explanation": "思路：先把减去的部分看成整体。3x=126−48=78；再两边同时除以 3，得 x=26。检验：126−3×26=48。"
+    },
+    {
+      "number": 267,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：159 − 4x = 51。",
+      "answer": "x = 27",
+      "explanation": "思路：先把减去的部分看成整体。4x=159−51=108；再两边同时除以 4，得 x=27。检验：159−4×27=51。"
+    },
+    {
+      "number": 268,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：194 − 5x = 54。",
+      "answer": "x = 28",
+      "explanation": "思路：先把减去的部分看成整体。5x=194−54=140；再两边同时除以 5，得 x=28。检验：194−5×28=54。"
+    },
+    {
+      "number": 269,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：196 − 6x = 22。",
+      "answer": "x = 29",
+      "explanation": "思路：先把减去的部分看成整体。6x=196−22=174；再两边同时除以 6，得 x=29。检验：196−6×29=22。"
+    },
+    {
+      "number": 270,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：85 − 2x = 25。",
+      "answer": "x = 30",
+      "explanation": "思路：先把减去的部分看成整体。2x=85−25=60；再两边同时除以 2，得 x=30。检验：85−2×30=25。"
+    },
+    {
+      "number": 271,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：121 − 3x = 28。",
+      "answer": "x = 31",
+      "explanation": "思路：先把减去的部分看成整体。3x=121−28=93；再两边同时除以 3，得 x=31。检验：121−3×31=28。"
+    },
+    {
+      "number": 272,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：159 − 4x = 31。",
+      "answer": "x = 32",
+      "explanation": "思路：先把减去的部分看成整体。4x=159−31=128；再两边同时除以 4，得 x=32。检验：159−4×32=31。"
+    },
+    {
+      "number": 273,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：199 − 5x = 34。",
+      "answer": "x = 33",
+      "explanation": "思路：先把减去的部分看成整体。5x=199−34=165；再两边同时除以 5，得 x=33。检验：199−5×33=34。"
+    },
+    {
+      "number": 274,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：241 − 6x = 37。",
+      "answer": "x = 34",
+      "explanation": "思路：先把减去的部分看成整体。6x=241−37=204；再两边同时除以 6，得 x=34。检验：241−6×34=37。"
+    },
+    {
+      "number": 275,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：50 − 2x = 40。",
+      "answer": "x = 5",
+      "explanation": "思路：先把减去的部分看成整体。2x=50−40=10；再两边同时除以 2，得 x=5。检验：50−2×5=40。"
+    },
+    {
+      "number": 276,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：61 − 3x = 43。",
+      "answer": "x = 6",
+      "explanation": "思路：先把减去的部分看成整体。3x=61−43=18；再两边同时除以 3，得 x=6。检验：61−3×6=43。"
+    },
+    {
+      "number": 277,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：74 − 4x = 46。",
+      "answer": "x = 7",
+      "explanation": "思路：先把减去的部分看成整体。4x=74−46=28；再两边同时除以 4，得 x=7。检验：74−4×7=46。"
+    },
+    {
+      "number": 278,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：89 − 5x = 49。",
+      "answer": "x = 8",
+      "explanation": "思路：先把减去的部分看成整体。5x=89−49=40；再两边同时除以 5，得 x=8。检验：89−5×8=49。"
+    },
+    {
+      "number": 279,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：106 − 6x = 52。",
+      "answer": "x = 9",
+      "explanation": "思路：先把减去的部分看成整体。6x=106−52=54；再两边同时除以 6，得 x=9。检验：106−6×9=52。"
+    },
+    {
+      "number": 280,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：40 − 2x = 20。",
+      "answer": "x = 10",
+      "explanation": "思路：先把减去的部分看成整体。2x=40−20=20；再两边同时除以 2，得 x=10。检验：40−2×10=20。"
+    },
+    {
+      "number": 281,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：56 − 3x = 23。",
+      "answer": "x = 11",
+      "explanation": "思路：先把减去的部分看成整体。3x=56−23=33；再两边同时除以 3，得 x=11。检验：56−3×11=23。"
+    },
+    {
+      "number": 282,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：74 − 4x = 26。",
+      "answer": "x = 12",
+      "explanation": "思路：先把减去的部分看成整体。4x=74−26=48；再两边同时除以 4，得 x=12。检验：74−4×12=26。"
+    },
+    {
+      "number": 283,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：94 − 5x = 29。",
+      "answer": "x = 13",
+      "explanation": "思路：先把减去的部分看成整体。5x=94−29=65；再两边同时除以 5，得 x=13。检验：94−5×13=29。"
+    },
+    {
+      "number": 284,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：116 − 6x = 32。",
+      "answer": "x = 14",
+      "explanation": "思路：先把减去的部分看成整体。6x=116−32=84；再两边同时除以 6，得 x=14。检验：116−6×14=32。"
+    },
+    {
+      "number": 285,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：65 − 2x = 35。",
+      "answer": "x = 15",
+      "explanation": "思路：先把减去的部分看成整体。2x=65−35=30；再两边同时除以 2，得 x=15。检验：65−2×15=35。"
+    },
+    {
+      "number": 286,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：86 − 3x = 38。",
+      "answer": "x = 16",
+      "explanation": "思路：先把减去的部分看成整体。3x=86−38=48；再两边同时除以 3，得 x=16。检验：86−3×16=38。"
+    },
+    {
+      "number": 287,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：109 − 4x = 41。",
+      "answer": "x = 17",
+      "explanation": "思路：先把减去的部分看成整体。4x=109−41=68；再两边同时除以 4，得 x=17。检验：109−4×17=41。"
+    },
+    {
+      "number": 288,
+      "difficulty": "困难",
+      "category": "逆向两步",
+      "prompt": "解方程：134 − 5x = 44。",
+      "answer": "x = 18",
+      "explanation": "思路：先把减去的部分看成整体。5x=134−44=90；再两边同时除以 5，得 x=18。检验：134−5×18=44。"
+    },
+    {
+      "number": 289,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：2(x + 2) = 12。",
+      "answer": "x = 4",
+      "explanation": "思路：先把括号 x+2 看成整体。两边同时除以 2，得 x+2=6；再减 2，得 x=4。"
+    },
+    {
+      "number": 290,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：3(x + 7) = 36。",
+      "answer": "x = 5",
+      "explanation": "思路：先把括号 x+7 看成整体。两边同时除以 3，得 x+7=12；再减 7，得 x=5。"
+    },
+    {
+      "number": 291,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：4(x + 12) = 72。",
+      "answer": "x = 6",
+      "explanation": "思路：先把括号 x+12 看成整体。两边同时除以 4，得 x+12=18；再减 12，得 x=6。"
+    },
+    {
+      "number": 292,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：5(x + 5) = 60。",
+      "answer": "x = 7",
+      "explanation": "思路：先把括号 x+5 看成整体。两边同时除以 5，得 x+5=12；再减 5，得 x=7。"
+    },
+    {
+      "number": 293,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：6(x + 10) = 108。",
+      "answer": "x = 8",
+      "explanation": "思路：先把括号 x+10 看成整体。两边同时除以 6，得 x+10=18；再减 10，得 x=8。"
+    },
+    {
+      "number": 294,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：8(x + 3) = 96。",
+      "answer": "x = 9",
+      "explanation": "思路：先把括号 x+3 看成整体。两边同时除以 8，得 x+3=12；再减 3，得 x=9。"
+    },
+    {
+      "number": 295,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：2(x + 8) = 36。",
+      "answer": "x = 10",
+      "explanation": "思路：先把括号 x+8 看成整体。两边同时除以 2，得 x+8=18；再减 8，得 x=10。"
+    },
+    {
+      "number": 296,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：3(x + 13) = 72。",
+      "answer": "x = 11",
+      "explanation": "思路：先把括号 x+13 看成整体。两边同时除以 3，得 x+13=24；再减 13，得 x=11。"
+    },
+    {
+      "number": 297,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：4(x + 6) = 72。",
+      "answer": "x = 12",
+      "explanation": "思路：先把括号 x+6 看成整体。两边同时除以 4，得 x+6=18；再减 6，得 x=12。"
+    },
+    {
+      "number": 298,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：5(x + 11) = 120。",
+      "answer": "x = 13",
+      "explanation": "思路：先把括号 x+11 看成整体。两边同时除以 5，得 x+11=24；再减 11，得 x=13。"
+    },
+    {
+      "number": 299,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：6(x + 4) = 108。",
+      "answer": "x = 14",
+      "explanation": "思路：先把括号 x+4 看成整体。两边同时除以 6，得 x+4=18；再减 4，得 x=14。"
+    },
+    {
+      "number": 300,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：8(x + 9) = 192。",
+      "answer": "x = 15",
+      "explanation": "思路：先把括号 x+9 看成整体。两边同时除以 8，得 x+9=24；再减 9，得 x=15。"
+    },
+    {
+      "number": 301,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：2(x + 2) = 36。",
+      "answer": "x = 16",
+      "explanation": "思路：先把括号 x+2 看成整体。两边同时除以 2，得 x+2=18；再减 2，得 x=16。"
+    },
+    {
+      "number": 302,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：3(x + 7) = 72。",
+      "answer": "x = 17",
+      "explanation": "思路：先把括号 x+7 看成整体。两边同时除以 3，得 x+7=24；再减 7，得 x=17。"
+    },
+    {
+      "number": 303,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：4(x + 12) = 120。",
+      "answer": "x = 18",
+      "explanation": "思路：先把括号 x+12 看成整体。两边同时除以 4，得 x+12=30；再减 12，得 x=18。"
+    },
+    {
+      "number": 304,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：5(x + 5) = 120。",
+      "answer": "x = 19",
+      "explanation": "思路：先把括号 x+5 看成整体。两边同时除以 5，得 x+5=24；再减 5，得 x=19。"
+    },
+    {
+      "number": 305,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：6(x + 10) = 180。",
+      "answer": "x = 20",
+      "explanation": "思路：先把括号 x+10 看成整体。两边同时除以 6，得 x+10=30；再减 10，得 x=20。"
+    },
+    {
+      "number": 306,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：8(x + 3) = 192。",
+      "answer": "x = 21",
+      "explanation": "思路：先把括号 x+3 看成整体。两边同时除以 8，得 x+3=24；再减 3，得 x=21。"
+    },
+    {
+      "number": 307,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：2(x + 8) = 60。",
+      "answer": "x = 22",
+      "explanation": "思路：先把括号 x+8 看成整体。两边同时除以 2，得 x+8=30；再减 8，得 x=22。"
+    },
+    {
+      "number": 308,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：3(x + 13) = 108。",
+      "answer": "x = 23",
+      "explanation": "思路：先把括号 x+13 看成整体。两边同时除以 3，得 x+13=36；再减 13，得 x=23。"
+    },
+    {
+      "number": 309,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：4(x + 6) = 120。",
+      "answer": "x = 24",
+      "explanation": "思路：先把括号 x+6 看成整体。两边同时除以 4，得 x+6=30；再减 6，得 x=24。"
+    },
+    {
+      "number": 310,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：5(x + 11) = 180。",
+      "answer": "x = 25",
+      "explanation": "思路：先把括号 x+11 看成整体。两边同时除以 5，得 x+11=36；再减 11，得 x=25。"
+    },
+    {
+      "number": 311,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：6(x + 4) = 180。",
+      "answer": "x = 26",
+      "explanation": "思路：先把括号 x+4 看成整体。两边同时除以 6，得 x+4=30；再减 4，得 x=26。"
+    },
+    {
+      "number": 312,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：8(x + 9) = 288。",
+      "answer": "x = 27",
+      "explanation": "思路：先把括号 x+9 看成整体。两边同时除以 8，得 x+9=36；再减 9，得 x=27。"
+    },
+    {
+      "number": 313,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：2(x + 2) = 60。",
+      "answer": "x = 28",
+      "explanation": "思路：先把括号 x+2 看成整体。两边同时除以 2，得 x+2=30；再减 2，得 x=28。"
+    },
+    {
+      "number": 314,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：3(x + 7) = 108。",
+      "answer": "x = 29",
+      "explanation": "思路：先把括号 x+7 看成整体。两边同时除以 3，得 x+7=36；再减 7，得 x=29。"
+    },
+    {
+      "number": 315,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：4(x + 12) = 168。",
+      "answer": "x = 30",
+      "explanation": "思路：先把括号 x+12 看成整体。两边同时除以 4，得 x+12=42；再减 12，得 x=30。"
+    },
+    {
+      "number": 316,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：5(x + 5) = 180。",
+      "answer": "x = 31",
+      "explanation": "思路：先把括号 x+5 看成整体。两边同时除以 5，得 x+5=36；再减 5，得 x=31。"
+    },
+    {
+      "number": 317,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：6(x + 10) = 252。",
+      "answer": "x = 32",
+      "explanation": "思路：先把括号 x+10 看成整体。两边同时除以 6，得 x+10=42；再减 10，得 x=32。"
+    },
+    {
+      "number": 318,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：8(x + 3) = 56。",
+      "answer": "x = 4",
+      "explanation": "思路：先把括号 x+3 看成整体。两边同时除以 8，得 x+3=7；再减 3，得 x=4。"
+    },
+    {
+      "number": 319,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：2(x + 8) = 26。",
+      "answer": "x = 5",
+      "explanation": "思路：先把括号 x+8 看成整体。两边同时除以 2，得 x+8=13；再减 8，得 x=5。"
+    },
+    {
+      "number": 320,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：3(x + 13) = 57。",
+      "answer": "x = 6",
+      "explanation": "思路：先把括号 x+13 看成整体。两边同时除以 3，得 x+13=19；再减 13，得 x=6。"
+    },
+    {
+      "number": 321,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：4(x + 6) = 52。",
+      "answer": "x = 7",
+      "explanation": "思路：先把括号 x+6 看成整体。两边同时除以 4，得 x+6=13；再减 6，得 x=7。"
+    },
+    {
+      "number": 322,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：5(x + 11) = 95。",
+      "answer": "x = 8",
+      "explanation": "思路：先把括号 x+11 看成整体。两边同时除以 5，得 x+11=19；再减 11，得 x=8。"
+    },
+    {
+      "number": 323,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：6(x + 4) = 78。",
+      "answer": "x = 9",
+      "explanation": "思路：先把括号 x+4 看成整体。两边同时除以 6，得 x+4=13；再减 4，得 x=9。"
+    },
+    {
+      "number": 324,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：8(x + 9) = 152。",
+      "answer": "x = 10",
+      "explanation": "思路：先把括号 x+9 看成整体。两边同时除以 8，得 x+9=19；再减 9，得 x=10。"
+    },
+    {
+      "number": 325,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：2(x + 2) = 26。",
+      "answer": "x = 11",
+      "explanation": "思路：先把括号 x+2 看成整体。两边同时除以 2，得 x+2=13；再减 2，得 x=11。"
+    },
+    {
+      "number": 326,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：3(x + 7) = 57。",
+      "answer": "x = 12",
+      "explanation": "思路：先把括号 x+7 看成整体。两边同时除以 3，得 x+7=19；再减 7，得 x=12。"
+    },
+    {
+      "number": 327,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：4(x + 12) = 100。",
+      "answer": "x = 13",
+      "explanation": "思路：先把括号 x+12 看成整体。两边同时除以 4，得 x+12=25；再减 12，得 x=13。"
+    },
+    {
+      "number": 328,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：5(x + 5) = 95。",
+      "answer": "x = 14",
+      "explanation": "思路：先把括号 x+5 看成整体。两边同时除以 5，得 x+5=19；再减 5，得 x=14。"
+    },
+    {
+      "number": 329,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：6(x + 10) = 150。",
+      "answer": "x = 15",
+      "explanation": "思路：先把括号 x+10 看成整体。两边同时除以 6，得 x+10=25；再减 10，得 x=15。"
+    },
+    {
+      "number": 330,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：8(x + 3) = 152。",
+      "answer": "x = 16",
+      "explanation": "思路：先把括号 x+3 看成整体。两边同时除以 8，得 x+3=19；再减 3，得 x=16。"
+    },
+    {
+      "number": 331,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：2(x + 8) = 50。",
+      "answer": "x = 17",
+      "explanation": "思路：先把括号 x+8 看成整体。两边同时除以 2，得 x+8=25；再减 8，得 x=17。"
+    },
+    {
+      "number": 332,
+      "difficulty": "困难",
+      "category": "括号方程",
+      "prompt": "解方程：3(x + 13) = 93。",
+      "answer": "x = 18",
+      "explanation": "思路：先把括号 x+13 看成整体。两边同时除以 3，得 x+13=31；再减 13，得 x=18。"
+    },
+    {
+      "number": 333,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 5.2。",
+      "answer": "x = 8",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=4；再除以 0.5，得 x=8。"
+    },
+    {
+      "number": 334,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 15。",
+      "answer": "x = 9",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=13.5；再除以 1.5，得 x=9。"
+    },
+    {
+      "number": 335,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 26.8。",
+      "answer": "x = 10",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=25；再除以 2.5，得 x=10。"
+    },
+    {
+      "number": 336,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 40.6。",
+      "answer": "x = 11",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=38.5；再除以 3.5，得 x=11。"
+    },
+    {
+      "number": 337,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 7.2。",
+      "answer": "x = 12",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=6；再除以 0.5，得 x=12。"
+    },
+    {
+      "number": 338,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 21。",
+      "answer": "x = 13",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=19.5；再除以 1.5，得 x=13。"
+    },
+    {
+      "number": 339,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 36.8。",
+      "answer": "x = 14",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=35；再除以 2.5，得 x=14。"
+    },
+    {
+      "number": 340,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 54.6。",
+      "answer": "x = 15",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=52.5；再除以 3.5，得 x=15。"
+    },
+    {
+      "number": 341,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 9.2。",
+      "answer": "x = 16",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=8；再除以 0.5，得 x=16。"
+    },
+    {
+      "number": 342,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 27。",
+      "answer": "x = 17",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=25.5；再除以 1.5，得 x=17。"
+    },
+    {
+      "number": 343,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 46.8。",
+      "answer": "x = 18",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=45；再除以 2.5，得 x=18。"
+    },
+    {
+      "number": 344,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 68.6。",
+      "answer": "x = 19",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=66.5；再除以 3.5，得 x=19。"
+    },
+    {
+      "number": 345,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 11.2。",
+      "answer": "x = 20",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=10；再除以 0.5，得 x=20。"
+    },
+    {
+      "number": 346,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 33。",
+      "answer": "x = 21",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=31.5；再除以 1.5，得 x=21。"
+    },
+    {
+      "number": 347,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 56.8。",
+      "answer": "x = 22",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=55；再除以 2.5，得 x=22。"
+    },
+    {
+      "number": 348,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 82.6。",
+      "answer": "x = 23",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=80.5；再除以 3.5，得 x=23。"
+    },
+    {
+      "number": 349,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 13.2。",
+      "answer": "x = 24",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=12；再除以 0.5，得 x=24。"
+    },
+    {
+      "number": 350,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 39。",
+      "answer": "x = 25",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=37.5；再除以 1.5，得 x=25。"
+    },
+    {
+      "number": 351,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 66.8。",
+      "answer": "x = 26",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=65；再除以 2.5，得 x=26。"
+    },
+    {
+      "number": 352,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 96.6。",
+      "answer": "x = 27",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=94.5；再除以 3.5，得 x=27。"
+    },
+    {
+      "number": 353,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 15.2。",
+      "answer": "x = 28",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=14；再除以 0.5，得 x=28。"
+    },
+    {
+      "number": 354,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 45。",
+      "answer": "x = 29",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=43.5；再除以 1.5，得 x=29。"
+    },
+    {
+      "number": 355,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 76.8。",
+      "answer": "x = 30",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=75；再除以 2.5，得 x=30。"
+    },
+    {
+      "number": 356,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 110.6。",
+      "answer": "x = 31",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=108.5；再除以 3.5，得 x=31。"
+    },
+    {
+      "number": 357,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 17.2。",
+      "answer": "x = 32",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=16；再除以 0.5，得 x=32。"
+    },
+    {
+      "number": 358,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 51。",
+      "answer": "x = 33",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=49.5；再除以 1.5，得 x=33。"
+    },
+    {
+      "number": 359,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 86.8。",
+      "answer": "x = 34",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=85；再除以 2.5，得 x=34。"
+    },
+    {
+      "number": 360,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 124.6。",
+      "answer": "x = 35",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=122.5；再除以 3.5，得 x=35。"
+    },
+    {
+      "number": 361,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 5.2。",
+      "answer": "x = 8",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=4；再除以 0.5，得 x=8。"
+    },
+    {
+      "number": 362,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 15。",
+      "answer": "x = 9",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=13.5；再除以 1.5，得 x=9。"
+    },
+    {
+      "number": 363,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 26.8。",
+      "answer": "x = 10",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=25；再除以 2.5，得 x=10。"
+    },
+    {
+      "number": 364,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 40.6。",
+      "answer": "x = 11",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=38.5；再除以 3.5，得 x=11。"
+    },
+    {
+      "number": 365,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 7.2。",
+      "answer": "x = 12",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=6；再除以 0.5，得 x=12。"
+    },
+    {
+      "number": 366,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 21。",
+      "answer": "x = 13",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=19.5；再除以 1.5，得 x=13。"
+    },
+    {
+      "number": 367,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 36.8。",
+      "answer": "x = 14",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=35；再除以 2.5，得 x=14。"
+    },
+    {
+      "number": 368,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 54.6。",
+      "answer": "x = 15",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=52.5；再除以 3.5，得 x=15。"
+    },
+    {
+      "number": 369,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 9.2。",
+      "answer": "x = 16",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=8；再除以 0.5，得 x=16。"
+    },
+    {
+      "number": 370,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 27。",
+      "answer": "x = 17",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=25.5；再除以 1.5，得 x=17。"
+    },
+    {
+      "number": 371,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 46.8。",
+      "answer": "x = 18",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=45；再除以 2.5，得 x=18。"
+    },
+    {
+      "number": 372,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 68.6。",
+      "answer": "x = 19",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=66.5；再除以 3.5，得 x=19。"
+    },
+    {
+      "number": 373,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：0.5x + 1.2 = 11.2。",
+      "answer": "x = 20",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.2，得 0.5x=10；再除以 0.5，得 x=20。"
+    },
+    {
+      "number": 374,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：1.5x + 1.5 = 33。",
+      "answer": "x = 21",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.5，得 1.5x=31.5；再除以 1.5，得 x=21。"
+    },
+    {
+      "number": 375,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：2.5x + 1.8 = 56.8。",
+      "answer": "x = 22",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 1.8，得 2.5x=55；再除以 2.5，得 x=22。"
+    },
+    {
+      "number": 376,
+      "difficulty": "困难",
+      "category": "小数方程",
+      "prompt": "解方程：3.5x + 2.1 = 82.6。",
+      "answer": "x = 23",
+      "explanation": "思路：小数方程也按等式性质来解。两边先减 2.1，得 3.5x=80.5；再除以 3.5，得 x=23。"
+    },
+    {
+      "number": 377,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 2 元。买 2 本练习册和 4 本笔记本共 28 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 4，一本笔记本 4 元，一本练习册 6 元",
+      "explanation": "思路：练习册价格是 x+2。方程：2(x+2)+4x=28。化简得 6x+4=28，所以 6x=24，x=4。"
+    },
+    {
+      "number": 378,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 3 元。买 3 本练习册和 5 本笔记本共 49 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 5，一本笔记本 5 元，一本练习册 8 元",
+      "explanation": "思路：练习册价格是 x+3。方程：3(x+3)+5x=49。化简得 8x+9=49，所以 8x=40，x=5。"
+    },
+    {
+      "number": 379,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 4 元。买 4 本练习册和 6 本笔记本共 76 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 6，一本笔记本 6 元，一本练习册 10 元",
+      "explanation": "思路：练习册价格是 x+4。方程：4(x+4)+6x=76。化简得 10x+16=76，所以 10x=60，x=6。"
+    },
+    {
+      "number": 380,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 5 元。买 5 本练习册和 2 本笔记本共 74 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 7，一本笔记本 7 元，一本练习册 12 元",
+      "explanation": "思路：练习册价格是 x+5。方程：5(x+5)+2x=74。化简得 7x+25=74，所以 7x=49，x=7。"
+    },
+    {
+      "number": 381,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 6 元。买 2 本练习册和 3 本笔记本共 52 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 8，一本笔记本 8 元，一本练习册 14 元",
+      "explanation": "思路：练习册价格是 x+6。方程：2(x+6)+3x=52。化简得 5x+12=52，所以 5x=40，x=8。"
+    },
+    {
+      "number": 382,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 7 元。买 3 本练习册和 4 本笔记本共 84 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 9，一本笔记本 9 元，一本练习册 16 元",
+      "explanation": "思路：练习册价格是 x+7。方程：3(x+7)+4x=84。化简得 7x+21=84，所以 7x=63，x=9。"
+    },
+    {
+      "number": 383,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 8 元。买 4 本练习册和 5 本笔记本共 122 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 10，一本笔记本 10 元，一本练习册 18 元",
+      "explanation": "思路：练习册价格是 x+8。方程：4(x+8)+5x=122。化简得 9x+32=122，所以 9x=90，x=10。"
+    },
+    {
+      "number": 384,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 2 元。买 5 本练习册和 6 本笔记本共 131 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 11，一本笔记本 11 元，一本练习册 13 元",
+      "explanation": "思路：练习册价格是 x+2。方程：5(x+2)+6x=131。化简得 11x+10=131，所以 11x=121，x=11。"
+    },
+    {
+      "number": 385,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 3 元。买 2 本练习册和 2 本笔记本共 54 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 12，一本笔记本 12 元，一本练习册 15 元",
+      "explanation": "思路：练习册价格是 x+3。方程：2(x+3)+2x=54。化简得 4x+6=54，所以 4x=48，x=12。"
+    },
+    {
+      "number": 386,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 4 元。买 3 本练习册和 3 本笔记本共 90 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 13，一本笔记本 13 元，一本练习册 17 元",
+      "explanation": "思路：练习册价格是 x+4。方程：3(x+4)+3x=90。化简得 6x+12=90，所以 6x=78，x=13。"
+    },
+    {
+      "number": 387,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 5 元。买 4 本练习册和 4 本笔记本共 132 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 14，一本笔记本 14 元，一本练习册 19 元",
+      "explanation": "思路：练习册价格是 x+5。方程：4(x+5)+4x=132。化简得 8x+20=132，所以 8x=112，x=14。"
+    },
+    {
+      "number": 388,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 6 元。买 5 本练习册和 5 本笔记本共 180 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 15，一本笔记本 15 元，一本练习册 21 元",
+      "explanation": "思路：练习册价格是 x+6。方程：5(x+6)+5x=180。化简得 10x+30=180，所以 10x=150，x=15。"
+    },
+    {
+      "number": 389,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 7 元。买 2 本练习册和 6 本笔记本共 142 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 16，一本笔记本 16 元，一本练习册 23 元",
+      "explanation": "思路：练习册价格是 x+7。方程：2(x+7)+6x=142。化简得 8x+14=142，所以 8x=128，x=16。"
+    },
+    {
+      "number": 390,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 8 元。买 3 本练习册和 2 本笔记本共 109 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 17，一本笔记本 17 元，一本练习册 25 元",
+      "explanation": "思路：练习册价格是 x+8。方程：3(x+8)+2x=109。化简得 5x+24=109，所以 5x=85，x=17。"
+    },
+    {
+      "number": 391,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 2 元。买 4 本练习册和 3 本笔记本共 134 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 18，一本笔记本 18 元，一本练习册 20 元",
+      "explanation": "思路：练习册价格是 x+2。方程：4(x+2)+3x=134。化简得 7x+8=134，所以 7x=126，x=18。"
+    },
+    {
+      "number": 392,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 3 元。买 5 本练习册和 4 本笔记本共 186 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 19，一本笔记本 19 元，一本练习册 22 元",
+      "explanation": "思路：练习册价格是 x+3。方程：5(x+3)+4x=186。化简得 9x+15=186，所以 9x=171，x=19。"
+    },
+    {
+      "number": 393,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 4 元。买 2 本练习册和 5 本笔记本共 148 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 20，一本笔记本 20 元，一本练习册 24 元",
+      "explanation": "思路：练习册价格是 x+4。方程：2(x+4)+5x=148。化简得 7x+8=148，所以 7x=140，x=20。"
+    },
+    {
+      "number": 394,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 5 元。买 3 本练习册和 6 本笔记本共 204 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 21，一本笔记本 21 元，一本练习册 26 元",
+      "explanation": "思路：练习册价格是 x+5。方程：3(x+5)+6x=204。化简得 9x+15=204，所以 9x=189，x=21。"
+    },
+    {
+      "number": 395,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 6 元。买 4 本练习册和 2 本笔记本共 48 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 4，一本笔记本 4 元，一本练习册 10 元",
+      "explanation": "思路：练习册价格是 x+6。方程：4(x+6)+2x=48。化简得 6x+24=48，所以 6x=24，x=4。"
+    },
+    {
+      "number": 396,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 7 元。买 5 本练习册和 3 本笔记本共 75 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 5，一本笔记本 5 元，一本练习册 12 元",
+      "explanation": "思路：练习册价格是 x+7。方程：5(x+7)+3x=75。化简得 8x+35=75，所以 8x=40，x=5。"
+    },
+    {
+      "number": 397,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 8 元。买 2 本练习册和 4 本笔记本共 52 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 6，一本笔记本 6 元，一本练习册 14 元",
+      "explanation": "思路：练习册价格是 x+8。方程：2(x+8)+4x=52。化简得 6x+16=52，所以 6x=36，x=6。"
+    },
+    {
+      "number": 398,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 2 元。买 3 本练习册和 5 本笔记本共 62 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 7，一本笔记本 7 元，一本练习册 9 元",
+      "explanation": "思路：练习册价格是 x+2。方程：3(x+2)+5x=62。化简得 8x+6=62，所以 8x=56，x=7。"
+    },
+    {
+      "number": 399,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 3 元。买 4 本练习册和 6 本笔记本共 92 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 8，一本笔记本 8 元，一本练习册 11 元",
+      "explanation": "思路：练习册价格是 x+3。方程：4(x+3)+6x=92。化简得 10x+12=92，所以 10x=80，x=8。"
+    },
+    {
+      "number": 400,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 4 元。买 5 本练习册和 2 本笔记本共 83 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 9，一本笔记本 9 元，一本练习册 13 元",
+      "explanation": "思路：练习册价格是 x+4。方程：5(x+4)+2x=83。化简得 7x+20=83，所以 7x=63，x=9。"
+    },
+    {
+      "number": 401,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 5 元。买 2 本练习册和 3 本笔记本共 60 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 10，一本笔记本 10 元，一本练习册 15 元",
+      "explanation": "思路：练习册价格是 x+5。方程：2(x+5)+3x=60。化简得 5x+10=60，所以 5x=50，x=10。"
+    },
+    {
+      "number": 402,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 6 元。买 3 本练习册和 4 本笔记本共 95 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 11，一本笔记本 11 元，一本练习册 17 元",
+      "explanation": "思路：练习册价格是 x+6。方程：3(x+6)+4x=95。化简得 7x+18=95，所以 7x=77，x=11。"
+    },
+    {
+      "number": 403,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 7 元。买 4 本练习册和 5 本笔记本共 136 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 12，一本笔记本 12 元，一本练习册 19 元",
+      "explanation": "思路：练习册价格是 x+7。方程：4(x+7)+5x=136。化简得 9x+28=136，所以 9x=108，x=12。"
+    },
+    {
+      "number": 404,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 8 元。买 5 本练习册和 6 本笔记本共 183 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 13，一本笔记本 13 元，一本练习册 21 元",
+      "explanation": "思路：练习册价格是 x+8。方程：5(x+8)+6x=183。化简得 11x+40=183，所以 11x=143，x=13。"
+    },
+    {
+      "number": 405,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 2 元。买 2 本练习册和 2 本笔记本共 60 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 14，一本笔记本 14 元，一本练习册 16 元",
+      "explanation": "思路：练习册价格是 x+2。方程：2(x+2)+2x=60。化简得 4x+4=60，所以 4x=56，x=14。"
+    },
+    {
+      "number": 406,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 3 元。买 3 本练习册和 3 本笔记本共 99 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 15，一本笔记本 15 元，一本练习册 18 元",
+      "explanation": "思路：练习册价格是 x+3。方程：3(x+3)+3x=99。化简得 6x+9=99，所以 6x=90，x=15。"
+    },
+    {
+      "number": 407,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 4 元。买 4 本练习册和 4 本笔记本共 144 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 16，一本笔记本 16 元，一本练习册 20 元",
+      "explanation": "思路：练习册价格是 x+4。方程：4(x+4)+4x=144。化简得 8x+16=144，所以 8x=128，x=16。"
+    },
+    {
+      "number": 408,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 5 元。买 5 本练习册和 5 本笔记本共 195 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 17，一本笔记本 17 元，一本练习册 22 元",
+      "explanation": "思路：练习册价格是 x+5。方程：5(x+5)+5x=195。化简得 10x+25=195，所以 10x=170，x=17。"
+    },
+    {
+      "number": 409,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 6 元。买 2 本练习册和 6 本笔记本共 156 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 18，一本笔记本 18 元，一本练习册 24 元",
+      "explanation": "思路：练习册价格是 x+6。方程：2(x+6)+6x=156。化简得 8x+12=156，所以 8x=144，x=18。"
+    },
+    {
+      "number": 410,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 7 元。买 3 本练习册和 2 本笔记本共 116 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 19，一本笔记本 19 元，一本练习册 26 元",
+      "explanation": "思路：练习册价格是 x+7。方程：3(x+7)+2x=116。化简得 5x+21=116，所以 5x=95，x=19。"
+    },
+    {
+      "number": 411,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 8 元。买 4 本练习册和 3 本笔记本共 172 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 20，一本笔记本 20 元，一本练习册 28 元",
+      "explanation": "思路：练习册价格是 x+8。方程：4(x+8)+3x=172。化简得 7x+32=172，所以 7x=140，x=20。"
+    },
+    {
+      "number": 412,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 2 元。买 5 本练习册和 4 本笔记本共 199 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 21，一本笔记本 21 元，一本练习册 23 元",
+      "explanation": "思路：练习册价格是 x+2。方程：5(x+2)+4x=199。化简得 9x+10=199，所以 9x=189，x=21。"
+    },
+    {
+      "number": 413,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 3 元。买 2 本练习册和 5 本笔记本共 34 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 4，一本笔记本 4 元，一本练习册 7 元",
+      "explanation": "思路：练习册价格是 x+3。方程：2(x+3)+5x=34。化简得 7x+6=34，所以 7x=28，x=4。"
+    },
+    {
+      "number": 414,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 4 元。买 3 本练习册和 6 本笔记本共 57 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 5，一本笔记本 5 元，一本练习册 9 元",
+      "explanation": "思路：练习册价格是 x+4。方程：3(x+4)+6x=57。化简得 9x+12=57，所以 9x=45，x=5。"
+    },
+    {
+      "number": 415,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 5 元。买 4 本练习册和 2 本笔记本共 56 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 6，一本笔记本 6 元，一本练习册 11 元",
+      "explanation": "思路：练习册价格是 x+5。方程：4(x+5)+2x=56。化简得 6x+20=56，所以 6x=36，x=6。"
+    },
+    {
+      "number": 416,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 6 元。买 5 本练习册和 3 本笔记本共 86 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 7，一本笔记本 7 元，一本练习册 13 元",
+      "explanation": "思路：练习册价格是 x+6。方程：5(x+6)+3x=86。化简得 8x+30=86，所以 8x=56，x=7。"
+    },
+    {
+      "number": 417,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 7 元。买 2 本练习册和 4 本笔记本共 62 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 8，一本笔记本 8 元，一本练习册 15 元",
+      "explanation": "思路：练习册价格是 x+7。方程：2(x+7)+4x=62。化简得 6x+14=62，所以 6x=48，x=8。"
+    },
+    {
+      "number": 418,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 8 元。买 3 本练习册和 5 本笔记本共 96 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 9，一本笔记本 9 元，一本练习册 17 元",
+      "explanation": "思路：练习册价格是 x+8。方程：3(x+8)+5x=96。化简得 8x+24=96，所以 8x=72，x=9。"
+    },
+    {
+      "number": 419,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 2 元。买 4 本练习册和 6 本笔记本共 108 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 10，一本笔记本 10 元，一本练习册 12 元",
+      "explanation": "思路：练习册价格是 x+2。方程：4(x+2)+6x=108。化简得 10x+8=108，所以 10x=100，x=10。"
+    },
+    {
+      "number": 420,
+      "difficulty": "困难",
+      "category": "列方程应用",
+      "prompt": "一本练习册比一本笔记本贵 3 元。买 5 本练习册和 2 本笔记本共 92 元。设一本笔记本 x 元，列方程并求 x。",
+      "answer": "x = 11，一本笔记本 11 元，一本练习册 14 元",
+      "explanation": "思路：练习册价格是 x+3。方程：5(x+3)+2x=92。化简得 7x+15=92，所以 7x=77，x=11。"
+    },
+    {
+      "number": 421,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：3(x + 3) − 8 = 28。",
+      "answer": "x = 9",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 8，得 3(x+3)=36；再除以 3，得 x+3=12；最后减 3，得 x=9。"
+    },
+    {
+      "number": 422,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：4(x + 4) − 15 = 41。",
+      "answer": "x = 10",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 15，得 4(x+4)=56；再除以 4，得 x+4=14；最后减 4，得 x=10。"
+    },
+    {
+      "number": 423,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：5(x + 5) − 22 = 58。",
+      "answer": "x = 11",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 22，得 5(x+5)=80；再除以 5，得 x+5=16；最后减 5，得 x=11。"
+    },
+    {
+      "number": 424,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：6(x + 6) − 29 = 79。",
+      "answer": "x = 12",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 29，得 6(x+6)=108；再除以 6，得 x+6=18；最后减 6，得 x=12。"
+    },
+    {
+      "number": 425,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：7(x + 7) − 10 = 130。",
+      "answer": "x = 13",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 10，得 7(x+7)=140；再除以 7，得 x+7=20；最后减 7，得 x=13。"
+    },
+    {
+      "number": 426,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：3(x + 8) − 17 = 49。",
+      "answer": "x = 14",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 17，得 3(x+8)=66；再除以 3，得 x+8=22；最后减 8，得 x=14。"
+    },
+    {
+      "number": 427,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：4(x + 9) − 24 = 72。",
+      "answer": "x = 15",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 24，得 4(x+9)=96；再除以 4，得 x+9=24；最后减 9，得 x=15。"
+    },
+    {
+      "number": 428,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：5(x + 10) − 31 = 99。",
+      "answer": "x = 16",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 31，得 5(x+10)=130；再除以 5，得 x+10=26；最后减 10，得 x=16。"
+    },
+    {
+      "number": 429,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：6(x + 11) − 12 = 156。",
+      "answer": "x = 17",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 12，得 6(x+11)=168；再除以 6，得 x+11=28；最后减 11，得 x=17。"
+    },
+    {
+      "number": 430,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：7(x + 3) − 19 = 128。",
+      "answer": "x = 18",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 19，得 7(x+3)=147；再除以 7，得 x+3=21；最后减 3，得 x=18。"
+    },
+    {
+      "number": 431,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：3(x + 4) − 26 = 43。",
+      "answer": "x = 19",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 26，得 3(x+4)=69；再除以 3，得 x+4=23；最后减 4，得 x=19。"
+    },
+    {
+      "number": 432,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：4(x + 5) − 33 = 67。",
+      "answer": "x = 20",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 33，得 4(x+5)=100；再除以 4，得 x+5=25；最后减 5，得 x=20。"
+    },
+    {
+      "number": 433,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：5(x + 6) − 14 = 121。",
+      "answer": "x = 21",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 14，得 5(x+6)=135；再除以 5，得 x+6=27；最后减 6，得 x=21。"
+    },
+    {
+      "number": 434,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：6(x + 7) − 21 = 153。",
+      "answer": "x = 22",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 21，得 6(x+7)=174；再除以 6，得 x+7=29；最后减 7，得 x=22。"
+    },
+    {
+      "number": 435,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：7(x + 8) − 28 = 189。",
+      "answer": "x = 23",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 28，得 7(x+8)=217；再除以 7，得 x+8=31；最后减 8，得 x=23。"
+    },
+    {
+      "number": 436,
+      "difficulty": "超级困难",
+      "category": "三步方程",
+      "prompt": "解方程：3(x + 9) − 9 = 90。",
+      "answer": "x = 24",
+      "explanation": "思路：按“先还原外层，再还原括号”的顺序。两边先加 9，得 3(x+9)=99；再除以 3，得 x+9=33；最后减 9，得 x=24。"
+    },
+    {
+      "number": 437,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：5x + 8 = 3x + 20。",
+      "answer": "x = 6",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 3x，再减 8，得 2x=12；所以 x=12÷2=6。"
+    },
+    {
+      "number": 438,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：6x + 13 = 4x + 27。",
+      "answer": "x = 7",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 4x，再减 13，得 2x=14；所以 x=14÷2=7。"
+    },
+    {
+      "number": 439,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：7x + 18 = 2x + 58。",
+      "answer": "x = 8",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 2x，再减 18，得 5x=40；所以 x=40÷5=8。"
+    },
+    {
+      "number": 440,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：8x + 23 = 3x + 68。",
+      "answer": "x = 9",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 3x，再减 23，得 5x=45；所以 x=45÷5=9。"
+    },
+    {
+      "number": 441,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：9x + 28 = 4x + 78。",
+      "answer": "x = 10",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 4x，再减 28，得 5x=50；所以 x=50÷5=10。"
+    },
+    {
+      "number": 442,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：5x + 9 = 2x + 42。",
+      "answer": "x = 11",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 2x，再减 9，得 3x=33；所以 x=33÷3=11。"
+    },
+    {
+      "number": 443,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：6x + 14 = 3x + 50。",
+      "answer": "x = 12",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 3x，再减 14，得 3x=36；所以 x=36÷3=12。"
+    },
+    {
+      "number": 444,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：7x + 19 = 4x + 58。",
+      "answer": "x = 13",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 4x，再减 19，得 3x=39；所以 x=39÷3=13。"
+    },
+    {
+      "number": 445,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：8x + 24 = 2x + 108。",
+      "answer": "x = 14",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 2x，再减 24，得 6x=84；所以 x=84÷6=14。"
+    },
+    {
+      "number": 446,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：9x + 29 = 3x + 119。",
+      "answer": "x = 15",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 3x，再减 29，得 6x=90；所以 x=90÷6=15。"
+    },
+    {
+      "number": 447,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：5x + 10 = 4x + 26。",
+      "answer": "x = 16",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 4x，再减 10，得 1x=16；所以 x=16÷1=16。"
+    },
+    {
+      "number": 448,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：6x + 15 = 2x + 83。",
+      "answer": "x = 17",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 2x，再减 15，得 4x=68；所以 x=68÷4=17。"
+    },
+    {
+      "number": 449,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：7x + 20 = 3x + 92。",
+      "answer": "x = 18",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 3x，再减 20，得 4x=72；所以 x=72÷4=18。"
+    },
+    {
+      "number": 450,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：8x + 25 = 4x + 101。",
+      "answer": "x = 19",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 4x，再减 25，得 4x=76；所以 x=76÷4=19。"
+    },
+    {
+      "number": 451,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：9x + 30 = 2x + 170。",
+      "answer": "x = 20",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 2x，再减 30，得 7x=140；所以 x=140÷7=20。"
+    },
+    {
+      "number": 452,
+      "difficulty": "超级困难",
+      "category": "两边含x",
+      "prompt": "解方程：5x + 11 = 3x + 53。",
+      "answer": "x = 21",
+      "explanation": "思路：把含 x 的项放到一边，常数放到另一边。两边同时减 3x，再减 11，得 2x=42；所以 x=42÷2=21。"
+    },
+    {
+      "number": 453,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 2 倍多 3 厘米，周长是 54 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 8 厘米，长 19 厘米",
+      "explanation": "思路：长是 2x+3，周长等于 2×(长+宽)。方程：2×(2x+3+x)=54。两边除以 2，得 3x+3=27；所以 x=8，长=2×8+3=19。"
+    },
+    {
+      "number": 454,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 3 倍多 4 厘米，周长是 80 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 9 厘米，长 31 厘米",
+      "explanation": "思路：长是 3x+4，周长等于 2×(长+宽)。方程：2×(3x+4+x)=80。两边除以 2，得 4x+4=40；所以 x=9，长=3×9+4=31。"
+    },
+    {
+      "number": 455,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 2 倍多 5 厘米，周长是 70 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 10 厘米，长 25 厘米",
+      "explanation": "思路：长是 2x+5，周长等于 2×(长+宽)。方程：2×(2x+5+x)=70。两边除以 2，得 3x+5=35；所以 x=10，长=2×10+5=25。"
+    },
+    {
+      "number": 456,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 3 倍多 6 厘米，周长是 100 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 11 厘米，长 39 厘米",
+      "explanation": "思路：长是 3x+6，周长等于 2×(长+宽)。方程：2×(3x+6+x)=100。两边除以 2，得 4x+6=50；所以 x=11，长=3×11+6=39。"
+    },
+    {
+      "number": 457,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 2 倍多 7 厘米，周长是 86 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 12 厘米，长 31 厘米",
+      "explanation": "思路：长是 2x+7，周长等于 2×(长+宽)。方程：2×(2x+7+x)=86。两边除以 2，得 3x+7=43；所以 x=12，长=2×12+7=31。"
+    },
+    {
+      "number": 458,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 3 倍多 8 厘米，周长是 120 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 13 厘米，长 47 厘米",
+      "explanation": "思路：长是 3x+8，周长等于 2×(长+宽)。方程：2×(3x+8+x)=120。两边除以 2，得 4x+8=60；所以 x=13，长=3×13+8=47。"
+    },
+    {
+      "number": 459,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 2 倍多 9 厘米，周长是 102 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 14 厘米，长 37 厘米",
+      "explanation": "思路：长是 2x+9，周长等于 2×(长+宽)。方程：2×(2x+9+x)=102。两边除以 2，得 3x+9=51；所以 x=14，长=2×14+9=37。"
+    },
+    {
+      "number": 460,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 3 倍多 10 厘米，周长是 140 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 15 厘米，长 55 厘米",
+      "explanation": "思路：长是 3x+10，周长等于 2×(长+宽)。方程：2×(3x+10+x)=140。两边除以 2，得 4x+10=70；所以 x=15，长=3×15+10=55。"
+    },
+    {
+      "number": 461,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 2 倍多 3 厘米，周长是 102 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 16 厘米，长 35 厘米",
+      "explanation": "思路：长是 2x+3，周长等于 2×(长+宽)。方程：2×(2x+3+x)=102。两边除以 2，得 3x+3=51；所以 x=16，长=2×16+3=35。"
+    },
+    {
+      "number": 462,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 3 倍多 4 厘米，周长是 144 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 17 厘米，长 55 厘米",
+      "explanation": "思路：长是 3x+4，周长等于 2×(长+宽)。方程：2×(3x+4+x)=144。两边除以 2，得 4x+4=72；所以 x=17，长=3×17+4=55。"
+    },
+    {
+      "number": 463,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 2 倍多 5 厘米，周长是 118 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 18 厘米，长 41 厘米",
+      "explanation": "思路：长是 2x+5，周长等于 2×(长+宽)。方程：2×(2x+5+x)=118。两边除以 2，得 3x+5=59；所以 x=18，长=2×18+5=41。"
+    },
+    {
+      "number": 464,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 3 倍多 6 厘米，周长是 164 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 19 厘米，长 63 厘米",
+      "explanation": "思路：长是 3x+6，周长等于 2×(长+宽)。方程：2×(3x+6+x)=164。两边除以 2，得 4x+6=82；所以 x=19，长=3×19+6=63。"
+    },
+    {
+      "number": 465,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 2 倍多 7 厘米，周长是 134 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 20 厘米，长 47 厘米",
+      "explanation": "思路：长是 2x+7，周长等于 2×(长+宽)。方程：2×(2x+7+x)=134。两边除以 2，得 3x+7=67；所以 x=20，长=2×20+7=47。"
+    },
+    {
+      "number": 466,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 3 倍多 8 厘米，周长是 184 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 21 厘米，长 71 厘米",
+      "explanation": "思路：长是 3x+8，周长等于 2×(长+宽)。方程：2×(3x+8+x)=184。两边除以 2，得 4x+8=92；所以 x=21，长=3×21+8=71。"
+    },
+    {
+      "number": 467,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 2 倍多 9 厘米，周长是 150 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 22 厘米，长 53 厘米",
+      "explanation": "思路：长是 2x+9，周长等于 2×(长+宽)。方程：2×(2x+9+x)=150。两边除以 2，得 3x+9=75；所以 x=22，长=2×22+9=53。"
+    },
+    {
+      "number": 468,
+      "difficulty": "超级困难",
+      "category": "图形应用",
+      "prompt": "一个长方形的长比宽的 3 倍多 10 厘米，周长是 204 厘米。设宽为 x 厘米，列方程并求长和宽。",
+      "answer": "宽 23 厘米，长 79 厘米",
+      "explanation": "思路：长是 3x+10，周长等于 2×(长+宽)。方程：2×(3x+10+x)=204。两边除以 2，得 4x+10=102；所以 x=23，长=3×23+10=79。"
+    },
+    {
+      "number": 469,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 3 倍少 5 岁，两人年龄和是 31 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 9 岁，爸爸 22 岁",
+      "explanation": "思路：爸爸年龄表示为 3x−5。方程：x+3x−5=31。化简得 4x=36，所以 x=9；爸爸是 3×9−5=22 岁。"
+    },
+    {
+      "number": 470,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 4 倍少 6 岁，两人年龄和是 44 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 10 岁，爸爸 34 岁",
+      "explanation": "思路：爸爸年龄表示为 4x−6。方程：x+4x−6=44。化简得 5x=50，所以 x=10；爸爸是 4×10−6=34 岁。"
+    },
+    {
+      "number": 471,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 3 倍少 7 岁，两人年龄和是 37 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 11 岁，爸爸 26 岁",
+      "explanation": "思路：爸爸年龄表示为 3x−7。方程：x+3x−7=37。化简得 4x=44，所以 x=11；爸爸是 3×11−7=26 岁。"
+    },
+    {
+      "number": 472,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 4 倍少 8 岁，两人年龄和是 52 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 12 岁，爸爸 40 岁",
+      "explanation": "思路：爸爸年龄表示为 4x−8。方程：x+4x−8=52。化简得 5x=60，所以 x=12；爸爸是 4×12−8=40 岁。"
+    },
+    {
+      "number": 473,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 3 倍少 9 岁，两人年龄和是 43 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 13 岁，爸爸 30 岁",
+      "explanation": "思路：爸爸年龄表示为 3x−9。方程：x+3x−9=43。化简得 4x=52，所以 x=13；爸爸是 3×13−9=30 岁。"
+    },
+    {
+      "number": 474,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 4 倍少 10 岁，两人年龄和是 60 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 14 岁，爸爸 46 岁",
+      "explanation": "思路：爸爸年龄表示为 4x−10。方程：x+4x−10=60。化简得 5x=70，所以 x=14；爸爸是 4×14−10=46 岁。"
+    },
+    {
+      "number": 475,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 3 倍少 5 岁，两人年龄和是 55 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 15 岁，爸爸 40 岁",
+      "explanation": "思路：爸爸年龄表示为 3x−5。方程：x+3x−5=55。化简得 4x=60，所以 x=15；爸爸是 3×15−5=40 岁。"
+    },
+    {
+      "number": 476,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 4 倍少 6 岁，两人年龄和是 74 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 16 岁，爸爸 58 岁",
+      "explanation": "思路：爸爸年龄表示为 4x−6。方程：x+4x−6=74。化简得 5x=80，所以 x=16；爸爸是 4×16−6=58 岁。"
+    },
+    {
+      "number": 477,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 3 倍少 7 岁，两人年龄和是 61 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 17 岁，爸爸 44 岁",
+      "explanation": "思路：爸爸年龄表示为 3x−7。方程：x+3x−7=61。化简得 4x=68，所以 x=17；爸爸是 3×17−7=44 岁。"
+    },
+    {
+      "number": 478,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 4 倍少 8 岁，两人年龄和是 82 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 18 岁，爸爸 64 岁",
+      "explanation": "思路：爸爸年龄表示为 4x−8。方程：x+4x−8=82。化简得 5x=90，所以 x=18；爸爸是 4×18−8=64 岁。"
+    },
+    {
+      "number": 479,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 3 倍少 9 岁，两人年龄和是 67 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 19 岁，爸爸 48 岁",
+      "explanation": "思路：爸爸年龄表示为 3x−9。方程：x+3x−9=67。化简得 4x=76，所以 x=19；爸爸是 3×19−9=48 岁。"
+    },
+    {
+      "number": 480,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 4 倍少 10 岁，两人年龄和是 90 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 20 岁，爸爸 70 岁",
+      "explanation": "思路：爸爸年龄表示为 4x−10。方程：x+4x−10=90。化简得 5x=100，所以 x=20；爸爸是 4×20−10=70 岁。"
+    },
+    {
+      "number": 481,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 3 倍少 5 岁，两人年龄和是 79 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 21 岁，爸爸 58 岁",
+      "explanation": "思路：爸爸年龄表示为 3x−5。方程：x+3x−5=79。化简得 4x=84，所以 x=21；爸爸是 3×21−5=58 岁。"
+    },
+    {
+      "number": 482,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 4 倍少 6 岁，两人年龄和是 104 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 22 岁，爸爸 82 岁",
+      "explanation": "思路：爸爸年龄表示为 4x−6。方程：x+4x−6=104。化简得 5x=110，所以 x=22；爸爸是 4×22−6=82 岁。"
+    },
+    {
+      "number": 483,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 3 倍少 7 岁，两人年龄和是 85 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 23 岁，爸爸 62 岁",
+      "explanation": "思路：爸爸年龄表示为 3x−7。方程：x+3x−7=85。化简得 4x=92，所以 x=23；爸爸是 3×23−7=62 岁。"
+    },
+    {
+      "number": 484,
+      "difficulty": "超级困难",
+      "category": "年龄应用",
+      "prompt": "爸爸的年龄比聪聪年龄的 4 倍少 8 岁，两人年龄和是 112 岁。设聪聪 x 岁，列方程并求两人的年龄。",
+      "answer": "聪聪 24 岁，爸爸 88 岁",
+      "explanation": "思路：爸爸年龄表示为 4x−8。方程：x+4x−8=112。化简得 5x=120，所以 x=24；爸爸是 4×24−8=88 岁。"
+    },
+    {
+      "number": 485,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 3(x + 2) = 27 时，先除以 3 得 x+2=9，然后直接写 x=9。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 2；正确答案 x = 7",
+      "explanation": "思路：除以 3 后得到的是 x+2=9，这时 x 还没有单独留下。还要两边同时减 2，所以 x=9−2=7。"
+    },
+    {
+      "number": 486,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 4(x + 3) = 44 时，先除以 4 得 x+3=11，然后直接写 x=11。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 3；正确答案 x = 8",
+      "explanation": "思路：除以 4 后得到的是 x+3=11，这时 x 还没有单独留下。还要两边同时减 3，所以 x=11−3=8。"
+    },
+    {
+      "number": 487,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 5(x + 4) = 65 时，先除以 5 得 x+4=13，然后直接写 x=13。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 4；正确答案 x = 9",
+      "explanation": "思路：除以 5 后得到的是 x+4=13，这时 x 还没有单独留下。还要两边同时减 4，所以 x=13−4=9。"
+    },
+    {
+      "number": 488,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 6(x + 5) = 90 时，先除以 6 得 x+5=15，然后直接写 x=15。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 5；正确答案 x = 10",
+      "explanation": "思路：除以 6 后得到的是 x+5=15，这时 x 还没有单独留下。还要两边同时减 5，所以 x=15−5=10。"
+    },
+    {
+      "number": 489,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 3(x + 6) = 51 时，先除以 3 得 x+6=17，然后直接写 x=17。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 6；正确答案 x = 11",
+      "explanation": "思路：除以 3 后得到的是 x+6=17，这时 x 还没有单独留下。还要两边同时减 6，所以 x=17−6=11。"
+    },
+    {
+      "number": 490,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 4(x + 7) = 76 时，先除以 4 得 x+7=19，然后直接写 x=19。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 7；正确答案 x = 12",
+      "explanation": "思路：除以 4 后得到的是 x+7=19，这时 x 还没有单独留下。还要两边同时减 7，所以 x=19−7=12。"
+    },
+    {
+      "number": 491,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 5(x + 8) = 105 时，先除以 5 得 x+8=21，然后直接写 x=21。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 8；正确答案 x = 13",
+      "explanation": "思路：除以 5 后得到的是 x+8=21，这时 x 还没有单独留下。还要两边同时减 8，所以 x=21−8=13。"
+    },
+    {
+      "number": 492,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 6(x + 9) = 138 时，先除以 6 得 x+9=23，然后直接写 x=23。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 9；正确答案 x = 14",
+      "explanation": "思路：除以 6 后得到的是 x+9=23，这时 x 还没有单独留下。还要两边同时减 9，所以 x=23−9=14。"
+    },
+    {
+      "number": 493,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 3(x + 10) = 75 时，先除以 3 得 x+10=25，然后直接写 x=25。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 10；正确答案 x = 15",
+      "explanation": "思路：除以 3 后得到的是 x+10=25，这时 x 还没有单独留下。还要两边同时减 10，所以 x=25−10=15。"
+    },
+    {
+      "number": 494,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 4(x + 2) = 72 时，先除以 4 得 x+2=18，然后直接写 x=18。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 2；正确答案 x = 16",
+      "explanation": "思路：除以 4 后得到的是 x+2=18，这时 x 还没有单独留下。还要两边同时减 2，所以 x=18−2=16。"
+    },
+    {
+      "number": 495,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 5(x + 3) = 100 时，先除以 5 得 x+3=20，然后直接写 x=20。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 3；正确答案 x = 17",
+      "explanation": "思路：除以 5 后得到的是 x+3=20，这时 x 还没有单独留下。还要两边同时减 3，所以 x=20−3=17。"
+    },
+    {
+      "number": 496,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 6(x + 4) = 132 时，先除以 6 得 x+4=22，然后直接写 x=22。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 4；正确答案 x = 18",
+      "explanation": "思路：除以 6 后得到的是 x+4=22，这时 x 还没有单独留下。还要两边同时减 4，所以 x=22−4=18。"
+    },
+    {
+      "number": 497,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 3(x + 5) = 72 时，先除以 3 得 x+5=24，然后直接写 x=24。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 5；正确答案 x = 19",
+      "explanation": "思路：除以 3 后得到的是 x+5=24，这时 x 还没有单独留下。还要两边同时减 5，所以 x=24−5=19。"
+    },
+    {
+      "number": 498,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 4(x + 6) = 104 时，先除以 4 得 x+6=26，然后直接写 x=26。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 6；正确答案 x = 20",
+      "explanation": "思路：除以 4 后得到的是 x+6=26，这时 x 还没有单独留下。还要两边同时减 6，所以 x=26−6=20。"
+    },
+    {
+      "number": 499,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 5(x + 7) = 140 时，先除以 5 得 x+7=28，然后直接写 x=28。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 7；正确答案 x = 21",
+      "explanation": "思路：除以 5 后得到的是 x+7=28，这时 x 还没有单独留下。还要两边同时减 7，所以 x=28−7=21。"
+    },
+    {
+      "number": 500,
+      "difficulty": "超级困难",
+      "category": "错因辨析",
+      "prompt": "小明解方程 6(x + 8) = 180 时，先除以 6 得 x+8=30，然后直接写 x=30。他错在哪里？正确答案是多少？",
+      "answer": "错在忘记再减 8；正确答案 x = 22",
+      "explanation": "思路：除以 6 后得到的是 x+8=30，这时 x 还没有单独留下。还要两边同时减 8，所以 x=30−8=22。"
+    }
+  ]
+}
