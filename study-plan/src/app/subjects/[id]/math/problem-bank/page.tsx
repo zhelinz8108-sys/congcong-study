@@ -1,6 +1,7 @@
 import Link from "next/link";
 import equationBank from "@/lib/math-equation-bank.json";
 import fractionBank from "@/lib/math-fraction-bank.json";
+import solidBank from "@/lib/math-solid-bank.json";
 
 type Params = {
   params: Promise<{ id: string }>;
@@ -30,6 +31,11 @@ const banks: Array<{
     href: "fractions",
     action: "打开分数题库",
     bank: fractionBank,
+  },
+  {
+    href: "solids",
+    action: "打开长方体和正方体题库",
+    bank: solidBank,
   },
 ];
 
