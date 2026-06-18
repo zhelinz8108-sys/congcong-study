@@ -2952,7 +2952,9 @@ export default function GrammarPage() {
         <div className="mt-8 space-y-4">
           {filteredChapters.length > 0 ? (
             filteredChapters.map((chapter) => {
-              const isChapterOpen = isSearching || expandedChapters.has(chapter.key);
+              const isPinnedChapter = chapter.key === "pinned";
+              const isChapterOpen =
+                isPinnedChapter || isSearching || expandedChapters.has(chapter.key);
 
               return (
                 <section
@@ -2960,7 +2962,13 @@ export default function GrammarPage() {
                   className="overflow-hidden rounded-[32px] border border-stone-200 bg-white shadow-[0_20px_55px_rgba(15,23,42,0.06)]"
                 >
                   <button
-                    onClick={() => toggleChapter(chapter.key)}
+                    type="button"
+                    aria-expanded={isChapterOpen}
+                    onClick={() => {
+                      if (!isPinnedChapter) {
+                        toggleChapter(chapter.key);
+                      }
+                    }}
                     className="flex w-full items-start justify-between gap-4 bg-white px-5 py-5 text-left transition hover:bg-stone-50 sm:px-6"
                   >
                     <div className="flex min-w-0 items-start gap-4">
@@ -2983,7 +2991,7 @@ export default function GrammarPage() {
                     </div>
 
                     <span className="shrink-0 rounded-full bg-white px-3 py-1 text-sm font-medium text-stone-500 shadow-sm ring-1 ring-stone-200/80">
-                      {isChapterOpen ? "收起" : "展开"}
+                      {isPinnedChapter ? "已展开" : isChapterOpen ? "收起" : "展开"}
                     </span>
                   </button>
 
