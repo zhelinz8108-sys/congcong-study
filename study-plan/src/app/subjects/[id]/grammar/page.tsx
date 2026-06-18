@@ -2572,10 +2572,10 @@ function GrammarQuizMode({
 export default function GrammarPage() {
   const { id } = useParams<{ id: string }>();
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(
-    () => new Set(["pinned", "present"])
+    () => new Set<string>()
   );
   const [expandedUnits, setExpandedUnits] = useState<Set<number>>(
-    () => new Set([1])
+    () => new Set<number>()
   );
   const [query, setQuery] = useState("");
   const [playingSpeechId, setPlayingSpeechId] = useState<string | null>(null);
@@ -2952,9 +2952,7 @@ export default function GrammarPage() {
         <div className="mt-8 space-y-4">
           {filteredChapters.length > 0 ? (
             filteredChapters.map((chapter) => {
-              const isPinnedChapter = chapter.key === "pinned";
-              const isChapterOpen =
-                isPinnedChapter || isSearching || expandedChapters.has(chapter.key);
+              const isChapterOpen = isSearching || expandedChapters.has(chapter.key);
 
               return (
                 <section
@@ -2964,11 +2962,7 @@ export default function GrammarPage() {
                   <button
                     type="button"
                     aria-expanded={isChapterOpen}
-                    onClick={() => {
-                      if (!isPinnedChapter) {
-                        toggleChapter(chapter.key);
-                      }
-                    }}
+                    onClick={() => toggleChapter(chapter.key)}
                     className="flex w-full items-start justify-between gap-4 bg-white px-5 py-5 text-left transition hover:bg-stone-50 sm:px-6"
                   >
                     <div className="flex min-w-0 items-start gap-4">
@@ -2991,7 +2985,7 @@ export default function GrammarPage() {
                     </div>
 
                     <span className="shrink-0 rounded-full bg-white px-3 py-1 text-sm font-medium text-stone-500 shadow-sm ring-1 ring-stone-200/80">
-                      {isPinnedChapter ? "已展开" : isChapterOpen ? "收起" : "展开"}
+                      {isChapterOpen ? "收起" : "展开"}
                     </span>
                   </button>
 
