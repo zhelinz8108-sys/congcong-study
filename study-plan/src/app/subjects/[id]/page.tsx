@@ -757,17 +757,34 @@ export default function SubjectPage() {
           <div className="flex-1">
           {/* 4 skill cards */}
           <div className="grid grid-cols-2 gap-4 mb-4">
-            {ENGLISH_SKILLS.map((skill) => (
-              <button
-                key={skill.key}
-                onClick={() => setActiveSkill(skill.key)}
-                className={`${skill.bgColor} ${skill.borderColor} border-2 rounded-2xl p-6 text-center transition-all active:scale-95 hover:shadow-md`}
-              >
-                <span className="text-4xl block mb-3">{skill.icon}</span>
-                <span className={`text-xl font-bold block ${skill.textColor}`}>{skill.name}</span>
-                <span className="text-xs text-stone-400 block mt-1">{skill.desc}</span>
-              </button>
-            ))}
+            {ENGLISH_SKILLS.map((skill) => {
+              const cardClass = `${skill.bgColor} ${skill.borderColor} border-2 rounded-2xl p-6 text-center transition-all active:scale-95 hover:shadow-md`;
+              const content = (
+                <>
+                  <span className="text-4xl block mb-3">{skill.icon}</span>
+                  <span className={`text-xl font-bold block ${skill.textColor}`}>{skill.name}</span>
+                  <span className="text-xs text-stone-400 block mt-1">{skill.desc}</span>
+                </>
+              );
+
+              if (skill.key === "reading") {
+                return (
+                  <Link key={skill.key} href={`/subjects/${id}/reading`} className={cardClass}>
+                    {content}
+                  </Link>
+                );
+              }
+
+              return (
+                <button
+                  key={skill.key}
+                  onClick={() => setActiveSkill(skill.key)}
+                  className={cardClass}
+                >
+                  {content}
+                </button>
+              );
+            })}
           </div>
           </div>
 
