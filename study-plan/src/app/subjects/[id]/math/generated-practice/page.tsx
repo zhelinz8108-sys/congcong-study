@@ -542,25 +542,32 @@ export default function GeneratedMathPracticePage() {
   };
 
   const recordAnswer = (question: MathGeneratedQuestion, value: string) => {
-    const isCorrect = gradeGeneratedMathQuestion(question, value);
-    setAnswers((prev) => ({
-      ...prev,
-      [question.id]: { value, isCorrect },
-    }));
+    setAnswers((prev) => {
+      if (prev[question.id]) {
+        return prev;
+      }
+
+      const isCorrect = gradeGeneratedMathQuestion(question, value);
+      return {
+        ...prev,
+        [question.id]: { value, isCorrect },
+      };
+    });
   };
 
   const updateFillDraft = (question: MathGeneratedQuestion, value: string) => {
-    setDrafts((prev) => ({ ...prev, [question.id]: value }));
-    if (answers[question.id]?.value !== value) {
-      setAnswers((prev) => {
-        const next = { ...prev };
-        delete next[question.id];
-        return next;
-      });
+    if (answers[question.id]) {
+      return;
     }
+
+    setDrafts((prev) => ({ ...prev, [question.id]: value }));
   };
 
   const submitFillAnswer = (question: MathGeneratedQuestion) => {
+    if (answers[question.id]) {
+      return;
+    }
+
     const value = drafts[question.id]?.trim() ?? "";
     if (!value) return;
     recordAnswer(question, value);
@@ -987,9 +994,13 @@ export default function GeneratedMathPracticePage() {
                   const selected = currentAnswer?.value === option;
                   const correct = currentAnswer && option === currentQuestion.answer;
                   const wrongSelected = selected && currentAnswer && !currentAnswer.isCorrect;
+                  const answered = Boolean(currentAnswer);
                   return (
                     <button
                       key={option}
+                      type="button"
+                      disabled={answered}
+                      aria-pressed={selected}
                       onClick={() => recordAnswer(currentQuestion, option)}
                       className={`flex items-center gap-4 rounded-2xl border px-5 py-4 text-left text-lg font-semibold transition ${
                         correct
@@ -998,7 +1009,9 @@ export default function GeneratedMathPracticePage() {
                             ? "border-rose-400 bg-rose-50 text-rose-700"
                             : selected
                               ? "border-blue-400 bg-blue-50 text-blue-800"
-                              : "border-neutral-200 bg-white hover:border-blue-300 hover:bg-blue-50"
+                              : answered
+                                ? "border-neutral-100 bg-white text-neutral-400"
+                                : "border-neutral-200 bg-white hover:border-blue-300 hover:bg-blue-50"
                       }`}
                     >
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-sm font-bold text-neutral-600">
@@ -1015,7 +1028,7 @@ export default function GeneratedMathPracticePage() {
               <div className="mt-6">
                 <label className="text-sm font-semibold text-neutral-600">答案</label>
                 <input
-                  value={drafts[currentQuestion.id] ?? currentAnswer?.value ?? ""}
+                  value={currentAnswer?.value ?? drafts[currentQuestion.id] ?? ""}
                   onChange={(event) => updateFillDraft(currentQuestion, event.target.value)}
                   onKeyDown={(event) => {
                     if (event.key !== "Enter") return;
@@ -1023,8 +1036,9 @@ export default function GeneratedMathPracticePage() {
                     if (currentAnswer) goNext();
                     else submitFillAnswer(currentQuestion);
                   }}
+                  disabled={Boolean(currentAnswer)}
                   placeholder="输入答案后点击提交"
-                  className={`mt-2 w-full rounded-2xl border px-5 py-4 text-2xl font-bold outline-none transition ${
+                  className={`mt-2 w-full rounded-2xl border px-5 py-4 text-2xl font-bold outline-none transition disabled:cursor-not-allowed disabled:opacity-100 ${
                     currentAnswer?.isCorrect
                       ? "border-emerald-400 bg-emerald-50"
                       : currentAnswer
@@ -1034,11 +1048,12 @@ export default function GeneratedMathPracticePage() {
                 />
                 <div className="mt-3 flex items-center gap-3">
                   <button
+                    type="button"
                     onClick={() => submitFillAnswer(currentQuestion)}
-                    disabled={!drafts[currentQuestion.id]?.trim()}
+                    disabled={Boolean(currentAnswer) || !drafts[currentQuestion.id]?.trim()}
                     className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {currentAnswer ? "重新提交" : "提交答案"}
+                    {currentAnswer ? "已提交" : "提交答案"}
                   </button>
                   <span className="text-sm text-neutral-500">填完后提交，或按 Enter。</span>
                 </div>
