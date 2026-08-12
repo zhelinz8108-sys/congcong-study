@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { GrammarOriginal500Practice } from "@/components/grammar-original-500-practice";
 import {
   ENGLISH_GRAMMAR_CHAPTERS,
   type GrammarChapter,
@@ -2908,6 +2909,8 @@ export default function GrammarPage() {
             </div>
           </div>
         </section>
+
+        <GrammarOriginal500Practice />
 
         <section className="mt-6 rounded-[28px] border border-amber-100 bg-amber-50/60 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.04)]">
           <div className="flex flex-wrap items-start justify-between gap-3">
