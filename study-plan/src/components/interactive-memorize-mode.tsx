@@ -6,7 +6,7 @@ import type { Unit, Word } from "@/lib/types";
 
 type PracticeMode = "en-zh" | "zh-en";
 type PracticeScope = "all" | "due" | "mistakes";
-type SessionSizeMode = "limited" | "all";
+type SessionSize = 100 | 200 | 300 | 500 | 800 | 1000 | "all";
 
 type SentenceInfo = {
   english: string;
@@ -57,7 +57,7 @@ type SessionHistoryRecord = {
   completed: boolean;
 };
 
-const SESSION_SIZE = 100;
+const SESSION_SIZE_OPTIONS: Exclude<SessionSize, "all">[] = [100, 200, 300, 500, 800, 1000];
 const AUTO_NEXT_DELAY_MS = 850;
 
 const POS_TAGS = [
@@ -289,7 +289,7 @@ export function InteractiveMemorizeMode({
   const [scope, setScope] = useState<PracticeScope>("all");
   const [selectedUnitIds, setSelectedUnitIds] = useState<Set<string>>(new Set());
   const [shuffle, setShuffle] = useState(true);
-  const [sessionSizeMode, setSessionSizeMode] = useState<SessionSizeMode>("limited");
+  const [sessionSize, setSessionSize] = useState<SessionSize>(100);
   const [autoNext, setAutoNext] = useState(() =>
     typeof window !== "undefined" ? window.localStorage.getItem(autoNextKey) === "1" : false
   );
@@ -398,7 +398,7 @@ export function InteractiveMemorizeMode({
       scope?: PracticeScope;
       selectedUnitIds?: Set<string>;
       shuffle?: boolean;
-      sessionSizeMode?: SessionSizeMode;
+      sessionSize?: SessionSize;
     } = {}
   ) {
     clearAutoNextTimer();
@@ -407,7 +407,7 @@ export function InteractiveMemorizeMode({
     const nextScope = overrides.scope ?? scope;
     const nextSelectedUnitIds = overrides.selectedUnitIds ?? selectedUnitIds;
     const nextShuffle = overrides.shuffle ?? shuffle;
-    const nextSessionSizeMode = overrides.sessionSizeMode ?? sessionSizeMode;
+    const nextSessionSize = overrides.sessionSize ?? sessionSize;
     const nextFilteredEntries = sourceEntries.filter((entry) => {
       if (nextScope === "due" && !isWordDue(entry.word)) return false;
       if (nextScope === "mistakes" && !mistakeIds.has(entry.word.id)) return false;
@@ -415,9 +415,9 @@ export function InteractiveMemorizeMode({
       return true;
     });
     const sessionLimit =
-      nextSessionSizeMode === "all"
+      nextSessionSize === "all"
         ? nextFilteredEntries.length
-        : Math.min(SESSION_SIZE, nextFilteredEntries.length);
+        : Math.min(nextSessionSize, nextFilteredEntries.length);
 
     const source = nextShuffle
       ? shuffleList(nextFilteredEntries).slice(0, sessionLimit)
@@ -532,11 +532,11 @@ export function InteractiveMemorizeMode({
     startSession({ selectedUnitIds: nextIds });
   }
 
-  function chooseSessionSizeMode(nextSessionSizeMode: SessionSizeMode) {
-    if (sessionSizeMode === nextSessionSizeMode) return;
+  function chooseSessionSize(nextSessionSize: SessionSize) {
+    if (sessionSize === nextSessionSize) return;
     finalizeSession(false);
-    setSessionSizeMode(nextSessionSizeMode);
-    startSession({ sessionSizeMode: nextSessionSizeMode });
+    setSessionSize(nextSessionSize);
+    startSession({ sessionSize: nextSessionSize });
   }
 
   function toggleAutoNext(nextValue: boolean) {
@@ -1037,21 +1037,24 @@ export function InteractiveMemorizeMode({
                 <span className="text-sm font-bold text-stone-600">测试数量</span>
                 <span className="text-xs font-bold text-emerald-800">{filteredActiveEntries.length} 个可测</span>
               </div>
-              <div className="grid grid-cols-2 gap-1 rounded-lg border border-stone-200 bg-stone-50 p-1">
+              <div className="grid grid-cols-3 gap-1 rounded-lg border border-stone-200 bg-stone-50 p-1">
+                {SESSION_SIZE_OPTIONS.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => chooseSessionSize(size)}
+                    className={`min-h-9 rounded-md text-sm font-black transition ${
+                      sessionSize === size
+                        ? "bg-white text-emerald-900 shadow-sm"
+                        : "text-stone-500 hover:bg-white hover:text-stone-900"
+                    }`}
+                  >
+                    {size} 词
+                  </button>
+                ))}
                 <button
-                  onClick={() => chooseSessionSizeMode("limited")}
-                  className={`min-h-9 rounded-md text-sm font-black transition ${
-                    sessionSizeMode === "limited"
-                      ? "bg-white text-emerald-900 shadow-sm"
-                      : "text-stone-500 hover:bg-white hover:text-stone-900"
-                  }`}
-                >
-                  {SESSION_SIZE} 词
-                </button>
-                <button
-                  onClick={() => chooseSessionSizeMode("all")}
-                  className={`min-h-9 rounded-md text-sm font-black transition ${
-                    sessionSizeMode === "all"
+                  onClick={() => chooseSessionSize("all")}
+                  className={`col-span-3 min-h-9 rounded-md text-sm font-black transition ${
+                    sessionSize === "all"
                       ? "bg-white text-emerald-900 shadow-sm"
                       : "text-stone-500 hover:bg-white hover:text-stone-900"
                   }`}
@@ -1060,7 +1063,7 @@ export function InteractiveMemorizeMode({
                 </button>
               </div>
               <p className="text-xs leading-5 text-stone-500">
-                “全部词”会测试当前词表类型和句子范围内的所有单词。
+                按当前词表与句子范围抽题；数量不足时使用全部可测词。
               </p>
             </div>
 
