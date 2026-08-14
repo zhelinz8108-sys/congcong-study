@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   buildOriginalGrammarExplanation,
-  getOriginalGrammarQuestions,
-  getOriginalGrammarTopic,
   ORIGINAL_GRAMMAR_QUESTIONS,
-  ORIGINAL_GRAMMAR_TOPICS,
   type OriginalGrammarQuestion,
 } from "@/lib/grammar-original-500";
 
@@ -26,7 +23,6 @@ type SessionAnswer = {
 
 const PROGRESS_KEY = "study-plan-grammar-original-500-progress-v1";
 const AUTO_NEXT_KEY = "study-plan-grammar-original-500-auto-next";
-const ALL_TOPICS_ID = 0;
 
 function loadSavedProgress(): SavedProgress {
   if (typeof window === "undefined") return {};
@@ -55,12 +51,8 @@ function shuffleWithSeed<T>(items: T[], seed: number): T[] {
     .map(({ item }) => item);
 }
 
-function getSessionQuestions(topicId: number): OriginalGrammarQuestion[] {
-  const source = topicId === ALL_TOPICS_ID
-    ? ORIGINAL_GRAMMAR_QUESTIONS
-    : getOriginalGrammarQuestions(topicId);
-  const seed = Date.now() + topicId * 1009;
-  return shuffleWithSeed(source, seed).slice(0, topicId === ALL_TOPICS_ID ? 50 : source.length);
+function getSessionQuestions(): OriginalGrammarQuestion[] {
+  return shuffleWithSeed(ORIGINAL_GRAMMAR_QUESTIONS, Date.now());
 }
 
 function optionLetter(index: number): "A" | "B" | "C" | "D" {
@@ -68,7 +60,7 @@ function optionLetter(index: number): "A" | "B" | "C" | "D" {
 }
 
 export function GrammarOriginal500Practice() {
-  const [activeTopicId, setActiveTopicId] = useState<number | null>(null);
+  const [isActive, setIsActive] = useState(false);
   const [questions, setQuestions] = useState<OriginalGrammarQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -102,9 +94,6 @@ export function GrammarOriginal500Practice() {
   const overallCorrect = Object.values(progress).reduce((sum, item) => sum + item.correct, 0);
   const overallAccuracy = overallAnswered > 0 ? Math.round((overallCorrect / overallAnswered) * 100) : 0;
 
-  const activeTopic = activeTopicId === null || activeTopicId === ALL_TOPICS_ID
-    ? undefined
-    : getOriginalGrammarTopic(activeTopicId);
   const current = questions[currentIndex];
   const isAnswered = selected !== null;
   const sessionCorrect = answers.filter((answer) => answer.correct).length;
@@ -117,19 +106,19 @@ export function GrammarOriginal500Practice() {
     [answers]
   );
 
-  const startTopic = (topicId: number) => {
+  const startPractice = () => {
     clearAutoNext();
-    setActiveTopicId(topicId);
-    setQuestions(getSessionQuestions(topicId));
+    setIsActive(true);
+    setQuestions(getSessionQuestions());
     setCurrentIndex(0);
     setSelected(null);
     setAnswers([]);
     setReviewMistakes(false);
   };
 
-  const returnToTopics = () => {
+  const returnToHub = () => {
     clearAutoNext();
-    setActiveTopicId(null);
+    setIsActive(false);
     setQuestions([]);
     setCurrentIndex(0);
     setSelected(null);
@@ -184,7 +173,7 @@ export function GrammarOriginal500Practice() {
     setReviewMistakes(true);
   };
 
-  if (activeTopicId === null) {
+  if (!isActive) {
     return (
       <section className="mt-8 rounded-[32px] border border-violet-100 bg-gradient-to-br from-violet-50 via-white to-amber-50/60 p-5 shadow-[0_20px_55px_rgba(88,28,135,0.07)] sm:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -194,14 +183,14 @@ export function GrammarOriginal500Practice() {
                 新增原题库
               </span>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-violet-700 ring-1 ring-violet-100">
-                500 道 · 15 专题 · 四选一
+                500 道混合题 · 四选一
               </span>
             </div>
             <h2 className="mt-4 text-2xl font-semibold text-slate-950 sm:text-3xl">
               小学英语语法 500 道拔高选择题
             </h2>
             <p className="mt-3 text-sm leading-7 text-stone-600">
-              已把 Word 文档里的全部题目和答案接入网站。点击选项立即显示对错、正确答案、考点规则、判断理由、正确句和易错提醒；练习进度会保存在当前设备。
+              500 道原题全部打乱混合，不再按语法专题分类。点击选项立即显示对错、正确答案、考点规则、判断理由、正确句和易错提醒；练习进度会保存在当前设备。
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
@@ -224,48 +213,15 @@ export function GrammarOriginal500Practice() {
 
         <button
           type="button"
-          onClick={() => startTopic(ALL_TOPICS_ID)}
-          className="mt-6 flex w-full items-center justify-between rounded-[24px] bg-slate-950 px-5 py-4 text-left text-white transition hover:bg-violet-700"
+          onClick={startPractice}
+          className="mt-6 flex w-full items-center justify-between rounded-[24px] bg-slate-950 px-5 py-5 text-left text-white transition hover:bg-violet-700"
         >
           <span>
-            <span className="block text-base font-semibold">综合随机练习</span>
-            <span className="mt-1 block text-xs text-white/70">从 500 道原题中随机抽取 50 道</span>
+            <span className="block text-lg font-semibold">开始 500 题混合练习</span>
+            <span className="mt-1 block text-sm text-white/70">全部 500 道题打乱顺序，一次练完</span>
           </span>
           <span className="text-xl">→</span>
         </button>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {ORIGINAL_GRAMMAR_TOPICS.map((topic) => {
-            const item = progress[String(topic.id)] ?? { answered: 0, correct: 0 };
-            const accuracy = item.answered > 0 ? Math.round((item.correct / item.answered) * 100) : 0;
-            return (
-              <button
-                key={topic.id}
-                type="button"
-                onClick={() => startTopic(topic.id)}
-                className="group rounded-[24px] border border-stone-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-[0_15px_40px_rgba(124,58,237,0.10)]"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-sm font-semibold text-violet-700">
-                    {topic.id}
-                  </span>
-                  <span className="rounded-full bg-stone-50 px-2.5 py-1 text-[11px] font-medium text-stone-500">
-                    {topic.questionCount} 题
-                  </span>
-                </div>
-                <h3 className="mt-3 min-h-12 text-sm font-semibold leading-6 text-slate-900">
-                  {topic.title}
-                </h3>
-                <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3 text-xs">
-                  <span className="text-stone-400">
-                    {item.answered > 0 ? `已答 ${item.answered} · ${accuracy}%` : "尚未练习"}
-                  </span>
-                  <span className="font-medium text-violet-700 transition group-hover:translate-x-0.5">开始 →</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
       </section>
     );
   }
@@ -275,15 +231,15 @@ export function GrammarOriginal500Practice() {
       <div className="fixed inset-0 z-50 overflow-y-auto bg-[#fbfaf7]">
         <div className="mx-auto min-h-screen w-full max-w-4xl px-4 py-6 sm:px-6">
           <div className="flex items-center justify-between gap-3">
-            <button type="button" onClick={returnToTopics} className="rounded-full px-3 py-2 text-sm font-medium text-stone-500 hover:bg-white">
-              ← 返回专题
+            <button type="button" onClick={returnToHub} className="rounded-full px-3 py-2 text-sm font-medium text-stone-500 hover:bg-white">
+              ← 返回语法
             </button>
-            <button type="button" onClick={() => startTopic(activeTopicId)} className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700">
+            <button type="button" onClick={startPractice} className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700">
               再练一轮
             </button>
           </div>
           <section className="mt-8 rounded-[32px] border border-stone-200 bg-white p-7 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-            <p className="text-sm font-semibold text-violet-600">{reviewMistakes ? "错题再练" : activeTopic?.title ?? "综合随机练习"}</p>
+            <p className="text-sm font-semibold text-violet-600">{reviewMistakes ? "错题再练" : "500 题混合练习"}</p>
             <h2 className="mt-3 text-3xl font-semibold text-slate-950">
               本轮答对 {sessionCorrect} / {answers.length} 题
             </h2>
@@ -312,7 +268,7 @@ export function GrammarOriginal500Practice() {
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#fbfaf7]">
       <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col px-4 py-5 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <button type="button" onClick={returnToTopics} className="rounded-full px-3 py-2 text-sm font-medium text-stone-500 hover:bg-white">
+          <button type="button" onClick={returnToHub} className="rounded-full px-3 py-2 text-sm font-medium text-stone-500 hover:bg-white">
             ← 退出练习
           </button>
           <div className="flex flex-wrap items-center gap-2">
@@ -333,7 +289,7 @@ export function GrammarOriginal500Practice() {
           <div className="w-full rounded-[34px] border border-stone-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.07)] sm:p-8">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-violet-600">{getOriginalGrammarTopic(current.topicId)?.title}</p>
+                <p className="text-sm font-semibold text-violet-600">500 题混合练习</p>
                 <p className="mt-1 text-xs text-stone-400">原题第 {current.id} 题 · 四选一</p>
               </div>
               <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700">即时判分 + 逐题解析</span>
