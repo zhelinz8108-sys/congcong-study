@@ -21,21 +21,57 @@ type SessionAnswer = {
   correct: boolean;
 };
 
-const PROGRESS_KEY = "study-plan-grammar-original-500-progress-v1";
-const AUTO_NEXT_KEY = "study-plan-grammar-original-500-auto-next";
+type GrammarQuestionExplanation = {
+  focus: string;
+  rule: string;
+  reason: string;
+  correctSentence: string;
+  trap: string;
+};
 
-function loadSavedProgress(): SavedProgress {
+export type GrammarPracticeBank = {
+  questions: OriginalGrammarQuestion[];
+  buildExplanation: (question: OriginalGrammarQuestion) => GrammarQuestionExplanation;
+  progressKey: string;
+  autoNextKey: string;
+  eyebrow: string;
+  badge: string;
+  title: string;
+  description: string;
+  startLabel: string;
+  startHint: string;
+  practiceLabel: string;
+  questionLabel: string;
+};
+
+const ORIGINAL_GRAMMAR_BANK: GrammarPracticeBank = {
+  questions: ORIGINAL_GRAMMAR_QUESTIONS,
+  buildExplanation: buildOriginalGrammarExplanation,
+  progressKey: "study-plan-grammar-original-500-progress-v1",
+  autoNextKey: "study-plan-grammar-original-500-auto-next",
+  eyebrow: "新增原题库",
+  badge: "500 道混合题 · 四选一",
+  title: "小学英语语法 500 道拔高选择题",
+  description:
+    "500 道原题全部打乱混合，不再按语法专题分类。点击选项立即显示对错、正确答案、考点规则、判断理由、正确句和易错提醒；练习进度会保存在当前设备。",
+  startLabel: "开始 500 题混合练习",
+  startHint: "全部 500 道题打乱顺序，一次练完",
+  practiceLabel: "500 题混合练习",
+  questionLabel: "原题",
+};
+
+function loadSavedProgress(progressKey: string): SavedProgress {
   if (typeof window === "undefined") return {};
   try {
-    return JSON.parse(window.localStorage.getItem(PROGRESS_KEY) ?? "{}") as SavedProgress;
+    return JSON.parse(window.localStorage.getItem(progressKey) ?? "{}") as SavedProgress;
   } catch {
     return {};
   }
 }
 
-function saveProgress(progress: SavedProgress) {
+function saveProgress(progressKey: string, progress: SavedProgress) {
   if (typeof window !== "undefined") {
-    window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    window.localStorage.setItem(progressKey, JSON.stringify(progress));
   }
 }
 
@@ -51,15 +87,19 @@ function shuffleWithSeed<T>(items: T[], seed: number): T[] {
     .map(({ item }) => item);
 }
 
-function getSessionQuestions(): OriginalGrammarQuestion[] {
-  return shuffleWithSeed(ORIGINAL_GRAMMAR_QUESTIONS, Date.now());
+function getSessionQuestions(questions: OriginalGrammarQuestion[]): OriginalGrammarQuestion[] {
+  return shuffleWithSeed(questions, Date.now());
 }
 
 function optionLetter(index: number): "A" | "B" | "C" | "D" {
   return String.fromCharCode(65 + index) as "A" | "B" | "C" | "D";
 }
 
-export function GrammarOriginal500Practice() {
+export function GrammarOriginal500Practice({
+  bank = ORIGINAL_GRAMMAR_BANK,
+}: {
+  bank?: GrammarPracticeBank;
+}) {
   const [isActive, setIsActive] = useState(false);
   const [questions, setQuestions] = useState<OriginalGrammarQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -80,15 +120,15 @@ export function GrammarOriginal500Practice() {
 
   useEffect(() => {
     const loadTimer = window.setTimeout(() => {
-      setProgress(loadSavedProgress());
-      setAutoNext(window.localStorage.getItem(AUTO_NEXT_KEY) === "1");
+      setProgress(loadSavedProgress(bank.progressKey));
+      setAutoNext(window.localStorage.getItem(bank.autoNextKey) === "1");
       setProgressReady(true);
     }, 0);
     return () => {
       window.clearTimeout(loadTimer);
       clearAutoNext();
     };
-  }, [clearAutoNext]);
+  }, [bank.autoNextKey, bank.progressKey, clearAutoNext]);
 
   const overallAnswered = Object.values(progress).reduce((sum, item) => sum + item.answered, 0);
   const overallCorrect = Object.values(progress).reduce((sum, item) => sum + item.correct, 0);
@@ -99,7 +139,7 @@ export function GrammarOriginal500Practice() {
   const sessionCorrect = answers.filter((answer) => answer.correct).length;
   const sessionWrong = answers.length - sessionCorrect;
   const sessionAccuracy = answers.length > 0 ? Math.round((sessionCorrect / answers.length) * 100) : 0;
-  const explanation = current ? buildOriginalGrammarExplanation(current) : null;
+  const explanation = current ? bank.buildExplanation(current) : null;
 
   const mistakes = useMemo(
     () => answers.filter((answer) => !answer.correct).map((answer) => answer.question),
@@ -109,7 +149,7 @@ export function GrammarOriginal500Practice() {
   const startPractice = () => {
     clearAutoNext();
     setIsActive(true);
-    setQuestions(getSessionQuestions());
+    setQuestions(getSessionQuestions(bank.questions));
     setCurrentIndex(0);
     setSelected(null);
     setAnswers([]);
@@ -149,7 +189,7 @@ export function GrammarOriginal500Practice() {
           lastQuestionId: current.id,
         },
       };
-      saveProgress(next);
+      saveProgress(bank.progressKey, next);
       return next;
     });
 
@@ -160,7 +200,7 @@ export function GrammarOriginal500Practice() {
 
   const toggleAutoNext = (checked: boolean) => {
     setAutoNext(checked);
-    window.localStorage.setItem(AUTO_NEXT_KEY, checked ? "1" : "0");
+    window.localStorage.setItem(bank.autoNextKey, checked ? "1" : "0");
     if (!checked) clearAutoNext();
   };
 
@@ -180,17 +220,17 @@ export function GrammarOriginal500Practice() {
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white">
-                新增原题库
+                {bank.eyebrow}
               </span>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-violet-700 ring-1 ring-violet-100">
-                500 道混合题 · 四选一
+                {bank.badge}
               </span>
             </div>
             <h2 className="mt-4 text-2xl font-semibold text-slate-950 sm:text-3xl">
-              小学英语语法 500 道拔高选择题
+              {bank.title}
             </h2>
             <p className="mt-3 text-sm leading-7 text-stone-600">
-              500 道原题全部打乱混合，不再按语法专题分类。点击选项立即显示对错、正确答案、考点规则、判断理由、正确句和易错提醒；练习进度会保存在当前设备。
+              {bank.description}
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
@@ -217,8 +257,8 @@ export function GrammarOriginal500Practice() {
           className="mt-6 flex w-full items-center justify-between rounded-[24px] bg-slate-950 px-5 py-5 text-left text-white transition hover:bg-violet-700"
         >
           <span>
-            <span className="block text-lg font-semibold">开始 500 题混合练习</span>
-            <span className="mt-1 block text-sm text-white/70">全部 500 道题打乱顺序，一次练完</span>
+            <span className="block text-lg font-semibold">{bank.startLabel}</span>
+            <span className="mt-1 block text-sm text-white/70">{bank.startHint}</span>
           </span>
           <span className="text-xl">→</span>
         </button>
@@ -239,7 +279,7 @@ export function GrammarOriginal500Practice() {
             </button>
           </div>
           <section className="mt-8 rounded-[32px] border border-stone-200 bg-white p-7 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-            <p className="text-sm font-semibold text-violet-600">{reviewMistakes ? "错题再练" : "500 题混合练习"}</p>
+            <p className="text-sm font-semibold text-violet-600">{reviewMistakes ? "错题再练" : bank.practiceLabel}</p>
             <h2 className="mt-3 text-3xl font-semibold text-slate-950">
               本轮答对 {sessionCorrect} / {answers.length} 题
             </h2>
@@ -289,8 +329,8 @@ export function GrammarOriginal500Practice() {
           <div className="w-full rounded-[34px] border border-stone-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.07)] sm:p-8">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-violet-600">500 题混合练习</p>
-                <p className="mt-1 text-xs text-stone-400">原题第 {current.id} 题 · 四选一</p>
+                <p className="text-sm font-semibold text-violet-600">{bank.practiceLabel}</p>
+                <p className="mt-1 text-xs text-stone-400">{bank.questionLabel}第 {current.id} 题 · 四选一</p>
               </div>
               <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700">即时判分 + 逐题解析</span>
             </div>

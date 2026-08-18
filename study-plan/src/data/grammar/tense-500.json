@@ -1,0 +1,7075 @@
+{
+  "title": "英语主流时态选择题 500 题",
+  "subtitle": "词汇控制：约 2000 词以内｜四选一｜含答案与中文解析",
+  "sourceFile": "英语主流时态选择题500题_2000词以内_含答案解析.docx",
+  "sourceSha256": "385b0c5e8b2f29c4f1f43622058c9d9fe344969eefc6d71af2ec15a18e2b7221",
+  "topics": [
+    {
+      "id": 1,
+      "title": "一、一般现在时 Present Simple",
+      "questionCount": 45
+    },
+    {
+      "id": 2,
+      "title": "二、现在进行时 Present Continuous",
+      "questionCount": 45
+    },
+    {
+      "id": 3,
+      "title": "三、现在完成时 Present Perfect",
+      "questionCount": 45
+    },
+    {
+      "id": 4,
+      "title": "四、现在完成进行时 Present Perfect Continuous",
+      "questionCount": 35
+    },
+    {
+      "id": 5,
+      "title": "五、一般过去时 Past Simple",
+      "questionCount": 45
+    },
+    {
+      "id": 6,
+      "title": "六、过去进行时 Past Continuous",
+      "questionCount": 40
+    },
+    {
+      "id": 7,
+      "title": "七、过去完成时 Past Perfect",
+      "questionCount": 35
+    },
+    {
+      "id": 8,
+      "title": "八、过去完成进行时 Past Perfect Continuous",
+      "questionCount": 25
+    },
+    {
+      "id": 9,
+      "title": "九、一般将来时 will",
+      "questionCount": 45
+    },
+    {
+      "id": 10,
+      "title": "十、be going to",
+      "questionCount": 35
+    },
+    {
+      "id": 11,
+      "title": "十一、将来进行时 Future Continuous",
+      "questionCount": 30
+    },
+    {
+      "id": 12,
+      "title": "十二、将来完成时 Future Perfect",
+      "questionCount": 25
+    },
+    {
+      "id": 13,
+      "title": "十三、综合时态 Mixed Tenses",
+      "questionCount": 50
+    }
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "topicId": 1,
+      "prompt": "I ___ to school every weekday.",
+      "options": [
+        "have gone",
+        "went",
+        "go",
+        "am going"
+      ],
+      "answer": "C",
+      "answerText": "go",
+      "explanation": "“every weekday”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“go”。"
+    },
+    {
+      "id": 2,
+      "topicId": 1,
+      "prompt": "You usually ___ at home.",
+      "options": [
+        "are working",
+        "have worked",
+        "work",
+        "worked"
+      ],
+      "answer": "C",
+      "answerText": "work",
+      "explanation": "“usually”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“work”。"
+    },
+    {
+      "id": 3,
+      "topicId": 1,
+      "prompt": "We ___ the bus every day.",
+      "options": [
+        "take",
+        "took",
+        "are taking",
+        "have taken"
+      ],
+      "answer": "A",
+      "answerText": "take",
+      "explanation": "“every day”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“take”。"
+    },
+    {
+      "id": 4,
+      "topicId": 1,
+      "prompt": "They ___ coffee every morning.",
+      "options": [
+        "make",
+        "have made",
+        "are making",
+        "made"
+      ],
+      "answer": "A",
+      "answerText": "make",
+      "explanation": "“every morning”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“make”。"
+    },
+    {
+      "id": 5,
+      "topicId": 1,
+      "prompt": "Tom ___ to music every week.",
+      "options": [
+        "has listened",
+        "listens",
+        "is listening",
+        "listened"
+      ],
+      "answer": "B",
+      "answerText": "listens",
+      "explanation": "“every week”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“listens”。"
+    },
+    {
+      "id": 6,
+      "topicId": 1,
+      "prompt": "Amy ___ a computer every day.",
+      "options": [
+        "has used",
+        "used",
+        "is using",
+        "uses"
+      ],
+      "answer": "D",
+      "answerText": "uses",
+      "explanation": "“every day”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“uses”。"
+    },
+    {
+      "id": 7,
+      "topicId": 1,
+      "prompt": "My brother usually ___ TV.",
+      "options": [
+        "watched",
+        "is watching",
+        "watches",
+        "has watched"
+      ],
+      "answer": "C",
+      "answerText": "watches",
+      "explanation": "“usually”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“watches”。"
+    },
+    {
+      "id": 8,
+      "topicId": 1,
+      "prompt": "My sister ___ to school every weekday.",
+      "options": [
+        "is walking",
+        "walks",
+        "has walked",
+        "walked"
+      ],
+      "answer": "B",
+      "answerText": "walks",
+      "explanation": "“every weekday”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“walks”。"
+    },
+    {
+      "id": 9,
+      "topicId": 1,
+      "prompt": "The teacher usually ___ early.",
+      "options": [
+        "slept",
+        "sleeps",
+        "is sleeping",
+        "has slept"
+      ],
+      "answer": "B",
+      "answerText": "sleeps",
+      "explanation": "“usually”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“sleeps”。"
+    },
+    {
+      "id": 10,
+      "topicId": 1,
+      "prompt": "The student ___ the door every week.",
+      "options": [
+        "is closing",
+        "closes",
+        "closed",
+        "has closed"
+      ],
+      "answer": "B",
+      "answerText": "closes",
+      "explanation": "“every week”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“closes”。"
+    },
+    {
+      "id": 11,
+      "topicId": 1,
+      "prompt": "Jack ___ new words every day.",
+      "options": [
+        "has learned",
+        "learns",
+        "is learning",
+        "learned"
+      ],
+      "answer": "B",
+      "answerText": "learns",
+      "explanation": "“every day”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“learns”。"
+    },
+    {
+      "id": 12,
+      "topicId": 1,
+      "prompt": "Lucy usually ___ a picture.",
+      "options": [
+        "drew",
+        "is drawing",
+        "has drawn",
+        "draws"
+      ],
+      "answer": "D",
+      "answerText": "draws",
+      "explanation": "“usually”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“draws”。"
+    },
+    {
+      "id": 13,
+      "topicId": 1,
+      "prompt": "I often ___ English.",
+      "options": [
+        "am studying",
+        "studied",
+        "study",
+        "have studied"
+      ],
+      "answer": "C",
+      "answerText": "study",
+      "explanation": "“often”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“study”。"
+    },
+    {
+      "id": 14,
+      "topicId": 1,
+      "prompt": "You sometimes ___ food.",
+      "options": [
+        "buy",
+        "are buying",
+        "have bought",
+        "bought"
+      ],
+      "answer": "A",
+      "answerText": "buy",
+      "explanation": "“sometimes”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“buy”。"
+    },
+    {
+      "id": 15,
+      "topicId": 1,
+      "prompt": "We ___ math every week.",
+      "options": [
+        "taught",
+        "have taught",
+        "are teaching",
+        "teach"
+      ],
+      "answer": "D",
+      "answerText": "teach",
+      "explanation": "“every week”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“teach”。"
+    },
+    {
+      "id": 16,
+      "topicId": 1,
+      "prompt": "They ___ for the bus every day.",
+      "options": [
+        "are waiting",
+        "have waited",
+        "wait",
+        "waited"
+      ],
+      "answer": "C",
+      "answerText": "wait",
+      "explanation": "“every day”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“wait”。"
+    },
+    {
+      "id": 17,
+      "topicId": 1,
+      "prompt": "Tom usually ___ a bag.",
+      "options": [
+        "carried",
+        "is carrying",
+        "carries",
+        "has carried"
+      ],
+      "answer": "C",
+      "answerText": "carries",
+      "explanation": "“usually”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“carries”。"
+    },
+    {
+      "id": 18,
+      "topicId": 1,
+      "prompt": "Amy often ___ homework.",
+      "options": [
+        "finished",
+        "finishes",
+        "is finishing",
+        "has finished"
+      ],
+      "answer": "B",
+      "answerText": "finishes",
+      "explanation": "“often”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“finishes”。"
+    },
+    {
+      "id": 19,
+      "topicId": 1,
+      "prompt": "My brother sometimes ___ the dishes.",
+      "options": [
+        "is washing",
+        "has washed",
+        "washed",
+        "washes"
+      ],
+      "answer": "D",
+      "answerText": "washes",
+      "explanation": "“sometimes”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“washes”。"
+    },
+    {
+      "id": 20,
+      "topicId": 1,
+      "prompt": "My sister ___ the office every week.",
+      "options": [
+        "has left",
+        "is leaving",
+        "left",
+        "leaves"
+      ],
+      "answer": "D",
+      "answerText": "leaves",
+      "explanation": "“every week”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“leaves”。"
+    },
+    {
+      "id": 21,
+      "topicId": 1,
+      "prompt": "The teacher ___ the window every day.",
+      "options": [
+        "opens",
+        "opened",
+        "is opening",
+        "has opened"
+      ],
+      "answer": "A",
+      "answerText": "opens",
+      "explanation": "“every day”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“opens”。"
+    },
+    {
+      "id": 22,
+      "topicId": 1,
+      "prompt": "The student usually ___ the piano.",
+      "options": [
+        "practiced",
+        "is practicing",
+        "has practiced",
+        "practices"
+      ],
+      "answer": "D",
+      "answerText": "practices",
+      "explanation": "“usually”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“practices”。"
+    },
+    {
+      "id": 23,
+      "topicId": 1,
+      "prompt": "Jack often ___ soccer.",
+      "options": [
+        "has played",
+        "plays",
+        "played",
+        "is playing"
+      ],
+      "answer": "B",
+      "answerText": "plays",
+      "explanation": "“often”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“plays”。"
+    },
+    {
+      "id": 24,
+      "topicId": 1,
+      "prompt": "Lucy sometimes ___ a friend.",
+      "options": [
+        "visited",
+        "has visited",
+        "is visiting",
+        "visits"
+      ],
+      "answer": "D",
+      "answerText": "visits",
+      "explanation": "“sometimes”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“visits”。"
+    },
+    {
+      "id": 25,
+      "topicId": 1,
+      "prompt": "I ___ an email every week.",
+      "options": [
+        "wrote",
+        "write",
+        "am writing",
+        "have written"
+      ],
+      "answer": "B",
+      "answerText": "write",
+      "explanation": "“every week”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“write”。"
+    },
+    {
+      "id": 26,
+      "topicId": 1,
+      "prompt": "You ___ in the pool every day.",
+      "options": [
+        "have swum",
+        "swam",
+        "swim",
+        "are swimming"
+      ],
+      "answer": "C",
+      "answerText": "swim",
+      "explanation": "“every day”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“swim”。"
+    },
+    {
+      "id": 27,
+      "topicId": 1,
+      "prompt": "We usually ___ a message.",
+      "options": [
+        "have sent",
+        "are sending",
+        "sent",
+        "send"
+      ],
+      "answer": "D",
+      "answerText": "send",
+      "explanation": "“usually”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“send”。"
+    },
+    {
+      "id": 28,
+      "topicId": 1,
+      "prompt": "They often ___ at the picture.",
+      "options": [
+        "looked",
+        "look",
+        "have looked",
+        "are looking"
+      ],
+      "answer": "B",
+      "answerText": "look",
+      "explanation": "“often”表示经常或习惯发生的动作，用一般现在时；主语为非第三人称单数，所以用“look”。"
+    },
+    {
+      "id": 29,
+      "topicId": 1,
+      "prompt": "Tom ___ breakfast every morning.",
+      "options": [
+        "eats",
+        "is eating",
+        "ate",
+        "has eaten"
+      ],
+      "answer": "A",
+      "answerText": "eats",
+      "explanation": "“every morning”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“eats”。"
+    },
+    {
+      "id": 30,
+      "topicId": 1,
+      "prompt": "Amy ___ dinner every evening.",
+      "options": [
+        "is cooking",
+        "cooks",
+        "cooked",
+        "has cooked"
+      ],
+      "answer": "B",
+      "answerText": "cooks",
+      "explanation": "“every evening”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“cooks”。"
+    },
+    {
+      "id": 31,
+      "topicId": 1,
+      "prompt": "My brother ___ a friend every day.",
+      "options": [
+        "has met",
+        "meets",
+        "is meeting",
+        "met"
+      ],
+      "answer": "B",
+      "answerText": "meets",
+      "explanation": "“every day”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“meets”。"
+    },
+    {
+      "id": 32,
+      "topicId": 1,
+      "prompt": "My sister ___ class every weekday.",
+      "options": [
+        "starts",
+        "started",
+        "has started",
+        "is starting"
+      ],
+      "answer": "A",
+      "answerText": "starts",
+      "explanation": "“every weekday”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“starts”。"
+    },
+    {
+      "id": 33,
+      "topicId": 1,
+      "prompt": "The teacher often ___ a classmate.",
+      "options": [
+        "helped",
+        "helps",
+        "is helping",
+        "has helped"
+      ],
+      "answer": "B",
+      "answerText": "helps",
+      "explanation": "“often”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“helps”。"
+    },
+    {
+      "id": 34,
+      "topicId": 1,
+      "prompt": "The student sometimes ___ a small table.",
+      "options": [
+        "is building",
+        "builds",
+        "has built",
+        "built"
+      ],
+      "answer": "B",
+      "answerText": "builds",
+      "explanation": "“sometimes”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“builds”。"
+    },
+    {
+      "id": 35,
+      "topicId": 1,
+      "prompt": "Jack ___ the room every week.",
+      "options": [
+        "is cleaning",
+        "cleans",
+        "has cleaned",
+        "cleaned"
+      ],
+      "answer": "B",
+      "answerText": "cleans",
+      "explanation": "“every week”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“cleans”。"
+    },
+    {
+      "id": 36,
+      "topicId": 1,
+      "prompt": "Lucy ___ to work every weekday.",
+      "options": [
+        "drives",
+        "drove",
+        "is driving",
+        "has driven"
+      ],
+      "answer": "A",
+      "answerText": "drives",
+      "explanation": "“every weekday”表示经常或习惯发生的动作，用一般现在时；主语为第三人称单数，所以用“drives”。"
+    },
+    {
+      "id": 37,
+      "topicId": 1,
+      "prompt": "The sun ___ in the east.",
+      "options": [
+        "rises",
+        "is rising",
+        "rose",
+        "has risen"
+      ],
+      "answer": "A",
+      "answerText": "rises",
+      "explanation": "客观事实用一般现在时。"
+    },
+    {
+      "id": 38,
+      "topicId": 1,
+      "prompt": "Water ___ at 100°C.",
+      "options": [
+        "is boiling",
+        "will boil",
+        "boiled",
+        "boils"
+      ],
+      "answer": "D",
+      "answerText": "boils",
+      "explanation": "客观规律用一般现在时。"
+    },
+    {
+      "id": 39,
+      "topicId": 1,
+      "prompt": "The store ___ at 9 a.m. every day.",
+      "options": [
+        "has opened",
+        "opens",
+        "is opening",
+        "opened"
+      ],
+      "answer": "B",
+      "answerText": "opens",
+      "explanation": "固定营业时间用一般现在时。"
+    },
+    {
+      "id": 40,
+      "topicId": 1,
+      "prompt": "Our class ___ at 8:30 on weekdays.",
+      "options": [
+        "starts",
+        "is starting",
+        "started",
+        "has started"
+      ],
+      "answer": "A",
+      "answerText": "starts",
+      "explanation": "固定课程表用一般现在时。"
+    },
+    {
+      "id": 41,
+      "topicId": 1,
+      "prompt": "My parents ___ coffee every morning.",
+      "options": [
+        "drink",
+        "drank",
+        "have drunk",
+        "are drinking"
+      ],
+      "answer": "A",
+      "answerText": "drink",
+      "explanation": "“every morning”表示习惯，用一般现在时；复数主语用动词原形。"
+    },
+    {
+      "id": 42,
+      "topicId": 1,
+      "prompt": "She never ___ late for school.",
+      "options": [
+        "has arrived",
+        "arrives",
+        "arrived",
+        "is arriving"
+      ],
+      "answer": "B",
+      "answerText": "arrives",
+      "explanation": "频率副词“never”表示习惯，用一般现在时；she 后动词加 -s。"
+    },
+    {
+      "id": 43,
+      "topicId": 1,
+      "prompt": "Do you usually ___ lunch at home?",
+      "options": [
+        "eats",
+        "eating",
+        "eat",
+        "ate"
+      ],
+      "answer": "C",
+      "answerText": "eat",
+      "explanation": "助动词 do 后要用动词原形。"
+    },
+    {
+      "id": 44,
+      "topicId": 1,
+      "prompt": "Does Tom ___ to music at night?",
+      "options": [
+        "listened",
+        "listen",
+        "listens",
+        "listening"
+      ],
+      "answer": "B",
+      "answerText": "listen",
+      "explanation": "助动词 does 后要用动词原形。"
+    },
+    {
+      "id": 45,
+      "topicId": 1,
+      "prompt": "They do not ___ TV before dinner.",
+      "options": [
+        "watch",
+        "watches",
+        "watching",
+        "watched"
+      ],
+      "answer": "A",
+      "answerText": "watch",
+      "explanation": "do not 后用动词原形。"
+    },
+    {
+      "id": 46,
+      "topicId": 2,
+      "prompt": "They ___ a picture now.",
+      "options": [
+        "drew",
+        "draw",
+        "have drawn",
+        "are drawing"
+      ],
+      "answer": "D",
+      "answerText": "are drawing",
+      "explanation": "“now”表示动作正在进行，用现在进行时：be + doing，所以选“are drawing”。"
+    },
+    {
+      "id": 47,
+      "topicId": 2,
+      "prompt": "Tom ___ an email right now.",
+      "options": [
+        "has written",
+        "writes",
+        "is writing",
+        "wrote"
+      ],
+      "answer": "C",
+      "answerText": "is writing",
+      "explanation": "“right now”表示动作正在进行，用现在进行时：be + doing，所以选“is writing”。"
+    },
+    {
+      "id": 48,
+      "topicId": 2,
+      "prompt": "Amy ___ a message at the moment.",
+      "options": [
+        "sent",
+        "has sent",
+        "sends",
+        "is sending"
+      ],
+      "answer": "D",
+      "answerText": "is sending",
+      "explanation": "“at the moment”表示动作正在进行，用现在进行时：be + doing，所以选“is sending”。"
+    },
+    {
+      "id": 49,
+      "topicId": 2,
+      "prompt": "My brother ___ at the picture today.",
+      "options": [
+        "looks",
+        "is looking",
+        "looked",
+        "has looked"
+      ],
+      "answer": "B",
+      "answerText": "is looking",
+      "explanation": "“today”表示动作正在进行，用现在进行时：be + doing，所以选“is looking”。"
+    },
+    {
+      "id": 50,
+      "topicId": 2,
+      "prompt": "My sister ___ the room this afternoon.",
+      "options": [
+        "is cleaning",
+        "has cleaned",
+        "cleans",
+        "cleaned"
+      ],
+      "answer": "A",
+      "answerText": "is cleaning",
+      "explanation": "“this afternoon”表示动作正在进行，用现在进行时：be + doing，所以选“is cleaning”。"
+    },
+    {
+      "id": 51,
+      "topicId": 2,
+      "prompt": "The teacher ___ a friend now.",
+      "options": [
+        "has met",
+        "met",
+        "is meeting",
+        "meets"
+      ],
+      "answer": "C",
+      "answerText": "is meeting",
+      "explanation": "“now”表示动作正在进行，用现在进行时：be + doing，所以选“is meeting”。"
+    },
+    {
+      "id": 52,
+      "topicId": 2,
+      "prompt": "The student ___ to music right now.",
+      "options": [
+        "listened",
+        "has listened",
+        "listens",
+        "is listening"
+      ],
+      "answer": "D",
+      "answerText": "is listening",
+      "explanation": "“right now”表示动作正在进行，用现在进行时：be + doing，所以选“is listening”。"
+    },
+    {
+      "id": 53,
+      "topicId": 2,
+      "prompt": "Jack ___ a computer at the moment.",
+      "options": [
+        "used",
+        "is using",
+        "uses",
+        "has used"
+      ],
+      "answer": "B",
+      "answerText": "is using",
+      "explanation": "“at the moment”表示动作正在进行，用现在进行时：be + doing，所以选“is using”。"
+    },
+    {
+      "id": 54,
+      "topicId": 2,
+      "prompt": "Lucy ___ at home today.",
+      "options": [
+        "worked",
+        "works",
+        "is working",
+        "has worked"
+      ],
+      "answer": "C",
+      "answerText": "is working",
+      "explanation": "“today”表示动作正在进行，用现在进行时：be + doing，所以选“is working”。"
+    },
+    {
+      "id": 55,
+      "topicId": 2,
+      "prompt": "I ___ in the pool this afternoon.",
+      "options": [
+        "swam",
+        "have swum",
+        "am swimming",
+        "swim"
+      ],
+      "answer": "C",
+      "answerText": "am swimming",
+      "explanation": "“this afternoon”表示动作正在进行，用现在进行时：be + doing，所以选“am swimming”。"
+    },
+    {
+      "id": 56,
+      "topicId": 2,
+      "prompt": "You ___ the piano now.",
+      "options": [
+        "are practicing",
+        "have practiced",
+        "practice",
+        "practiced"
+      ],
+      "answer": "A",
+      "answerText": "are practicing",
+      "explanation": "“now”表示动作正在进行，用现在进行时：be + doing，所以选“are practicing”。"
+    },
+    {
+      "id": 57,
+      "topicId": 2,
+      "prompt": "We ___ soccer right now.",
+      "options": [
+        "have played",
+        "played",
+        "play",
+        "are playing"
+      ],
+      "answer": "D",
+      "answerText": "are playing",
+      "explanation": "“right now”表示动作正在进行，用现在进行时：be + doing，所以选“are playing”。"
+    },
+    {
+      "id": 58,
+      "topicId": 2,
+      "prompt": "They ___ the dishes at the moment.",
+      "options": [
+        "wash",
+        "are washing",
+        "have washed",
+        "washed"
+      ],
+      "answer": "B",
+      "answerText": "are washing",
+      "explanation": "“at the moment”表示动作正在进行，用现在进行时：be + doing，所以选“are washing”。"
+    },
+    {
+      "id": 59,
+      "topicId": 2,
+      "prompt": "Tom ___ a family member today.",
+      "options": [
+        "calls",
+        "has called",
+        "called",
+        "is calling"
+      ],
+      "answer": "D",
+      "answerText": "is calling",
+      "explanation": "“today”表示动作正在进行，用现在进行时：be + doing，所以选“is calling”。"
+    },
+    {
+      "id": 60,
+      "topicId": 2,
+      "prompt": "Amy ___ with a friend this afternoon.",
+      "options": [
+        "is talking",
+        "talks",
+        "talked",
+        "has talked"
+      ],
+      "answer": "A",
+      "answerText": "is talking",
+      "explanation": "“this afternoon”表示动作正在进行，用现在进行时：be + doing，所以选“is talking”。"
+    },
+    {
+      "id": 61,
+      "topicId": 2,
+      "prompt": "My brother ___ TV now.",
+      "options": [
+        "is watching",
+        "has watched",
+        "watched",
+        "watches"
+      ],
+      "answer": "A",
+      "answerText": "is watching",
+      "explanation": "“now”表示动作正在进行，用现在进行时：be + doing，所以选“is watching”。"
+    },
+    {
+      "id": 62,
+      "topicId": 2,
+      "prompt": "My sister ___ food right now.",
+      "options": [
+        "bought",
+        "is buying",
+        "has bought",
+        "buys"
+      ],
+      "answer": "B",
+      "answerText": "is buying",
+      "explanation": "“right now”表示动作正在进行，用现在进行时：be + doing，所以选“is buying”。"
+    },
+    {
+      "id": 63,
+      "topicId": 2,
+      "prompt": "The teacher ___ for the bus at the moment.",
+      "options": [
+        "has waited",
+        "waits",
+        "is waiting",
+        "waited"
+      ],
+      "answer": "C",
+      "answerText": "is waiting",
+      "explanation": "“at the moment”表示动作正在进行，用现在进行时：be + doing，所以选“is waiting”。"
+    },
+    {
+      "id": 64,
+      "topicId": 2,
+      "prompt": "The student ___ a bag today.",
+      "options": [
+        "is carrying",
+        "has carried",
+        "carried",
+        "carries"
+      ],
+      "answer": "A",
+      "answerText": "is carrying",
+      "explanation": "“today”表示动作正在进行，用现在进行时：be + doing，所以选“is carrying”。"
+    },
+    {
+      "id": 65,
+      "topicId": 2,
+      "prompt": "Jack ___ English this afternoon.",
+      "options": [
+        "studies",
+        "studied",
+        "has studied",
+        "is studying"
+      ],
+      "answer": "D",
+      "answerText": "is studying",
+      "explanation": "“this afternoon”表示动作正在进行，用现在进行时：be + doing，所以选“is studying”。"
+    },
+    {
+      "id": 66,
+      "topicId": 2,
+      "prompt": "Lucy ___ in the park now.",
+      "options": [
+        "has run",
+        "is running",
+        "runs",
+        "ran"
+      ],
+      "answer": "B",
+      "answerText": "is running",
+      "explanation": "“now”表示动作正在进行，用现在进行时：be + doing，所以选“is running”。"
+    },
+    {
+      "id": 67,
+      "topicId": 2,
+      "prompt": "I ___ a classmate right now.",
+      "options": [
+        "help",
+        "have helped",
+        "helped",
+        "am helping"
+      ],
+      "answer": "D",
+      "answerText": "am helping",
+      "explanation": "“right now”表示动作正在进行，用现在进行时：be + doing，所以选“am helping”。"
+    },
+    {
+      "id": 68,
+      "topicId": 2,
+      "prompt": "You ___ a small table at the moment.",
+      "options": [
+        "are building",
+        "build",
+        "built",
+        "have built"
+      ],
+      "answer": "A",
+      "answerText": "are building",
+      "explanation": "“at the moment”表示动作正在进行，用现在进行时：be + doing，所以选“are building”。"
+    },
+    {
+      "id": 69,
+      "topicId": 2,
+      "prompt": "We ___ dinner today.",
+      "options": [
+        "cook",
+        "are cooking",
+        "cooked",
+        "have cooked"
+      ],
+      "answer": "B",
+      "answerText": "are cooking",
+      "explanation": "“today”表示动作正在进行，用现在进行时：be + doing，所以选“are cooking”。"
+    },
+    {
+      "id": 70,
+      "topicId": 2,
+      "prompt": "They ___ coffee this afternoon.",
+      "options": [
+        "make",
+        "are making",
+        "have made",
+        "made"
+      ],
+      "answer": "B",
+      "answerText": "are making",
+      "explanation": "“this afternoon”表示动作正在进行，用现在进行时：be + doing，所以选“are making”。"
+    },
+    {
+      "id": 71,
+      "topicId": 2,
+      "prompt": "Tom ___ new words now.",
+      "options": [
+        "learns",
+        "learned",
+        "has learned",
+        "is learning"
+      ],
+      "answer": "D",
+      "answerText": "is learning",
+      "explanation": "“now”表示动作正在进行，用现在进行时：be + doing，所以选“is learning”。"
+    },
+    {
+      "id": 72,
+      "topicId": 2,
+      "prompt": "Amy ___ a picture right now.",
+      "options": [
+        "is drawing",
+        "draws",
+        "has drawn",
+        "drew"
+      ],
+      "answer": "A",
+      "answerText": "is drawing",
+      "explanation": "“right now”表示动作正在进行，用现在进行时：be + doing，所以选“is drawing”。"
+    },
+    {
+      "id": 73,
+      "topicId": 2,
+      "prompt": "My brother ___ an email at the moment.",
+      "options": [
+        "wrote",
+        "is writing",
+        "has written",
+        "writes"
+      ],
+      "answer": "B",
+      "answerText": "is writing",
+      "explanation": "“at the moment”表示动作正在进行，用现在进行时：be + doing，所以选“is writing”。"
+    },
+    {
+      "id": 74,
+      "topicId": 2,
+      "prompt": "My sister ___ a message today.",
+      "options": [
+        "has sent",
+        "sends",
+        "is sending",
+        "sent"
+      ],
+      "answer": "C",
+      "answerText": "is sending",
+      "explanation": "“today”表示动作正在进行，用现在进行时：be + doing，所以选“is sending”。"
+    },
+    {
+      "id": 75,
+      "topicId": 2,
+      "prompt": "The teacher ___ at the picture this afternoon.",
+      "options": [
+        "looks",
+        "looked",
+        "is looking",
+        "has looked"
+      ],
+      "answer": "C",
+      "answerText": "is looking",
+      "explanation": "“this afternoon”表示动作正在进行，用现在进行时：be + doing，所以选“is looking”。"
+    },
+    {
+      "id": 76,
+      "topicId": 2,
+      "prompt": "The student ___ the room now.",
+      "options": [
+        "cleaned",
+        "is cleaning",
+        "has cleaned",
+        "cleans"
+      ],
+      "answer": "B",
+      "answerText": "is cleaning",
+      "explanation": "“now”表示动作正在进行，用现在进行时：be + doing，所以选“is cleaning”。"
+    },
+    {
+      "id": 77,
+      "topicId": 2,
+      "prompt": "Jack ___ a friend right now.",
+      "options": [
+        "has met",
+        "met",
+        "meets",
+        "is meeting"
+      ],
+      "answer": "D",
+      "answerText": "is meeting",
+      "explanation": "“right now”表示动作正在进行，用现在进行时：be + doing，所以选“is meeting”。"
+    },
+    {
+      "id": 78,
+      "topicId": 2,
+      "prompt": "Lucy ___ to music at the moment.",
+      "options": [
+        "has listened",
+        "listened",
+        "listens",
+        "is listening"
+      ],
+      "answer": "D",
+      "answerText": "is listening",
+      "explanation": "“at the moment”表示动作正在进行，用现在进行时：be + doing，所以选“is listening”。"
+    },
+    {
+      "id": 79,
+      "topicId": 2,
+      "prompt": "I ___ a computer today.",
+      "options": [
+        "have used",
+        "used",
+        "use",
+        "am using"
+      ],
+      "answer": "D",
+      "answerText": "am using",
+      "explanation": "“today”表示动作正在进行，用现在进行时：be + doing，所以选“am using”。"
+    },
+    {
+      "id": 80,
+      "topicId": 2,
+      "prompt": "You ___ at home this afternoon.",
+      "options": [
+        "worked",
+        "have worked",
+        "work",
+        "are working"
+      ],
+      "answer": "D",
+      "answerText": "are working",
+      "explanation": "“this afternoon”表示动作正在进行，用现在进行时：be + doing，所以选“are working”。"
+    },
+    {
+      "id": 81,
+      "topicId": 2,
+      "prompt": "We ___ in the pool now.",
+      "options": [
+        "are swimming",
+        "swam",
+        "have swum",
+        "swim"
+      ],
+      "answer": "A",
+      "answerText": "are swimming",
+      "explanation": "“now”表示动作正在进行，用现在进行时：be + doing，所以选“are swimming”。"
+    },
+    {
+      "id": 82,
+      "topicId": 2,
+      "prompt": "They ___ the piano right now.",
+      "options": [
+        "are practicing",
+        "have practiced",
+        "practiced",
+        "practice"
+      ],
+      "answer": "A",
+      "answerText": "are practicing",
+      "explanation": "“right now”表示动作正在进行，用现在进行时：be + doing，所以选“are practicing”。"
+    },
+    {
+      "id": 83,
+      "topicId": 2,
+      "prompt": "Look! The baby ___ now.",
+      "options": [
+        "is sleeping",
+        "has slept",
+        "slept",
+        "sleeps"
+      ],
+      "answer": "A",
+      "answerText": "is sleeping",
+      "explanation": "“Look!”和“now”说明动作正在发生，用现在进行时。"
+    },
+    {
+      "id": 84,
+      "topicId": 2,
+      "prompt": "Listen! Someone ___ at the door.",
+      "options": [
+        "is talking",
+        "talked",
+        "has talked",
+        "talks"
+      ],
+      "answer": "A",
+      "answerText": "is talking",
+      "explanation": "“Listen!”提示此刻正在发生，用现在进行时。"
+    },
+    {
+      "id": 85,
+      "topicId": 2,
+      "prompt": "This week, I ___ with my aunt.",
+      "options": [
+        "am living",
+        "live",
+        "have lived",
+        "lived"
+      ],
+      "answer": "A",
+      "answerText": "am living",
+      "explanation": "“this week”表示暂时的当前状态，可用现在进行时。"
+    },
+    {
+      "id": 86,
+      "topicId": 2,
+      "prompt": "We ___ for the bus at the moment.",
+      "options": [
+        "wait",
+        "waited",
+        "are waiting",
+        "have waited"
+      ],
+      "answer": "C",
+      "answerText": "are waiting",
+      "explanation": "“at the moment”表示此刻正在进行。"
+    },
+    {
+      "id": 87,
+      "topicId": 2,
+      "prompt": "Why ___ you ___ so fast now?",
+      "options": [
+        "have / walked",
+        "did / walk",
+        "are / walking",
+        "do / walk"
+      ],
+      "answer": "C",
+      "answerText": "are / walking",
+      "explanation": "“now”要求现在进行时；you 搭配 are。"
+    },
+    {
+      "id": 88,
+      "topicId": 2,
+      "prompt": "Tom ___ dinner now, so he cannot answer the phone.",
+      "options": [
+        "cooked",
+        "has cooked",
+        "is cooking",
+        "cooks"
+      ],
+      "answer": "C",
+      "answerText": "is cooking",
+      "explanation": "后半句说明他此刻正在做饭，用现在进行时。"
+    },
+    {
+      "id": 89,
+      "topicId": 2,
+      "prompt": "The students ___ a test right now.",
+      "options": [
+        "are taking",
+        "take",
+        "have taken",
+        "took"
+      ],
+      "answer": "A",
+      "answerText": "are taking",
+      "explanation": "“right now”表示正在进行，用 are taking。"
+    },
+    {
+      "id": 90,
+      "topicId": 2,
+      "prompt": "I ___ my room today because guests are coming.",
+      "options": [
+        "have cleaned",
+        "clean",
+        "am cleaning",
+        "cleaned"
+      ],
+      "answer": "C",
+      "answerText": "am cleaning",
+      "explanation": "“today”表示当前阶段的临时安排，用现在进行时。"
+    },
+    {
+      "id": 91,
+      "topicId": 3,
+      "prompt": "Amy ___ homework once so far this week.",
+      "options": [
+        "finished",
+        "finishes",
+        "is finishing",
+        "has finished"
+      ],
+      "answer": "D",
+      "answerText": "has finished",
+      "explanation": "“once so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has finished”。"
+    },
+    {
+      "id": 92,
+      "topicId": 3,
+      "prompt": "My brother ___ the dishes twice so far this week.",
+      "options": [
+        "has washed",
+        "washed",
+        "washes",
+        "is washing"
+      ],
+      "answer": "A",
+      "answerText": "has washed",
+      "explanation": "“twice so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has washed”。"
+    },
+    {
+      "id": 93,
+      "topicId": 3,
+      "prompt": "My sister ___ the office before.",
+      "options": [
+        "is leaving",
+        "leaves",
+        "left",
+        "has left"
+      ],
+      "answer": "D",
+      "answerText": "has left",
+      "explanation": "“before”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has left”。"
+    },
+    {
+      "id": 94,
+      "topicId": 3,
+      "prompt": "The teacher ___ the window three times so far this month.",
+      "options": [
+        "is opening",
+        "opens",
+        "opened",
+        "has opened"
+      ],
+      "answer": "D",
+      "answerText": "has opened",
+      "explanation": "“three times so far this month”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has opened”。"
+    },
+    {
+      "id": 95,
+      "topicId": 3,
+      "prompt": "The student ___ the piano recently.",
+      "options": [
+        "practices",
+        "has practiced",
+        "is practicing",
+        "practiced"
+      ],
+      "answer": "B",
+      "answerText": "has practiced",
+      "explanation": "“recently”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has practiced”。"
+    },
+    {
+      "id": 96,
+      "topicId": 3,
+      "prompt": "Jack ___ soccer once so far this week.",
+      "options": [
+        "is playing",
+        "plays",
+        "has played",
+        "played"
+      ],
+      "answer": "C",
+      "answerText": "has played",
+      "explanation": "“once so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has played”。"
+    },
+    {
+      "id": 97,
+      "topicId": 3,
+      "prompt": "Lucy ___ a friend twice so far this week.",
+      "options": [
+        "visits",
+        "is visiting",
+        "visited",
+        "has visited"
+      ],
+      "answer": "D",
+      "answerText": "has visited",
+      "explanation": "“twice so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has visited”。"
+    },
+    {
+      "id": 98,
+      "topicId": 3,
+      "prompt": "I ___ an email before.",
+      "options": [
+        "am writing",
+        "have written",
+        "wrote",
+        "write"
+      ],
+      "answer": "B",
+      "answerText": "have written",
+      "explanation": "“before”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“have written”。"
+    },
+    {
+      "id": 99,
+      "topicId": 3,
+      "prompt": "You ___ in the pool three times so far this month.",
+      "options": [
+        "swim",
+        "are swimming",
+        "have swum",
+        "swam"
+      ],
+      "answer": "C",
+      "answerText": "have swum",
+      "explanation": "“three times so far this month”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“have swum”。"
+    },
+    {
+      "id": 100,
+      "topicId": 3,
+      "prompt": "We ___ a message recently.",
+      "options": [
+        "send",
+        "sent",
+        "have sent",
+        "are sending"
+      ],
+      "answer": "C",
+      "answerText": "have sent",
+      "explanation": "“recently”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“have sent”。"
+    },
+    {
+      "id": 101,
+      "topicId": 3,
+      "prompt": "They ___ at the picture once so far this week.",
+      "options": [
+        "have looked",
+        "look",
+        "looked",
+        "are looking"
+      ],
+      "answer": "A",
+      "answerText": "have looked",
+      "explanation": "“once so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“have looked”。"
+    },
+    {
+      "id": 102,
+      "topicId": 3,
+      "prompt": "Tom ___ breakfast twice so far this week.",
+      "options": [
+        "eats",
+        "has eaten",
+        "ate",
+        "is eating"
+      ],
+      "answer": "B",
+      "answerText": "has eaten",
+      "explanation": "“twice so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has eaten”。"
+    },
+    {
+      "id": 103,
+      "topicId": 3,
+      "prompt": "Amy ___ dinner before.",
+      "options": [
+        "is cooking",
+        "cooks",
+        "cooked",
+        "has cooked"
+      ],
+      "answer": "D",
+      "answerText": "has cooked",
+      "explanation": "“before”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has cooked”。"
+    },
+    {
+      "id": 104,
+      "topicId": 3,
+      "prompt": "My brother ___ a friend three times so far this month.",
+      "options": [
+        "has met",
+        "met",
+        "meets",
+        "is meeting"
+      ],
+      "answer": "A",
+      "answerText": "has met",
+      "explanation": "“three times so far this month”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has met”。"
+    },
+    {
+      "id": 105,
+      "topicId": 3,
+      "prompt": "My sister ___ class recently.",
+      "options": [
+        "started",
+        "is starting",
+        "starts",
+        "has started"
+      ],
+      "answer": "D",
+      "answerText": "has started",
+      "explanation": "“recently”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has started”。"
+    },
+    {
+      "id": 106,
+      "topicId": 3,
+      "prompt": "The teacher ___ a classmate once so far this week.",
+      "options": [
+        "has helped",
+        "is helping",
+        "helped",
+        "helps"
+      ],
+      "answer": "A",
+      "answerText": "has helped",
+      "explanation": "“once so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has helped”。"
+    },
+    {
+      "id": 107,
+      "topicId": 3,
+      "prompt": "The student ___ a small table twice so far this week.",
+      "options": [
+        "builds",
+        "has built",
+        "is building",
+        "built"
+      ],
+      "answer": "B",
+      "answerText": "has built",
+      "explanation": "“twice so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has built”。"
+    },
+    {
+      "id": 108,
+      "topicId": 3,
+      "prompt": "Jack ___ the room before.",
+      "options": [
+        "is cleaning",
+        "cleans",
+        "cleaned",
+        "has cleaned"
+      ],
+      "answer": "D",
+      "answerText": "has cleaned",
+      "explanation": "“before”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has cleaned”。"
+    },
+    {
+      "id": 109,
+      "topicId": 3,
+      "prompt": "Lucy ___ to work three times so far this month.",
+      "options": [
+        "drives",
+        "is driving",
+        "drove",
+        "has driven"
+      ],
+      "answer": "D",
+      "answerText": "has driven",
+      "explanation": "“three times so far this month”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has driven”。"
+    },
+    {
+      "id": 110,
+      "topicId": 3,
+      "prompt": "I ___ in the park recently.",
+      "options": [
+        "ran",
+        "have run",
+        "am running",
+        "run"
+      ],
+      "answer": "B",
+      "answerText": "have run",
+      "explanation": "“recently”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“have run”。"
+    },
+    {
+      "id": 111,
+      "topicId": 3,
+      "prompt": "You ___ a family member once so far this week.",
+      "options": [
+        "called",
+        "call",
+        "have called",
+        "are calling"
+      ],
+      "answer": "C",
+      "answerText": "have called",
+      "explanation": "“once so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“have called”。"
+    },
+    {
+      "id": 112,
+      "topicId": 3,
+      "prompt": "We ___ with a friend twice so far this week.",
+      "options": [
+        "are talking",
+        "talked",
+        "have talked",
+        "talk"
+      ],
+      "answer": "C",
+      "answerText": "have talked",
+      "explanation": "“twice so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“have talked”。"
+    },
+    {
+      "id": 113,
+      "topicId": 3,
+      "prompt": "They ___ to school before.",
+      "options": [
+        "go",
+        "are going",
+        "went",
+        "have gone"
+      ],
+      "answer": "D",
+      "answerText": "have gone",
+      "explanation": "“before”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“have gone”。"
+    },
+    {
+      "id": 114,
+      "topicId": 3,
+      "prompt": "Tom ___ at home three times so far this month.",
+      "options": [
+        "worked",
+        "is working",
+        "works",
+        "has worked"
+      ],
+      "answer": "D",
+      "answerText": "has worked",
+      "explanation": "“three times so far this month”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has worked”。"
+    },
+    {
+      "id": 115,
+      "topicId": 3,
+      "prompt": "Amy ___ the bus recently.",
+      "options": [
+        "has taken",
+        "took",
+        "is taking",
+        "takes"
+      ],
+      "answer": "A",
+      "answerText": "has taken",
+      "explanation": "“recently”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has taken”。"
+    },
+    {
+      "id": 116,
+      "topicId": 3,
+      "prompt": "My brother ___ coffee once so far this week.",
+      "options": [
+        "is making",
+        "has made",
+        "makes",
+        "made"
+      ],
+      "answer": "B",
+      "answerText": "has made",
+      "explanation": "“once so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has made”。"
+    },
+    {
+      "id": 117,
+      "topicId": 3,
+      "prompt": "My sister ___ to music twice so far this week.",
+      "options": [
+        "is listening",
+        "listens",
+        "has listened",
+        "listened"
+      ],
+      "answer": "C",
+      "answerText": "has listened",
+      "explanation": "“twice so far this week”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has listened”。"
+    },
+    {
+      "id": 118,
+      "topicId": 3,
+      "prompt": "The teacher ___ a computer before.",
+      "options": [
+        "is using",
+        "used",
+        "uses",
+        "has used"
+      ],
+      "answer": "D",
+      "answerText": "has used",
+      "explanation": "“before”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has used”。"
+    },
+    {
+      "id": 119,
+      "topicId": 3,
+      "prompt": "The student ___ TV three times so far this month.",
+      "options": [
+        "has watched",
+        "watched",
+        "watches",
+        "is watching"
+      ],
+      "answer": "A",
+      "answerText": "has watched",
+      "explanation": "“three times so far this month”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has watched”。"
+    },
+    {
+      "id": 120,
+      "topicId": 3,
+      "prompt": "Jack ___ to school recently.",
+      "options": [
+        "is walking",
+        "walked",
+        "has walked",
+        "walks"
+      ],
+      "answer": "C",
+      "answerText": "has walked",
+      "explanation": "“recently”强调截至现在的经历、完成或结果，用现在完成时：have/has + 过去分词，所以选“has walked”。"
+    },
+    {
+      "id": 121,
+      "topicId": 3,
+      "prompt": "I ___ in this city for five years.",
+      "options": [
+        "am living",
+        "lived",
+        "have lived",
+        "will live"
+      ],
+      "answer": "C",
+      "answerText": "have lived",
+      "explanation": "“for five years”表示从过去持续到现在；live 表示持续状态，可用现在完成时“have lived”。"
+    },
+    {
+      "id": 122,
+      "topicId": 3,
+      "prompt": "Amy ___ here since 2022.",
+      "options": [
+        "is living",
+        "lived",
+        "has lived",
+        "will live"
+      ],
+      "answer": "C",
+      "answerText": "has lived",
+      "explanation": "“since 2022”表示从过去持续到现在；live 表示持续状态，可用现在完成时“has lived”。"
+    },
+    {
+      "id": 123,
+      "topicId": 3,
+      "prompt": "We ___ in this house for ten years.",
+      "options": [
+        "lived",
+        "will live",
+        "are living",
+        "have lived"
+      ],
+      "answer": "D",
+      "answerText": "have lived",
+      "explanation": "“for ten years”表示从过去持续到现在；live 表示持续状态，可用现在完成时“have lived”。"
+    },
+    {
+      "id": 124,
+      "topicId": 3,
+      "prompt": "Tom ___ here since May.",
+      "options": [
+        "lived",
+        "will live",
+        "has lived",
+        "is living"
+      ],
+      "answer": "C",
+      "answerText": "has lived",
+      "explanation": "“since May”表示从过去持续到现在；live 表示持续状态，可用现在完成时“has lived”。"
+    },
+    {
+      "id": 125,
+      "topicId": 3,
+      "prompt": "They ___ in the same town for a long time.",
+      "options": [
+        "are living",
+        "lived",
+        "will live",
+        "have lived"
+      ],
+      "answer": "D",
+      "answerText": "have lived",
+      "explanation": "“for a long time”表示从过去持续到现在；live 表示持续状态，可用现在完成时“have lived”。"
+    },
+    {
+      "id": 126,
+      "topicId": 3,
+      "prompt": "My sister ___ in New York since last summer.",
+      "options": [
+        "lived",
+        "is living",
+        "will live",
+        "has lived"
+      ],
+      "answer": "D",
+      "answerText": "has lived",
+      "explanation": "“since last summer”表示从过去持续到现在；live 表示持续状态，可用现在完成时“has lived”。"
+    },
+    {
+      "id": 127,
+      "topicId": 3,
+      "prompt": "You ___ here for two months.",
+      "options": [
+        "will live",
+        "are living",
+        "lived",
+        "have lived"
+      ],
+      "answer": "D",
+      "answerText": "have lived",
+      "explanation": "“for two months”表示从过去持续到现在；live 表示持续状态，可用现在完成时“have lived”。"
+    },
+    {
+      "id": 128,
+      "topicId": 3,
+      "prompt": "Jack ___ with this company since 2024.",
+      "options": [
+        "lived",
+        "is living",
+        "will live",
+        "has lived"
+      ],
+      "answer": "D",
+      "answerText": "has lived",
+      "explanation": "“since 2024”表示从过去持续到现在；live 表示持续状态，可用现在完成时“has lived”。"
+    },
+    {
+      "id": 129,
+      "topicId": 3,
+      "prompt": "Have you ever ___ this movie?",
+      "options": [
+        "seen",
+        "seeing",
+        "saw",
+        "see"
+      ],
+      "answer": "A",
+      "answerText": "seen",
+      "explanation": "ever 常用于现在完成时疑问句；have 后用过去分词 seen。"
+    },
+    {
+      "id": 130,
+      "topicId": 3,
+      "prompt": "She has not finished her homework ___.",
+      "options": [
+        "last",
+        "yet",
+        "ago",
+        "now"
+      ],
+      "answer": "B",
+      "answerText": "yet",
+      "explanation": "yet 常用于现在完成时否定句或疑问句，表示“还、尚未”。"
+    },
+    {
+      "id": 131,
+      "topicId": 3,
+      "prompt": "I have ___ eaten lunch, so I am not hungry.",
+      "options": [
+        "last",
+        "already",
+        "ago",
+        "yesterday"
+      ],
+      "answer": "B",
+      "answerText": "already",
+      "explanation": "already 表示“已经”，常与现在完成时连用。"
+    },
+    {
+      "id": 132,
+      "topicId": 3,
+      "prompt": "Tom ___ never ___ to Japan.",
+      "options": [
+        "has / been",
+        "did / go",
+        "is / going",
+        "will / go"
+      ],
+      "answer": "A",
+      "answerText": "has / been",
+      "explanation": "never 表示截至现在从未有过的经历，用现在完成时。"
+    },
+    {
+      "id": 133,
+      "topicId": 3,
+      "prompt": "We ___ the work yet.",
+      "options": [
+        "do not finish",
+        "did not finish",
+        "have not finished",
+        "are not finishing"
+      ],
+      "answer": "C",
+      "answerText": "have not finished",
+      "explanation": "yet 与“截至现在尚未完成”搭配，用现在完成时否定。"
+    },
+    {
+      "id": 134,
+      "topicId": 3,
+      "prompt": "My phone is gone. I think I ___ it.",
+      "options": [
+        "am losing",
+        "lost",
+        "lose",
+        "have lost"
+      ],
+      "answer": "D",
+      "answerText": "have lost",
+      "explanation": "强调过去动作造成现在结果“现在没有手机”，用现在完成时。"
+    },
+    {
+      "id": 135,
+      "topicId": 3,
+      "prompt": "This is the best cake I ___ ever ___.",
+      "options": [
+        "did / eat",
+        "have / eaten",
+        "am / eating",
+        "will / eat"
+      ],
+      "answer": "B",
+      "answerText": "have / eaten",
+      "explanation": "“ever”表示截至现在的经历，用现在完成时。"
+    },
+    {
+      "id": 136,
+      "topicId": 4,
+      "prompt": "We ___ soccer for two hours, and the activity is still going on.",
+      "options": [
+        "played",
+        "have been playing",
+        "have played",
+        "are playing"
+      ],
+      "answer": "B",
+      "answerText": "have been playing",
+      "explanation": "“for two hours”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 137,
+      "topicId": 4,
+      "prompt": "They ___ TV since 8 a.m., and the activity is still going on.",
+      "options": [
+        "watched",
+        "have been watching",
+        "have watched",
+        "are watching"
+      ],
+      "answer": "B",
+      "answerText": "have been watching",
+      "explanation": "“since 8 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 138,
+      "topicId": 4,
+      "prompt": "Tom ___ the room all morning, and the activity is still going on.",
+      "options": [
+        "is cleaning",
+        "has cleaned",
+        "has been cleaning",
+        "cleaned"
+      ],
+      "answer": "C",
+      "answerText": "has been cleaning",
+      "explanation": "“all morning”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 139,
+      "topicId": 4,
+      "prompt": "Amy ___ English for an hour, and the activity is still going on.",
+      "options": [
+        "has been studying",
+        "studied",
+        "is studying",
+        "has studied"
+      ],
+      "answer": "A",
+      "answerText": "has been studying",
+      "explanation": "“for an hour”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 140,
+      "topicId": 4,
+      "prompt": "My brother ___ at home since 9 a.m., and the activity is still going on.",
+      "options": [
+        "has been working",
+        "worked",
+        "has worked",
+        "is working"
+      ],
+      "answer": "A",
+      "answerText": "has been working",
+      "explanation": "“since 9 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 141,
+      "topicId": 4,
+      "prompt": "My sister ___ dinner for two hours, and the activity is still going on.",
+      "options": [
+        "has cooked",
+        "has been cooking",
+        "is cooking",
+        "cooked"
+      ],
+      "answer": "B",
+      "answerText": "has been cooking",
+      "explanation": "“for two hours”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 142,
+      "topicId": 4,
+      "prompt": "The teacher ___ an email since 8 a.m., and the activity is still going on.",
+      "options": [
+        "has been writing",
+        "has written",
+        "wrote",
+        "is writing"
+      ],
+      "answer": "A",
+      "answerText": "has been writing",
+      "explanation": "“since 8 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 143,
+      "topicId": 4,
+      "prompt": "The student ___ in the park all morning, and the activity is still going on.",
+      "options": [
+        "has been running",
+        "is running",
+        "has run",
+        "ran"
+      ],
+      "answer": "A",
+      "answerText": "has been running",
+      "explanation": "“all morning”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 144,
+      "topicId": 4,
+      "prompt": "Jack ___ for the bus for an hour, and the activity is still going on.",
+      "options": [
+        "has been waiting",
+        "waited",
+        "is waiting",
+        "has waited"
+      ],
+      "answer": "A",
+      "answerText": "has been waiting",
+      "explanation": "“for an hour”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 145,
+      "topicId": 4,
+      "prompt": "Lucy ___ a classmate since 9 a.m., and the activity is still going on.",
+      "options": [
+        "has helped",
+        "is helping",
+        "helped",
+        "has been helping"
+      ],
+      "answer": "D",
+      "answerText": "has been helping",
+      "explanation": "“since 9 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 146,
+      "topicId": 4,
+      "prompt": "I ___ the piano for two hours, and the activity is still going on.",
+      "options": [
+        "practiced",
+        "am practicing",
+        "have been practicing",
+        "have practiced"
+      ],
+      "answer": "C",
+      "answerText": "have been practicing",
+      "explanation": "“for two hours”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 147,
+      "topicId": 4,
+      "prompt": "You ___ new words since 8 a.m., and the activity is still going on.",
+      "options": [
+        "are learning",
+        "learned",
+        "have been learning",
+        "have learned"
+      ],
+      "answer": "C",
+      "answerText": "have been learning",
+      "explanation": "“since 8 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 148,
+      "topicId": 4,
+      "prompt": "We ___ with a friend all morning, and the activity is still going on.",
+      "options": [
+        "talked",
+        "are talking",
+        "have been talking",
+        "have talked"
+      ],
+      "answer": "C",
+      "answerText": "have been talking",
+      "explanation": "“all morning”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 149,
+      "topicId": 4,
+      "prompt": "They ___ soccer for an hour, and the activity is still going on.",
+      "options": [
+        "have played",
+        "played",
+        "are playing",
+        "have been playing"
+      ],
+      "answer": "D",
+      "answerText": "have been playing",
+      "explanation": "“for an hour”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 150,
+      "topicId": 4,
+      "prompt": "Tom ___ TV since 9 a.m., and the activity is still going on.",
+      "options": [
+        "is watching",
+        "has been watching",
+        "has watched",
+        "watched"
+      ],
+      "answer": "B",
+      "answerText": "has been watching",
+      "explanation": "“since 9 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 151,
+      "topicId": 4,
+      "prompt": "Amy ___ the room for two hours, and the activity is still going on.",
+      "options": [
+        "cleaned",
+        "has cleaned",
+        "has been cleaning",
+        "is cleaning"
+      ],
+      "answer": "C",
+      "answerText": "has been cleaning",
+      "explanation": "“for two hours”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 152,
+      "topicId": 4,
+      "prompt": "My brother ___ English since 8 a.m., and the activity is still going on.",
+      "options": [
+        "has been studying",
+        "has studied",
+        "is studying",
+        "studied"
+      ],
+      "answer": "A",
+      "answerText": "has been studying",
+      "explanation": "“since 8 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 153,
+      "topicId": 4,
+      "prompt": "My sister ___ at home all morning, and the activity is still going on.",
+      "options": [
+        "worked",
+        "is working",
+        "has worked",
+        "has been working"
+      ],
+      "answer": "D",
+      "answerText": "has been working",
+      "explanation": "“all morning”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 154,
+      "topicId": 4,
+      "prompt": "The teacher ___ dinner for an hour, and the activity is still going on.",
+      "options": [
+        "has cooked",
+        "has been cooking",
+        "cooked",
+        "is cooking"
+      ],
+      "answer": "B",
+      "answerText": "has been cooking",
+      "explanation": "“for an hour”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 155,
+      "topicId": 4,
+      "prompt": "The student ___ an email since 9 a.m., and the activity is still going on.",
+      "options": [
+        "wrote",
+        "has written",
+        "is writing",
+        "has been writing"
+      ],
+      "answer": "D",
+      "answerText": "has been writing",
+      "explanation": "“since 9 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 156,
+      "topicId": 4,
+      "prompt": "Jack ___ in the park for two hours, and the activity is still going on.",
+      "options": [
+        "ran",
+        "is running",
+        "has been running",
+        "has run"
+      ],
+      "answer": "C",
+      "answerText": "has been running",
+      "explanation": "“for two hours”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 157,
+      "topicId": 4,
+      "prompt": "Lucy ___ for the bus since 8 a.m., and the activity is still going on.",
+      "options": [
+        "has waited",
+        "is waiting",
+        "has been waiting",
+        "waited"
+      ],
+      "answer": "C",
+      "answerText": "has been waiting",
+      "explanation": "“since 8 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 158,
+      "topicId": 4,
+      "prompt": "I ___ a classmate all morning, and the activity is still going on.",
+      "options": [
+        "have helped",
+        "helped",
+        "have been helping",
+        "am helping"
+      ],
+      "answer": "C",
+      "answerText": "have been helping",
+      "explanation": "“all morning”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 159,
+      "topicId": 4,
+      "prompt": "You ___ the piano for an hour, and the activity is still going on.",
+      "options": [
+        "are practicing",
+        "have practiced",
+        "have been practicing",
+        "practiced"
+      ],
+      "answer": "C",
+      "answerText": "have been practicing",
+      "explanation": "“for an hour”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 160,
+      "topicId": 4,
+      "prompt": "We ___ new words since 9 a.m., and the activity is still going on.",
+      "options": [
+        "have been learning",
+        "learned",
+        "have learned",
+        "are learning"
+      ],
+      "answer": "A",
+      "answerText": "have been learning",
+      "explanation": "“since 9 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 161,
+      "topicId": 4,
+      "prompt": "They ___ with a friend for two hours, and the activity is still going on.",
+      "options": [
+        "are talking",
+        "talked",
+        "have talked",
+        "have been talking"
+      ],
+      "answer": "D",
+      "answerText": "have been talking",
+      "explanation": "“for two hours”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 162,
+      "topicId": 4,
+      "prompt": "Tom ___ soccer since 8 a.m., and the activity is still going on.",
+      "options": [
+        "has been playing",
+        "played",
+        "is playing",
+        "has played"
+      ],
+      "answer": "A",
+      "answerText": "has been playing",
+      "explanation": "“since 8 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 163,
+      "topicId": 4,
+      "prompt": "Amy ___ TV all morning, and the activity is still going on.",
+      "options": [
+        "has been watching",
+        "is watching",
+        "has watched",
+        "watched"
+      ],
+      "answer": "A",
+      "answerText": "has been watching",
+      "explanation": "“all morning”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 164,
+      "topicId": 4,
+      "prompt": "My brother ___ the room for an hour, and the activity is still going on.",
+      "options": [
+        "cleaned",
+        "has cleaned",
+        "has been cleaning",
+        "is cleaning"
+      ],
+      "answer": "C",
+      "answerText": "has been cleaning",
+      "explanation": "“for an hour”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 165,
+      "topicId": 4,
+      "prompt": "My sister ___ English since 9 a.m., and the activity is still going on.",
+      "options": [
+        "has studied",
+        "studied",
+        "has been studying",
+        "is studying"
+      ],
+      "answer": "C",
+      "answerText": "has been studying",
+      "explanation": "“since 9 a.m.”加上“still going on”表示动作从过去持续到现在且仍在进行，用现在完成进行时：have/has been + doing。"
+    },
+    {
+      "id": 166,
+      "topicId": 4,
+      "prompt": "It ___ for three hours, and it is still raining.",
+      "options": [
+        "is raining",
+        "has been raining",
+        "has rained",
+        "rained"
+      ],
+      "answer": "B",
+      "answerText": "has been raining",
+      "explanation": "动作从过去持续到现在且仍在继续，用现在完成进行时。"
+    },
+    {
+      "id": 167,
+      "topicId": 4,
+      "prompt": "How long ___ you ___ English?",
+      "options": [
+        "have / studied",
+        "are / studying",
+        "have / been studying",
+        "did / study"
+      ],
+      "answer": "C",
+      "answerText": "have / been studying",
+      "explanation": "How long 询问持续时间，且学习仍在继续，用现在完成进行时。"
+    },
+    {
+      "id": 168,
+      "topicId": 4,
+      "prompt": "Tom is tired because he ___ all morning.",
+      "options": [
+        "is working",
+        "has been working",
+        "worked",
+        "works"
+      ],
+      "answer": "B",
+      "answerText": "has been working",
+      "explanation": "过去开始持续到现在的活动造成当前结果“tired”，用现在完成进行时。"
+    },
+    {
+      "id": 169,
+      "topicId": 4,
+      "prompt": "My hands are dirty because I ___ the bike.",
+      "options": [
+        "have cleaned",
+        "cleaned",
+        "am cleaning",
+        "have been cleaning"
+      ],
+      "answer": "D",
+      "answerText": "have been cleaning",
+      "explanation": "强调刚才持续进行的动作及现在的结果，用现在完成进行时。"
+    },
+    {
+      "id": 170,
+      "topicId": 4,
+      "prompt": "She ___ for the bus since 7:30, and it still has not come.",
+      "options": [
+        "has waited",
+        "has been waiting",
+        "waited",
+        "is waiting"
+      ],
+      "answer": "B",
+      "answerText": "has been waiting",
+      "explanation": "since + 时间点，且动作仍在进行，用现在完成进行时。"
+    },
+    {
+      "id": 171,
+      "topicId": 5,
+      "prompt": "Tom ___ a friend yesterday.",
+      "options": [
+        "has visited",
+        "visits",
+        "visited",
+        "is visiting"
+      ],
+      "answer": "C",
+      "answerText": "visited",
+      "explanation": "“yesterday”是明确的过去时间，动作已结束，用一般过去时，所以选“visited”。"
+    },
+    {
+      "id": 172,
+      "topicId": 5,
+      "prompt": "Amy ___ an email two days ago.",
+      "options": [
+        "wrote",
+        "has written",
+        "writes",
+        "is writing"
+      ],
+      "answer": "A",
+      "answerText": "wrote",
+      "explanation": "“two days ago”是明确的过去时间，动作已结束，用一般过去时，所以选“wrote”。"
+    },
+    {
+      "id": 173,
+      "topicId": 5,
+      "prompt": "My brother ___ in the pool last weekend.",
+      "options": [
+        "has swum",
+        "is swimming",
+        "swims",
+        "swam"
+      ],
+      "answer": "D",
+      "answerText": "swam",
+      "explanation": "“last weekend”是明确的过去时间，动作已结束，用一般过去时，所以选“swam”。"
+    },
+    {
+      "id": 174,
+      "topicId": 5,
+      "prompt": "My sister ___ a message last week.",
+      "options": [
+        "has sent",
+        "is sending",
+        "sent",
+        "sends"
+      ],
+      "answer": "C",
+      "answerText": "sent",
+      "explanation": "“last week”是明确的过去时间，动作已结束，用一般过去时，所以选“sent”。"
+    },
+    {
+      "id": 175,
+      "topicId": 5,
+      "prompt": "The teacher ___ at the picture yesterday.",
+      "options": [
+        "is looking",
+        "looks",
+        "looked",
+        "has looked"
+      ],
+      "answer": "C",
+      "answerText": "looked",
+      "explanation": "“yesterday”是明确的过去时间，动作已结束，用一般过去时，所以选“looked”。"
+    },
+    {
+      "id": 176,
+      "topicId": 5,
+      "prompt": "The student ___ breakfast yesterday morning.",
+      "options": [
+        "has eaten",
+        "ate",
+        "eats",
+        "is eating"
+      ],
+      "answer": "B",
+      "answerText": "ate",
+      "explanation": "“yesterday morning”是明确的过去时间，动作已结束，用一般过去时，所以选“ate”。"
+    },
+    {
+      "id": 177,
+      "topicId": 5,
+      "prompt": "Jack ___ dinner last night.",
+      "options": [
+        "is cooking",
+        "cooked",
+        "has cooked",
+        "cooks"
+      ],
+      "answer": "B",
+      "answerText": "cooked",
+      "explanation": "“last night”是明确的过去时间，动作已结束，用一般过去时，所以选“cooked”。"
+    },
+    {
+      "id": 178,
+      "topicId": 5,
+      "prompt": "Lucy ___ a friend last week.",
+      "options": [
+        "is meeting",
+        "has met",
+        "met",
+        "meets"
+      ],
+      "answer": "C",
+      "answerText": "met",
+      "explanation": "“last week”是明确的过去时间，动作已结束，用一般过去时，所以选“met”。"
+    },
+    {
+      "id": 179,
+      "topicId": 5,
+      "prompt": "I ___ class yesterday.",
+      "options": [
+        "am starting",
+        "start",
+        "have started",
+        "started"
+      ],
+      "answer": "D",
+      "answerText": "started",
+      "explanation": "“yesterday”是明确的过去时间，动作已结束，用一般过去时，所以选“started”。"
+    },
+    {
+      "id": 180,
+      "topicId": 5,
+      "prompt": "You ___ a classmate two days ago.",
+      "options": [
+        "have helped",
+        "help",
+        "are helping",
+        "helped"
+      ],
+      "answer": "D",
+      "answerText": "helped",
+      "explanation": "“two days ago”是明确的过去时间，动作已结束，用一般过去时，所以选“helped”。"
+    },
+    {
+      "id": 181,
+      "topicId": 5,
+      "prompt": "We ___ a small table last weekend.",
+      "options": [
+        "have built",
+        "are building",
+        "build",
+        "built"
+      ],
+      "answer": "D",
+      "answerText": "built",
+      "explanation": "“last weekend”是明确的过去时间，动作已结束，用一般过去时，所以选“built”。"
+    },
+    {
+      "id": 182,
+      "topicId": 5,
+      "prompt": "They ___ the room last week.",
+      "options": [
+        "clean",
+        "are cleaning",
+        "have cleaned",
+        "cleaned"
+      ],
+      "answer": "D",
+      "answerText": "cleaned",
+      "explanation": "“last week”是明确的过去时间，动作已结束，用一般过去时，所以选“cleaned”。"
+    },
+    {
+      "id": 183,
+      "topicId": 5,
+      "prompt": "Tom ___ to work yesterday morning.",
+      "options": [
+        "drove",
+        "has driven",
+        "is driving",
+        "drives"
+      ],
+      "answer": "A",
+      "answerText": "drove",
+      "explanation": "“yesterday morning”是明确的过去时间，动作已结束，用一般过去时，所以选“drove”。"
+    },
+    {
+      "id": 184,
+      "topicId": 5,
+      "prompt": "Amy ___ in the park two days ago.",
+      "options": [
+        "runs",
+        "has run",
+        "is running",
+        "ran"
+      ],
+      "answer": "D",
+      "answerText": "ran",
+      "explanation": "“two days ago”是明确的过去时间，动作已结束，用一般过去时，所以选“ran”。"
+    },
+    {
+      "id": 185,
+      "topicId": 5,
+      "prompt": "My brother ___ a family member last weekend.",
+      "options": [
+        "has called",
+        "calls",
+        "is calling",
+        "called"
+      ],
+      "answer": "D",
+      "answerText": "called",
+      "explanation": "“last weekend”是明确的过去时间，动作已结束，用一般过去时，所以选“called”。"
+    },
+    {
+      "id": 186,
+      "topicId": 5,
+      "prompt": "My sister ___ with a friend last week.",
+      "options": [
+        "is talking",
+        "talks",
+        "talked",
+        "has talked"
+      ],
+      "answer": "C",
+      "answerText": "talked",
+      "explanation": "“last week”是明确的过去时间，动作已结束，用一般过去时，所以选“talked”。"
+    },
+    {
+      "id": 187,
+      "topicId": 5,
+      "prompt": "The teacher ___ to school yesterday morning.",
+      "options": [
+        "is going",
+        "has gone",
+        "goes",
+        "went"
+      ],
+      "answer": "D",
+      "answerText": "went",
+      "explanation": "“yesterday morning”是明确的过去时间，动作已结束，用一般过去时，所以选“went”。"
+    },
+    {
+      "id": 188,
+      "topicId": 5,
+      "prompt": "The student ___ at home two days ago.",
+      "options": [
+        "has worked",
+        "is working",
+        "works",
+        "worked"
+      ],
+      "answer": "D",
+      "answerText": "worked",
+      "explanation": "“two days ago”是明确的过去时间，动作已结束，用一般过去时，所以选“worked”。"
+    },
+    {
+      "id": 189,
+      "topicId": 5,
+      "prompt": "Jack ___ the bus yesterday.",
+      "options": [
+        "took",
+        "is taking",
+        "takes",
+        "has taken"
+      ],
+      "answer": "A",
+      "answerText": "took",
+      "explanation": "“yesterday”是明确的过去时间，动作已结束，用一般过去时，所以选“took”。"
+    },
+    {
+      "id": 190,
+      "topicId": 5,
+      "prompt": "Lucy ___ coffee yesterday morning.",
+      "options": [
+        "made",
+        "has made",
+        "makes",
+        "is making"
+      ],
+      "answer": "A",
+      "answerText": "made",
+      "explanation": "“yesterday morning”是明确的过去时间，动作已结束，用一般过去时，所以选“made”。"
+    },
+    {
+      "id": 191,
+      "topicId": 5,
+      "prompt": "I ___ to music yesterday.",
+      "options": [
+        "am listening",
+        "listened",
+        "listen",
+        "have listened"
+      ],
+      "answer": "B",
+      "answerText": "listened",
+      "explanation": "“yesterday”是明确的过去时间，动作已结束，用一般过去时，所以选“listened”。"
+    },
+    {
+      "id": 192,
+      "topicId": 5,
+      "prompt": "You ___ a computer two days ago.",
+      "options": [
+        "use",
+        "used",
+        "have used",
+        "are using"
+      ],
+      "answer": "B",
+      "answerText": "used",
+      "explanation": "“two days ago”是明确的过去时间，动作已结束，用一般过去时，所以选“used”。"
+    },
+    {
+      "id": 193,
+      "topicId": 5,
+      "prompt": "We ___ TV last weekend.",
+      "options": [
+        "have watched",
+        "watched",
+        "watch",
+        "are watching"
+      ],
+      "answer": "B",
+      "answerText": "watched",
+      "explanation": "“last weekend”是明确的过去时间，动作已结束，用一般过去时，所以选“watched”。"
+    },
+    {
+      "id": 194,
+      "topicId": 5,
+      "prompt": "They ___ to school yesterday morning.",
+      "options": [
+        "walk",
+        "walked",
+        "are walking",
+        "have walked"
+      ],
+      "answer": "B",
+      "answerText": "walked",
+      "explanation": "“yesterday morning”是明确的过去时间，动作已结束，用一般过去时，所以选“walked”。"
+    },
+    {
+      "id": 195,
+      "topicId": 5,
+      "prompt": "Tom ___ early last night.",
+      "options": [
+        "is sleeping",
+        "sleeps",
+        "slept",
+        "has slept"
+      ],
+      "answer": "C",
+      "answerText": "slept",
+      "explanation": "“last night”是明确的过去时间，动作已结束，用一般过去时，所以选“slept”。"
+    },
+    {
+      "id": 196,
+      "topicId": 5,
+      "prompt": "Amy ___ the door two days ago.",
+      "options": [
+        "is closing",
+        "has closed",
+        "closes",
+        "closed"
+      ],
+      "answer": "D",
+      "answerText": "closed",
+      "explanation": "“two days ago”是明确的过去时间，动作已结束，用一般过去时，所以选“closed”。"
+    },
+    {
+      "id": 197,
+      "topicId": 5,
+      "prompt": "My brother ___ new words last weekend.",
+      "options": [
+        "is learning",
+        "has learned",
+        "learns",
+        "learned"
+      ],
+      "answer": "D",
+      "answerText": "learned",
+      "explanation": "“last weekend”是明确的过去时间，动作已结束，用一般过去时，所以选“learned”。"
+    },
+    {
+      "id": 198,
+      "topicId": 5,
+      "prompt": "My sister ___ a picture last week.",
+      "options": [
+        "has drawn",
+        "is drawing",
+        "draws",
+        "drew"
+      ],
+      "answer": "D",
+      "answerText": "drew",
+      "explanation": "“last week”是明确的过去时间，动作已结束，用一般过去时，所以选“drew”。"
+    },
+    {
+      "id": 199,
+      "topicId": 5,
+      "prompt": "The teacher ___ English yesterday.",
+      "options": [
+        "has studied",
+        "is studying",
+        "studied",
+        "studies"
+      ],
+      "answer": "C",
+      "answerText": "studied",
+      "explanation": "“yesterday”是明确的过去时间，动作已结束，用一般过去时，所以选“studied”。"
+    },
+    {
+      "id": 200,
+      "topicId": 5,
+      "prompt": "The student ___ food two days ago.",
+      "options": [
+        "bought",
+        "has bought",
+        "is buying",
+        "buys"
+      ],
+      "answer": "A",
+      "answerText": "bought",
+      "explanation": "“two days ago”是明确的过去时间，动作已结束，用一般过去时，所以选“bought”。"
+    },
+    {
+      "id": 201,
+      "topicId": 5,
+      "prompt": "Jack ___ math last weekend.",
+      "options": [
+        "has taught",
+        "is teaching",
+        "taught",
+        "teaches"
+      ],
+      "answer": "C",
+      "answerText": "taught",
+      "explanation": "“last weekend”是明确的过去时间，动作已结束，用一般过去时，所以选“taught”。"
+    },
+    {
+      "id": 202,
+      "topicId": 5,
+      "prompt": "Lucy ___ for the bus last week.",
+      "options": [
+        "waits",
+        "has waited",
+        "is waiting",
+        "waited"
+      ],
+      "answer": "D",
+      "answerText": "waited",
+      "explanation": "“last week”是明确的过去时间，动作已结束，用一般过去时，所以选“waited”。"
+    },
+    {
+      "id": 203,
+      "topicId": 5,
+      "prompt": "I ___ a bag yesterday.",
+      "options": [
+        "carried",
+        "have carried",
+        "carry",
+        "am carrying"
+      ],
+      "answer": "A",
+      "answerText": "carried",
+      "explanation": "“yesterday”是明确的过去时间，动作已结束，用一般过去时，所以选“carried”。"
+    },
+    {
+      "id": 204,
+      "topicId": 5,
+      "prompt": "You ___ homework two days ago.",
+      "options": [
+        "finished",
+        "finish",
+        "have finished",
+        "are finishing"
+      ],
+      "answer": "A",
+      "answerText": "finished",
+      "explanation": "“two days ago”是明确的过去时间，动作已结束，用一般过去时，所以选“finished”。"
+    },
+    {
+      "id": 205,
+      "topicId": 5,
+      "prompt": "We ___ the dishes last weekend.",
+      "options": [
+        "are washing",
+        "wash",
+        "washed",
+        "have washed"
+      ],
+      "answer": "C",
+      "answerText": "washed",
+      "explanation": "“last weekend”是明确的过去时间，动作已结束，用一般过去时，所以选“washed”。"
+    },
+    {
+      "id": 206,
+      "topicId": 5,
+      "prompt": "They ___ the office last week.",
+      "options": [
+        "leave",
+        "have left",
+        "left",
+        "are leaving"
+      ],
+      "answer": "C",
+      "answerText": "left",
+      "explanation": "“last week”是明确的过去时间，动作已结束，用一般过去时，所以选“left”。"
+    },
+    {
+      "id": 207,
+      "topicId": 5,
+      "prompt": "Tom ___ the window yesterday.",
+      "options": [
+        "opened",
+        "has opened",
+        "opens",
+        "is opening"
+      ],
+      "answer": "A",
+      "answerText": "opened",
+      "explanation": "“yesterday”是明确的过去时间，动作已结束，用一般过去时，所以选“opened”。"
+    },
+    {
+      "id": 208,
+      "topicId": 5,
+      "prompt": "Amy ___ the piano two days ago.",
+      "options": [
+        "is practicing",
+        "practices",
+        "practiced",
+        "has practiced"
+      ],
+      "answer": "C",
+      "answerText": "practiced",
+      "explanation": "“two days ago”是明确的过去时间，动作已结束，用一般过去时，所以选“practiced”。"
+    },
+    {
+      "id": 209,
+      "topicId": 5,
+      "prompt": "I ___ him at the station yesterday.",
+      "options": [
+        "met",
+        "am meeting",
+        "have met",
+        "meet"
+      ],
+      "answer": "A",
+      "answerText": "met",
+      "explanation": "yesterday 表示过去，用 meet 的过去式 met。"
+    },
+    {
+      "id": 210,
+      "topicId": 5,
+      "prompt": "She ___ to school late last Monday.",
+      "options": [
+        "went",
+        "has gone",
+        "is going",
+        "goes"
+      ],
+      "answer": "A",
+      "answerText": "went",
+      "explanation": "last Monday 是明确过去时间，用 went。"
+    },
+    {
+      "id": 211,
+      "topicId": 5,
+      "prompt": "We did not ___ the game last night.",
+      "options": [
+        "watched",
+        "watch",
+        "watches",
+        "watching"
+      ],
+      "answer": "B",
+      "answerText": "watch",
+      "explanation": "did not 后用动词原形。"
+    },
+    {
+      "id": 212,
+      "topicId": 5,
+      "prompt": "Did Tom ___ the door before he left?",
+      "options": [
+        "closed",
+        "close",
+        "closes",
+        "closing"
+      ],
+      "answer": "B",
+      "answerText": "close",
+      "explanation": "助动词 did 后用动词原形。"
+    },
+    {
+      "id": 213,
+      "topicId": 5,
+      "prompt": "When I was ten, I ___ in a small town.",
+      "options": [
+        "lived",
+        "live",
+        "am living",
+        "have lived"
+      ],
+      "answer": "A",
+      "answerText": "lived",
+      "explanation": "“When I was ten”限定过去时期，用一般过去时。"
+    },
+    {
+      "id": 214,
+      "topicId": 5,
+      "prompt": "The bus ___ five minutes ago.",
+      "options": [
+        "has left",
+        "leaves",
+        "left",
+        "is leaving"
+      ],
+      "answer": "C",
+      "answerText": "left",
+      "explanation": "ago 是一般过去时的典型时间标志。"
+    },
+    {
+      "id": 215,
+      "topicId": 5,
+      "prompt": "They ___ dinner at 7 last night.",
+      "options": [
+        "eat",
+        "have eaten",
+        "are eating",
+        "ate"
+      ],
+      "answer": "D",
+      "answerText": "ate",
+      "explanation": "last night 表示已结束的过去时间，用一般过去时。"
+    },
+    {
+      "id": 216,
+      "topicId": 6,
+      "prompt": "My brother ___ the room at 8 yesterday morning.",
+      "options": [
+        "cleaned",
+        "has cleaned",
+        "cleans",
+        "was cleaning"
+      ],
+      "answer": "D",
+      "answerText": "was cleaning",
+      "explanation": "“at 8 yesterday morning”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 217,
+      "topicId": 6,
+      "prompt": "My sister ___ an email at 3 yesterday afternoon.",
+      "options": [
+        "has written",
+        "was writing",
+        "writes",
+        "wrote"
+      ],
+      "answer": "B",
+      "answerText": "was writing",
+      "explanation": "“at 3 yesterday afternoon”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 218,
+      "topicId": 6,
+      "prompt": "The teacher ___ coffee this time yesterday.",
+      "options": [
+        "makes",
+        "was making",
+        "has made",
+        "made"
+      ],
+      "answer": "B",
+      "answerText": "was making",
+      "explanation": "“this time yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 219,
+      "topicId": 6,
+      "prompt": "The student ___ a classmate at noon yesterday.",
+      "options": [
+        "helps",
+        "has helped",
+        "was helping",
+        "helped"
+      ],
+      "answer": "C",
+      "answerText": "was helping",
+      "explanation": "“at noon yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 220,
+      "topicId": 6,
+      "prompt": "Jack ___ a bag at 10 last Saturday.",
+      "options": [
+        "has carried",
+        "carries",
+        "was carrying",
+        "carried"
+      ],
+      "answer": "C",
+      "answerText": "was carrying",
+      "explanation": "“at 10 last Saturday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 221,
+      "topicId": 6,
+      "prompt": "Lucy ___ TV at 8 yesterday morning.",
+      "options": [
+        "watches",
+        "was watching",
+        "has watched",
+        "watched"
+      ],
+      "answer": "B",
+      "answerText": "was watching",
+      "explanation": "“at 8 yesterday morning”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 222,
+      "topicId": 6,
+      "prompt": "I ___ the dishes at 3 yesterday afternoon.",
+      "options": [
+        "have washed",
+        "wash",
+        "was washing",
+        "washed"
+      ],
+      "answer": "C",
+      "answerText": "was washing",
+      "explanation": "“at 3 yesterday afternoon”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 223,
+      "topicId": 6,
+      "prompt": "You ___ in the pool this time yesterday.",
+      "options": [
+        "have swum",
+        "swam",
+        "were swimming",
+        "swim"
+      ],
+      "answer": "C",
+      "answerText": "were swimming",
+      "explanation": "“this time yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 224,
+      "topicId": 6,
+      "prompt": "We ___ to music at noon yesterday.",
+      "options": [
+        "listen",
+        "have listened",
+        "were listening",
+        "listened"
+      ],
+      "answer": "C",
+      "answerText": "were listening",
+      "explanation": "“at noon yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 225,
+      "topicId": 6,
+      "prompt": "They ___ at the picture at 10 last Saturday.",
+      "options": [
+        "have looked",
+        "were looking",
+        "look",
+        "looked"
+      ],
+      "answer": "B",
+      "answerText": "were looking",
+      "explanation": "“at 10 last Saturday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 226,
+      "topicId": 6,
+      "prompt": "Tom ___ a picture at 8 yesterday morning.",
+      "options": [
+        "was drawing",
+        "drew",
+        "draws",
+        "has drawn"
+      ],
+      "answer": "A",
+      "answerText": "was drawing",
+      "explanation": "“at 8 yesterday morning”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 227,
+      "topicId": 6,
+      "prompt": "Amy ___ dinner at 3 yesterday afternoon.",
+      "options": [
+        "has cooked",
+        "cooked",
+        "was cooking",
+        "cooks"
+      ],
+      "answer": "C",
+      "answerText": "was cooking",
+      "explanation": "“at 3 yesterday afternoon”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 228,
+      "topicId": 6,
+      "prompt": "My brother ___ in the park this time yesterday.",
+      "options": [
+        "was running",
+        "ran",
+        "runs",
+        "has run"
+      ],
+      "answer": "A",
+      "answerText": "was running",
+      "explanation": "“this time yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 229,
+      "topicId": 6,
+      "prompt": "My sister ___ for the bus at noon yesterday.",
+      "options": [
+        "waits",
+        "was waiting",
+        "waited",
+        "has waited"
+      ],
+      "answer": "B",
+      "answerText": "was waiting",
+      "explanation": "“at noon yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 230,
+      "topicId": 6,
+      "prompt": "The teacher ___ with a friend at 10 last Saturday.",
+      "options": [
+        "talked",
+        "talks",
+        "has talked",
+        "was talking"
+      ],
+      "answer": "D",
+      "answerText": "was talking",
+      "explanation": "“at 10 last Saturday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 231,
+      "topicId": 6,
+      "prompt": "The student ___ soccer at 8 yesterday morning.",
+      "options": [
+        "played",
+        "plays",
+        "has played",
+        "was playing"
+      ],
+      "answer": "D",
+      "answerText": "was playing",
+      "explanation": "“at 8 yesterday morning”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 232,
+      "topicId": 6,
+      "prompt": "Jack ___ at home at 3 yesterday afternoon.",
+      "options": [
+        "worked",
+        "was working",
+        "has worked",
+        "works"
+      ],
+      "answer": "B",
+      "answerText": "was working",
+      "explanation": "“at 3 yesterday afternoon”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 233,
+      "topicId": 6,
+      "prompt": "Lucy ___ a friend this time yesterday.",
+      "options": [
+        "met",
+        "has met",
+        "was meeting",
+        "meets"
+      ],
+      "answer": "C",
+      "answerText": "was meeting",
+      "explanation": "“this time yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 234,
+      "topicId": 6,
+      "prompt": "I ___ a message at noon yesterday.",
+      "options": [
+        "have sent",
+        "sent",
+        "send",
+        "was sending"
+      ],
+      "answer": "D",
+      "answerText": "was sending",
+      "explanation": "“at noon yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 235,
+      "topicId": 6,
+      "prompt": "You ___ new words at 10 last Saturday.",
+      "options": [
+        "learn",
+        "have learned",
+        "were learning",
+        "learned"
+      ],
+      "answer": "C",
+      "answerText": "were learning",
+      "explanation": "“at 10 last Saturday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 236,
+      "topicId": 6,
+      "prompt": "We ___ a small table at 8 yesterday morning.",
+      "options": [
+        "build",
+        "have built",
+        "built",
+        "were building"
+      ],
+      "answer": "D",
+      "answerText": "were building",
+      "explanation": "“at 8 yesterday morning”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 237,
+      "topicId": 6,
+      "prompt": "They ___ English at 3 yesterday afternoon.",
+      "options": [
+        "were studying",
+        "studied",
+        "study",
+        "have studied"
+      ],
+      "answer": "A",
+      "answerText": "were studying",
+      "explanation": "“at 3 yesterday afternoon”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 238,
+      "topicId": 6,
+      "prompt": "Tom ___ food this time yesterday.",
+      "options": [
+        "buys",
+        "was buying",
+        "has bought",
+        "bought"
+      ],
+      "answer": "B",
+      "answerText": "was buying",
+      "explanation": "“this time yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 239,
+      "topicId": 6,
+      "prompt": "Amy ___ a family member at noon yesterday.",
+      "options": [
+        "has called",
+        "calls",
+        "called",
+        "was calling"
+      ],
+      "answer": "D",
+      "answerText": "was calling",
+      "explanation": "“at noon yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 240,
+      "topicId": 6,
+      "prompt": "My brother ___ the piano at 10 last Saturday.",
+      "options": [
+        "was practicing",
+        "has practiced",
+        "practiced",
+        "practices"
+      ],
+      "answer": "A",
+      "answerText": "was practicing",
+      "explanation": "“at 10 last Saturday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 241,
+      "topicId": 6,
+      "prompt": "My sister ___ a computer at 8 yesterday morning.",
+      "options": [
+        "used",
+        "uses",
+        "was using",
+        "has used"
+      ],
+      "answer": "C",
+      "answerText": "was using",
+      "explanation": "“at 8 yesterday morning”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 242,
+      "topicId": 6,
+      "prompt": "The teacher ___ the room at 3 yesterday afternoon.",
+      "options": [
+        "was cleaning",
+        "has cleaned",
+        "cleaned",
+        "cleans"
+      ],
+      "answer": "A",
+      "answerText": "was cleaning",
+      "explanation": "“at 3 yesterday afternoon”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 243,
+      "topicId": 6,
+      "prompt": "The student ___ an email this time yesterday.",
+      "options": [
+        "wrote",
+        "has written",
+        "was writing",
+        "writes"
+      ],
+      "answer": "C",
+      "answerText": "was writing",
+      "explanation": "“this time yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 244,
+      "topicId": 6,
+      "prompt": "Jack ___ coffee at noon yesterday.",
+      "options": [
+        "was making",
+        "made",
+        "makes",
+        "has made"
+      ],
+      "answer": "A",
+      "answerText": "was making",
+      "explanation": "“at noon yesterday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 245,
+      "topicId": 6,
+      "prompt": "Lucy ___ a classmate at 10 last Saturday.",
+      "options": [
+        "has helped",
+        "was helping",
+        "helped",
+        "helps"
+      ],
+      "answer": "B",
+      "answerText": "was helping",
+      "explanation": "“at 10 last Saturday”表示过去某一时刻正在进行的动作，用过去进行时：was/were + doing。"
+    },
+    {
+      "id": 246,
+      "topicId": 6,
+      "prompt": "I ___ dinner when the phone rang.",
+      "options": [
+        "have cooked",
+        "cooked",
+        "was cooking",
+        "am cooking"
+      ],
+      "answer": "C",
+      "answerText": "was cooking",
+      "explanation": "一个动作正在进行时，另一个短动作发生：正在进行的动作用过去进行时。"
+    },
+    {
+      "id": 247,
+      "topicId": 6,
+      "prompt": "They ___ soccer when it started to rain.",
+      "options": [
+        "played",
+        "were playing",
+        "have played",
+        "are playing"
+      ],
+      "answer": "B",
+      "answerText": "were playing",
+      "explanation": "started 是过去短动作，背景中的持续动作用过去进行时。"
+    },
+    {
+      "id": 248,
+      "topicId": 6,
+      "prompt": "While Amy ___, her brother was watching TV.",
+      "options": [
+        "studies",
+        "studied",
+        "has studied",
+        "was studying"
+      ],
+      "answer": "D",
+      "answerText": "was studying",
+      "explanation": "while 常连接两个同时进行的过去动作，用过去进行时。"
+    },
+    {
+      "id": 249,
+      "topicId": 6,
+      "prompt": "What ___ you ___ when I called?",
+      "options": [
+        "are / doing",
+        "did / do",
+        "were / doing",
+        "have / done"
+      ],
+      "answer": "C",
+      "answerText": "were / doing",
+      "explanation": "when I called 是过去时间；询问当时正在做什么，用过去进行时。"
+    },
+    {
+      "id": 250,
+      "topicId": 6,
+      "prompt": "The children ___ when their teacher came in.",
+      "options": [
+        "talked",
+        "were talking",
+        "are talking",
+        "have talked"
+      ],
+      "answer": "B",
+      "answerText": "were talking",
+      "explanation": "老师进来时，孩子们正在说话，用过去进行时。"
+    },
+    {
+      "id": 251,
+      "topicId": 6,
+      "prompt": "She ___ home when she saw the accident.",
+      "options": [
+        "was walking",
+        "is walking",
+        "has walked",
+        "walked"
+      ],
+      "answer": "A",
+      "answerText": "was walking",
+      "explanation": "看到事故发生时，她正在走路，用过去进行时。"
+    },
+    {
+      "id": 252,
+      "topicId": 6,
+      "prompt": "We ___ TV while our parents were cooking.",
+      "options": [
+        "watched",
+        "were watching",
+        "watch",
+        "have watched"
+      ],
+      "answer": "B",
+      "answerText": "were watching",
+      "explanation": "两个过去同时进行的动作，均可用过去进行时。"
+    },
+    {
+      "id": 253,
+      "topicId": 6,
+      "prompt": "At that moment, Tom ___ for the bus.",
+      "options": [
+        "waited",
+        "was waiting",
+        "waits",
+        "has waited"
+      ],
+      "answer": "B",
+      "answerText": "was waiting",
+      "explanation": "“At that moment”指过去某一时刻正在进行，用过去进行时。"
+    },
+    {
+      "id": 254,
+      "topicId": 6,
+      "prompt": "It ___ hard when we left the house.",
+      "options": [
+        "rained",
+        "has rained",
+        "was raining",
+        "rains"
+      ],
+      "answer": "C",
+      "answerText": "was raining",
+      "explanation": "离开房子时雨正在下，作为背景动作，用过去进行时。"
+    },
+    {
+      "id": 255,
+      "topicId": 6,
+      "prompt": "I ___ a book while my sister was doing homework.",
+      "options": [
+        "was reading",
+        "am reading",
+        "read",
+        "have read"
+      ],
+      "answer": "A",
+      "answerText": "was reading",
+      "explanation": "while 表示两个动作在过去同时进行，用过去进行时。"
+    },
+    {
+      "id": 256,
+      "topicId": 7,
+      "prompt": "By the time I got home, my sister ___ to school.",
+      "options": [
+        "went",
+        "has gone",
+        "was going",
+        "had gone"
+      ],
+      "answer": "D",
+      "answerText": "had gone",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 257,
+      "topicId": 7,
+      "prompt": "By the time the meeting started, the teacher ___ at home.",
+      "options": [
+        "worked",
+        "was working",
+        "has worked",
+        "had worked"
+      ],
+      "answer": "D",
+      "answerText": "had worked",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 258,
+      "topicId": 7,
+      "prompt": "By the time the day ended, the student ___ the bus.",
+      "options": [
+        "took",
+        "has taken",
+        "was taking",
+        "had taken"
+      ],
+      "answer": "D",
+      "answerText": "had taken",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 259,
+      "topicId": 7,
+      "prompt": "By the time we met again, Jack ___ coffee.",
+      "options": [
+        "made",
+        "had made",
+        "was making",
+        "has made"
+      ],
+      "answer": "B",
+      "answerText": "had made",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 260,
+      "topicId": 7,
+      "prompt": "By the time the guests arrived, Lucy ___ to music.",
+      "options": [
+        "had listened",
+        "was listening",
+        "has listened",
+        "listened"
+      ],
+      "answer": "A",
+      "answerText": "had listened",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 261,
+      "topicId": 7,
+      "prompt": "By the time the lesson began, I ___ a computer.",
+      "options": [
+        "have used",
+        "was using",
+        "used",
+        "had used"
+      ],
+      "answer": "D",
+      "answerText": "had used",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 262,
+      "topicId": 7,
+      "prompt": "By the time I called, you ___ TV.",
+      "options": [
+        "watched",
+        "had watched",
+        "were watching",
+        "have watched"
+      ],
+      "answer": "B",
+      "answerText": "had watched",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 263,
+      "topicId": 7,
+      "prompt": "By the time I got home, we ___ to school.",
+      "options": [
+        "walked",
+        "have walked",
+        "were walking",
+        "had walked"
+      ],
+      "answer": "D",
+      "answerText": "had walked",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 264,
+      "topicId": 7,
+      "prompt": "By the time the meeting started, they ___ early.",
+      "options": [
+        "were sleeping",
+        "slept",
+        "have slept",
+        "had slept"
+      ],
+      "answer": "D",
+      "answerText": "had slept",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 265,
+      "topicId": 7,
+      "prompt": "By the time the day ended, Tom ___ the door.",
+      "options": [
+        "closed",
+        "was closing",
+        "had closed",
+        "has closed"
+      ],
+      "answer": "C",
+      "answerText": "had closed",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 266,
+      "topicId": 7,
+      "prompt": "By the time we met again, Amy ___ new words.",
+      "options": [
+        "was learning",
+        "had learned",
+        "learned",
+        "has learned"
+      ],
+      "answer": "B",
+      "answerText": "had learned",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 267,
+      "topicId": 7,
+      "prompt": "By the time the guests arrived, my brother ___ a picture.",
+      "options": [
+        "drew",
+        "was drawing",
+        "had drawn",
+        "has drawn"
+      ],
+      "answer": "C",
+      "answerText": "had drawn",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 268,
+      "topicId": 7,
+      "prompt": "By the time the lesson began, my sister ___ English.",
+      "options": [
+        "had studied",
+        "has studied",
+        "was studying",
+        "studied"
+      ],
+      "answer": "A",
+      "answerText": "had studied",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 269,
+      "topicId": 7,
+      "prompt": "By the time I called, the teacher ___ food.",
+      "options": [
+        "was buying",
+        "bought",
+        "has bought",
+        "had bought"
+      ],
+      "answer": "D",
+      "answerText": "had bought",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 270,
+      "topicId": 7,
+      "prompt": "By the time I got home, the student ___ math.",
+      "options": [
+        "has taught",
+        "had taught",
+        "taught",
+        "was teaching"
+      ],
+      "answer": "B",
+      "answerText": "had taught",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 271,
+      "topicId": 7,
+      "prompt": "By the time the meeting started, Jack ___ for the bus.",
+      "options": [
+        "waited",
+        "had waited",
+        "was waiting",
+        "has waited"
+      ],
+      "answer": "B",
+      "answerText": "had waited",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 272,
+      "topicId": 7,
+      "prompt": "By the time the day ended, Lucy ___ a bag.",
+      "options": [
+        "carried",
+        "had carried",
+        "has carried",
+        "was carrying"
+      ],
+      "answer": "B",
+      "answerText": "had carried",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 273,
+      "topicId": 7,
+      "prompt": "By the time we met again, I ___ homework.",
+      "options": [
+        "finished",
+        "have finished",
+        "was finishing",
+        "had finished"
+      ],
+      "answer": "D",
+      "answerText": "had finished",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 274,
+      "topicId": 7,
+      "prompt": "By the time the guests arrived, you ___ the dishes.",
+      "options": [
+        "washed",
+        "have washed",
+        "had washed",
+        "were washing"
+      ],
+      "answer": "C",
+      "answerText": "had washed",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 275,
+      "topicId": 7,
+      "prompt": "By the time the lesson began, we ___ the office.",
+      "options": [
+        "left",
+        "were leaving",
+        "had left",
+        "have left"
+      ],
+      "answer": "C",
+      "answerText": "had left",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 276,
+      "topicId": 7,
+      "prompt": "By the time I called, they ___ the window.",
+      "options": [
+        "opened",
+        "were opening",
+        "had opened",
+        "have opened"
+      ],
+      "answer": "C",
+      "answerText": "had opened",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 277,
+      "topicId": 7,
+      "prompt": "By the time I got home, Tom ___ the piano.",
+      "options": [
+        "was practicing",
+        "practiced",
+        "has practiced",
+        "had practiced"
+      ],
+      "answer": "D",
+      "answerText": "had practiced",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 278,
+      "topicId": 7,
+      "prompt": "By the time the meeting started, Amy ___ soccer.",
+      "options": [
+        "played",
+        "was playing",
+        "has played",
+        "had played"
+      ],
+      "answer": "D",
+      "answerText": "had played",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 279,
+      "topicId": 7,
+      "prompt": "By the time the day ended, my brother ___ a friend.",
+      "options": [
+        "has visited",
+        "had visited",
+        "was visiting",
+        "visited"
+      ],
+      "answer": "B",
+      "answerText": "had visited",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 280,
+      "topicId": 7,
+      "prompt": "By the time we met again, my sister ___ an email.",
+      "options": [
+        "was writing",
+        "wrote",
+        "has written",
+        "had written"
+      ],
+      "answer": "D",
+      "answerText": "had written",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 281,
+      "topicId": 7,
+      "prompt": "By the time the guests arrived, the teacher ___ in the pool.",
+      "options": [
+        "swam",
+        "was swimming",
+        "has swum",
+        "had swum"
+      ],
+      "answer": "D",
+      "answerText": "had swum",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 282,
+      "topicId": 7,
+      "prompt": "By the time the lesson began, the student ___ a message.",
+      "options": [
+        "had sent",
+        "has sent",
+        "was sending",
+        "sent"
+      ],
+      "answer": "A",
+      "answerText": "had sent",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 283,
+      "topicId": 7,
+      "prompt": "By the time I called, Jack ___ at the picture.",
+      "options": [
+        "was looking",
+        "has looked",
+        "looked",
+        "had looked"
+      ],
+      "answer": "D",
+      "answerText": "had looked",
+      "explanation": "“By the time + 一般过去时”表示在另一个过去动作之前已经完成，用过去完成时：had + 过去分词。"
+    },
+    {
+      "id": 284,
+      "topicId": 7,
+      "prompt": "When we got to the station, the train ___ already ___.",
+      "options": [
+        "has / left",
+        "was / leaving",
+        "had / left",
+        "did / leave"
+      ],
+      "answer": "C",
+      "answerText": "had / left",
+      "explanation": "到车站是过去；火车离开更早，故用过去完成时。"
+    },
+    {
+      "id": 285,
+      "topicId": 7,
+      "prompt": "She was hungry because she ___ breakfast.",
+      "options": [
+        "was not eating",
+        "has not eaten",
+        "did not eat",
+        "had not eaten"
+      ],
+      "answer": "D",
+      "answerText": "had not eaten",
+      "explanation": "“饿”是过去结果；没吃早餐发生在更早的过去，用过去完成时。"
+    },
+    {
+      "id": 286,
+      "topicId": 7,
+      "prompt": "I knew the city because I ___ there before.",
+      "options": [
+        "had been",
+        "was",
+        "have been",
+        "am"
+      ],
+      "answer": "A",
+      "answerText": "had been",
+      "explanation": "“knew”是过去；更早之前已有去过的经历，用过去完成时。"
+    },
+    {
+      "id": 287,
+      "topicId": 7,
+      "prompt": "By the time Tom went out, he ___ his homework.",
+      "options": [
+        "finished",
+        "has finished",
+        "had finished",
+        "was finishing"
+      ],
+      "answer": "C",
+      "answerText": "had finished",
+      "explanation": "“By the time”强调在另一个过去动作之前已经完成，用过去完成时。"
+    },
+    {
+      "id": 288,
+      "topicId": 7,
+      "prompt": "The room was clean because Amy ___ it before the guests arrived.",
+      "options": [
+        "cleaned",
+        "had cleaned",
+        "was cleaning",
+        "has cleaned"
+      ],
+      "answer": "B",
+      "answerText": "had cleaned",
+      "explanation": "打扫发生在客人到达之前，属于“过去的过去”，用过去完成时。"
+    },
+    {
+      "id": 289,
+      "topicId": 7,
+      "prompt": "They could not enter because they ___ the key at home.",
+      "options": [
+        "left",
+        "have left",
+        "were leaving",
+        "had left"
+      ],
+      "answer": "D",
+      "answerText": "had left",
+      "explanation": "把钥匙落在家里发生在“could not enter”之前，用过去完成时。"
+    },
+    {
+      "id": 290,
+      "topicId": 7,
+      "prompt": "By 9 p.m. yesterday, we ___ all the work.",
+      "options": [
+        "have finished",
+        "were finishing",
+        "had finished",
+        "finished"
+      ],
+      "answer": "C",
+      "answerText": "had finished",
+      "explanation": "“By 9 p.m. yesterday”表示截至过去某时已经完成，用过去完成时。"
+    },
+    {
+      "id": 291,
+      "topicId": 8,
+      "prompt": "You ___ soccer for two hours before the class started.",
+      "options": [
+        "were playing",
+        "had been playing",
+        "played",
+        "had played"
+      ],
+      "answer": "B",
+      "answerText": "had been playing",
+      "explanation": "“for two hours”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 292,
+      "topicId": 8,
+      "prompt": "We ___ the room since early morning before dinner.",
+      "options": [
+        "were cleaning",
+        "cleaned",
+        "had cleaned",
+        "had been cleaning"
+      ],
+      "answer": "D",
+      "answerText": "had been cleaning",
+      "explanation": "“since early morning”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 293,
+      "topicId": 8,
+      "prompt": "They ___ English for an hour before the bus came.",
+      "options": [
+        "had been studying",
+        "were studying",
+        "studied",
+        "had studied"
+      ],
+      "answer": "A",
+      "answerText": "had been studying",
+      "explanation": "“for an hour”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 294,
+      "topicId": 8,
+      "prompt": "Tom ___ at home for a while before the rain stopped.",
+      "options": [
+        "had been working",
+        "was working",
+        "had worked",
+        "worked"
+      ],
+      "answer": "A",
+      "answerText": "had been working",
+      "explanation": "“for a while”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 295,
+      "topicId": 8,
+      "prompt": "Amy ___ dinner for thirty minutes before I arrived.",
+      "options": [
+        "was cooking",
+        "cooked",
+        "had been cooking",
+        "had cooked"
+      ],
+      "answer": "C",
+      "answerText": "had been cooking",
+      "explanation": "“for thirty minutes”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 296,
+      "topicId": 8,
+      "prompt": "My brother ___ an email for two hours before the class started.",
+      "options": [
+        "was writing",
+        "had written",
+        "wrote",
+        "had been writing"
+      ],
+      "answer": "D",
+      "answerText": "had been writing",
+      "explanation": "“for two hours”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 297,
+      "topicId": 8,
+      "prompt": "My sister ___ in the park since early morning before dinner.",
+      "options": [
+        "had run",
+        "ran",
+        "was running",
+        "had been running"
+      ],
+      "answer": "D",
+      "answerText": "had been running",
+      "explanation": "“since early morning”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 298,
+      "topicId": 8,
+      "prompt": "The teacher ___ for the bus for an hour before the bus came.",
+      "options": [
+        "was waiting",
+        "had waited",
+        "had been waiting",
+        "waited"
+      ],
+      "answer": "C",
+      "answerText": "had been waiting",
+      "explanation": "“for an hour”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 299,
+      "topicId": 8,
+      "prompt": "The student ___ the piano for a while before the rain stopped.",
+      "options": [
+        "had practiced",
+        "was practicing",
+        "practiced",
+        "had been practicing"
+      ],
+      "answer": "D",
+      "answerText": "had been practicing",
+      "explanation": "“for a while”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 300,
+      "topicId": 8,
+      "prompt": "Jack ___ new words for thirty minutes before I arrived.",
+      "options": [
+        "learned",
+        "had learned",
+        "had been learning",
+        "was learning"
+      ],
+      "answer": "C",
+      "answerText": "had been learning",
+      "explanation": "“for thirty minutes”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 301,
+      "topicId": 8,
+      "prompt": "Lucy ___ with a friend for two hours before the class started.",
+      "options": [
+        "had been talking",
+        "had talked",
+        "was talking",
+        "talked"
+      ],
+      "answer": "A",
+      "answerText": "had been talking",
+      "explanation": "“for two hours”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 302,
+      "topicId": 8,
+      "prompt": "I ___ soccer since early morning before dinner.",
+      "options": [
+        "was playing",
+        "had been playing",
+        "played",
+        "had played"
+      ],
+      "answer": "B",
+      "answerText": "had been playing",
+      "explanation": "“since early morning”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 303,
+      "topicId": 8,
+      "prompt": "You ___ the room for an hour before the bus came.",
+      "options": [
+        "had cleaned",
+        "cleaned",
+        "were cleaning",
+        "had been cleaning"
+      ],
+      "answer": "D",
+      "answerText": "had been cleaning",
+      "explanation": "“for an hour”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 304,
+      "topicId": 8,
+      "prompt": "We ___ English for a while before the rain stopped.",
+      "options": [
+        "had studied",
+        "had been studying",
+        "were studying",
+        "studied"
+      ],
+      "answer": "B",
+      "answerText": "had been studying",
+      "explanation": "“for a while”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 305,
+      "topicId": 8,
+      "prompt": "They ___ at home for thirty minutes before I arrived.",
+      "options": [
+        "had worked",
+        "worked",
+        "had been working",
+        "were working"
+      ],
+      "answer": "C",
+      "answerText": "had been working",
+      "explanation": "“for thirty minutes”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 306,
+      "topicId": 8,
+      "prompt": "Tom ___ dinner for two hours before the class started.",
+      "options": [
+        "had cooked",
+        "cooked",
+        "had been cooking",
+        "was cooking"
+      ],
+      "answer": "C",
+      "answerText": "had been cooking",
+      "explanation": "“for two hours”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 307,
+      "topicId": 8,
+      "prompt": "Amy ___ an email since early morning before dinner.",
+      "options": [
+        "wrote",
+        "had written",
+        "had been writing",
+        "was writing"
+      ],
+      "answer": "C",
+      "answerText": "had been writing",
+      "explanation": "“since early morning”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 308,
+      "topicId": 8,
+      "prompt": "My brother ___ in the park for an hour before the bus came.",
+      "options": [
+        "was running",
+        "had run",
+        "had been running",
+        "ran"
+      ],
+      "answer": "C",
+      "answerText": "had been running",
+      "explanation": "“for an hour”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 309,
+      "topicId": 8,
+      "prompt": "My sister ___ for the bus for a while before the rain stopped.",
+      "options": [
+        "was waiting",
+        "had been waiting",
+        "had waited",
+        "waited"
+      ],
+      "answer": "B",
+      "answerText": "had been waiting",
+      "explanation": "“for a while”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 310,
+      "topicId": 8,
+      "prompt": "The teacher ___ the piano for thirty minutes before I arrived.",
+      "options": [
+        "had practiced",
+        "had been practicing",
+        "practiced",
+        "was practicing"
+      ],
+      "answer": "B",
+      "answerText": "had been practicing",
+      "explanation": "“for thirty minutes”表示动作在某个过去时间之前持续了一段时间，用过去完成进行时：had been + doing。"
+    },
+    {
+      "id": 311,
+      "topicId": 8,
+      "prompt": "Tom was tired because he ___ for two hours.",
+      "options": [
+        "had been running",
+        "was running",
+        "has been running",
+        "ran"
+      ],
+      "answer": "A",
+      "answerText": "had been running",
+      "explanation": "疲劳是过去结果；跑步在此前持续两小时，用过去完成进行时。"
+    },
+    {
+      "id": 312,
+      "topicId": 8,
+      "prompt": "The ground was wet because it ___ all night.",
+      "options": [
+        "has rained",
+        "had been raining",
+        "was raining",
+        "rained"
+      ],
+      "answer": "B",
+      "answerText": "had been raining",
+      "explanation": "地面湿是过去结果；此前整夜持续下雨，用过去完成进行时。"
+    },
+    {
+      "id": 313,
+      "topicId": 8,
+      "prompt": "She had red eyes because she ___ for a long time.",
+      "options": [
+        "cried",
+        "had been crying",
+        "was crying",
+        "has cried"
+      ],
+      "answer": "B",
+      "answerText": "had been crying",
+      "explanation": "强调导致过去结果的持续动作，用过去完成进行时。"
+    },
+    {
+      "id": 314,
+      "topicId": 8,
+      "prompt": "How long ___ they ___ before the bus finally came?",
+      "options": [
+        "had / been waiting",
+        "did / wait",
+        "were / waiting",
+        "have / waited"
+      ],
+      "answer": "A",
+      "answerText": "had / been waiting",
+      "explanation": "公交车到达是过去；此前等待持续多久，用过去完成进行时。"
+    },
+    {
+      "id": 315,
+      "topicId": 8,
+      "prompt": "We ___ English for a year before we moved to Canada.",
+      "options": [
+        "were studying",
+        "had been studying",
+        "studied",
+        "have studied"
+      ],
+      "answer": "B",
+      "answerText": "had been studying",
+      "explanation": "搬家之前，学习持续了一年，强调持续性，用过去完成进行时。"
+    },
+    {
+      "id": 316,
+      "topicId": 9,
+      "prompt": "I think the teacher ___ the room tomorrow.",
+      "options": [
+        "cleaned",
+        "will clean",
+        "has cleaned",
+        "cleans"
+      ],
+      "answer": "B",
+      "answerText": "will clean",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 317,
+      "topicId": 9,
+      "prompt": "I think the student ___ to work tomorrow morning.",
+      "options": [
+        "has driven",
+        "drives",
+        "will drive",
+        "drove"
+      ],
+      "answer": "C",
+      "answerText": "will drive",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 318,
+      "topicId": 9,
+      "prompt": "I think Jack ___ in the park soon.",
+      "options": [
+        "has run",
+        "ran",
+        "will run",
+        "runs"
+      ],
+      "answer": "C",
+      "answerText": "will run",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 319,
+      "topicId": 9,
+      "prompt": "I think Lucy ___ a family member later today.",
+      "options": [
+        "calls",
+        "will call",
+        "has called",
+        "called"
+      ],
+      "answer": "B",
+      "answerText": "will call",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 320,
+      "topicId": 9,
+      "prompt": "I think I ___ with a friend this weekend.",
+      "options": [
+        "talked",
+        "will talk",
+        "have talked",
+        "talk"
+      ],
+      "answer": "B",
+      "answerText": "will talk",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 321,
+      "topicId": 9,
+      "prompt": "I think you ___ to school tomorrow morning.",
+      "options": [
+        "go",
+        "will go",
+        "have gone",
+        "went"
+      ],
+      "answer": "B",
+      "answerText": "will go",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 322,
+      "topicId": 9,
+      "prompt": "I think we ___ at home next week.",
+      "options": [
+        "work",
+        "worked",
+        "have worked",
+        "will work"
+      ],
+      "answer": "D",
+      "answerText": "will work",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 323,
+      "topicId": 9,
+      "prompt": "I think they ___ the bus tomorrow.",
+      "options": [
+        "will take",
+        "have taken",
+        "take",
+        "took"
+      ],
+      "answer": "A",
+      "answerText": "will take",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 324,
+      "topicId": 9,
+      "prompt": "I think Tom ___ coffee tomorrow morning.",
+      "options": [
+        "made",
+        "makes",
+        "has made",
+        "will make"
+      ],
+      "answer": "D",
+      "answerText": "will make",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 325,
+      "topicId": 9,
+      "prompt": "I think Amy ___ to music soon.",
+      "options": [
+        "will listen",
+        "listened",
+        "has listened",
+        "listens"
+      ],
+      "answer": "A",
+      "answerText": "will listen",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 326,
+      "topicId": 9,
+      "prompt": "I think my brother ___ a computer later today.",
+      "options": [
+        "uses",
+        "has used",
+        "will use",
+        "used"
+      ],
+      "answer": "C",
+      "answerText": "will use",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 327,
+      "topicId": 9,
+      "prompt": "I think my sister ___ TV this weekend.",
+      "options": [
+        "has watched",
+        "will watch",
+        "watched",
+        "watches"
+      ],
+      "answer": "B",
+      "answerText": "will watch",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 328,
+      "topicId": 9,
+      "prompt": "I think the teacher ___ to school tomorrow morning.",
+      "options": [
+        "walked",
+        "will walk",
+        "walks",
+        "has walked"
+      ],
+      "answer": "B",
+      "answerText": "will walk",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 329,
+      "topicId": 9,
+      "prompt": "I think the student ___ early tonight.",
+      "options": [
+        "will sleep",
+        "sleeps",
+        "slept",
+        "has slept"
+      ],
+      "answer": "A",
+      "answerText": "will sleep",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 330,
+      "topicId": 9,
+      "prompt": "I think Jack ___ the door tomorrow.",
+      "options": [
+        "closed",
+        "will close",
+        "has closed",
+        "closes"
+      ],
+      "answer": "B",
+      "answerText": "will close",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 331,
+      "topicId": 9,
+      "prompt": "I think Lucy ___ new words next Saturday.",
+      "options": [
+        "learned",
+        "learns",
+        "has learned",
+        "will learn"
+      ],
+      "answer": "D",
+      "answerText": "will learn",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 332,
+      "topicId": 9,
+      "prompt": "I think I ___ a picture soon.",
+      "options": [
+        "draw",
+        "will draw",
+        "have drawn",
+        "drew"
+      ],
+      "answer": "B",
+      "answerText": "will draw",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 333,
+      "topicId": 9,
+      "prompt": "I think you ___ English later today.",
+      "options": [
+        "have studied",
+        "study",
+        "studied",
+        "will study"
+      ],
+      "answer": "D",
+      "answerText": "will study",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 334,
+      "topicId": 9,
+      "prompt": "I think we ___ food this weekend.",
+      "options": [
+        "will buy",
+        "have bought",
+        "buy",
+        "bought"
+      ],
+      "answer": "A",
+      "answerText": "will buy",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 335,
+      "topicId": 9,
+      "prompt": "I think they ___ math this evening.",
+      "options": [
+        "will teach",
+        "taught",
+        "teach",
+        "have taught"
+      ],
+      "answer": "A",
+      "answerText": "will teach",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 336,
+      "topicId": 9,
+      "prompt": "I think Tom ___ for the bus next week.",
+      "options": [
+        "will wait",
+        "has waited",
+        "waits",
+        "waited"
+      ],
+      "answer": "A",
+      "answerText": "will wait",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 337,
+      "topicId": 9,
+      "prompt": "I think Amy ___ a bag tomorrow.",
+      "options": [
+        "carries",
+        "has carried",
+        "will carry",
+        "carried"
+      ],
+      "answer": "C",
+      "answerText": "will carry",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 338,
+      "topicId": 9,
+      "prompt": "I think my brother ___ homework next Saturday.",
+      "options": [
+        "finishes",
+        "has finished",
+        "finished",
+        "will finish"
+      ],
+      "answer": "D",
+      "answerText": "will finish",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 339,
+      "topicId": 9,
+      "prompt": "I think my sister ___ the dishes soon.",
+      "options": [
+        "washes",
+        "has washed",
+        "washed",
+        "will wash"
+      ],
+      "answer": "D",
+      "answerText": "will wash",
+      "explanation": "“I think”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 340,
+      "topicId": 9,
+      "prompt": "I believe the teacher ___ the office later today.",
+      "options": [
+        "has left",
+        "leaves",
+        "left",
+        "will leave"
+      ],
+      "answer": "D",
+      "answerText": "will leave",
+      "explanation": "“I believe”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 341,
+      "topicId": 9,
+      "prompt": "I believe the student ___ the window this weekend.",
+      "options": [
+        "has opened",
+        "opened",
+        "will open",
+        "opens"
+      ],
+      "answer": "C",
+      "answerText": "will open",
+      "explanation": "“I believe”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 342,
+      "topicId": 9,
+      "prompt": "I believe Jack ___ the piano this evening.",
+      "options": [
+        "will practice",
+        "practices",
+        "has practiced",
+        "practiced"
+      ],
+      "answer": "A",
+      "answerText": "will practice",
+      "explanation": "“I believe”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 343,
+      "topicId": 9,
+      "prompt": "I believe Lucy ___ soccer next week.",
+      "options": [
+        "will play",
+        "plays",
+        "has played",
+        "played"
+      ],
+      "answer": "A",
+      "answerText": "will play",
+      "explanation": "“I believe”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 344,
+      "topicId": 9,
+      "prompt": "I believe I ___ a friend tomorrow.",
+      "options": [
+        "will visit",
+        "visit",
+        "visited",
+        "have visited"
+      ],
+      "answer": "A",
+      "answerText": "will visit",
+      "explanation": "“I believe”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 345,
+      "topicId": 9,
+      "prompt": "I believe you ___ an email next Saturday.",
+      "options": [
+        "have written",
+        "wrote",
+        "write",
+        "will write"
+      ],
+      "answer": "D",
+      "answerText": "will write",
+      "explanation": "“I believe”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 346,
+      "topicId": 9,
+      "prompt": "I believe we ___ in the pool soon.",
+      "options": [
+        "swim",
+        "have swum",
+        "will swim",
+        "swam"
+      ],
+      "answer": "C",
+      "answerText": "will swim",
+      "explanation": "“I believe”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 347,
+      "topicId": 9,
+      "prompt": "I believe they ___ a message later today.",
+      "options": [
+        "have sent",
+        "sent",
+        "will send",
+        "send"
+      ],
+      "answer": "C",
+      "answerText": "will send",
+      "explanation": "“I believe”表示对未来的判断或预测，常用 will + 动词原形。"
+    },
+    {
+      "id": 348,
+      "topicId": 9,
+      "prompt": "The phone is ringing. I ___ it.",
+      "options": [
+        "answered",
+        "am answering",
+        "answer",
+        "will answer"
+      ],
+      "answer": "D",
+      "answerText": "will answer",
+      "explanation": "说话当下临时做出的决定，常用 will。"
+    },
+    {
+      "id": 349,
+      "topicId": 9,
+      "prompt": "Do not worry. I ___ you with the work.",
+      "options": [
+        "have helped",
+        "will help",
+        "helped",
+        "am helping"
+      ],
+      "answer": "B",
+      "answerText": "will help",
+      "explanation": "承诺或主动提供帮助，常用 will。"
+    },
+    {
+      "id": 350,
+      "topicId": 9,
+      "prompt": "I am sure she ___ the test.",
+      "options": [
+        "will pass",
+        "passed",
+        "has passed",
+        "passes"
+      ],
+      "answer": "A",
+      "answerText": "will pass",
+      "explanation": "“I am sure”表示对未来结果的判断，用 will。"
+    },
+    {
+      "id": 351,
+      "topicId": 9,
+      "prompt": "Maybe it ___ tomorrow.",
+      "options": [
+        "rained",
+        "is raining",
+        "rains",
+        "will rain"
+      ],
+      "answer": "D",
+      "answerText": "will rain",
+      "explanation": "maybe 表示对未来的可能性判断，用 will。"
+    },
+    {
+      "id": 352,
+      "topicId": 9,
+      "prompt": "I promise I ___ late again.",
+      "options": [
+        "will not be",
+        "am not",
+        "have not been",
+        "was not"
+      ],
+      "answer": "A",
+      "answerText": "will not be",
+      "explanation": "promise 表示对未来的承诺，用 will。"
+    },
+    {
+      "id": 353,
+      "topicId": 9,
+      "prompt": "If you need help, I ___ here.",
+      "options": [
+        "will be",
+        "was",
+        "am",
+        "have been"
+      ],
+      "answer": "A",
+      "answerText": "will be",
+      "explanation": "主句表示将来的结果或承诺，用 will。"
+    },
+    {
+      "id": 354,
+      "topicId": 9,
+      "prompt": "I think people ___ more online in the future.",
+      "options": [
+        "have worked",
+        "worked",
+        "work",
+        "will work"
+      ],
+      "answer": "D",
+      "answerText": "will work",
+      "explanation": "in the future 加预测语境，用 will。"
+    },
+    {
+      "id": 355,
+      "topicId": 9,
+      "prompt": "The bag looks heavy. I ___ it for you.",
+      "options": [
+        "will carry",
+        "am carrying",
+        "carry",
+        "carried"
+      ],
+      "answer": "A",
+      "answerText": "will carry",
+      "explanation": "看到情况后即时提出帮助，用 will。"
+    },
+    {
+      "id": 356,
+      "topicId": 9,
+      "prompt": "I hope you ___ a good time tomorrow.",
+      "options": [
+        "had",
+        "will have",
+        "have",
+        "are having"
+      ],
+      "answer": "B",
+      "answerText": "will have",
+      "explanation": "hope 后谈未来情况，可用 will。"
+    },
+    {
+      "id": 357,
+      "topicId": 9,
+      "prompt": "No one knows what ___ next.",
+      "options": [
+        "will happen",
+        "happens",
+        "has happened",
+        "happened"
+      ],
+      "answer": "A",
+      "answerText": "will happen",
+      "explanation": "谈尚未发生的未来事件，用 will。"
+    },
+    {
+      "id": 358,
+      "topicId": 9,
+      "prompt": "I think our team ___ the game tonight.",
+      "options": [
+        "won",
+        "has won",
+        "will win",
+        "wins"
+      ],
+      "answer": "C",
+      "answerText": "will win",
+      "explanation": "I think + tonight 表示未来预测，用 will。"
+    },
+    {
+      "id": 359,
+      "topicId": 9,
+      "prompt": "I forgot my pen. — I ___ you mine.",
+      "options": [
+        "am lending",
+        "lend",
+        "lent",
+        "will lend"
+      ],
+      "answer": "D",
+      "answerText": "will lend",
+      "explanation": "对当前情况作出的即时决定，用 will。"
+    },
+    {
+      "id": 360,
+      "topicId": 9,
+      "prompt": "Perhaps Tom ___ us later.",
+      "options": [
+        "calls",
+        "will call",
+        "has called",
+        "called"
+      ],
+      "answer": "B",
+      "answerText": "will call",
+      "explanation": "perhaps 表示未来可能性，用 will。"
+    },
+    {
+      "id": 361,
+      "topicId": 10,
+      "prompt": "There is already a plan. The student ___ a picture tomorrow.",
+      "options": [
+        "will draw",
+        "drew",
+        "is going to draw",
+        "is drawing"
+      ],
+      "answer": "C",
+      "answerText": "is going to draw",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 362,
+      "topicId": 10,
+      "prompt": "There is already a plan. Jack ___ English tomorrow.",
+      "options": [
+        "is studying",
+        "will study",
+        "is going to study",
+        "studied"
+      ],
+      "answer": "C",
+      "answerText": "is going to study",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 363,
+      "topicId": 10,
+      "prompt": "There is already a plan. Lucy ___ food tomorrow.",
+      "options": [
+        "is buying",
+        "will buy",
+        "is going to buy",
+        "bought"
+      ],
+      "answer": "C",
+      "answerText": "is going to buy",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 364,
+      "topicId": 10,
+      "prompt": "There is already a plan. I ___ math tomorrow.",
+      "options": [
+        "am going to teach",
+        "taught",
+        "am teaching",
+        "will teach"
+      ],
+      "answer": "A",
+      "answerText": "am going to teach",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 365,
+      "topicId": 10,
+      "prompt": "There is already a plan. You ___ for the bus tomorrow.",
+      "options": [
+        "will wait",
+        "waited",
+        "are waiting",
+        "are going to wait"
+      ],
+      "answer": "D",
+      "answerText": "are going to wait",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 366,
+      "topicId": 10,
+      "prompt": "There is already a plan. We ___ at the picture tomorrow.",
+      "options": [
+        "are looking",
+        "looked",
+        "will look",
+        "are going to look"
+      ],
+      "answer": "D",
+      "answerText": "are going to look",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 367,
+      "topicId": 10,
+      "prompt": "There is already a plan. They ___ breakfast tomorrow.",
+      "options": [
+        "are eating",
+        "will eat",
+        "are going to eat",
+        "ate"
+      ],
+      "answer": "C",
+      "answerText": "are going to eat",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 368,
+      "topicId": 10,
+      "prompt": "There is already a plan. Tom ___ dinner tomorrow.",
+      "options": [
+        "is going to cook",
+        "will cook",
+        "cooked",
+        "is cooking"
+      ],
+      "answer": "A",
+      "answerText": "is going to cook",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 369,
+      "topicId": 10,
+      "prompt": "There is already a plan. Amy ___ a friend tomorrow.",
+      "options": [
+        "met",
+        "is meeting",
+        "is going to meet",
+        "will meet"
+      ],
+      "answer": "C",
+      "answerText": "is going to meet",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 370,
+      "topicId": 10,
+      "prompt": "There is already a plan. My brother ___ class tomorrow.",
+      "options": [
+        "is starting",
+        "will start",
+        "started",
+        "is going to start"
+      ],
+      "answer": "D",
+      "answerText": "is going to start",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 371,
+      "topicId": 10,
+      "prompt": "There is already a plan. My sister ___ a classmate tomorrow.",
+      "options": [
+        "helped",
+        "is going to help",
+        "is helping",
+        "will help"
+      ],
+      "answer": "B",
+      "answerText": "is going to help",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 372,
+      "topicId": 10,
+      "prompt": "There is already a plan. The teacher ___ a computer tomorrow.",
+      "options": [
+        "used",
+        "is using",
+        "will use",
+        "is going to use"
+      ],
+      "answer": "D",
+      "answerText": "is going to use",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 373,
+      "topicId": 10,
+      "prompt": "There is already a plan. The student ___ TV tomorrow.",
+      "options": [
+        "will watch",
+        "is going to watch",
+        "watched",
+        "is watching"
+      ],
+      "answer": "B",
+      "answerText": "is going to watch",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 374,
+      "topicId": 10,
+      "prompt": "There is already a plan. Jack ___ to school tomorrow.",
+      "options": [
+        "will walk",
+        "is going to walk",
+        "walked",
+        "is walking"
+      ],
+      "answer": "B",
+      "answerText": "is going to walk",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 375,
+      "topicId": 10,
+      "prompt": "There is already a plan. Lucy ___ early tomorrow.",
+      "options": [
+        "will sleep",
+        "is going to sleep",
+        "slept",
+        "is sleeping"
+      ],
+      "answer": "B",
+      "answerText": "is going to sleep",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 376,
+      "topicId": 10,
+      "prompt": "There is already a plan. I ___ the door tomorrow.",
+      "options": [
+        "will close",
+        "am closing",
+        "am going to close",
+        "closed"
+      ],
+      "answer": "C",
+      "answerText": "am going to close",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 377,
+      "topicId": 10,
+      "prompt": "There is already a plan. You ___ new words tomorrow.",
+      "options": [
+        "learned",
+        "are going to learn",
+        "are learning",
+        "will learn"
+      ],
+      "answer": "B",
+      "answerText": "are going to learn",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 378,
+      "topicId": 10,
+      "prompt": "There is already a plan. We ___ soccer tomorrow.",
+      "options": [
+        "are going to play",
+        "are playing",
+        "played",
+        "will play"
+      ],
+      "answer": "A",
+      "answerText": "are going to play",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 379,
+      "topicId": 10,
+      "prompt": "There is already a plan. They ___ a friend tomorrow.",
+      "options": [
+        "visited",
+        "are going to visit",
+        "are visiting",
+        "will visit"
+      ],
+      "answer": "B",
+      "answerText": "are going to visit",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 380,
+      "topicId": 10,
+      "prompt": "There is already a plan. Tom ___ an email tomorrow.",
+      "options": [
+        "is writing",
+        "wrote",
+        "will write",
+        "is going to write"
+      ],
+      "answer": "D",
+      "answerText": "is going to write",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 381,
+      "topicId": 10,
+      "prompt": "There is already a plan. Amy ___ in the pool tomorrow.",
+      "options": [
+        "swam",
+        "is going to swim",
+        "is swimming",
+        "will swim"
+      ],
+      "answer": "B",
+      "answerText": "is going to swim",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 382,
+      "topicId": 10,
+      "prompt": "There is already a plan. My brother ___ a message tomorrow.",
+      "options": [
+        "will send",
+        "is sending",
+        "is going to send",
+        "sent"
+      ],
+      "answer": "C",
+      "answerText": "is going to send",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 383,
+      "topicId": 10,
+      "prompt": "There is already a plan. My sister ___ with a friend tomorrow.",
+      "options": [
+        "talked",
+        "is going to talk",
+        "is talking",
+        "will talk"
+      ],
+      "answer": "B",
+      "answerText": "is going to talk",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 384,
+      "topicId": 10,
+      "prompt": "There is already a plan. The teacher ___ to school tomorrow.",
+      "options": [
+        "is going",
+        "went",
+        "is going to go",
+        "will go"
+      ],
+      "answer": "C",
+      "answerText": "is going to go",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 385,
+      "topicId": 10,
+      "prompt": "There is already a plan. The student ___ at home tomorrow.",
+      "options": [
+        "is going to work",
+        "is working",
+        "worked",
+        "will work"
+      ],
+      "answer": "A",
+      "answerText": "is going to work",
+      "explanation": "前句明确说明“已经做了计划”，强调事先打算，用 be going to + 动词原形。"
+    },
+    {
+      "id": 386,
+      "topicId": 10,
+      "prompt": "Look at those dark clouds. It ___ rain.",
+      "options": [
+        "will",
+        "has",
+        "is going to",
+        "did"
+      ],
+      "answer": "C",
+      "answerText": "is going to",
+      "explanation": "有眼前证据（乌云）预测即将下雨，常用 be going to。"
+    },
+    {
+      "id": 387,
+      "topicId": 10,
+      "prompt": "Be careful! You ___ drop that glass.",
+      "options": [
+        "did",
+        "will",
+        "have",
+        "are going to"
+      ],
+      "answer": "D",
+      "answerText": "are going to",
+      "explanation": "根据眼前迹象判断马上可能发生，用 be going to。"
+    },
+    {
+      "id": 388,
+      "topicId": 10,
+      "prompt": "We bought the tickets yesterday. We ___ visit Beijing next month.",
+      "options": [
+        "will",
+        "are going to",
+        "were",
+        "have"
+      ],
+      "answer": "B",
+      "answerText": "are going to",
+      "explanation": "已经买票，说明计划事先确定，用 be going to。"
+    },
+    {
+      "id": 389,
+      "topicId": 10,
+      "prompt": "Amy has saved enough money. She ___ buy a new computer.",
+      "options": [
+        "did",
+        "is going to",
+        "will",
+        "has"
+      ],
+      "answer": "B",
+      "answerText": "is going to",
+      "explanation": "已有明确准备和打算，用 be going to。"
+    },
+    {
+      "id": 390,
+      "topicId": 10,
+      "prompt": "I have decided to learn Spanish. I ___ start next week.",
+      "options": [
+        "am going to",
+        "have",
+        "did",
+        "will"
+      ],
+      "answer": "A",
+      "answerText": "am going to",
+      "explanation": "“have decided”表明计划已做出，用 be going to。"
+    },
+    {
+      "id": 391,
+      "topicId": 10,
+      "prompt": "The box is falling! It ___ hit the floor.",
+      "options": [
+        "has",
+        "is going to",
+        "did",
+        "will"
+      ],
+      "answer": "B",
+      "answerText": "is going to",
+      "explanation": "根据正在发生的迹象预测马上发生，用 be going to。"
+    },
+    {
+      "id": 392,
+      "topicId": 10,
+      "prompt": "They have chosen a date. They ___ get married in June.",
+      "options": [
+        "are going to",
+        "will",
+        "did",
+        "have"
+      ],
+      "answer": "A",
+      "answerText": "are going to",
+      "explanation": "已选好日期，属于事先安排，用 be going to。"
+    },
+    {
+      "id": 393,
+      "topicId": 10,
+      "prompt": "Tom has a map and a train ticket. He ___ travel tomorrow.",
+      "options": [
+        "did",
+        "will",
+        "is going to",
+        "has"
+      ],
+      "answer": "C",
+      "answerText": "is going to",
+      "explanation": "已有具体准备，说明事先计划，用 be going to。"
+    },
+    {
+      "id": 394,
+      "topicId": 10,
+      "prompt": "I have all the food ready. I ___ cook dinner for everyone.",
+      "options": [
+        "have",
+        "am going to",
+        "did",
+        "will"
+      ],
+      "answer": "B",
+      "answerText": "am going to",
+      "explanation": "食材已准备好，表明事先计划，用 be going to。"
+    },
+    {
+      "id": 395,
+      "topicId": 10,
+      "prompt": "The child is too close to the water. He ___ fall in.",
+      "options": [
+        "is going to",
+        "has",
+        "will",
+        "did"
+      ],
+      "answer": "A",
+      "answerText": "is going to",
+      "explanation": "根据眼前危险迹象作预测，用 be going to。"
+    },
+    {
+      "id": 396,
+      "topicId": 11,
+      "prompt": "Amy ___ soccer at 8 tomorrow morning.",
+      "options": [
+        "will play",
+        "played",
+        "has played",
+        "will be playing"
+      ],
+      "answer": "D",
+      "answerText": "will be playing",
+      "explanation": "“at 8 tomorrow morning”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 397,
+      "topicId": 11,
+      "prompt": "My brother ___ a picture this time tomorrow.",
+      "options": [
+        "will draw",
+        "drew",
+        "will be drawing",
+        "has drawn"
+      ],
+      "answer": "C",
+      "answerText": "will be drawing",
+      "explanation": "“this time tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 398,
+      "topicId": 11,
+      "prompt": "My sister ___ TV at 9 tomorrow night.",
+      "options": [
+        "watched",
+        "will be watching",
+        "has watched",
+        "will watch"
+      ],
+      "answer": "B",
+      "answerText": "will be watching",
+      "explanation": "“at 9 tomorrow night”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 399,
+      "topicId": 11,
+      "prompt": "The teacher ___ the room at noon tomorrow.",
+      "options": [
+        "will clean",
+        "will be cleaning",
+        "cleaned",
+        "has cleaned"
+      ],
+      "answer": "B",
+      "answerText": "will be cleaning",
+      "explanation": "“at noon tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 400,
+      "topicId": 11,
+      "prompt": "The student ___ English at 3 next Saturday.",
+      "options": [
+        "studied",
+        "will be studying",
+        "has studied",
+        "will study"
+      ],
+      "answer": "B",
+      "answerText": "will be studying",
+      "explanation": "“at 3 next Saturday”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 401,
+      "topicId": 11,
+      "prompt": "Jack ___ at home at 8 tomorrow morning.",
+      "options": [
+        "will work",
+        "will be working",
+        "has worked",
+        "worked"
+      ],
+      "answer": "B",
+      "answerText": "will be working",
+      "explanation": "“at 8 tomorrow morning”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 402,
+      "topicId": 11,
+      "prompt": "Lucy ___ dinner this time tomorrow.",
+      "options": [
+        "will be cooking",
+        "has cooked",
+        "cooked",
+        "will cook"
+      ],
+      "answer": "A",
+      "answerText": "will be cooking",
+      "explanation": "“this time tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 403,
+      "topicId": 11,
+      "prompt": "I ___ an email at 9 tomorrow night.",
+      "options": [
+        "will be writing",
+        "wrote",
+        "will write",
+        "have written"
+      ],
+      "answer": "A",
+      "answerText": "will be writing",
+      "explanation": "“at 9 tomorrow night”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 404,
+      "topicId": 11,
+      "prompt": "You ___ in the park at noon tomorrow.",
+      "options": [
+        "will be running",
+        "ran",
+        "will run",
+        "have run"
+      ],
+      "answer": "A",
+      "answerText": "will be running",
+      "explanation": "“at noon tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 405,
+      "topicId": 11,
+      "prompt": "We ___ in the pool at 3 next Saturday.",
+      "options": [
+        "will swim",
+        "will be swimming",
+        "have swum",
+        "swam"
+      ],
+      "answer": "B",
+      "answerText": "will be swimming",
+      "explanation": "“at 3 next Saturday”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 406,
+      "topicId": 11,
+      "prompt": "They ___ coffee at 8 tomorrow morning.",
+      "options": [
+        "will make",
+        "made",
+        "will be making",
+        "have made"
+      ],
+      "answer": "C",
+      "answerText": "will be making",
+      "explanation": "“at 8 tomorrow morning”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 407,
+      "topicId": 11,
+      "prompt": "Tom ___ a message this time tomorrow.",
+      "options": [
+        "will send",
+        "sent",
+        "has sent",
+        "will be sending"
+      ],
+      "answer": "D",
+      "answerText": "will be sending",
+      "explanation": "“this time tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 408,
+      "topicId": 11,
+      "prompt": "Amy ___ for the bus at 9 tomorrow night.",
+      "options": [
+        "has waited",
+        "will wait",
+        "will be waiting",
+        "waited"
+      ],
+      "answer": "C",
+      "answerText": "will be waiting",
+      "explanation": "“at 9 tomorrow night”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 409,
+      "topicId": 11,
+      "prompt": "My brother ___ to music at noon tomorrow.",
+      "options": [
+        "will be listening",
+        "listened",
+        "will listen",
+        "has listened"
+      ],
+      "answer": "A",
+      "answerText": "will be listening",
+      "explanation": "“at noon tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 410,
+      "topicId": 11,
+      "prompt": "My sister ___ a classmate at 3 next Saturday.",
+      "options": [
+        "has helped",
+        "helped",
+        "will help",
+        "will be helping"
+      ],
+      "answer": "D",
+      "answerText": "will be helping",
+      "explanation": "“at 3 next Saturday”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 411,
+      "topicId": 11,
+      "prompt": "The teacher ___ the piano at 8 tomorrow morning.",
+      "options": [
+        "has practiced",
+        "will be practicing",
+        "practiced",
+        "will practice"
+      ],
+      "answer": "B",
+      "answerText": "will be practicing",
+      "explanation": "“at 8 tomorrow morning”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 412,
+      "topicId": 11,
+      "prompt": "The student ___ new words this time tomorrow.",
+      "options": [
+        "has learned",
+        "will learn",
+        "learned",
+        "will be learning"
+      ],
+      "answer": "D",
+      "answerText": "will be learning",
+      "explanation": "“this time tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 413,
+      "topicId": 11,
+      "prompt": "Jack ___ with a friend at 9 tomorrow night.",
+      "options": [
+        "will talk",
+        "will be talking",
+        "has talked",
+        "talked"
+      ],
+      "answer": "B",
+      "answerText": "will be talking",
+      "explanation": "“at 9 tomorrow night”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 414,
+      "topicId": 11,
+      "prompt": "Lucy ___ a computer at noon tomorrow.",
+      "options": [
+        "has used",
+        "will be using",
+        "will use",
+        "used"
+      ],
+      "answer": "B",
+      "answerText": "will be using",
+      "explanation": "“at noon tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 415,
+      "topicId": 11,
+      "prompt": "I ___ a small table at 3 next Saturday.",
+      "options": [
+        "have built",
+        "will build",
+        "will be building",
+        "built"
+      ],
+      "answer": "C",
+      "answerText": "will be building",
+      "explanation": "“at 3 next Saturday”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 416,
+      "topicId": 11,
+      "prompt": "You ___ soccer at 8 tomorrow morning.",
+      "options": [
+        "will be playing",
+        "will play",
+        "have played",
+        "played"
+      ],
+      "answer": "A",
+      "answerText": "will be playing",
+      "explanation": "“at 8 tomorrow morning”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 417,
+      "topicId": 11,
+      "prompt": "We ___ a picture this time tomorrow.",
+      "options": [
+        "will draw",
+        "will be drawing",
+        "drew",
+        "have drawn"
+      ],
+      "answer": "B",
+      "answerText": "will be drawing",
+      "explanation": "“this time tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 418,
+      "topicId": 11,
+      "prompt": "They ___ TV at 9 tomorrow night.",
+      "options": [
+        "have watched",
+        "watched",
+        "will be watching",
+        "will watch"
+      ],
+      "answer": "C",
+      "answerText": "will be watching",
+      "explanation": "“at 9 tomorrow night”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 419,
+      "topicId": 11,
+      "prompt": "Tom ___ the room at noon tomorrow.",
+      "options": [
+        "has cleaned",
+        "will be cleaning",
+        "will clean",
+        "cleaned"
+      ],
+      "answer": "B",
+      "answerText": "will be cleaning",
+      "explanation": "“at noon tomorrow”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 420,
+      "topicId": 11,
+      "prompt": "Amy ___ English at 3 next Saturday.",
+      "options": [
+        "will study",
+        "will be studying",
+        "studied",
+        "has studied"
+      ],
+      "answer": "B",
+      "answerText": "will be studying",
+      "explanation": "“at 3 next Saturday”表示未来某一时刻正在进行的动作，用将来进行时：will be + doing。"
+    },
+    {
+      "id": 421,
+      "topicId": 11,
+      "prompt": "This time next week, we ___ on the beach.",
+      "options": [
+        "have relaxed",
+        "will relax",
+        "will be relaxing",
+        "relaxed"
+      ],
+      "answer": "C",
+      "answerText": "will be relaxing",
+      "explanation": "“This time next week”强调未来某时正在进行，用将来进行时。"
+    },
+    {
+      "id": 422,
+      "topicId": 11,
+      "prompt": "Do not call me at 7 tonight. I ___ dinner then.",
+      "options": [
+        "will cook",
+        "cooked",
+        "have cooked",
+        "will be cooking"
+      ],
+      "answer": "D",
+      "answerText": "will be cooking",
+      "explanation": "then 指未来7点，当时动作正在进行，用将来进行时。"
+    },
+    {
+      "id": 423,
+      "topicId": 11,
+      "prompt": "At 10 tomorrow, Tom ___ his test.",
+      "options": [
+        "took",
+        "has taken",
+        "will take",
+        "will be taking"
+      ],
+      "answer": "D",
+      "answerText": "will be taking",
+      "explanation": "未来10点正在考试，用将来进行时。"
+    },
+    {
+      "id": 424,
+      "topicId": 11,
+      "prompt": "When you arrive tonight, I ___ at the station.",
+      "options": [
+        "waited",
+        "will wait",
+        "have waited",
+        "will be waiting"
+      ],
+      "answer": "D",
+      "answerText": "will be waiting",
+      "explanation": "你到达时，我将正在车站等，强调未来进行中的状态。"
+    },
+    {
+      "id": 425,
+      "topicId": 11,
+      "prompt": "At this hour tomorrow, she ___ to New York.",
+      "options": [
+        "flew",
+        "has flown",
+        "will fly",
+        "will be flying"
+      ],
+      "answer": "D",
+      "answerText": "will be flying",
+      "explanation": "未来同一时刻正在飞行，用将来进行时。"
+    },
+    {
+      "id": 426,
+      "topicId": 12,
+      "prompt": "Jack ___ a picture by tomorrow.",
+      "options": [
+        "has drawn",
+        "will draw",
+        "will be drawing",
+        "will have drawn"
+      ],
+      "answer": "D",
+      "answerText": "will have drawn",
+      "explanation": "“by tomorrow”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 427,
+      "topicId": 12,
+      "prompt": "Lucy ___ homework by tomorrow.",
+      "options": [
+        "has finished",
+        "will be finishing",
+        "will finish",
+        "will have finished"
+      ],
+      "answer": "D",
+      "answerText": "will have finished",
+      "explanation": "“by tomorrow”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 428,
+      "topicId": 12,
+      "prompt": "I ___ the room by this evening.",
+      "options": [
+        "will be cleaning",
+        "will clean",
+        "will have cleaned",
+        "have cleaned"
+      ],
+      "answer": "C",
+      "answerText": "will have cleaned",
+      "explanation": "“by this evening”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 429,
+      "topicId": 12,
+      "prompt": "You ___ a friend by Sunday.",
+      "options": [
+        "will be visiting",
+        "will have visited",
+        "will visit",
+        "have visited"
+      ],
+      "answer": "B",
+      "answerText": "will have visited",
+      "explanation": "“by Sunday”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 430,
+      "topicId": 12,
+      "prompt": "We ___ dinner by 7 p.m. tonight.",
+      "options": [
+        "will cook",
+        "will have cooked",
+        "will be cooking",
+        "have cooked"
+      ],
+      "answer": "B",
+      "answerText": "will have cooked",
+      "explanation": "“by 7 p.m. tonight”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 431,
+      "topicId": 12,
+      "prompt": "They ___ an email by this evening.",
+      "options": [
+        "will have written",
+        "will write",
+        "have written",
+        "will be writing"
+      ],
+      "answer": "A",
+      "answerText": "will have written",
+      "explanation": "“by this evening”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 432,
+      "topicId": 12,
+      "prompt": "Tom ___ food by this evening.",
+      "options": [
+        "has bought",
+        "will have bought",
+        "will be buying",
+        "will buy"
+      ],
+      "answer": "B",
+      "answerText": "will have bought",
+      "explanation": "“by this evening”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 433,
+      "topicId": 12,
+      "prompt": "Amy ___ coffee by 9 a.m. tomorrow.",
+      "options": [
+        "will make",
+        "will be making",
+        "will have made",
+        "has made"
+      ],
+      "answer": "C",
+      "answerText": "will have made",
+      "explanation": "“by 9 a.m. tomorrow”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 434,
+      "topicId": 12,
+      "prompt": "My brother ___ a message by noon tomorrow.",
+      "options": [
+        "will send",
+        "has sent",
+        "will be sending",
+        "will have sent"
+      ],
+      "answer": "D",
+      "answerText": "will have sent",
+      "explanation": "“by noon tomorrow”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 435,
+      "topicId": 12,
+      "prompt": "My sister ___ new words by the end of this week.",
+      "options": [
+        "has learned",
+        "will learn",
+        "will have learned",
+        "will be learning"
+      ],
+      "answer": "C",
+      "answerText": "will have learned",
+      "explanation": "“by the end of this week”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 436,
+      "topicId": 12,
+      "prompt": "The teacher ___ a small table by next Friday.",
+      "options": [
+        "has built",
+        "will be building",
+        "will build",
+        "will have built"
+      ],
+      "answer": "D",
+      "answerText": "will have built",
+      "explanation": "“by next Friday”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 437,
+      "topicId": 12,
+      "prompt": "The student ___ a picture by tomorrow.",
+      "options": [
+        "will draw",
+        "will have drawn",
+        "will be drawing",
+        "has drawn"
+      ],
+      "answer": "B",
+      "answerText": "will have drawn",
+      "explanation": "“by tomorrow”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 438,
+      "topicId": 12,
+      "prompt": "Jack ___ homework by tomorrow.",
+      "options": [
+        "has finished",
+        "will have finished",
+        "will be finishing",
+        "will finish"
+      ],
+      "answer": "B",
+      "answerText": "will have finished",
+      "explanation": "“by tomorrow”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 439,
+      "topicId": 12,
+      "prompt": "Lucy ___ the room by this evening.",
+      "options": [
+        "will clean",
+        "will be cleaning",
+        "has cleaned",
+        "will have cleaned"
+      ],
+      "answer": "D",
+      "answerText": "will have cleaned",
+      "explanation": "“by this evening”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 440,
+      "topicId": 12,
+      "prompt": "I ___ a friend by Sunday.",
+      "options": [
+        "will be visiting",
+        "will visit",
+        "have visited",
+        "will have visited"
+      ],
+      "answer": "D",
+      "answerText": "will have visited",
+      "explanation": "“by Sunday”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 441,
+      "topicId": 12,
+      "prompt": "You ___ dinner by 7 p.m. tonight.",
+      "options": [
+        "will cook",
+        "will be cooking",
+        "will have cooked",
+        "have cooked"
+      ],
+      "answer": "C",
+      "answerText": "will have cooked",
+      "explanation": "“by 7 p.m. tonight”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 442,
+      "topicId": 12,
+      "prompt": "We ___ an email by this evening.",
+      "options": [
+        "will be writing",
+        "have written",
+        "will write",
+        "will have written"
+      ],
+      "answer": "D",
+      "answerText": "will have written",
+      "explanation": "“by this evening”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 443,
+      "topicId": 12,
+      "prompt": "They ___ food by this evening.",
+      "options": [
+        "will buy",
+        "have bought",
+        "will be buying",
+        "will have bought"
+      ],
+      "answer": "D",
+      "answerText": "will have bought",
+      "explanation": "“by this evening”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 444,
+      "topicId": 12,
+      "prompt": "Tom ___ coffee by 9 a.m. tomorrow.",
+      "options": [
+        "will make",
+        "will be making",
+        "has made",
+        "will have made"
+      ],
+      "answer": "D",
+      "answerText": "will have made",
+      "explanation": "“by 9 a.m. tomorrow”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 445,
+      "topicId": 12,
+      "prompt": "Amy ___ a message by noon tomorrow.",
+      "options": [
+        "will have sent",
+        "will send",
+        "has sent",
+        "will be sending"
+      ],
+      "answer": "A",
+      "answerText": "will have sent",
+      "explanation": "“by noon tomorrow”表示截至未来某个时间已经完成，用将来完成时：will have + 过去分词。"
+    },
+    {
+      "id": 446,
+      "topicId": 12,
+      "prompt": "By the time you arrive, I ___ the report.",
+      "options": [
+        "finished",
+        "will have finished",
+        "will be finishing",
+        "will finish"
+      ],
+      "answer": "B",
+      "answerText": "will have finished",
+      "explanation": "截至你到达这一未来时点，报告将已经完成，用将来完成时。"
+    },
+    {
+      "id": 447,
+      "topicId": 12,
+      "prompt": "By next year, she ___ here for ten years.",
+      "options": [
+        "has lived",
+        "will live",
+        "will have lived",
+        "will be living"
+      ],
+      "answer": "C",
+      "answerText": "will have lived",
+      "explanation": "by next year 表示截至未来时间累计达到十年，用将来完成时。"
+    },
+    {
+      "id": 448,
+      "topicId": 12,
+      "prompt": "By 2030, they ___ the new bridge.",
+      "options": [
+        "built",
+        "will build",
+        "will be building",
+        "will have built"
+      ],
+      "answer": "D",
+      "answerText": "will have built",
+      "explanation": "截至2030年将已完成建设，用将来完成时。"
+    },
+    {
+      "id": 449,
+      "topicId": 12,
+      "prompt": "By midnight, we ___ all the work.",
+      "options": [
+        "will finish",
+        "finished",
+        "will be finishing",
+        "will have finished"
+      ],
+      "answer": "D",
+      "answerText": "will have finished",
+      "explanation": "by midnight 是未来截止点，用将来完成时。"
+    },
+    {
+      "id": 450,
+      "topicId": 12,
+      "prompt": "By the end of the course, you ___ more than 1,000 new words.",
+      "options": [
+        "will be learning",
+        "will have learned",
+        "will learn",
+        "learned"
+      ],
+      "answer": "B",
+      "answerText": "will have learned",
+      "explanation": "“By the end...”强调未来截止时已经达到的成果，用将来完成时。"
+    },
+    {
+      "id": 451,
+      "topicId": 13,
+      "prompt": "My father usually ___ to work, but today he is taking the bus.",
+      "options": [
+        "has driven",
+        "is driving",
+        "drives",
+        "drove"
+      ],
+      "answer": "C",
+      "answerText": "drives",
+      "explanation": "usually 表示习惯，用一般现在时。"
+    },
+    {
+      "id": 452,
+      "topicId": 13,
+      "prompt": "Look! The children ___ in the snow.",
+      "options": [
+        "play",
+        "played",
+        "have played",
+        "are playing"
+      ],
+      "answer": "D",
+      "answerText": "are playing",
+      "explanation": "Look! 提示此刻正在发生，用现在进行时。"
+    },
+    {
+      "id": 453,
+      "topicId": 13,
+      "prompt": "So far, I ___ this book twice, so I know the story well.",
+      "options": [
+        "am reading",
+        "read",
+        "have read",
+        "will read"
+      ],
+      "answer": "C",
+      "answerText": "have read",
+      "explanation": "so far 表示“截至现在”，用现在完成时。"
+    },
+    {
+      "id": 454,
+      "topicId": 13,
+      "prompt": "We ___ dinner when the lights went out.",
+      "options": [
+        "have eaten",
+        "are eating",
+        "ate",
+        "were eating"
+      ],
+      "answer": "D",
+      "answerText": "were eating",
+      "explanation": "停电发生时，吃饭正在进行，用过去进行时。"
+    },
+    {
+      "id": 455,
+      "topicId": 13,
+      "prompt": "By the time the guests arrived, she ___ the room.",
+      "options": [
+        "has cleaned",
+        "cleaned",
+        "had cleaned",
+        "was cleaning"
+      ],
+      "answer": "C",
+      "answerText": "had cleaned",
+      "explanation": "By the time 表明打扫在另一个过去动作之前已完成，用过去完成时。"
+    },
+    {
+      "id": 456,
+      "topicId": 13,
+      "prompt": "I think it ___ sunny tomorrow.",
+      "options": [
+        "is",
+        "will be",
+        "was",
+        "has been"
+      ],
+      "answer": "B",
+      "answerText": "will be",
+      "explanation": "对未来的判断，用 will。"
+    },
+    {
+      "id": 457,
+      "topicId": 13,
+      "prompt": "They have bought paint. They ___ the kitchen this weekend.",
+      "options": [
+        "painted",
+        "are going to paint",
+        "paint",
+        "will paint"
+      ],
+      "answer": "B",
+      "answerText": "are going to paint",
+      "explanation": "已有材料准备，说明事先计划，用 be going to。"
+    },
+    {
+      "id": 458,
+      "topicId": 13,
+      "prompt": "At 9 tomorrow morning, I ___ in class.",
+      "options": [
+        "sat",
+        "will sit",
+        "have sat",
+        "will be sitting"
+      ],
+      "answer": "D",
+      "answerText": "will be sitting",
+      "explanation": "未来9点正在进行，用将来进行时。"
+    },
+    {
+      "id": 459,
+      "topicId": 13,
+      "prompt": "By Friday, Tom ___ the job.",
+      "options": [
+        "will have finished",
+        "will finish",
+        "finished",
+        "will be finishing"
+      ],
+      "answer": "A",
+      "answerText": "will have finished",
+      "explanation": "by Friday 是未来截止点，用将来完成时。"
+    },
+    {
+      "id": 460,
+      "topicId": 13,
+      "prompt": "Amy ___ English for two hours, and she is still studying.",
+      "options": [
+        "studied",
+        "has studied",
+        "has been studying",
+        "is studying"
+      ],
+      "answer": "C",
+      "answerText": "has been studying",
+      "explanation": "从过去持续到现在且仍继续，用现在完成进行时。"
+    },
+    {
+      "id": 461,
+      "topicId": 13,
+      "prompt": "We ___ that movie last Saturday.",
+      "options": [
+        "watched",
+        "are watching",
+        "watch",
+        "have watched"
+      ],
+      "answer": "A",
+      "answerText": "watched",
+      "explanation": "last Saturday 是明确过去时间，用一般过去时。"
+    },
+    {
+      "id": 462,
+      "topicId": 13,
+      "prompt": "Tom ___ coffee every morning.",
+      "options": [
+        "is drinking",
+        "drank",
+        "has drunk",
+        "drinks"
+      ],
+      "answer": "D",
+      "answerText": "drinks",
+      "explanation": "every morning 表示习惯；Tom 后动词加 -s。"
+    },
+    {
+      "id": 463,
+      "topicId": 13,
+      "prompt": "I cannot talk now. I ___ a test.",
+      "options": [
+        "have taken",
+        "am taking",
+        "took",
+        "take"
+      ],
+      "answer": "B",
+      "answerText": "am taking",
+      "explanation": "now 表示此刻正在进行，用现在进行时。"
+    },
+    {
+      "id": 464,
+      "topicId": 13,
+      "prompt": "She ___ here since 2021.",
+      "options": [
+        "lived",
+        "is living",
+        "has lived",
+        "will live"
+      ],
+      "answer": "C",
+      "answerText": "has lived",
+      "explanation": "since 2021 表示从过去持续到现在，用现在完成时。"
+    },
+    {
+      "id": 465,
+      "topicId": 13,
+      "prompt": "They ___ here for five years.",
+      "options": [
+        "are living",
+        "have lived",
+        "lived",
+        "will live"
+      ],
+      "answer": "B",
+      "answerText": "have lived",
+      "explanation": "for five years 表示从过去持续到现在，用现在完成时。"
+    },
+    {
+      "id": 466,
+      "topicId": 13,
+      "prompt": "When I called, Jack ___ a shower.",
+      "options": [
+        "has taken",
+        "was taking",
+        "took",
+        "takes"
+      ],
+      "answer": "B",
+      "answerText": "was taking",
+      "explanation": "打电话时洗澡正在进行，用过去进行时。"
+    },
+    {
+      "id": 467,
+      "topicId": 13,
+      "prompt": "By the time I got home, my family ___ dinner.",
+      "options": [
+        "were eating",
+        "ate",
+        "had eaten",
+        "have eaten"
+      ],
+      "answer": "C",
+      "answerText": "had eaten",
+      "explanation": "吃饭早于“got home”，用过去完成时。"
+    },
+    {
+      "id": 468,
+      "topicId": 13,
+      "prompt": "He was tired because he ___ all day.",
+      "options": [
+        "worked",
+        "has worked",
+        "was working",
+        "had been working"
+      ],
+      "answer": "D",
+      "answerText": "had been working",
+      "explanation": "强调过去某结果之前持续一整天的动作，用过去完成进行时。"
+    },
+    {
+      "id": 469,
+      "topicId": 13,
+      "prompt": "Someone is at the door. I ___ it.",
+      "options": [
+        "opened",
+        "will open",
+        "am opening",
+        "open"
+      ],
+      "answer": "B",
+      "answerText": "will open",
+      "explanation": "面对当前情况临时做决定，用 will。"
+    },
+    {
+      "id": 470,
+      "topicId": 13,
+      "prompt": "Look at the sky. It ___ rain soon.",
+      "options": [
+        "did",
+        "will",
+        "is going to",
+        "has"
+      ],
+      "answer": "C",
+      "answerText": "is going to",
+      "explanation": "根据眼前迹象预测，用 be going to。"
+    },
+    {
+      "id": 471,
+      "topicId": 13,
+      "prompt": "This time tomorrow, we ___ over the ocean.",
+      "options": [
+        "have flown",
+        "flew",
+        "will be flying",
+        "will fly"
+      ],
+      "answer": "C",
+      "answerText": "will be flying",
+      "explanation": "未来某一时刻正在进行，用将来进行时。"
+    },
+    {
+      "id": 472,
+      "topicId": 13,
+      "prompt": "By next month, I ___ all ten lessons.",
+      "options": [
+        "will finish",
+        "finished",
+        "will have finished",
+        "will be finishing"
+      ],
+      "answer": "C",
+      "answerText": "will have finished",
+      "explanation": "by next month 表未来截止点，用将来完成时。"
+    },
+    {
+      "id": 473,
+      "topicId": 13,
+      "prompt": "I ___ my keys. Can you help me find them?",
+      "options": [
+        "have lost",
+        "am losing",
+        "lost",
+        "lose"
+      ],
+      "answer": "A",
+      "answerText": "have lost",
+      "explanation": "丢钥匙造成现在找不到的结果，用现在完成时。"
+    },
+    {
+      "id": 474,
+      "topicId": 13,
+      "prompt": "She ___ for the bus since 8, and it still has not arrived.",
+      "options": [
+        "has waited",
+        "is waiting",
+        "waited",
+        "has been waiting"
+      ],
+      "answer": "D",
+      "answerText": "has been waiting",
+      "explanation": "since 8 且仍在等，强调持续动作，用现在完成进行时。"
+    },
+    {
+      "id": 475,
+      "topicId": 13,
+      "prompt": "We ___ to the museum two days ago.",
+      "options": [
+        "have gone",
+        "are going",
+        "go",
+        "went"
+      ],
+      "answer": "D",
+      "answerText": "went",
+      "explanation": "two days ago 是一般过去时标志。"
+    },
+    {
+      "id": 476,
+      "topicId": 13,
+      "prompt": "While I ___, my sister was making dinner.",
+      "options": [
+        "studied",
+        "study",
+        "have studied",
+        "was studying"
+      ],
+      "answer": "D",
+      "answerText": "was studying",
+      "explanation": "while 表示过去同时进行，用过去进行时。"
+    },
+    {
+      "id": 477,
+      "topicId": 13,
+      "prompt": "By the time he sent the letter, he ___ it twice.",
+      "options": [
+        "had checked",
+        "was checking",
+        "has checked",
+        "checked"
+      ],
+      "answer": "A",
+      "answerText": "had checked",
+      "explanation": "By the time 表示“发送”之前已经检查了两次，用过去完成时。"
+    },
+    {
+      "id": 478,
+      "topicId": 13,
+      "prompt": "My clothes were wet because I ___ in the rain.",
+      "options": [
+        "walked",
+        "had been walking",
+        "have walked",
+        "was walking"
+      ],
+      "answer": "B",
+      "answerText": "had been walking",
+      "explanation": "湿衣服是过去结果，之前步行持续发生，用过去完成进行时。"
+    },
+    {
+      "id": 479,
+      "topicId": 13,
+      "prompt": "I promise I ___ you tomorrow.",
+      "options": [
+        "call",
+        "will call",
+        "called",
+        "have called"
+      ],
+      "answer": "B",
+      "answerText": "will call",
+      "explanation": "promise 表示未来承诺，用 will。"
+    },
+    {
+      "id": 480,
+      "topicId": 13,
+      "prompt": "We have decided. We ___ a new table this weekend.",
+      "options": [
+        "bought",
+        "are going to buy",
+        "will buy",
+        "buy"
+      ],
+      "answer": "B",
+      "answerText": "are going to buy",
+      "explanation": "have decided 表明事先计划，用 be going to。"
+    },
+    {
+      "id": 481,
+      "topicId": 13,
+      "prompt": "At 8 tonight, Amy ___ for her exam.",
+      "options": [
+        "has studied",
+        "studied",
+        "will be studying",
+        "will study"
+      ],
+      "answer": "C",
+      "answerText": "will be studying",
+      "explanation": "未来8点正在进行，用将来进行时。"
+    },
+    {
+      "id": 482,
+      "topicId": 13,
+      "prompt": "By the end of today, we ___ the room.",
+      "options": [
+        "will have cleaned",
+        "will clean",
+        "will be cleaning",
+        "cleaned"
+      ],
+      "answer": "A",
+      "answerText": "will have cleaned",
+      "explanation": "截至今天结束时将已完成，用将来完成时。"
+    },
+    {
+      "id": 483,
+      "topicId": 13,
+      "prompt": "The train ___ at 7 every morning.",
+      "options": [
+        "leaves",
+        "has left",
+        "left",
+        "is leaving"
+      ],
+      "answer": "A",
+      "answerText": "leaves",
+      "explanation": "固定时刻表用一般现在时。"
+    },
+    {
+      "id": 484,
+      "topicId": 13,
+      "prompt": "Listen! Someone ___ my name.",
+      "options": [
+        "is calling",
+        "has called",
+        "called",
+        "calls"
+      ],
+      "answer": "A",
+      "answerText": "is calling",
+      "explanation": "Listen! 表示此刻正在发生，用现在进行时。"
+    },
+    {
+      "id": 485,
+      "topicId": 13,
+      "prompt": "Have you ever ___ a horse?",
+      "options": [
+        "ride",
+        "riding",
+        "rode",
+        "ridden"
+      ],
+      "answer": "D",
+      "answerText": "ridden",
+      "explanation": "ever 与现在完成时搭配，have 后用过去分词 ridden。"
+    },
+    {
+      "id": 486,
+      "topicId": 13,
+      "prompt": "I ___ him in 2024, but I have not seen him since.",
+      "options": [
+        "have met",
+        "meet",
+        "met",
+        "am meeting"
+      ],
+      "answer": "C",
+      "answerText": "met",
+      "explanation": "in 2024 是明确过去时间，用一般过去时。"
+    },
+    {
+      "id": 487,
+      "topicId": 13,
+      "prompt": "At 6 yesterday evening, we ___ home.",
+      "options": [
+        "drove",
+        "were driving",
+        "have driven",
+        "drive"
+      ],
+      "answer": "B",
+      "answerText": "were driving",
+      "explanation": "过去6点正在开车，用过去进行时。"
+    },
+    {
+      "id": 488,
+      "topicId": 13,
+      "prompt": "The movie had already started when we ___ the theater.",
+      "options": [
+        "enter",
+        "entered",
+        "are entering",
+        "have entered"
+      ],
+      "answer": "B",
+      "answerText": "entered",
+      "explanation": "when 从句描述随后发生的过去动作，用一般过去时。"
+    },
+    {
+      "id": 489,
+      "topicId": 13,
+      "prompt": "Before the teacher came, the students ___ for ten minutes.",
+      "options": [
+        "had been talking",
+        "were talking",
+        "talked",
+        "have talked"
+      ],
+      "answer": "A",
+      "answerText": "had been talking",
+      "explanation": "老师来之前已持续十分钟，强调过去持续性，用过去完成进行时。"
+    },
+    {
+      "id": 490,
+      "topicId": 13,
+      "prompt": "Maybe our team ___ tonight.",
+      "options": [
+        "won",
+        "wins",
+        "has won",
+        "will win"
+      ],
+      "answer": "D",
+      "answerText": "will win",
+      "explanation": "maybe + tonight 表示未来预测，用 will。"
+    },
+    {
+      "id": 491,
+      "topicId": 13,
+      "prompt": "Look at the baby: his eyes are closing. He ___ soon.",
+      "options": [
+        "sleeps",
+        "will sleep",
+        "is going to sleep",
+        "slept"
+      ],
+      "answer": "C",
+      "answerText": "is going to sleep",
+      "explanation": "根据眼前明显迹象判断即将发生，用 be going to。"
+    },
+    {
+      "id": 492,
+      "topicId": 13,
+      "prompt": "At this time next Sunday, they ___ in the pool.",
+      "options": [
+        "will be swimming",
+        "will swim",
+        "swam",
+        "have swum"
+      ],
+      "answer": "A",
+      "answerText": "will be swimming",
+      "explanation": "未来某时正在游泳，用将来进行时。"
+    },
+    {
+      "id": 493,
+      "topicId": 13,
+      "prompt": "By 10 p.m., she ___ the whole book.",
+      "options": [
+        "will have read",
+        "will read",
+        "will be reading",
+        "read"
+      ],
+      "answer": "A",
+      "answerText": "will have read",
+      "explanation": "by 10 p.m. 是未来截止点，用将来完成时。"
+    },
+    {
+      "id": 494,
+      "topicId": 13,
+      "prompt": "My mother usually ___ dinner at home.",
+      "options": [
+        "is cooking",
+        "has cooked",
+        "cooked",
+        "cooks"
+      ],
+      "answer": "D",
+      "answerText": "cooks",
+      "explanation": "usually 表示习惯；第三人称单数用 cooks。"
+    },
+    {
+      "id": 495,
+      "topicId": 13,
+      "prompt": "We ___ in this city since 2020.",
+      "options": [
+        "will live",
+        "have lived",
+        "lived",
+        "are living"
+      ],
+      "answer": "B",
+      "answerText": "have lived",
+      "explanation": "since 2020 表示从过去持续到现在，用现在完成时。"
+    },
+    {
+      "id": 496,
+      "topicId": 13,
+      "prompt": "He ___ the piano for an hour and is still practicing.",
+      "options": [
+        "practiced",
+        "has practiced",
+        "is practicing",
+        "has been practicing"
+      ],
+      "answer": "D",
+      "answerText": "has been practicing",
+      "explanation": "for an hour 且仍继续，强调持续，用现在完成进行时。"
+    },
+    {
+      "id": 497,
+      "topicId": 13,
+      "prompt": "Yesterday I ___ a new bag.",
+      "options": [
+        "buy",
+        "am buying",
+        "have bought",
+        "bought"
+      ],
+      "answer": "D",
+      "answerText": "bought",
+      "explanation": "yesterday 是一般过去时标志。"
+    },
+    {
+      "id": 498,
+      "topicId": 13,
+      "prompt": "When the teacher walked in, I ___ to my friend.",
+      "options": [
+        "talk",
+        "was talking",
+        "have talked",
+        "talked"
+      ],
+      "answer": "B",
+      "answerText": "was talking",
+      "explanation": "老师进来时谈话正在进行，用过去进行时。"
+    },
+    {
+      "id": 499,
+      "topicId": 13,
+      "prompt": "By 5 yesterday, they ___ all the food.",
+      "options": [
+        "ate",
+        "have eaten",
+        "had eaten",
+        "were eating"
+      ],
+      "answer": "C",
+      "answerText": "had eaten",
+      "explanation": "截至过去5点已经完成，用过去完成时。"
+    },
+    {
+      "id": 500,
+      "topicId": 13,
+      "prompt": "Next year, I think more people ___ from home.",
+      "options": [
+        "will work",
+        "worked",
+        "have worked",
+        "work"
+      ],
+      "answer": "A",
+      "answerText": "will work",
+      "explanation": "I think + next year 表示未来预测，用 will。"
+    }
+  ]
+}
