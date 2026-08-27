@@ -984,6 +984,18 @@ export default function SubjectPage() {
               <span className="text-stone-400 text-sm">→</span>
             </Link>
           </div>
+
+          <div className="bg-white rounded-2xl border border-indigo-200 overflow-hidden">
+            <Link
+              href={`/subjects/${id}/sentence-structure`}
+              className="px-4 py-3 bg-indigo-50 flex items-center justify-between cursor-pointer hover:bg-indigo-100 transition-colors block"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold text-indigo-800 whitespace-nowrap">🧩 句子结构</span>
+              </div>
+              <span className="text-stone-400 text-sm">→</span>
+            </Link>
+          </div>
           </div>
         </div>
       )}
