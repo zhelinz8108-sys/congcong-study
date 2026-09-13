@@ -54,6 +54,16 @@ export default async function RootLayout({
             initialStudentName={DEFAULT_STUDENT_PROFILE.name}
           />
         )}
+        <footer className="mt-auto border-t border-stone-100 px-4 py-5 text-center text-xs text-stone-400">
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-stone-600 hover:underline"
+          >
+            苏ICP备2026024446号-2
+          </a>
+        </footer>
       </body>
     </html>
   );
