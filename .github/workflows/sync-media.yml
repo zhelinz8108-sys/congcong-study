@@ -23,12 +23,29 @@ jobs:
       SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
       SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
       REMOTE_MEDIA_DIR: /www/study-plan/public/listening
+      MEDIA_BASE_URL: https://media.githubusercontent.com/media/${{ github.repository }}/${{ github.sha }}/study-plan/public/listening
 
     steps:
-      - name: Checkout listening media
+      - name: Checkout media manifest source
         uses: actions/checkout@v4
-        with:
-          lfs: true
+
+      - name: Build LFS verification manifest
+        shell: bash
+        run: |
+          : > media-manifest.tsv
+          while IFS= read -r file; do
+            pointer="$(git show "$GITHUB_SHA:$file")"
+            oid="$(printf '%s\n' "$pointer" | sed -n 's/^oid sha256://p')"
+            size="$(printf '%s\n' "$pointer" | sed -n 's/^size //p')"
+            relative_path="${file#study-plan/public/listening/}"
+            if [ -z "$oid" ] || [ -z "$size" ] || [ "$relative_path" = "$file" ]; then
+              echo "::error::Invalid Git LFS pointer: $file"
+              exit 1
+            fi
+            printf '%s\t%s\t%s\n' "$relative_path" "$oid" "$size" >> media-manifest.tsv
+          done < <(git ls-tree -r --name-only "$GITHUB_SHA" -- study-plan/public/listening)
+          test -s media-manifest.tsv
+          echo "Media objects in manifest: $(wc -l < media-manifest.tsv)"
 
       - name: Check deployment secrets
         shell: bash
@@ -56,28 +73,22 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "$SERVER_PORT" "$SERVER_HOST" >> ~/.ssh/known_hosts
 
-      - name: Prepare media directory
+      - name: Upload manifest and sync helper
+        shell: bash
+        run: |
+          scp -i ~/.ssh/deploy_key -P "$SERVER_PORT" \
+            media-manifest.tsv study-plan/scripts/sync-listening-media.sh \
+            "$SERVER_USER@$SERVER_HOST:/tmp/"
+
+      - name: Download and verify media on server
         shell: bash
         run: |
           ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
-            "mkdir -p '$REMOTE_MEDIA_DIR/.rsync-partial'"
+            "bash /tmp/sync-listening-media.sh /tmp/media-manifest.tsv '$MEDIA_BASE_URL' '$REMOTE_MEDIA_DIR' 8"
 
-      - name: Resume media sync
+      - name: Remove temporary sync files
+        if: always()
         shell: bash
         run: |
-          rsync -az --checksum --delete \
-            --partial --partial-dir=.rsync-partial \
-            --timeout=300 --info=progress2 \
-            -e "ssh -i ~/.ssh/deploy_key -p $SERVER_PORT" \
-            study-plan/public/listening/ \
-            "$SERVER_USER@$SERVER_HOST:$REMOTE_MEDIA_DIR/"
-
-      - name: Verify media count
-        shell: bash
-        run: |
-          local_count="$(find study-plan/public/listening -type f | wc -l)"
-          remote_count="$(ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
-            "find '$REMOTE_MEDIA_DIR' -type f ! -path '*/.rsync-partial/*' | wc -l")"
-          echo "Local media files: $local_count"
-          echo "Remote media files: $remote_count"
-          test "$local_count" -eq "$remote_count"
+          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
+            "rm -f /tmp/media-manifest.tsv /tmp/sync-listening-media.sh" || true
