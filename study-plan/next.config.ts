@@ -1,7 +1,22 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  outputFileTracingExcludes: {
+    "/api/upload": [
+      "./public/**/*",
+      "./.chrome-*-profile/**/*",
+      "./.tmp-*/**/*",
+      "./downloads/**/*",
+      "./tmp/**/*",
+    ],
+    "/api/files/*": [
+      "./public/**/*",
+      "./.chrome-*-profile/**/*",
+      "./.tmp-*/**/*",
+      "./downloads/**/*",
+      "./tmp/**/*",
+    ],
+  },
 };
 
 export default nextConfig;

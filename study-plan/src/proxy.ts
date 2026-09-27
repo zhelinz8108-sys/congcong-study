@@ -5,6 +5,7 @@ const publicApiPaths = new Set([
   "/api/access/login",
   "/api/access/logout",
   "/api/access/profile",
+  "/api/health",
 ]);
 
 function shouldSkip(pathname: string) {

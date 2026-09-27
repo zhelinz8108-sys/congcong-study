@@ -7,13 +7,18 @@
     "build": "next build",
     "start": "next start",
     "db:seed": "node scripts/seed-postgres.mjs",
+    "db:migrate": "node scripts/migrate-postgres.mjs",
+    "db:backup": "node scripts/backup-postgres.mjs",
     "math:import": "node scripts/import-math-question-bank.mjs",
     "math:import:local": "node scripts/import-math-question-bank.mjs --dry-run",
     "math:import:dry": "node scripts/import-math-question-bank.mjs --dry-run",
     "math:import:reset": "node scripts/import-math-question-bank.mjs --reset",
+    "atlantic:download-pdfs": "node scripts/download_atlantic_library_pdfs.mjs",
+    "atlantic:audit-pdfs": "node scripts/audit_atlantic_library_pdfs.mjs",
     "lint": "eslint"
   },
   "dependencies": {
+    "@next/env": "16.2.1",
     "adm-zip": "^0.5.17",
     "mammoth": "^1.12.0",
     "next": "16.2.1",

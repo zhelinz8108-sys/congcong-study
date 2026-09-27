@@ -1,0 +1,6 @@
+# One page URL per line.
+# Put pages that contain official PDF/download buttons or links.
+#
+# Examples:
+# https://www.theatlantic.com/my-account/library/
+# https://www.theatlantic.com/magazine/archive/2024/01/

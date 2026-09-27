@@ -20,9 +20,16 @@ export type MathGeneratedUnitVisual = {
   caption: string;
 };
 
+export type MathGeneratedUnitReviewImage = {
+  src: string;
+  alt: string;
+  caption: string;
+};
+
 export type MathGeneratedUnit = {
   id: string;
   visual: MathGeneratedUnitVisual;
+  reviewImages?: MathGeneratedUnitReviewImage[];
   order: number;
   title: string;
   shortTitle: string;
@@ -240,6 +247,18 @@ export const MATH_GENERATED_UNITS: MathGeneratedUnit[] = [
       alt: "Grouped colorful cubes, factor trees, and overlapping circles.",
       caption: "把整数拆成有序的因数组合，再用倍数特征快速排除。",
     },
+    reviewImages: [
+      {
+        src: "/math-review/unit-3-knowledge-points.png",
+        alt: "Unit 3 factors and multiples core knowledge summary.",
+        caption: "核心知识点总结",
+      },
+      {
+        src: "/math-review/unit-3-solving-strategies.png",
+        alt: "Unit 3 factors and multiples solving strategy summary.",
+        caption: "解题思路总结",
+      },
+    ],
     order: 3,
     title: "第三单元：因数与倍数",
     shortTitle: "因数与倍数",

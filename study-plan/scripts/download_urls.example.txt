@@ -1,0 +1,7 @@
+# One direct, allowed download URL per line.
+# You can also name files with:
+# filename.pdf<TAB>https://example.com/path/file.pdf
+#
+# Examples:
+# The Atlantic 2024-01.pdf	https://example.com/direct-download/issue-2024-01.pdf
+# https://example.com/direct-download/article.pdf

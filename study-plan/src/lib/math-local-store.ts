@@ -16,6 +16,7 @@ import {
   getMathUnitDisplay,
   getMathUnitKey,
 } from "@/lib/math-unit-labels";
+import { localDataFallbackAllowed, requireLocalDataFallback } from "@/lib/local-fallback";
 
 type LocalQuestionSet = {
   id: string;
@@ -120,6 +121,7 @@ let writeChain = Promise.resolve();
 const inlineAnswerCache = new Map<string, Promise<Map<string, InlineAnswerRecord>>>();
 
 export function shouldUseLocalMathStore(error: unknown) {
+  if (!localDataFallbackAllowed()) return false;
   const message = error instanceof Error ? error.message : String(error);
   return /ECONNREFUSED|ETIMEDOUT|ENOTFOUND|connect|database|password|relation|schema/i.test(
     message
@@ -127,6 +129,7 @@ export function shouldUseLocalMathStore(error: unknown) {
 }
 
 async function readDataset(): Promise<LocalDataset> {
+  requireLocalDataFallback();
   try {
     const raw = await readFile(datasetPath, "utf8");
     return JSON.parse(raw) as LocalDataset;
@@ -140,6 +143,7 @@ async function readDataset(): Promise<LocalDataset> {
 }
 
 async function readState(): Promise<LocalState> {
+  requireLocalDataFallback();
   try {
     const raw = await readFile(statePath, "utf8");
     const parsed = JSON.parse(raw) as Partial<LocalState>;

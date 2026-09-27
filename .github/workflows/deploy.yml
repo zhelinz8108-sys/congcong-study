@@ -25,28 +25,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Check deployment secrets
-        id: preflight
         shell: bash
         run: |
-          missing=0
-
           for name in SERVER_HOST SERVER_USER SERVER_SSH_KEY; do
             if [ -z "${!name}" ]; then
-              echo "::warning::Required secret $name is not configured; skipping deployment."
-              missing=1
+              echo "::error::Required secret $name is not configured."
+              exit 1
             fi
           done
 
-          if [ "$missing" -eq 0 ]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Ensure rsync is available
-        if: steps.preflight.outputs.ready == 'true'
         shell: bash
         run: |
           if ! command -v rsync >/dev/null 2>&1; then
@@ -55,7 +47,6 @@ jobs:
           fi
 
       - name: Configure SSH
-        if: steps.preflight.outputs.ready == 'true'
         shell: bash
         run: |
           mkdir -p ~/.ssh
@@ -63,27 +54,74 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "$SERVER_PORT" "$SERVER_HOST" >> ~/.ssh/known_hosts
 
-      - name: Sync application files
-        if: steps.preflight.outputs.ready == 'true'
+      - name: Prepare persistent application data
         shell: bash
         run: |
-          rsync -az --delete \
+          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" "
+            set -e
+            sudo install -d -m 0755 -o ubuntu -g ubuntu /var/lib/study-plan/uploads/study-uploads
+            if [ -d '$REMOTE_APP_DIR/public/uploads' ]; then
+              sudo cp -a '$REMOTE_APP_DIR/public/uploads/.' /var/lib/study-plan/uploads/
+            fi
+            sudo chown -R ubuntu:ubuntu /var/lib/study-plan/uploads
+            sudo chmod -R a+rX /var/lib/study-plan/uploads
+            if [ -f /etc/study-plan.env ]; then
+              sudo chgrp ubuntu /etc/study-plan.env
+              sudo chmod 0640 /etc/study-plan.env
+            fi
+          "
+
+      - name: Sync application files
+        shell: bash
+        run: |
+          rsync -az --checksum --delete \
             -e "ssh -i ~/.ssh/deploy_key -p $SERVER_PORT" \
             --exclude ".env*" \
+            --exclude ".data/" \
             --exclude "node_modules/" \
             --exclude ".next/" \
             --exclude "*.log" \
+            --exclude "public/uploads/" \
             study-plan/ "$SERVER_USER@$SERVER_HOST:$REMOTE_APP_DIR/"
 
-      - name: Install, build, and restart service
-        if: steps.preflight.outputs.ready == 'true'
+      - name: Install, migrate, build, and restart service
         shell: bash
         run: |
           ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" "
             set -e
             cd '$REMOTE_APP_DIR'
+            if [ -r /etc/study-plan.env ]; then
+              set -a
+              . /etc/study-plan.env
+              set +a
+            fi
             npm ci
+            npm run db:migrate
             npm run build
+            sudo cp deploy/study-plan.service /etc/systemd/system/study-plan.service
+            sudo cp deploy/nginx.conf /etc/nginx/sites-available/study-plan
+            sudo ln -sfn /etc/nginx/sites-available/study-plan /etc/nginx/sites-enabled/study-plan
+            sudo systemctl daemon-reload
+            sudo nginx -t
+            sudo systemctl reload nginx
             sudo systemctl restart '$SERVICE_NAME'
             sudo systemctl is-active --quiet '$SERVICE_NAME'
+
+            ready=0
+            for attempt in 1 2 3 4 5 6; do
+              if curl --fail --silent --show-error http://127.0.0.1:3001/api/health >/dev/null; then
+                ready=1
+                break
+              fi
+              sleep 5
+            done
+            test "\$ready" -eq 1
+
+            if ! command -v certbot >/dev/null 2>&1; then
+              sudo apt-get update
+              sudo DEBIAN_FRONTEND=noninteractive apt-get install -y certbot python3-certbot-nginx
+            fi
+            sudo certbot --nginx --non-interactive --agree-tos --register-unsafely-without-email \
+              --redirect --keep-until-expiring -d congcong-study.cn
+            curl --fail --silent --show-error --head https://congcong-study.cn >/dev/null
           "

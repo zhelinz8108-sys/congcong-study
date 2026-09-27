@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Material, Subject, Unit, Word } from "@/lib/types";
 import { sm2 } from "@/lib/sm2";
+import { requireLocalDataFallback } from "@/lib/local-fallback";
 
 type BackupUnit = Unit & {
   words?: Word[];
@@ -101,6 +102,7 @@ function staticSubjectResponse(
 }
 
 export async function getLocalEnglishSubject(): Promise<BackupSubject | null> {
+  requireLocalDataFallback();
   if (cachedSubject !== undefined) return cachedSubject;
 
   try {

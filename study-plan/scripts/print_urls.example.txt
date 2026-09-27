@@ -1,0 +1,7 @@
+# One article URL per line.
+# Or use:
+# filename.pdf<TAB>https://www.example.com/article-url/
+#
+# Examples:
+# Atlantic - one article.pdf	https://www.theatlantic.com/world/archive/example/
+# https://www.theatlantic.com/ideas/archive/example/

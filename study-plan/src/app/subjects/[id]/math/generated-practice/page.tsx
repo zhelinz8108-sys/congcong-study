@@ -315,20 +315,43 @@ function UnitReviewPanel({
         />
       </div>
 
-      <figure className="mt-5 overflow-hidden rounded-2xl border border-white bg-white shadow-sm">
-        <div className={`relative w-full ${compact ? "aspect-[16/7]" : "aspect-video"}`}>
-          <Image
-            src={unit.visual.src}
-            alt={unit.visual.alt}
-            fill
-            sizes={compact ? "(max-width: 768px) 100vw, 900px" : "(max-width: 1024px) 100vw, 960px"}
-            className="object-cover"
-          />
+      {unit.reviewImages?.length ? (
+        <div className="mt-5 grid gap-4">
+          {unit.reviewImages.map((image) => (
+            <figure
+              key={image.src}
+              className="overflow-hidden rounded-2xl border border-white bg-white shadow-sm"
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                width={1200}
+                height={1800}
+                sizes={compact ? "(max-width: 768px) 100vw, 900px" : "(max-width: 1280px) 100vw, 1120px"}
+                className="h-auto w-full"
+              />
+              <figcaption className="border-t border-amber-50 px-4 py-3 text-xs font-bold leading-5 text-amber-800">
+                {image.caption}
+              </figcaption>
+            </figure>
+          ))}
         </div>
-        <figcaption className="border-t border-amber-50 px-4 py-3 text-xs font-bold leading-5 text-amber-800">
-          {unit.visual.caption}
-        </figcaption>
-      </figure>
+      ) : (
+        <figure className="mt-5 overflow-hidden rounded-2xl border border-white bg-white shadow-sm">
+          <div className={`relative w-full ${compact ? "aspect-[16/7]" : "aspect-video"}`}>
+            <Image
+              src={unit.visual.src}
+              alt={unit.visual.alt}
+              fill
+              sizes={compact ? "(max-width: 768px) 100vw, 900px" : "(max-width: 1024px) 100vw, 960px"}
+              className="object-cover"
+            />
+          </div>
+          <figcaption className="border-t border-amber-50 px-4 py-3 text-xs font-bold leading-5 text-amber-800">
+            {unit.visual.caption}
+          </figcaption>
+        </figure>
+      )}
 
       <div className="mt-4 rounded-2xl bg-white/70 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">

@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { loadCloudState, saveCloudState } from "@/lib/cloud-progress";
 import { getSentenceText } from "@/lib/sentences";
 import type { Unit, Word } from "@/lib/types";
 
@@ -129,6 +131,8 @@ function isWordDue(word: Word) {
 }
 
 function parseSentenceText(unit: UnitWithSummary): SentenceInfo | null {
+  const canonicalSentence = getSentenceText(unit.name, unit.group_name);
+  if (canonicalSentence) return canonicalSentence;
   if (unit.sentenceText) return unit.sentenceText;
 
   const raw = unit.sentence_text;
@@ -152,7 +156,7 @@ function parseSentenceText(unit: UnitWithSummary): SentenceInfo | null {
     }
   }
 
-  return getSentenceText(unit.name, unit.group_name);
+  return null;
 }
 
 function getEnglishVoice() {
@@ -177,7 +181,7 @@ function readIdSet(key: string) {
 
 function writeIdSet(key: string, value: Set<string>) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(key, JSON.stringify([...value]));
+  saveCloudState("vocab:interactive:mistakes:v1", key, [...value]);
 }
 
 function readHistory(key: string) {
@@ -192,7 +196,7 @@ function readHistory(key: string) {
 
 function writeHistory(key: string, value: SessionHistoryRecord[]) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(key, JSON.stringify(value.slice(0, 30)));
+  saveCloudState("vocab:interactive:history:v1", key, value.slice(0, 30));
 }
 
 function formatSessionDate(value: string) {
@@ -309,6 +313,21 @@ export function InteractiveMemorizeMode({
   const [sessionId, setSessionId] = useState("");
   const [sessionSaved, setSessionSaved] = useState(false);
   const autoNextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void Promise.all([
+      loadCloudState<string[]>("vocab:interactive:mistakes:v1", mistakeKey, []),
+      loadCloudState<SessionHistoryRecord[]>("vocab:interactive:history:v1", historyKey, []),
+    ]).then(([savedMistakes, savedHistory]) => {
+      if (!active) return;
+      setMistakeIds(new Set(savedMistakes));
+      setHistory(savedHistory.slice(0, 30));
+    });
+    return () => {
+      active = false;
+    };
+  }, [historyKey, mistakeKey]);
 
   const clearAutoNextTimer = () => {
     if (autoNextTimer.current) {
@@ -493,6 +512,14 @@ export function InteractiveMemorizeMode({
       window.speechSynthesis.cancel();
     }
     onFinish();
+  }
+
+  function prepareForHome() {
+    finalizeSession(false);
+    clearAutoNextTimer();
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
   }
 
   function toggleMode(nextMode: PracticeMode) {
@@ -836,6 +863,16 @@ export function InteractiveMemorizeMode({
       <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
+            <Link
+              href="/"
+              onClick={prepareForHome}
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 text-sm font-bold text-stone-600 shadow-sm transition hover:border-emerald-300 hover:text-emerald-800"
+              aria-label="返回主页"
+              title="返回主页"
+            >
+              <span aria-hidden="true">←</span>
+              <span>主页</span>
+            </Link>
             <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-slate-900 text-base font-black text-white">
               Aa
             </div>

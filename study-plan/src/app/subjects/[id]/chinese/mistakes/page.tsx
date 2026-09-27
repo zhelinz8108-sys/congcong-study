@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { clearCloudState, loadCloudState } from "@/lib/cloud-progress";
 
 type MistakeRecord = {
   id: string;
@@ -20,6 +21,7 @@ type MistakeRecord = {
 };
 
 const mistakesStorageKey = "congcong_chinese_reading_mistakes";
+const mistakesCloudScope = "chinese:reading:mistakes:v1";
 
 function readMistakes() {
   if (typeof window === "undefined") return [];
@@ -44,6 +46,20 @@ export default function ChineseMistakesPage() {
   const { id: subjectId } = useParams<{ id: string }>();
   const [mistakes, setMistakes] = useState<MistakeRecord[]>(() => readMistakes());
 
+  useEffect(() => {
+    let active = true;
+    void loadCloudState<MistakeRecord[]>(
+      mistakesCloudScope,
+      mistakesStorageKey,
+      [],
+    ).then((saved) => {
+      if (active) setMistakes(saved);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const grouped = useMemo(() => {
     const map = new Map<string, MistakeRecord[]>();
     mistakes.forEach((mistake) => {
@@ -54,8 +70,8 @@ export default function ChineseMistakesPage() {
   }, [mistakes]);
 
   const clearMistakes = () => {
-    window.localStorage.setItem(mistakesStorageKey, "[]");
     setMistakes([]);
+    void clearCloudState(mistakesCloudScope, mistakesStorageKey);
   };
 
   return (
@@ -115,7 +131,7 @@ export default function ChineseMistakesPage() {
                 onClick={clearMistakes}
                 className="rounded-xl border border-rose-100 bg-white px-4 py-2 text-sm font-black text-rose-700 transition hover:bg-rose-50"
               >
-                清空本地错题
+                清空云端错题
               </button>
             </div>
 

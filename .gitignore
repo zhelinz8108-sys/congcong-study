@@ -9,6 +9,7 @@ coverage/
 # Environment and local credentials
 .env
 .env.*
+!study-plan/.env.example
 *.pem
 .deploy-keys/
 
@@ -27,6 +28,8 @@ tmp/
 **/.tmp-*
 **/.temp/
 *.tgz
+study-plan/.chrome-*-profile/
+study-plan/downloads/
 
 # Large local reference material; keep out of GitHub unless handled separately.
 剑桥初级英语语法 (墨菲) (Z-Library).pdf
@@ -36,8 +39,21 @@ tmp/
 _audit_repo/
 _repo_check/
 
+# Local reading imports
+英语/阅读/imports/
+
 # OS/editor noise
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+# Local source libraries and export archives. Runtime-ready assets live under
+# study-plan/public and are tracked separately (large media through Git LFS).
+*.zip
+_question_bank_scan/
+六上数学/
+数学/
+英语/
+**/__pycache__/
+*.pyc

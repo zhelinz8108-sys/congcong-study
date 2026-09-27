@@ -6,6 +6,7 @@ import {
   ORIGINAL_GRAMMAR_QUESTIONS,
   type OriginalGrammarQuestion,
 } from "@/lib/grammar-original-500";
+import { loadCloudState, saveCloudState } from "@/lib/cloud-progress";
 
 type TopicProgress = {
   answered: number;
@@ -53,26 +54,15 @@ const ORIGINAL_GRAMMAR_BANK: GrammarPracticeBank = {
   badge: "500 道混合题 · 四选一",
   title: "小学英语语法 500 道拔高选择题",
   description:
-    "500 道原题全部打乱混合，不再按语法专题分类。点击选项立即显示对错、正确答案、考点规则、判断理由、正确句和易错提醒；练习进度会保存在当前设备。",
+    "500 道原题全部打乱混合，不再按语法专题分类。点击选项立即显示对错、正确答案、考点规则、判断理由、正确句和易错提醒；练习进度会同步到云端。",
   startLabel: "开始 500 题混合练习",
   startHint: "全部 500 道题打乱顺序，一次练完",
   practiceLabel: "500 题混合练习",
   questionLabel: "原题",
 };
 
-function loadSavedProgress(progressKey: string): SavedProgress {
-  if (typeof window === "undefined") return {};
-  try {
-    return JSON.parse(window.localStorage.getItem(progressKey) ?? "{}") as SavedProgress;
-  } catch {
-    return {};
-  }
-}
-
 function saveProgress(progressKey: string, progress: SavedProgress) {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(progressKey, JSON.stringify(progress));
-  }
+  saveCloudState(progressKey, progressKey, progress);
 }
 
 function shuffleWithSeed<T>(items: T[], seed: number): T[] {
@@ -119,12 +109,19 @@ export function GrammarOriginal500Practice({
   }, []);
 
   useEffect(() => {
+    let active = true;
     const loadTimer = window.setTimeout(() => {
-      setProgress(loadSavedProgress(bank.progressKey));
       setAutoNext(window.localStorage.getItem(bank.autoNextKey) === "1");
-      setProgressReady(true);
+      void loadCloudState<SavedProgress>(bank.progressKey, bank.progressKey, {}).then(
+        (saved) => {
+          if (!active) return;
+          setProgress(saved);
+          setProgressReady(true);
+        },
+      );
     }, 0);
     return () => {
+      active = false;
       window.clearTimeout(loadTimer);
       clearAutoNext();
     };

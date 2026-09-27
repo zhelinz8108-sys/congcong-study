@@ -10,6 +10,7 @@ import {
   gradeChineseReadingQuestion,
   type ChineseReadingQuestion,
 } from "@/lib/chinese-reading";
+import { updateCloudState } from "@/lib/cloud-progress";
 
 type ResponseRecord = {
   value: string;
@@ -34,6 +35,7 @@ type MistakeRecord = {
 };
 
 const mistakesStorageKey = "congcong_chinese_reading_mistakes";
+const mistakesCloudScope = "chinese:reading:mistakes:v1";
 
 function stableOptions(question: ChineseReadingQuestion) {
   const options = question.options ?? [];
@@ -46,30 +48,26 @@ function stableOptions(question: ChineseReadingQuestion) {
   });
 }
 
-function readMistakes() {
-  if (typeof window === "undefined") return [];
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(mistakesStorageKey) ?? "[]");
-    return Array.isArray(parsed) ? (parsed as MistakeRecord[]) : [];
-  } catch {
-    return [];
-  }
-}
-
 function saveMistake(record: MistakeRecord) {
   if (typeof window === "undefined") return;
-  const current = readMistakes().filter((item) => item.id !== record.id);
-  window.localStorage.setItem(
+  void updateCloudState<MistakeRecord[]>(
+    mistakesCloudScope,
     mistakesStorageKey,
-    JSON.stringify([{ ...record, updatedAt: new Date().toISOString() }, ...current].slice(0, 200))
+    [],
+    (current) => [
+      { ...record, updatedAt: new Date().toISOString() },
+      ...current.filter((item) => item.id !== record.id),
+    ].slice(0, 200),
   );
 }
 
 function removeMistake(recordId: string) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(
+  void updateCloudState<MistakeRecord[]>(
+    mistakesCloudScope,
     mistakesStorageKey,
-    JSON.stringify(readMistakes().filter((item) => item.id !== recordId))
+    [],
+    (current) => current.filter((item) => item.id !== recordId),
   );
 }
 

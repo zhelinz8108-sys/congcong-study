@@ -101,6 +101,8 @@ type WordKind = "noun" | "verb" | "adj" | "adv" | "prep" | "conj";
 interface WordUsageExample {
   phrase: string;
   chinese: string;
+  label?: string;
+  note?: string;
 }
 
 interface SentenceInfo {
@@ -140,6 +142,8 @@ function normalizeUsageKey(value: string): string {
     .replace(/^[^a-z]+|[^a-z]+$/g, "");
 }
 
+const USAGE_EXAMPLE_LIMIT = 4;
+
 function mergeUsageExamples(
   ...groups: Array<WordUsageExample[] | undefined>
 ): WordUsageExample[] {
@@ -153,8 +157,8 @@ function mergeUsageExamples(
       const key = normalizeUsageKey(phrase);
       if (!phrase || !chinese || seen.has(key)) continue;
       seen.add(key);
-      merged.push({ phrase, chinese });
-      if (merged.length >= 2) return merged;
+      merged.push({ ...item, phrase, chinese });
+      if (merged.length >= USAGE_EXAMPLE_LIMIT) return merged;
     }
   }
 
@@ -183,10 +187,12 @@ function getSentenceContextUsage(
 
   return [
     {
-      phrase,
+      label: "原句应用",
+      phrase: sentenceInfo.english.trim(),
       chinese: sentenceInfo.chinese
         ? `原句：${sentenceInfo.chinese}`
         : "来自原句的自然用法",
+      note: phrase !== sentenceInfo.english.trim() ? `关键词附近：${phrase}` : undefined,
     },
   ];
 }
@@ -797,8 +803,315 @@ const FUNCTION_USAGE_EXAMPLES: Record<string, WordUsageExample[]> = {
   ],
 };
 
+const PRONOUN_USAGE_EXAMPLES: Record<string, WordUsageExample[]> = {
+  i: [
+    { label: "主语句型", phrase: "I am ready.", chinese: "我准备好了。" },
+    { label: "表达喜好", phrase: "I like English.", chinese: "我喜欢英语。" },
+    { label: "能力表达", phrase: "I can read it.", chinese: "我能读它。" },
+  ],
+  you: [
+    { label: "交际句", phrase: "Thank you.", chinese: "谢谢你。" },
+    { label: "请求帮助", phrase: "Can you help me?", chinese: "你能帮我吗？" },
+    { label: "描述别人", phrase: "You are very kind.", chinese: "你很友好。" },
+  ],
+  he: [
+    { label: "主语句型", phrase: "He is my friend.", chinese: "他是我的朋友。" },
+    { label: "能力表达", phrase: "He can swim.", chinese: "他会游泳。" },
+    { label: "一般现在时", phrase: "He likes music.", chinese: "他喜欢音乐。" },
+  ],
+  she: [
+    { label: "主语句型", phrase: "She is kind.", chinese: "她很友好。" },
+    { label: "能力表达", phrase: "She can read.", chinese: "她会阅读。" },
+    { label: "一般现在时", phrase: "She likes apples.", chinese: "她喜欢苹果。" },
+  ],
+  it: [
+    { label: "指代物品", phrase: "It is on the desk.", chinese: "它在桌子上。" },
+    { label: "天气表达", phrase: "It is sunny today.", chinese: "今天是晴天。" },
+    { label: "评价事物", phrase: "It looks nice.", chinese: "它看起来很好。" },
+  ],
+  we: [
+    { label: "一起行动", phrase: "We go to school together.", chinese: "我们一起去上学。" },
+    { label: "课堂表达", phrase: "We are in Class One.", chinese: "我们在一班。" },
+    { label: "建议句", phrase: "We can try again.", chinese: "我们可以再试一次。" },
+  ],
+  they: [
+    { label: "复数主语", phrase: "They are my classmates.", chinese: "他们是我的同学。" },
+    { label: "现在进行时", phrase: "They are playing football.", chinese: "他们正在踢足球。" },
+    { label: "一般现在时", phrase: "They often read books.", chinese: "他们经常读书。" },
+  ],
+  me: [
+    { label: "宾语用法", phrase: "Please help me.", chinese: "请帮助我。" },
+    { label: "给某人", phrase: "Give it to me.", chinese: "把它给我。" },
+    { label: "和我一起", phrase: "Come with me.", chinese: "跟我来。" },
+  ],
+  my: [
+    { label: "物主代词", phrase: "my book", chinese: "我的书" },
+    { label: "家庭表达", phrase: "my family", chinese: "我的家人" },
+    { label: "完整句", phrase: "This is my bag.", chinese: "这是我的书包。" },
+  ],
+  your: [
+    { label: "物主代词", phrase: "your name", chinese: "你的名字" },
+    { label: "课堂表达", phrase: "Open your book.", chinese: "打开你的书。" },
+    { label: "提问句", phrase: "What is your name?", chinese: "你叫什么名字？" },
+  ],
+};
+
+const FRUIT_WORDS = new Set([
+  "apple",
+  "orange",
+  "pear",
+  "banana",
+  "grape",
+  "watermelon",
+  "strawberry",
+  "peach",
+  "fruit",
+]);
+
+const FOOD_WORDS = new Set([
+  "bread",
+  "cake",
+  "egg",
+  "rice",
+  "noodle",
+  "noodles",
+  "sandwich",
+  "salad",
+  "pizza",
+  "pie",
+  "hamburger",
+  "food",
+  "meal",
+  "breakfast",
+  "lunch",
+  "dinner",
+  "supper",
+]);
+
+const DRINK_WORDS = new Set(["water", "milk", "juice", "tea", "coffee"]);
+const SCHOOL_WORDS = new Set(["book", "bag", "pen", "pencil", "ruler", "desk", "chair", "class", "homework", "school", "teacher", "student"]);
+const PLACE_WORDS = new Set(["home", "school", "classroom", "library", "park", "zoo", "room", "shop", "hospital"]);
+const ANIMAL_WORDS = new Set(["cat", "dog", "bird", "fish", "rabbit", "tiger", "lion", "panda", "monkey", "animal"]);
+const TIME_WORDS = new Set(["morning", "afternoon", "evening", "night", "today", "tomorrow", "week", "month", "year", "time"]);
+const AUXILIARY_OR_LIGHT_VERB_KEYS = new Set([
+  "be",
+  "am",
+  "is",
+  "are",
+  "was",
+  "were",
+  "have",
+  "has",
+  "had",
+  "do",
+  "does",
+  "did",
+  "can",
+  "could",
+  "may",
+  "might",
+  "must",
+  "shall",
+  "should",
+  "will",
+  "would",
+]);
+
+function startsWithVowelSound(word: string): boolean {
+  return /^[aeiou]/i.test(word.trim());
+}
+
+function withArticle(word: string): string {
+  return `${startsWithVowelSound(word) ? "an" : "a"} ${word}`;
+}
+
+function pluralizeWord(word: string): string {
+  if (/[^aeiou]y$/i.test(word)) return word.replace(/y$/i, "ies");
+  if (/(s|x|ch|sh)$/i.test(word)) return `${word}es`;
+  if (/s$/i.test(word)) return word;
+  return `${word}s`;
+}
+
+function hasAnyWord(set: Set<string>, key: string, meaning: string): boolean {
+  if (set.has(key)) return true;
+  if (set === FRUIT_WORDS) return /水果|苹果|橘|橙|梨|香蕉|葡萄|西瓜|草莓|桃/.test(meaning);
+  if (set === FOOD_WORDS) return /食物|面包|蛋糕|鸡蛋|米饭|面条|三明治|沙拉|披萨|馅饼|早饭|午饭|晚饭/.test(meaning);
+  if (set === DRINK_WORDS) return /水|牛奶|果汁|茶|咖啡|饮料/.test(meaning);
+  if (set === SCHOOL_WORDS) return /书|书包|钢笔|铅笔|尺|课桌|椅子|课堂|作业|学校|老师|学生/.test(meaning);
+  if (set === PLACE_WORDS) return /家|学校|教室|图书馆|公园|动物园|房间|商店|医院/.test(meaning);
+  if (set === ANIMAL_WORDS) return /动物|猫|狗|鸟|鱼|兔|虎|狮|熊猫|猴/.test(meaning);
+  if (set === TIME_WORDS) return /早上|下午|晚上|夜晚|今天|明天|星期|月份|年份|时间/.test(meaning);
+  return false;
+}
+
+function getThemeUsageExamples(
+  target: string,
+  meaning: string,
+  kind: WordKind,
+  band: VocabularyBand
+): WordUsageExample[] {
+  const key = normalizeUsageKey(target);
+  const single = withArticle(target);
+  const plural = pluralizeWord(target);
+
+  if (hasAnyWord(FRUIT_WORDS, key, meaning)) {
+    if (key === "fruit") {
+      return [
+        { label: "常用搭配", phrase: "fresh fruit", chinese: "新鲜水果" },
+        { label: "动作搭配", phrase: "eat some fruit", chinese: "吃一些水果" },
+        { label: "生活场景", phrase: "fruit salad", chinese: "水果沙拉" },
+        { label: "完整句", phrase: "Which fruit do you like best?", chinese: "你最喜欢哪种水果？" },
+      ];
+    }
+    return [
+      { label: "数量搭配", phrase: single, chinese: `一个${meaning}` },
+      { label: "动作搭配", phrase: `eat ${single}`, chinese: `吃一个${meaning}` },
+      { label: "生活场景", phrase: `${target} juice`, chinese: `${meaning}汁` },
+      { label: "完整句", phrase: `This ${target} is sweet.`, chinese: `这个${meaning}很甜。` },
+    ];
+  }
+
+  if (hasAnyWord(FOOD_WORDS, key, meaning)) {
+    if (key === "meal") {
+      return [
+        { label: "动作搭配", phrase: "have a meal", chinese: "吃一顿饭" },
+        { label: "准备食物", phrase: "cook a meal", chinese: "做一顿饭" },
+        { label: "一起吃饭", phrase: "share a meal", chinese: "一起吃一顿饭" },
+        { label: "完整句", phrase: "I have a meal with my family.", chinese: "我和家人一起吃饭。" },
+      ];
+    }
+
+    if (["breakfast", "lunch", "dinner", "supper"].includes(key)) {
+      const timePhrase =
+        key === "breakfast"
+          ? "in the morning"
+          : key === "lunch"
+            ? "at noon"
+            : "in the evening";
+      const chineseTime =
+        key === "breakfast" ? "早上" : key === "lunch" ? "中午" : "晚上";
+      return [
+        { label: "动作搭配", phrase: `have ${target}`, chinese: `吃${meaning}` },
+        { label: "动作搭配", phrase: `eat ${target}`, chinese: `吃${meaning}` },
+        { label: "准备食物", phrase: `make ${target}`, chinese: `做${meaning}` },
+        { label: "完整句", phrase: `I have ${target} ${timePhrase}.`, chinese: `我${chineseTime}吃${meaning}。` },
+      ];
+    }
+
+    const foodTarget = key === "noodle" ? "noodles" : target;
+    const countableFood = ["sandwich", "egg", "hamburger"].includes(key);
+    const foodObject = countableFood || key === "pie"
+      ? withArticle(target)
+      : foodTarget;
+    const questionObject = countableFood ? foodObject : `some ${foodTarget}`;
+    return [
+      { label: "动作搭配", phrase: `eat ${foodObject}`, chinese: `吃${meaning}` },
+      { label: "准备食物", phrase: `make ${foodObject}`, chinese: `做${meaning}` },
+      { label: "完整句", phrase: `I have ${foodObject} for lunch.`, chinese: `我午饭吃${meaning}。` },
+      { label: "问答场景", phrase: `Would you like ${questionObject}?`, chinese: `你想要${countableFood ? "一个" : "一些"}${meaning}吗？` },
+    ];
+  }
+
+  if (hasAnyWord(DRINK_WORDS, key, meaning)) {
+    return [
+      { label: "动作搭配", phrase: `drink ${target}`, chinese: `喝${meaning}` },
+      { label: "数量搭配", phrase: `a glass of ${target}`, chinese: `一杯${meaning}` },
+      { label: "请求句", phrase: `Can I have some ${target}?`, chinese: `我可以喝一些${meaning}吗？` },
+      { label: "完整句", phrase: `The ${target} is cold.`, chinese: `这${meaning}是凉的。` },
+    ];
+  }
+
+  if (hasAnyWord(SCHOOL_WORDS, key, meaning)) {
+    return [
+      { label: "物主搭配", phrase: `my ${target}`, chinese: `我的${meaning}` },
+      { label: "课堂动作", phrase: `open your ${target}`, chinese: `打开你的${meaning}` },
+      { label: "位置句", phrase: `The ${target} is on the desk.`, chinese: `${meaning}在课桌上。` },
+      { label: "问答场景", phrase: `Where is your ${target}?`, chinese: `你的${meaning}在哪里？` },
+    ];
+  }
+
+  if (hasAnyWord(PLACE_WORDS, key, meaning)) {
+    return [
+      { label: "地点搭配", phrase: `at ${target}`, chinese: `在${meaning}` },
+      { label: "动作搭配", phrase: `go to ${target}`, chinese: `去${meaning}` },
+      { label: "位置句", phrase: `I am in the ${target}.`, chinese: `我在${meaning}里。` },
+      { label: "问答场景", phrase: `How can I get to the ${target}?`, chinese: `我怎样到${meaning}？` },
+    ];
+  }
+
+  if (hasAnyWord(ANIMAL_WORDS, key, meaning)) {
+    return [
+      { label: "数量搭配", phrase: single, chinese: `一只${meaning}` },
+      { label: "描述句", phrase: `The ${target} is cute.`, chinese: `这只${meaning}很可爱。` },
+      { label: "动作句", phrase: `${plural} can run.`, chinese: `${meaning}会跑。` },
+      { label: "问答场景", phrase: `Do you like ${plural}?`, chinese: `你喜欢${meaning}吗？` },
+    ];
+  }
+
+  if (hasAnyWord(TIME_WORDS, key, meaning)) {
+    if (key === "time") {
+      return [
+        { label: "常用搭配", phrase: "have time", chinese: "有时间" },
+        { label: "常用搭配", phrase: "free time", chinese: "空闲时间" },
+        { label: "准时表达", phrase: "on time", chinese: "准时" },
+        { label: "问答场景", phrase: "What time is it?", chinese: "现在几点？" },
+      ];
+    }
+    return [
+      { label: "时间搭配", phrase: `in the ${target}`, chinese: `在${meaning}` },
+      { label: "频率表达", phrase: `every ${target}`, chinese: `每个${meaning}` },
+      { label: "完整句", phrase: `I read in the ${target}.`, chinese: `我在${meaning}读书。` },
+      { label: "问答场景", phrase: `What time is it?`, chinese: `现在几点？` },
+    ];
+  }
+
+  if (kind === "verb") {
+    return [
+      { label: "能力表达", phrase: `can ${target}`, chinese: `会${meaning}` },
+      { label: "计划表达", phrase: `want to ${target}`, chinese: `想要${meaning}` },
+      { label: "完整句", phrase: `I ${target} every day.`, chinese: `我每天${meaning}。` },
+      { label: "否定句", phrase: `I don't ${target} now.`, chinese: `我现在不${meaning}。` },
+    ];
+  }
+
+  if (kind === "adj") {
+    return [
+      { label: "程度搭配", phrase: `very ${target}`, chinese: `很${meaning}` },
+      { label: "系表结构", phrase: `look ${target}`, chinese: `看起来${meaning}` },
+      { label: "名词前修饰", phrase: `a ${target} day`, chinese: `一个${meaning}的日子` },
+      { label: "完整句", phrase: `The room is ${target}.`, chinese: `这个房间很${meaning}。` },
+    ];
+  }
+
+  if (kind === "adv") {
+    return [
+      { label: "修饰动作", phrase: `read ${target}`, chinese: `${meaning}地读` },
+      { label: "修饰动作", phrase: `answer ${target}`, chinese: `${meaning}地回答` },
+      { label: "完整句", phrase: `Please speak ${target}.`, chinese: `请${meaning}地说。` },
+      { label: "课堂提醒", phrase: `Listen ${target}.`, chinese: `${meaning}地听。` },
+    ];
+  }
+
+  if (kind === "prep" || kind === "conj") return [];
+
+  return band === "senior"
+    ? [
+        { label: "学术搭配", phrase: `focus on ${target}`, chinese: `关注${meaning}` },
+        { label: "处理问题", phrase: `deal with ${target}`, chinese: `处理${meaning}` },
+        { label: "完整句", phrase: `This article is about ${target}.`, chinese: `这篇文章是关于${meaning}的。` },
+        { label: "写作表达", phrase: `the idea of ${target}`, chinese: `${meaning}这个想法` },
+      ]
+    : [
+        { label: "数量搭配", phrase: single, chinese: `一个/一种${meaning}` },
+        { label: "物主搭配", phrase: `my ${target}`, chinese: `我的${meaning}` },
+        { label: "完整句", phrase: `I can see ${single}.`, chinese: `我能看见一个${meaning}。` },
+        { label: "问答场景", phrase: `Where is the ${target}?`, chinese: `这个${meaning}在哪里？` },
+      ];
+}
+
 const FUNCTION_WORD_KEYS = new Set([
   ...Object.keys(FUNCTION_USAGE_EXAMPLES),
+  ...Object.keys(PRONOUN_USAGE_EXAMPLES),
   "a",
   "an",
   "the",
@@ -882,16 +1195,25 @@ function getWordUsageExamples(
 
   const key = normalizeUsageKey(target);
   const sentenceUsage = getSentenceContextUsage(target, sentenceInfo);
-  const commonUsage = COMMON_USAGE_EXAMPLES[key] ?? FUNCTION_USAGE_EXAMPLES[key];
+  const commonUsage =
+    PRONOUN_USAGE_EXAMPLES[key] ?? COMMON_USAGE_EXAMPLES[key] ?? FUNCTION_USAGE_EXAMPLES[key];
+  const themeUsage = getThemeUsageExamples(target, meaning, kind, band);
+  const functionLike = isLikelyFunctionWord(target, word.meaning, kind) || AUXILIARY_OR_LIGHT_VERB_KEYS.has(key);
 
-  if (commonUsage) return mergeUsageExamples(sentenceUsage, commonUsage);
+  if (commonUsage) {
+    return mergeUsageExamples(sentenceUsage, commonUsage, functionLike ? [] : themeUsage);
+  }
 
   // Function words are easy to misuse with templates, so never force a fake phrase.
-  if (isLikelyFunctionWord(target, word.meaning, kind)) {
+  if (functionLike) {
     return mergeUsageExamples(sentenceUsage);
   }
 
-  return mergeUsageExamples(sentenceUsage, getFallbackUsageExamples(target, meaning, kind, band));
+  return mergeUsageExamples(
+    sentenceUsage,
+    themeUsage,
+    getFallbackUsageExamples(target, meaning, kind, band)
+  );
 }
 
 function shuffleArray<T>(items: T[]): T[] {
@@ -1353,11 +1675,11 @@ function SentenceCard({
                               )}
                             </div>
 
-                            <div className="min-w-0 rounded-2xl border border-emerald-100 bg-emerald-50/40 px-3 py-2.5">
+                            <div className="min-w-0 rounded-2xl border border-emerald-100 bg-emerald-50/40 px-3 py-3">
                               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
                                 用法
                               </p>
-                              <div className="space-y-2">
+                              <div className="space-y-2.5">
                                 {usageExamples.map((item, usageIdx) => {
                                   const phraseKey = `${w.id}-usage-${usageIdx}`;
                                   const isPlayingPhrase = playingPhraseKey === phraseKey;
@@ -1365,7 +1687,7 @@ function SentenceCard({
                                   return (
                                     <div
                                       key={phraseKey}
-                                      className="flex items-start gap-2 text-sm leading-6"
+                                      className="flex items-start gap-2 rounded-xl bg-white/80 p-2.5 text-sm leading-6 ring-1 ring-emerald-100/80"
                                     >
                                       <button
                                         onClick={() => playPhraseAudio(item.phrase, phraseKey)}
@@ -1379,6 +1701,11 @@ function SentenceCard({
                                         {isPlayingPhrase ? "■" : "▶"}
                                       </button>
                                       <div className="min-w-0">
+                                        {item.label && (
+                                          <span className="mb-1 inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                                            {item.label}
+                                          </span>
+                                        )}
                                         <p
                                           className={`select-none font-medium text-slate-900 ${
                                             englishHidden
@@ -1399,6 +1726,11 @@ function SentenceCard({
                                         >
                                           {item.chinese}
                                         </p>
+                                        {item.note && (
+                                          <p className="mt-1 text-[11px] leading-5 text-stone-400">
+                                            {item.note}
+                                          </p>
+                                        )}
                                       </div>
                                     </div>
                                   );

@@ -1,5 +1,3 @@
-import { mkdir, stat, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { Pool } from "pg";
 
 type DbError = { message: string };
@@ -315,56 +313,8 @@ class PgQueryBuilder {
   }
 }
 
-class LocalStorageBucket {
-  constructor(private readonly bucket: string) {}
-
-  async upload(
-    filename: string,
-    buffer: Buffer,
-    options: { contentType?: string; upsert?: boolean } = {}
-  ): Promise<{ data: { path: string } | null; error: DbError | null }> {
-    try {
-      const safeFilename = filename.replace(/[\\/]/g, "_");
-      const uploadDir = path.join(process.cwd(), "public", "uploads", this.bucket);
-      const fullPath = path.join(uploadDir, safeFilename);
-
-      if (!options.upsert) {
-        try {
-          await stat(fullPath);
-          return { data: null, error: { message: "File already exists" } };
-        } catch {
-          // File does not exist yet, so it is safe to create it.
-        }
-      }
-
-      await mkdir(uploadDir, { recursive: true });
-      await writeFile(fullPath, buffer);
-      return { data: { path: safeFilename }, error: null };
-    } catch (error) {
-      return {
-        data: null,
-        error: { message: error instanceof Error ? error.message : "Upload failed" },
-      };
-    }
-  }
-
-  getPublicUrl(filename: string) {
-    const safeFilename = filename.replace(/[\\/]/g, "_");
-    return {
-      data: {
-        publicUrl: `/uploads/${this.bucket}/${encodeURIComponent(safeFilename)}`,
-      },
-    };
-  }
-}
-
 export const supabase = {
   from(table: string) {
     return new PgQueryBuilder(table);
-  },
-  storage: {
-    from(bucket: string) {
-      return new LocalStorageBucket(bucket);
-    },
   },
 };

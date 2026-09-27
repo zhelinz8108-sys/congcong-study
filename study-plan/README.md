@@ -26,6 +26,15 @@ FAMILY_ACCESS_PASSWORD=your-password
 
 The local file is `study-plan/.env.local`. On the production server, keep the same variable in the server environment or `/www/study-plan/.env.local`.
 
+## Cloud deployment
+
+The production application uses PostgreSQL for shared learning data and a persistent upload
+directory outside the release tree. GitHub Actions deploys `main`, runs database migrations,
+builds the Next.js application, restarts the service, and checks `/api/health`.
+
+See [CLOUD_DEPLOYMENT.md](./CLOUD_DEPLOYMENT.md) for the server environment, GitHub Secrets,
+HTTPS, backup, restore, and verification checklist.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

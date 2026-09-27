@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Material, Unit, Word } from "@/lib/types";
 
@@ -617,9 +618,50 @@ export function EnglishListeningPanel({ subjectId, playWordAudio }: EnglishListe
         <p className="text-sm font-bold text-emerald-600">English Listening Workspace</p>
         <h2 className="mt-2 text-4xl font-black text-slate-950">英语听力训练</h2>
         <p className="mt-4 max-w-2xl text-lg leading-9 text-stone-600">
-          按词汇量分成小学和初中两个训练板块，每个板块 500 题。题型从主旨题开始，再进入细节题和推断题，适合循序渐进练听力。
+          先用整篇配套训练跟着教材练，再按词汇量进入小学和初中专项训练，逐步提高信息定位与整体理解能力。
         </p>
       </section>
+
+      <Link
+        href={`/subjects/${subjectId}/listening/yiben-grade-6`}
+        className="group block overflow-hidden rounded-[2rem] border border-emerald-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md"
+      >
+        <div className="grid gap-0 lg:grid-cols-[1.3fr_0.7fr]">
+          <div className="p-7 sm:p-8">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-black text-white">
+                新书 · 100 篇
+              </span>
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                六年级
+              </span>
+            </div>
+            <h3 className="mt-5 text-2xl font-black leading-tight text-slate-950 sm:text-3xl">
+              2026 一本·小学英语听力训练100篇
+            </h3>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-stone-600">
+              100 个 Exercise，配套原书题面和官方音频。完成整篇后统一查看成绩、答案、听力原文与中文翻译。
+            </p>
+            <div className="mt-6 inline-flex items-center gap-2 font-black text-emerald-700">
+              进入书籍目录 <span className="transition-transform group-hover:translate-x-1">→</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 border-t border-emerald-100 bg-emerald-50/60 p-5 text-center lg:grid-cols-1 lg:border-l lg:border-t-0">
+            <div className="flex flex-col justify-center border-r border-emerald-100 py-3 lg:border-b lg:border-r-0">
+              <p className="text-xl font-black text-emerald-800">100</p>
+              <p className="mt-1 text-xs font-semibold text-emerald-800/60">篇训练</p>
+            </div>
+            <div className="flex flex-col justify-center border-r border-emerald-100 py-3 lg:border-b lg:border-r-0">
+              <p className="text-xl font-black text-emerald-800">音频</p>
+              <p className="mt-1 text-xs font-semibold text-emerald-800/60">逐篇配套</p>
+            </div>
+            <div className="flex flex-col justify-center py-3">
+              <p className="text-xl font-black text-emerald-800">整篇</p>
+              <p className="mt-1 text-xs font-semibold text-emerald-800/60">提交反馈</p>
+            </div>
+          </div>
+        </div>
+      </Link>
 
       <div className="grid gap-5 md:grid-cols-2">
         {bandSummaries.map(({ band, questions, audioCount }) => {

@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import EnglishListeningPanel from "@/components/english-listening-panel";
 import { countMathCurriculumItems } from "@/lib/math-curriculum";
-import { countMathGradeFivePoints } from "@/lib/math-grade-five";
 import { countChineseTopics } from "@/lib/chinese-curriculum";
 import type { Subject, Unit, Material, Word } from "@/lib/types";
 
@@ -1009,6 +1008,17 @@ export default function SubjectPage() {
             </Link>
           </div>
 
+          <div className="bg-white rounded-2xl border border-rose-200 overflow-hidden">
+            <Link
+              href={`/subjects/${id}/final-review`}
+              className="px-4 py-3 bg-rose-50 flex items-center justify-between cursor-pointer hover:bg-rose-100 transition-colors block"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold text-rose-800 whitespace-nowrap">🧾 期末复习</span>
+              </div>
+              <span className="text-stone-400 text-sm">→</span>
+            </Link>
+          </div>
           </div>
         </div>
       )}
@@ -1061,47 +1071,15 @@ export default function SubjectPage() {
           </Link>
 
           <Link
-            href={`/subjects/${id}/math/grade-5`}
+            href={`/subjects/${id}/math/grade-6`}
             className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
             style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
           >
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-stone-900">五年级</h2>
+                <h2 className="text-2xl font-bold text-stone-900">六年级</h2>
                 <p className="mt-1 text-sm text-stone-400">
-                  8 个单元 · {countMathGradeFivePoints()} 个知识点
-                </p>
-              </div>
-              <span className="text-stone-400">→</span>
-            </div>
-          </Link>
-
-          <Link
-            href={`/subjects/${id}/math/generated-practice`}
-            className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
-            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-stone-900">五下数学新题训练</h2>
-                <p className="mt-1 text-sm text-stone-400">
-                  基于 PDF 出题思路 · 8 个单元 · 每单元 300 题
-                </p>
-              </div>
-              <span className="text-stone-400">→</span>
-            </div>
-          </Link>
-
-          <Link
-            href={`/subjects/${id}/math/question-bank`}
-            className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
-            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-stone-900">数学互动题库</h2>
-                <p className="mt-1 text-sm text-stone-400">
-                  按卷练习 · 自动判分 · 错题复习
+                  百分数 · 比例 · 圆柱圆锥 · 小学总复习
                 </p>
               </div>
               <span className="text-stone-400">→</span>
