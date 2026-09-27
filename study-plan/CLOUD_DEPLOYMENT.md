@@ -65,6 +65,18 @@ pg_restore --clean --if-exists --no-owner --dbname "$DATABASE_URL" study-plan.du
 备份至少应保留一份在服务器之外，并对备份文件设置访问控制。将生产数据库复制到
 GitHub Artifact、对象存储或其他云服务之前，需要单独确认目标位置和数据权限。
 
+仓库自带的 `Backup production PostgreSQL` 工作流会先使用 AES-256-CBC 和 PBKDF2
+加密数据库转储，再上传 GitHub Artifact；仓库中不会出现明文数据库。加密口令仅保存在
+GitHub Actions Secret `BACKUP_ENCRYPTION_PASSWORD` 中。下载备份后可在安全环境中解密：
+
+```bash
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -md sha256 \
+  -in study-plan.dump.enc -out study-plan.dump \
+  -pass env:BACKUP_ENCRYPTION_PASSWORD
+```
+
+解密后的文件包含生产数据，恢复结束后应立即安全删除。
+
 ## 验收
 
 ```bash

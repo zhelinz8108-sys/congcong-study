@@ -17,6 +17,7 @@ jobs:
       SERVER_USER: ${{ secrets.SERVER_USER }}
       SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
       SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+      BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
       REMOTE_APP_DIR: /www/study-plan
       BACKUP_NAME: study-plan-${{ github.run_id }}-${{ github.run_attempt }}.dump
 
@@ -24,7 +25,7 @@ jobs:
       - name: Check backup secrets
         shell: bash
         run: |
-          for name in SERVER_HOST SERVER_USER SERVER_SSH_KEY; do
+          for name in SERVER_HOST SERVER_USER SERVER_SSH_KEY BACKUP_ENCRYPTION_PASSWORD; do
             if [ -z "${!name}" ]; then
               echo "::error::Required secret $name is not configured."
               exit 1
@@ -54,21 +55,27 @@ jobs:
           "
           scp -i ~/.ssh/deploy_key -P "$SERVER_PORT" \
             "$SERVER_USER@$SERVER_HOST:/tmp/$BACKUP_NAME" "$BACKUP_NAME"
-          sha256sum "$BACKUP_NAME" > "$BACKUP_NAME.sha256"
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -md sha256 \
+            -in "$BACKUP_NAME" \
+            -out "$BACKUP_NAME.enc" \
+            -pass env:BACKUP_ENCRYPTION_PASSWORD
+          sha256sum "$BACKUP_NAME.enc" > "$BACKUP_NAME.enc.sha256"
+          rm -f "$BACKUP_NAME"
 
-      - name: Store GitHub artifact
+      - name: Store encrypted GitHub artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.BACKUP_NAME }}
+          name: ${{ env.BACKUP_NAME }}-encrypted
           path: |
-            ${{ env.BACKUP_NAME }}
-            ${{ env.BACKUP_NAME }}.sha256
+            ${{ env.BACKUP_NAME }}.enc
+            ${{ env.BACKUP_NAME }}.enc.sha256
           retention-days: 30
           if-no-files-found: error
 
-      - name: Remove temporary server backup
+      - name: Remove temporary backups
         if: always()
         shell: bash
         run: |
           ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
             "rm -f '/tmp/$BACKUP_NAME'" || true
+          rm -f "$BACKUP_NAME" "$BACKUP_NAME.enc" "$BACKUP_NAME.enc.sha256"
