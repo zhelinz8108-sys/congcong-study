@@ -10,6 +10,7 @@ Group=ubuntu
 WorkingDirectory=/www/study-plan
 Environment=NODE_ENV=production
 Environment=STORAGE_ROOT=/var/lib/study-plan/uploads
+Environment=ASSET_BASE_URL=https://media.githubusercontent.com/media/zhelinz8108-sys/congcong-study/main/study-plan/public
 Environment=ALLOW_LOCAL_DATA_FALLBACK=false
 EnvironmentFile=-/etc/study-plan.env
 ExecStart=/usr/bin/node /www/study-plan/node_modules/next/dist/bin/next start -p 3001 -H 127.0.0.1
