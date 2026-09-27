@@ -1,0 +1,83 @@
+name: Sync listening media
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "study-plan/public/listening/**"
+      - ".github/workflows/sync-media.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: production-media-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      SERVER_USER: ${{ secrets.SERVER_USER }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+      SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+      REMOTE_MEDIA_DIR: /www/study-plan/public/listening
+
+    steps:
+      - name: Checkout listening media
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Check deployment secrets
+        shell: bash
+        run: |
+          for name in SERVER_HOST SERVER_USER SERVER_SSH_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Required secret $name is not configured."
+              exit 1
+            fi
+          done
+
+      - name: Ensure rsync is available
+        shell: bash
+        run: |
+          if ! command -v rsync >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y rsync
+          fi
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SERVER_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$SERVER_PORT" "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+      - name: Prepare media directory
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
+            "mkdir -p '$REMOTE_MEDIA_DIR/.rsync-partial'"
+
+      - name: Resume media sync
+        shell: bash
+        run: |
+          rsync -az --checksum --delete \
+            --partial --partial-dir=.rsync-partial \
+            --timeout=300 --info=progress2 \
+            -e "ssh -i ~/.ssh/deploy_key -p $SERVER_PORT" \
+            study-plan/public/listening/ \
+            "$SERVER_USER@$SERVER_HOST:$REMOTE_MEDIA_DIR/"
+
+      - name: Verify media count
+        shell: bash
+        run: |
+          local_count="$(find study-plan/public/listening -type f | wc -l)"
+          remote_count="$(ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
+            "find '$REMOTE_MEDIA_DIR' -type f ! -path '*/.rsync-partial/*' | wc -l")"
+          echo "Local media files: $local_count"
+          echo "Remote media files: $remote_count"
+          test "$local_count" -eq "$remote_count"
