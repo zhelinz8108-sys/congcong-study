@@ -105,8 +105,8 @@ export default function GrammarLessonExperience({
   };
 
   return (
-    <main className="min-h-screen bg-[#f6f4ef] text-slate-950">
-      <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-[#f6f4ef]/90 backdrop-blur-xl">
+    <main className="min-h-screen bg-white text-slate-900">
+      <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto max-w-4xl space-y-2 px-4 py-3 sm:px-7">
           <Link href={`/subjects/${subjectId}/grammar`} className="text-sm font-black text-slate-500 transition hover:text-violet-700">← 课程地图</Link>
           <span className="block w-fit rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-500 ring-1 ring-slate-200">第 {lesson.n} / 72 课</span>
@@ -114,22 +114,22 @@ export default function GrammarLessonExperience({
       </div>
 
       <div className="mx-auto max-w-4xl px-4 pb-20 pt-7 sm:px-7">
-        <header className="overflow-hidden rounded-[36px] bg-[#17142a] text-white shadow-[0_24px_70px_rgba(31,25,70,0.18)]">
+        <header className="overflow-hidden rounded-[36px] border border-cyan-100 bg-cyan-50/60 text-slate-900 shadow-[0_16px_48px_rgba(15,23,42,0.06)]">
           <div className="p-6 sm:p-9">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-cyan-400/15 px-3 py-1 text-xs font-black text-cyan-200">阶段 {String(lesson.stage).padStart(2, "0")} · {stageTitle}</span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white/60">{lesson.level}</span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-cyan-700 ring-1 ring-cyan-200">阶段 {String(lesson.stage).padStart(2, "0")} · {stageTitle}</span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-600 ring-1 ring-slate-200">{lesson.level}</span>
               </div>
-              <p className="mt-8 text-xs font-black uppercase tracking-[0.2em] text-violet-300">Lesson {String(lesson.n).padStart(2, "0")}</p>
+              <p className="mt-8 text-xs font-black uppercase tracking-[0.2em] text-violet-700">Lesson {String(lesson.n).padStart(2, "0")}</p>
               <h1 className="mt-3 text-4xl font-black leading-tight tracking-tight sm:text-5xl">{lesson.title}</h1>
-              <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-white/65">{lesson.goal}</p>
+              <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-slate-600">{lesson.goal}</p>
             </div>
-            <div className="mt-8 rounded-[28px] bg-white/[0.07] p-5 ring-1 ring-white/10">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-white/40">本课路线</p>
+            <div className="mt-8 rounded-[28px] bg-white p-5 ring-1 ring-cyan-100">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">本课路线</p>
               <div className="mt-4 space-y-3 text-sm font-bold">
                 {[["01", "理解核心规则"], ["02", "观察3个例句"], ["03", "诊断易错表达"], ["04", "完成10项训练"]].map(([number, text]) => (
-                  <div key={number} className="flex items-center gap-3"><span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10 text-[10px] text-cyan-200">{number}</span><span className="text-white/70">{text}</span></div>
+                  <div key={number} className="flex items-center gap-3"><span className="grid h-8 w-8 place-items-center rounded-lg bg-cyan-50 text-[10px] text-cyan-700">{number}</span><span className="text-slate-700">{text}</span></div>
                 ))}
               </div>
             </div>
@@ -147,21 +147,21 @@ export default function GrammarLessonExperience({
               <div className="mt-6 space-y-3">
                 {lesson.rules.map((rule, index) => (
                   <div key={rule} className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-cyan-500 text-xs font-black text-white">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-cyan-100 text-xs font-black text-cyan-800">{String(index + 1).padStart(2, "0")}</span>
                     <p className="mt-4 text-sm font-semibold leading-7 text-slate-700">{rule}</p>
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="rounded-[32px] bg-gradient-to-br from-violet-600 to-fuchsia-600 p-5 text-white shadow-xl shadow-violet-100 sm:p-8">
-              <div><p className="text-xs font-black uppercase tracking-[0.18em] text-violet-200">02 · Observe</p><h2 className="mt-2 text-2xl font-black">用例句把规则看见</h2></div>
+            <section className="rounded-[32px] border border-violet-100 bg-violet-50/70 p-5 text-slate-900 sm:p-8">
+              <div><p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">02 · Observe</p><h2 className="mt-2 text-2xl font-black">用例句把规则看见</h2></div>
               <div className="mt-6 grid gap-3">
                 {lesson.examples.map(([english, note], index) => (
-                  <article key={english} className="rounded-2xl bg-white/12 p-5 ring-1 ring-white/15">
-                    <div><p className="text-[10px] font-black uppercase tracking-[0.18em] text-violet-200">Example {index + 1}</p><p className="mt-2 text-xl font-black leading-8">{english}</p></div>
-                    <button type="button" onClick={() => speakEnglish(english)} className="mt-4 rounded-full bg-white/15 px-4 py-2 text-xs font-black transition hover:bg-white/25" aria-label={`朗读例句 ${index + 1}`}>▶ 朗读例句</button>
-                    <p className="mt-4 border-t border-white/15 pt-4 text-sm font-semibold leading-7 text-white/70">{note}</p>
+                  <article key={english} className="rounded-2xl bg-white p-5 ring-1 ring-violet-100">
+                    <div><p className="text-[10px] font-black uppercase tracking-[0.18em] text-violet-700">Example {index + 1}</p><p className="mt-2 text-xl font-black leading-8">{english}</p></div>
+                    <button type="button" onClick={() => speakEnglish(english)} className="mt-4 rounded-full bg-violet-50 px-4 py-2 text-xs font-black text-violet-700 transition hover:bg-violet-100" aria-label={`朗读例句 ${index + 1}`}>▶ 朗读例句</button>
+                    <p className="mt-4 border-t border-violet-100 pt-4 text-sm font-semibold leading-7 text-slate-600">{note}</p>
                   </article>
                 ))}
               </div>
@@ -180,33 +180,33 @@ export default function GrammarLessonExperience({
             </section>
 
             <section className="overflow-hidden rounded-[34px] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.07)]">
-              <div className="bg-[#17142a] p-5 text-white sm:p-7">
+              <div className="border-b border-cyan-100 bg-cyan-50 p-5 text-slate-900 sm:p-7">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">04 · Transfer lab</p>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">04 · Transfer lab</p>
                   <h2 className="mt-2 text-2xl font-black">10项迁移训练</h2>
-                  <p className="mt-2 text-sm font-medium text-white/50">先独立判断，再展开答案。根据真实掌握情况记录反馈。</p>
-                  <p className="mt-4 text-sm font-black text-cyan-200">已检查 {answeredSet.size} / {lesson.tasks.length}</p>
+                  <p className="mt-2 text-sm font-medium text-slate-600">先独立判断，再展开答案。根据真实掌握情况记录反馈。</p>
+                  <p className="mt-4 text-sm font-black text-cyan-700">已检查 {answeredSet.size} / {lesson.tasks.length}</p>
                 </div>
-                <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-cyan-300 transition-all" style={{ width: `${taskPercent}%` }} /></div>
+                <div className="mt-5 h-2 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-cyan-300 transition-all" style={{ width: `${taskPercent}%` }} /></div>
               </div>
               <div className="p-5 sm:p-7">
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {lesson.tasks.map((_, index) => (
-                    <button key={index} type="button" onClick={() => { setActiveTask(index); setRevealed(false); }} className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-xs font-black transition ${index === activeTask ? "bg-violet-600 text-white shadow-md" : masteredSet.has(index) ? "bg-emerald-500 text-white" : answeredSet.has(index) ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-400 hover:bg-violet-50 hover:text-violet-700"}`}>{masteredSet.has(index) ? "✓" : index + 1}</button>
+                    <button key={index} type="button" onClick={() => { setActiveTask(index); setRevealed(false); }} className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-xs font-black transition ${index === activeTask ? "bg-violet-100 text-violet-800 ring-1 ring-violet-200" : masteredSet.has(index) ? "bg-emerald-100 text-emerald-800" : answeredSet.has(index) ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-500 hover:bg-violet-50 hover:text-violet-700"}`}>{masteredSet.has(index) ? "✓" : index + 1}</button>
                   ))}
                 </div>
                 <div className="mt-5 rounded-[26px] border border-violet-100 bg-violet-50/50 p-5 sm:p-7">
                   <div><span className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-black text-violet-700 ring-1 ring-violet-100">任务 {activeTask + 1}</span><p className="mt-3 text-xs font-bold text-slate-400">先想，再核对</p></div>
                   <p className="mt-6 whitespace-pre-line text-lg font-black leading-8 text-slate-900">{task.prompt}</p>
                   {!revealed ? (
-                    <button type="button" onClick={() => setRevealed(true)} className="mt-6 w-full rounded-2xl bg-slate-950 px-5 py-3.5 text-sm font-black text-white transition hover:bg-violet-700">显示答案与判断依据</button>
+                    <button type="button" onClick={() => setRevealed(true)} className="mt-6 w-full rounded-2xl bg-violet-100 px-5 py-3.5 text-sm font-black text-violet-800 ring-1 ring-violet-200 transition hover:bg-violet-200">显示答案与判断依据</button>
                   ) : (
                     <div aria-live="polite" className="mt-6">
                       <div className="rounded-2xl border border-emerald-200 bg-white p-5"><p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-600">参考答案</p><p className="mt-3 text-sm font-bold leading-7 text-slate-700">{task.answer}</p></div>
                       <p className="mt-4 text-center text-xs font-bold text-slate-400">你的判断和理由都对吗？</p>
                       <div className="mt-3 space-y-3">
                         <button type="button" onClick={() => rateTask(false)} className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-black text-amber-800 transition hover:bg-amber-100">还不稳，稍后再练</button>
-                        <button type="button" onClick={() => rateTask(true)} className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-black text-white transition hover:bg-emerald-700">判断正确，我掌握了</button>
+                        <button type="button" onClick={() => rateTask(true)} className="rounded-2xl bg-emerald-100 px-5 py-3 text-sm font-black text-emerald-800 ring-1 ring-emerald-200 transition hover:bg-emerald-200">判断正确，我掌握了</button>
                       </div>
                     </div>
                   )}
@@ -221,12 +221,12 @@ export default function GrammarLessonExperience({
               </section>
             )}
 
-            <section className={`rounded-[34px] p-6 text-center sm:p-9 ${isComplete || completedNow ? "bg-emerald-600 text-white" : "bg-[#17142a] text-white"}`}>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-white/55">Lesson checkpoint</p>
+            <section className={`rounded-[34px] border p-6 text-center text-slate-900 sm:p-9 ${isComplete || completedNow ? "border-emerald-200 bg-emerald-50" : "border-cyan-200 bg-cyan-50"}`}>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-700">Lesson checkpoint</p>
               <h2 className="mt-3 text-3xl font-black">{isComplete || completedNow ? "本课已点亮" : "完成本课，点亮课程地图"}</h2>
-              <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-white/65">已检查 {answeredSet.size}/10 项，其中 {masteredSet.size} 项标记为掌握。未掌握的任务会保留为黄色，随时可以回来重练。</p>
-              {!isComplete && !completedNow && <button type="button" onClick={completeLesson} className="mt-6 rounded-2xl bg-cyan-300 px-7 py-3.5 text-sm font-black text-slate-950 transition hover:bg-cyan-200">完成并保存本课</button>}
-              {(isComplete || completedNow) && nextLesson && <Link href={`/subjects/${subjectId}/grammar/lesson/${nextLesson.n}`} className="mt-6 inline-flex rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-emerald-700 transition hover:-translate-y-0.5">进入第 {nextLesson.n} 课 →</Link>}
+              <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-slate-600">已检查 {answeredSet.size}/10 项，其中 {masteredSet.size} 项标记为掌握。未掌握的任务会保留为黄色，随时可以回来重练。</p>
+              {!isComplete && !completedNow && <button type="button" onClick={completeLesson} className="mt-6 rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-cyan-800 ring-1 ring-cyan-200 transition hover:bg-cyan-100">完成并保存本课</button>}
+              {(isComplete || completedNow) && nextLesson && <Link href={`/subjects/${subjectId}/grammar/lesson/${nextLesson.n}`} className="mt-6 inline-flex rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-emerald-700 ring-1 ring-emerald-200 transition hover:-translate-y-0.5">进入第 {nextLesson.n} 课 →</Link>}
             </section>
           </div>
 
@@ -246,7 +246,7 @@ export default function GrammarLessonExperience({
             </div>
             <div className="grid gap-2">
               {previousLesson ? <Link href={`/subjects/${subjectId}/grammar/lesson/${previousLesson.n}`} className="rounded-2xl border border-slate-200 bg-white p-4 text-sm font-black text-slate-600 transition hover:border-violet-200 hover:text-violet-700"><span className="block text-[10px] text-slate-400">上一课 · {previousLesson.n}</span><span className="mt-1 block">← {previousLesson.title}</span></Link> : null}
-              {nextLesson ? <Link href={`/subjects/${subjectId}/grammar/lesson/${nextLesson.n}`} className="rounded-2xl border border-slate-200 bg-white p-4 text-right text-sm font-black text-slate-600 transition hover:border-violet-200 hover:text-violet-700"><span className="block text-[10px] text-slate-400">下一课 · {nextLesson.n}</span><span className="mt-1 block">{nextLesson.title} →</span></Link> : <Link href={`/subjects/${subjectId}/grammar/stage/12`} className="rounded-2xl bg-violet-600 p-4 text-center text-sm font-black text-white">进入最终阶段测评 →</Link>}
+              {nextLesson ? <Link href={`/subjects/${subjectId}/grammar/lesson/${nextLesson.n}`} className="rounded-2xl border border-slate-200 bg-white p-4 text-right text-sm font-black text-slate-600 transition hover:border-violet-200 hover:text-violet-700"><span className="block text-[10px] text-slate-400">下一课 · {nextLesson.n}</span><span className="mt-1 block">{nextLesson.title} →</span></Link> : <Link href={`/subjects/${subjectId}/grammar/stage/12`} className="rounded-2xl bg-violet-50 p-4 text-center text-sm font-black text-violet-700 ring-1 ring-violet-200">进入最终阶段测评 →</Link>}
             </div>
           </aside>
         </div>

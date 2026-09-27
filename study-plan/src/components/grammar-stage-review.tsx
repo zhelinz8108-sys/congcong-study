@@ -76,25 +76,25 @@ export default function GrammarStageReview({
   };
 
   return (
-    <main className="min-h-screen bg-[#f6f4ef] text-slate-950">
+    <main className="min-h-screen bg-white text-slate-900">
       <div className="mx-auto max-w-4xl px-4 pb-20 pt-6 sm:px-7">
         <nav className="space-y-3">
           <Link href={`/subjects/${subjectId}/grammar`} className="rounded-full bg-white px-4 py-2 text-sm font-black text-slate-500 shadow-sm ring-1 ring-slate-200 transition hover:text-violet-700">← 课程地图</Link>
-          <span className="block w-fit rounded-full bg-slate-950 px-4 py-2 text-xs font-black text-white">阶段 {stage.number} / 12</span>
+          <span className="block w-fit rounded-full bg-cyan-50 px-4 py-2 text-xs font-black text-cyan-800 ring-1 ring-cyan-200">阶段 {stage.number} / 12</span>
         </nav>
 
-        <header className="mt-7 overflow-hidden rounded-[38px] bg-gradient-to-br from-cyan-500 via-teal-500 to-emerald-500 p-6 text-white shadow-[0_28px_80px_rgba(20,184,166,0.22)] sm:p-10">
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-100">Stage {String(stage.number).padStart(2, "0")} · Read, think, write</p>
+        <header className="mt-7 overflow-hidden rounded-[38px] border border-cyan-200 bg-cyan-50 p-6 text-slate-900 shadow-[0_16px_48px_rgba(15,23,42,0.06)] sm:p-10">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-700">Stage {String(stage.number).padStart(2, "0")} · Read, think, write</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">{stage.title} · 阶段迁移站</h1>
-          <p className="mt-5 max-w-3xl text-sm font-semibold leading-7 text-white/75">读一段完整语料，检查6个关键判断，再用80-120词完成一次真实表达。这里检验的不是背诵，而是能不能把前6课用起来。</p>
+          <p className="mt-5 max-w-3xl text-sm font-semibold leading-7 text-slate-600">读一段完整语料，检查6个关键判断，再用80-120词完成一次真实表达。这里检验的不是背诵，而是能不能把前6课用起来。</p>
           <div className="mt-7 space-y-2">
-            {lessonTitles.map((lesson) => <Link key={lesson.n} href={`/subjects/${subjectId}/grammar/lesson/${lesson.n}`} className="block rounded-2xl bg-white/15 px-4 py-3 text-xs font-black ring-1 ring-white/20 transition hover:bg-white/25">{lesson.n}. {lesson.title}</Link>)}
+            {lessonTitles.map((lesson) => <Link key={lesson.n} href={`/subjects/${subjectId}/grammar/lesson/${lesson.n}`} className="block rounded-2xl bg-white px-4 py-3 text-xs font-black text-slate-700 ring-1 ring-cyan-100 transition hover:bg-cyan-100">{lesson.n}. {lesson.title}</Link>)}
           </div>
         </header>
 
         <section className="mt-8 rounded-[32px] border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
           <div><p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-600">01 · Stage reading</p><h2 className="mt-2 text-2xl font-black">先读懂，再解释语法为什么这样用</h2><button type="button" onClick={() => speakEnglish(stage.review.text)} className="mt-4 rounded-full bg-cyan-50 px-4 py-2 text-xs font-black text-cyan-700 transition hover:bg-cyan-100">▶ 朗读全文</button></div>
-          <p className="mt-6 rounded-[26px] bg-[#17142a] p-6 text-lg font-semibold leading-9 text-white sm:p-8">{stage.review.text}</p>
+          <p className="mt-6 rounded-[26px] bg-slate-50 p-6 text-lg font-semibold leading-9 text-slate-800 ring-1 ring-slate-200 sm:p-8">{stage.review.text}</p>
         </section>
 
         <section className="mt-8 rounded-[32px] border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
@@ -102,33 +102,33 @@ export default function GrammarStageReview({
           <div className="mt-6 space-y-3">
             {stage.review.questions.map((question, index) => {
               const open = revealed.includes(index);
-              return <article key={question.prompt} className={`rounded-2xl border p-4 transition ${open ? "border-emerald-200 bg-emerald-50/60" : "border-slate-200 bg-slate-50"}`}><span className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-black ${open ? "bg-emerald-500 text-white" : "bg-white text-slate-400 ring-1 ring-slate-200"}`}>{open ? "✓" : index + 1}</span><div className="mt-3"><p className="text-sm font-black leading-7 text-slate-800">{question.prompt}</p>{open ? <p className="mt-3 border-t border-emerald-200 pt-3 text-sm font-semibold leading-7 text-emerald-900">{question.answer}</p> : <button type="button" onClick={() => setRevealed((items) => uniqueSorted([...items, index]))} className="mt-3 rounded-xl bg-white px-4 py-2 text-xs font-black text-violet-700 ring-1 ring-violet-200">展开参考答案</button>}</div></article>;
+              return <article key={question.prompt} className={`rounded-2xl border p-4 transition ${open ? "border-emerald-200 bg-emerald-50/60" : "border-slate-200 bg-slate-50"}`}><span className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-black ${open ? "bg-emerald-100 text-emerald-700" : "bg-white text-slate-400 ring-1 ring-slate-200"}`}>{open ? "✓" : index + 1}</span><div className="mt-3"><p className="text-sm font-black leading-7 text-slate-800">{question.prompt}</p>{open ? <p className="mt-3 border-t border-emerald-200 pt-3 text-sm font-semibold leading-7 text-emerald-900">{question.answer}</p> : <button type="button" onClick={() => setRevealed((items) => uniqueSorted([...items, index]))} className="mt-3 rounded-xl bg-white px-4 py-2 text-xs font-black text-violet-700 ring-1 ring-violet-200">展开参考答案</button>}</div></article>;
             })}
           </div>
         </section>
 
-        <section className="mt-8 overflow-hidden rounded-[34px] bg-[#17142a] text-white shadow-xl">
+        <section className="mt-8 overflow-hidden rounded-[34px] border border-violet-200 bg-violet-50/60 text-slate-900">
           <div className="p-6 sm:p-9">
             <div className="mt-7">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">03 · Real writing</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">03 · Real writing</p>
               <h2 className="mt-3 text-3xl font-black">把规则写成自己的表达</h2>
-              <p className="mt-5 text-sm font-semibold leading-7 text-white/65">{stage.review.writing}</p>
-              <div className="mt-5 rounded-2xl bg-white/10 p-4 ring-1 ring-white/10"><p className="text-xs font-black text-cyan-300">提交前自检</p><p className="mt-2 text-xs font-semibold leading-6 text-white/65">{stage.review.check}</p></div>
+              <p className="mt-5 text-sm font-semibold leading-7 text-slate-600">{stage.review.writing}</p>
+              <div className="mt-5 rounded-2xl bg-white p-4 ring-1 ring-violet-100"><p className="text-xs font-black text-violet-700">提交前自检</p><p className="mt-2 text-xs font-semibold leading-6 text-slate-600">{stage.review.check}</p></div>
             </div>
             <div>
-              <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onBlur={saveDraft} placeholder="在这里完成英文写作……" className="min-h-72 w-full resize-y rounded-[24px] border border-white/10 bg-white p-5 text-sm font-semibold leading-7 text-slate-900 outline-none transition placeholder:text-slate-300 focus:ring-4 focus:ring-cyan-300/20" />
-              <div className="mt-3 space-y-3"><p className={`text-xs font-black ${wordCount >= 80 ? "text-emerald-300" : "text-white/40"}`}>{wordCount} words {wordCount >= 80 ? "· 已达到建议长度" : "· 建议至少80词"}</p><button type="button" onClick={saveDraft} className="w-full rounded-xl bg-white/10 px-4 py-3 text-xs font-black transition hover:bg-white/20">保存草稿</button></div>
+              <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onBlur={saveDraft} placeholder="在这里完成英文写作……" className="min-h-72 w-full resize-y rounded-[24px] border border-violet-200 bg-white p-5 text-sm font-semibold leading-7 text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 focus:ring-violet-200/40" />
+              <div className="mt-3 space-y-3"><p className={`text-xs font-black ${wordCount >= 80 ? "text-emerald-700" : "text-slate-500"}`}>{wordCount} words {wordCount >= 80 ? "· 已达到建议长度" : "· 建议至少80词"}</p><button type="button" onClick={saveDraft} className="w-full rounded-xl bg-white px-4 py-3 text-xs font-black text-violet-700 ring-1 ring-violet-200 transition hover:bg-violet-100">保存草稿</button></div>
             </div>
           </div>
         </section>
 
-        <section className={`mt-8 rounded-[34px] p-6 text-center sm:p-9 ${completed ? "bg-emerald-600 text-white" : "border border-slate-200 bg-white"}`}>
-          <p className={`text-xs font-black uppercase tracking-[0.18em] ${completed ? "text-white/60" : "text-violet-600"}`}>Stage checkpoint</p>
+        <section className={`mt-8 rounded-[34px] border p-6 text-center text-slate-900 sm:p-9 ${completed ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-white"}`}>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Stage checkpoint</p>
           <h2 className="mt-3 text-3xl font-black">{completed ? `阶段 ${stage.number} 已完成` : "准备好点亮这一阶段了吗？"}</h2>
-          <p className={`mx-auto mt-3 max-w-2xl text-sm font-semibold leading-7 ${completed ? "text-white/70" : "text-slate-500"}`}>{allQuestionsChecked ? "6个理解问题已经全部核对。" : `还差 ${stage.review.questions.length - revealed.length} 个问题未核对。`} {wordCount >= 80 ? "写作已经达到建议长度。" : "写作可以继续完善，也可以稍后回来补充。"}</p>
-          {!completed && <button type="button" disabled={!allQuestionsChecked} onClick={completeStage} className="mt-6 rounded-2xl bg-violet-600 px-7 py-3.5 text-sm font-black text-white transition enabled:hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-35">完成阶段并保存进度</button>}
-          {completed && stage.number < 12 && <Link href={`/subjects/${subjectId}/grammar/lesson/${stage.lastLesson + 1}`} className="mt-6 inline-flex rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-emerald-700">进入下一阶段 →</Link>}
-          {completed && stage.number === 12 && <Link href={`/subjects/${subjectId}/grammar/practice/mixed`} className="mt-6 inline-flex rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-emerald-700">进入500题综合挑战 →</Link>}
+          <p className="mx-auto mt-3 max-w-2xl text-sm font-semibold leading-7 text-slate-500">{allQuestionsChecked ? "6个理解问题已经全部核对。" : `还差 ${stage.review.questions.length - revealed.length} 个问题未核对。`} {wordCount >= 80 ? "写作已经达到建议长度。" : "写作可以继续完善，也可以稍后回来补充。"}</p>
+          {!completed && <button type="button" disabled={!allQuestionsChecked} onClick={completeStage} className="mt-6 rounded-2xl bg-violet-100 px-7 py-3.5 text-sm font-black text-violet-800 ring-1 ring-violet-200 transition enabled:hover:bg-violet-200 disabled:cursor-not-allowed disabled:opacity-35">完成阶段并保存进度</button>}
+          {completed && stage.number < 12 && <Link href={`/subjects/${subjectId}/grammar/lesson/${stage.lastLesson + 1}`} className="mt-6 inline-flex rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-emerald-700 ring-1 ring-emerald-200">进入下一阶段 →</Link>}
+          {completed && stage.number === 12 && <Link href={`/subjects/${subjectId}/grammar/practice/mixed`} className="mt-6 inline-flex rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-emerald-700 ring-1 ring-emerald-200">进入500题综合挑战 →</Link>}
           {!ready && <p className="mt-3 text-xs text-slate-400">正在读取云端进度……</p>}
         </section>
       </div>

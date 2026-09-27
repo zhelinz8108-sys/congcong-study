@@ -212,11 +212,11 @@ export function GrammarOriginal500Practice({
 
   if (!isActive) {
     return (
-      <section className="mt-8 rounded-[32px] border border-violet-100 bg-gradient-to-br from-violet-50 via-white to-amber-50/60 p-5 shadow-[0_20px_55px_rgba(88,28,135,0.07)] sm:p-7">
+      <section className="mt-8 rounded-[32px] border border-violet-100 bg-white p-5 shadow-[0_16px_48px_rgba(15,23,42,0.05)] sm:p-7">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-violet-600 px-3 py-1 text-xs font-semibold text-white">
+              <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700 ring-1 ring-violet-200">
                 {bank.eyebrow}
               </span>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-violet-700 ring-1 ring-violet-100">
@@ -251,11 +251,11 @@ export function GrammarOriginal500Practice({
         <button
           type="button"
           onClick={startPractice}
-          className="mt-6 flex w-full items-center justify-between rounded-[24px] bg-slate-950 px-5 py-5 text-left text-white transition hover:bg-violet-700"
+          className="mt-6 flex w-full items-center justify-between rounded-[24px] bg-violet-50 px-5 py-5 text-left text-slate-900 ring-1 ring-violet-200 transition hover:bg-violet-100"
         >
           <span>
             <span className="block text-lg font-semibold">{bank.startLabel}</span>
-            <span className="mt-1 block text-sm text-white/70">{bank.startHint}</span>
+            <span className="mt-1 block text-sm text-slate-600">{bank.startHint}</span>
           </span>
           <span className="text-xl">→</span>
         </button>
@@ -265,13 +265,13 @@ export function GrammarOriginal500Practice({
 
   if (currentIndex >= questions.length || !current) {
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-[#fbfaf7]">
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
         <div className="mx-auto min-h-screen w-full max-w-4xl px-4 py-6 sm:px-6">
           <div className="flex items-center justify-between gap-3">
             <button type="button" onClick={returnToHub} className="rounded-full px-3 py-2 text-sm font-medium text-stone-500 hover:bg-white">
               ← 返回语法
             </button>
-            <button type="button" onClick={startPractice} className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700">
+            <button type="button" onClick={startPractice} className="rounded-full bg-violet-50 px-4 py-2 text-sm font-medium text-violet-800 ring-1 ring-violet-200 hover:bg-violet-100">
               再练一轮
             </button>
           </div>
@@ -287,7 +287,7 @@ export function GrammarOriginal500Practice({
               <div className="rounded-2xl bg-violet-50 p-4"><p className="text-xs font-semibold text-violet-700">正确率</p><p className="mt-2 text-2xl font-semibold text-violet-700">{sessionAccuracy}%</p></div>
             </div>
             {mistakes.length > 0 && !reviewMistakes && (
-              <button type="button" onClick={beginMistakeReview} className="mt-6 w-full rounded-2xl bg-rose-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-rose-700">
+              <button type="button" onClick={beginMistakeReview} className="mt-6 w-full rounded-2xl bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-800 ring-1 ring-rose-200 transition hover:bg-rose-100">
                 只重练本轮 {mistakes.length} 道错题
               </button>
             )}
@@ -302,7 +302,7 @@ export function GrammarOriginal500Practice({
   const progressPercent = ((currentIndex + 1) / questions.length) * 100;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#fbfaf7]">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
       <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col px-4 py-5 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <button type="button" onClick={returnToHub} className="rounded-full px-3 py-2 text-sm font-medium text-stone-500 hover:bg-white">
@@ -375,7 +375,7 @@ export function GrammarOriginal500Practice({
                       <div className="rounded-2xl bg-amber-50 px-4 py-3 text-amber-800 ring-1 ring-amber-100"><span className="font-semibold">易错提醒：</span>{explanation.trap}</div>
                     </div>
                   </div>
-                  <button type="button" onClick={goNext} className="shrink-0 rounded-xl bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-violet-700">
+                  <button type="button" onClick={goNext} className="shrink-0 rounded-xl bg-violet-50 px-5 py-3 text-sm font-medium text-violet-800 ring-1 ring-violet-200 transition hover:bg-violet-100">
                     {currentIndex + 1 >= questions.length ? "查看结果" : "下一题"}
                   </button>
                 </div>

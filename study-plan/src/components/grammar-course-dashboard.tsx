@@ -50,55 +50,54 @@ export default function GrammarCourseDashboard({
   const completedStageSet = useMemo(() => new Set(progress.completedStages), [progress.completedStages]);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#f6f4ef] text-slate-950">
-      <div className="pointer-events-none fixed inset-x-0 top-0 h-[420px] bg-[linear-gradient(180deg,rgba(34,211,238,0.10),transparent)]" />
-      <div className="relative mx-auto max-w-4xl px-4 pb-20 pt-6 sm:px-7">
+    <main className="min-h-screen bg-white text-slate-900">
+      <div className="mx-auto max-w-4xl px-4 pb-20 pt-6 sm:px-7">
         <nav>
-          <Link href={`/subjects/${subjectId}`} className="rounded-full bg-white/75 px-4 py-2 text-sm font-bold text-slate-500 shadow-sm ring-1 ring-slate-200 backdrop-blur transition hover:text-slate-950">
+          <Link href={`/subjects/${subjectId}`} className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-500 shadow-sm ring-1 ring-slate-200 transition hover:text-slate-950">
             ← 返回英语
           </Link>
         </nav>
 
-        <section className="mt-7 overflow-hidden rounded-[34px] bg-[#17142a] text-white shadow-[0_24px_70px_rgba(31,25,70,0.18)]">
+        <section className="mt-7 overflow-hidden rounded-[34px] border border-cyan-100 bg-cyan-50/50 text-slate-900 shadow-[0_16px_48px_rgba(15,23,42,0.06)]">
           <div className="p-6 sm:p-10">
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-cyan-400/15 px-3 py-1.5 text-xs font-black text-cyan-200 ring-1 ring-cyan-300/20">12 阶段</span>
-              <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-black text-white/70">72 节系统课</span>
-              <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-black text-white/70">720 项迁移任务</span>
+              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-cyan-700 ring-1 ring-cyan-200">12 阶段</span>
+              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-600 ring-1 ring-slate-200">72 节系统课</span>
+              <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-600 ring-1 ring-slate-200">720 项迁移任务</span>
             </div>
-            <p className="mt-9 text-xs font-black uppercase tracking-[0.24em] text-cyan-300">English grammar pathway</p>
+            <p className="mt-9 text-xs font-black uppercase tracking-[0.24em] text-cyan-700">English grammar pathway</p>
             <h1 className="mt-4 max-w-3xl text-4xl font-black leading-[1.15] tracking-tight sm:text-6xl">
               从第一个完整句子开始，<br />一步一步搭起语法系统。
             </h1>
-            <p className="mt-6 max-w-2xl text-sm font-medium leading-7 text-white/60 sm:text-base">
+            <p className="mt-6 max-w-2xl text-sm font-medium leading-7 text-slate-600 sm:text-base">
               每次只学一个主题：先理解，再观察，再判断，最后迁移到真实表达。
             </p>
             <div className="mt-8 max-w-sm space-y-3">
-              <Link href={`/subjects/${subjectId}/grammar/lesson/${resumeLesson}`} className="block rounded-2xl bg-cyan-300 px-6 py-3.5 text-center text-sm font-black text-slate-950 transition hover:bg-cyan-200">
+              <Link href={`/subjects/${subjectId}/grammar/lesson/${resumeLesson}`} className="block rounded-2xl bg-cyan-100 px-6 py-3.5 text-center text-sm font-black text-cyan-900 ring-1 ring-cyan-200 transition hover:bg-cyan-200">
                 {completed > 0 ? `继续第 ${resumeLesson} 课` : "从第 1 课开始"} →
               </Link>
-              <a href="#roadmap" className="block rounded-2xl bg-white/10 px-6 py-3.5 text-center text-sm font-black text-white ring-1 ring-white/15 transition hover:bg-white/15">向下查看学习路线</a>
+              <a href="#roadmap" className="block rounded-2xl bg-white px-6 py-3.5 text-center text-sm font-black text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50">向下查看学习路线</a>
             </div>
           </div>
-          <div className="border-t border-white/10 bg-white/[0.04] p-6 sm:p-10">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">当前学习进度</p>
+          <div className="border-t border-cyan-100 bg-white p-6 sm:p-10">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">当前学习进度</p>
             <p className="mt-3 text-4xl font-black">{ready ? `${percent}%` : "--"}</p>
-            <p className="mt-2 text-sm font-bold text-white/50">已完成 {ready ? completed : "--"} / 72 课 · 当前阶段 {currentStage}</p>
-            <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/10">
+            <p className="mt-2 text-sm font-bold text-slate-500">已完成 {ready ? completed : "--"} / 72 课 · 当前阶段 {currentStage}</p>
+            <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100">
               <div className="h-full rounded-full bg-cyan-300 transition-all" style={{ width: `${ready ? percent : 0}%` }} />
             </div>
           </div>
-          <div className="border-t border-white/10 bg-white/[0.04]">
+          <div className="border-t border-slate-100 bg-white">
             {[
               ["01", "看懂规则", "每课只解决一个核心问题"],
               ["02", "观察例句", "英文、意义和结构一起看"],
               ["03", "即时判断", "答案展开后马上核对理由"],
               ["04", "迁移表达", "每六课完成阅读与写作"],
             ].map(([number, title, note]) => (
-              <div key={number} className="border-b border-white/10 p-6 last:border-b-0 sm:px-10">
-                <p className="text-xs font-black text-cyan-300">STEP {number}</p>
+              <div key={number} className="border-b border-slate-100 p-6 last:border-b-0 sm:px-10">
+                <p className="text-xs font-black text-cyan-700">STEP {number}</p>
                 <p className="mt-2 font-black">{title}</p>
-                <p className="mt-1 text-xs leading-5 text-white/40">{note}</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">{note}</p>
               </div>
             ))}
           </div>
@@ -139,7 +138,7 @@ export default function GrammarCourseDashboard({
                         const done = completedSet.has(lesson.n);
                         return (
                           <Link key={lesson.n} href={`/subjects/${subjectId}/grammar/lesson/${lesson.n}`} className="group block rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition hover:border-cyan-200 hover:bg-white hover:shadow-sm">
-                            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl text-xs font-black ${done ? "bg-emerald-500 text-white" : "bg-white text-slate-400 ring-1 ring-slate-200"}`}>{done ? "✓" : String(lesson.n).padStart(2, "0")}</span>
+                            <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl text-xs font-black ${done ? "bg-emerald-100 text-emerald-700" : "bg-white text-slate-400 ring-1 ring-slate-200"}`}>{done ? "✓" : String(lesson.n).padStart(2, "0")}</span>
                             <span className="mt-3 block min-w-0">
                               <span className="block text-sm font-black text-slate-800 group-hover:text-cyan-700">{lesson.title}</span>
                               <span className="mt-1 block text-[11px] font-semibold text-slate-400">{lesson.level}</span>
@@ -166,16 +165,16 @@ export default function GrammarCourseDashboard({
             <p className="mt-3 text-sm font-medium leading-7 text-slate-500">两套题库都提供即时判分、逐题解析和云端进度，共1000题。</p>
           </div>
           <div className="mt-7 space-y-4">
-            <Link href={`/subjects/${subjectId}/grammar/practice/mixed`} className="group block rounded-[28px] bg-slate-950 p-6 text-white transition hover:bg-slate-900">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-300">Mixed challenge</p>
+            <Link href={`/subjects/${subjectId}/grammar/practice/mixed`} className="group block rounded-[28px] border border-cyan-200 bg-cyan-50 p-6 text-slate-900 transition hover:bg-cyan-100">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-700">Mixed challenge</p>
               <h3 className="mt-3 text-2xl font-black">500题综合混合练习</h3>
-              <p className="mt-3 text-sm font-medium leading-7 text-white/65">所有考点混合出现，实时反馈并解释为什么。</p>
+              <p className="mt-3 text-sm font-medium leading-7 text-slate-600">所有考点混合出现，实时反馈并解释为什么。</p>
               <span className="mt-7 inline-flex items-center gap-2 text-sm font-black">开始挑战 <span className="transition group-hover:translate-x-1">→</span></span>
             </Link>
-            <Link href={`/subjects/${subjectId}/grammar/practice/tense`} className="group block rounded-[28px] bg-cyan-600 p-6 text-white transition hover:bg-cyan-700">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-100">Tense challenge</p>
+            <Link href={`/subjects/${subjectId}/grammar/practice/tense`} className="group block rounded-[28px] border border-violet-200 bg-violet-50 p-6 text-slate-900 transition hover:bg-violet-100">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-violet-700">Tense challenge</p>
               <h3 className="mt-3 text-2xl font-black">500题时态专项训练</h3>
-              <p className="mt-3 text-sm font-medium leading-7 text-white/70">13类主流时态混合判断，配原题解析。</p>
+              <p className="mt-3 text-sm font-medium leading-7 text-slate-600">13类主流时态混合判断，配原题解析。</p>
               <span className="mt-7 inline-flex items-center gap-2 text-sm font-black">开始专项 <span className="transition group-hover:translate-x-1">→</span></span>
             </Link>
           </div>
