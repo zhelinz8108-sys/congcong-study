@@ -1019,6 +1019,17 @@ export default function SubjectPage() {
               <span className="text-stone-400 text-sm">→</span>
             </Link>
           </div>
+          <div className="bg-white rounded-2xl border border-orange-200 overflow-hidden">
+            <Link
+              href={`/subjects/${id}/national-day-english`}
+              className="px-4 py-3 bg-orange-50 flex items-center justify-between cursor-pointer hover:bg-orange-100 transition-colors block"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold text-orange-800 whitespace-nowrap">🍁 国庆英语</span>
+              </div>
+              <span className="text-stone-400 text-sm">→</span>
+            </Link>
+          </div>
           </div>
         </div>
       )}

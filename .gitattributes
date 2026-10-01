@@ -1,3 +1,4 @@
 # The listening library is required at runtime but is too large for ordinary
 # Git blobs. Keep it versioned in GitHub through Git LFS.
 study-plan/public/listening/** filter=lfs diff=lfs merge=lfs -text
+study-plan/public/national-day-english/*.pdf binary
