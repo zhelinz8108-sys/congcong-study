@@ -47,12 +47,14 @@ test("the website uses one light vertical book, not PDF embeds or chapter gates"
   const subject = read("../src/app/subjects/[id]/page.tsx");
   assert.match(subject, /href=\{`\/subjects\/\$\{id\}\/national-day-math`\}/);
   assert.match(subject, /国庆数学/);
-  assert.match(route, /NATIONAL_DAY_MATH_SECTIONS/);
+  assert.match(route, /getPublicNationalDayMathSections/);
   assert.match(ui, /sections\.map/);
   assert.match(ui, /bg-white/);
   assert.match(ui, /useState\(false\)/);
   assert.match(ui, /data-math-answer/);
-  assert.match(ui, /hideQuizAnswers/);
+  assert.match(ui, /\/api\/math\/national-day\/submit/);
+  assert.match(ui, /solution && <div data-math-answer/);
+  assert.ok(!/hideQuizAnswers|selfRated:|我已独立做对|核对答案与步骤|展开全部自测解答/.test(ui));
   assert.ok(!/<(?:iframe|embed|object|details)\b/.test(ui));
   assert.ok(!/grid-cols-[2-9]|bg-(?:black|slate-900|stone-900)/.test(ui));
 });

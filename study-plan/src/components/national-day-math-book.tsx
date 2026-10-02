@@ -5,10 +5,9 @@ import { memo, useState, type CSSProperties } from "react";
 import NationalDayMathDiagram from "@/components/national-day-math-diagram";
 import { getNationalDayMathPalette } from "@/lib/national-day-math-colors";
 import styles from "./national-day-math-book.module.css";
-import { checkMathAnswer } from "@/lib/national-day-math-answer";
 import { useNationalDayMathProgress } from "@/lib/national-day-math-progress";
 import type { NationalDayMathAttempt } from "@/lib/national-day-math-progress";
-import type { NationalDayMathBlock, NationalDayMathQuestion, NationalDayMathSection } from "@/lib/national-day-math";
+import type { NationalDayMathBlock, NationalDayMathPublicQuestion, NationalDayMathPublicSection, NationalDayMathSubmissionResult } from "@/lib/national-day-math";
 
 function MathText({ text }: { text: string }) {
   // Fractions stay selectable native HTML, with a spoken equivalent for readers.
@@ -20,39 +19,73 @@ function MathText({ text }: { text: string }) {
   })}</>;
 }
 
-const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, hideQuizAnswers, answerEpoch, ready, attempt, saveDraft, recordAttempt }: {
-  question: NationalDayMathQuestion;
+function draftFields(value: string, question: NationalDayMathPublicQuestion): Record<string, string> {
+  if (question.type !== "quiz") return {};
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return Object.fromEntries(question.fields.map(field => [field.id,
+        Object.hasOwn(parsed, field.id) && typeof (parsed as Record<string, unknown>)[field.id] === "string"
+          ? (parsed as Record<string, string>)[field.id] : "",
+      ]));
+    }
+  } catch { /* Keep a one-field legacy draft without inventing multipart answers. */ }
+  return question.fields.length === 1 ? { [question.fields[0].id]: value } : {};
+}
+
+const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, ready, attempt, saveDraft, recordAttempt }: {
+  question: NationalDayMathPublicQuestion;
   sectionId: string;
   tone: "tint" | "white";
-  hideQuizAnswers: boolean;
-  answerEpoch: number;
   ready: boolean;
   attempt?: NationalDayMathAttempt;
   saveDraft: ReturnType<typeof useNationalDayMathProgress>["saveDraft"];
   recordAttempt: ReturnType<typeof useNationalDayMathProgress>["recordAttempt"];
 }) {
   const isQuiz = question.type === "quiz";
-  const [revealedEpoch, setRevealedEpoch] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
-  const value = attempt?.value ?? "";
-  const showAnswer = !isQuiz || !hideQuizAnswers || revealedEpoch === answerEpoch;
-  const automatic = Boolean(question.accepted?.length);
+  const [pending, setPending] = useState(false);
+  const [feedback, setFeedback] = useState<NationalDayMathSubmissionResult | null>(null);
+  const values = draftFields(attempt?.value ?? "", question);
+  const solution = question.type === "example" ? question : feedback;
 
-  function check() {
-    if (!value.trim()) {
-      setNotice("先写下自己的答案或列式，再核对。也可以直接阅读下方的参考解答。");
-      return;
-    }
-    const correct = checkMathAnswer(value, question.accepted);
-    recordAttempt(question.id, { value, checked: true, correct, selfRated: false }, sectionId);
-    setRevealedEpoch(answerEpoch);
-    setNotice(correct === null ? "这题含步骤、说明或多个问法，请逐项对照参考解答，再标记自己的掌握情况。" : correct ? "核对正确！再说一说为什么这样列式。" : "结果还不一致，看看步骤和单位，再试一次。若表达形式不同，可按解答自行核对。");
+  function changeField(id: string, value: string) {
+    saveDraft(question.id, JSON.stringify({ ...values, [id]: value }), sectionId);
+    setFeedback(null);
+    setNotice("");
   }
 
-  function rate(correct: boolean) {
-    recordAttempt(question.id, { value, checked: true, correct, selfRated: true }, sectionId);
-    setRevealedEpoch(answerEpoch);
-    setNotice(correct ? "已标记为掌握。建议明天遮住答案再做一遍。" : "已放入待巩固。先找错因，再换一组数字重做。");
+  async function submit() {
+    if (question.type !== "quiz" || pending || !ready) return;
+    setFeedback(null);
+    const missing = question.fields.find(field => !values[field.id]?.trim());
+    if (missing) {
+      setNotice(`请先完成：${missing.label}`);
+      return;
+    }
+    setPending(true);
+    setNotice("");
+    try {
+      const response = await fetch("/api/math/national-day/submit", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionId: question.id, answers: values }), cache: "no-store",
+        signal: AbortSignal.timeout(20000),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "提交失败，请稍后重试。");
+      if (result.questionId !== question.id || typeof result.correct !== "boolean" || typeof result.answer !== "string" ||
+          !Array.isArray(result.steps) || !Array.isArray(result.fields) || result.fields.length !== question.fields.length) {
+        throw new Error("判题结果不完整，请重新提交。");
+      }
+      setFeedback(result as NationalDayMathSubmissionResult);
+      recordAttempt(question.id, {
+        value: JSON.stringify(values), checked: true, correct: result.correct, gradingVersion: 2,
+      }, sectionId);
+    } catch (error) {
+      setNotice(error instanceof Error && error.name === "TimeoutError"
+        ? "提交超时，答案仍已保存在草稿中，请重新提交。"
+        : error instanceof Error ? error.message : "网络暂时不可用，请重新提交。");
+    } finally { setPending(false); }
   }
 
   return (
@@ -60,19 +93,32 @@ const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, hid
       <p className={`text-xs font-bold tracking-wide ${isQuiz ? styles.practiceAccent : styles.accent}`}>{question.label}</p>
       {question.title && <h4 className="mt-2 text-lg font-bold leading-8 text-slate-800"><MathText text={question.title} /></h4>}
       <p className="mt-3 whitespace-pre-wrap text-[16px] leading-8 text-slate-700"><MathText text={question.question} /></p>
-      {isQuiz && <div className="mt-5">
-        <label htmlFor={`draft-${question.id}`} className="block text-sm font-bold text-slate-600">我的答案／列式</label>
-        <textarea id={`draft-${question.id}`} value={value} disabled={!ready} maxLength={1200} rows={3} onChange={(event) => { saveDraft(question.id, event.target.value, sectionId); setNotice(""); }} placeholder={ready ? "先想一想，写下答案或计算过程……" : "正在载入学习记录……"} className="mt-2 block w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-base leading-7 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-50" />
-        <p className="mt-2 text-xs leading-6 text-slate-500">{automatic ? "本题有明确短答案，可以核对结果；单位和数量意义也要一致。" : "多问或需要说明的题，请按参考解答自行逐项核对，不会自动判错。"}</p>
-        <button type="button" onClick={check} disabled={!ready} className={`mt-3 block w-full rounded-xl border px-4 py-3 text-sm font-bold transition disabled:opacity-50 ${styles.checkButton}`}>核对答案与步骤</button>
-        {hideQuizAnswers && !showAnswer && <button type="button" onClick={() => setRevealedEpoch(answerEpoch)} className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">直接看参考解答</button>}
-        {(notice || attempt?.checked) && <p aria-live="polite" className="mt-3 rounded-xl border border-teal-100 bg-white px-4 py-3 text-sm leading-7 text-teal-800">{notice || (attempt?.correct === true ? "已标记掌握" : attempt?.correct === false ? "待巩固，换数再练一题" : "已查看解答，请逐项核对后自评")}{attempt?.selfRated && <span className="ml-2 text-xs text-slate-500">（自行核对）</span>}</p>}
-      </div>}
-      {showAnswer && <div data-math-answer={question.id} className="mt-5 border-t border-slate-200/80 pt-4">
-        {question.steps.length > 0 && <ol className="space-y-3 text-[15px] leading-8 text-slate-700">{question.steps.map((step, index) => <li key={index} className="whitespace-pre-wrap"><span className={`mr-2 font-semibold ${styles.accent}`}>{index + 1}.</span><MathText text={step} /></li>)}</ol>}
-        <p className={`mt-4 whitespace-pre-wrap rounded-xl border px-4 py-3 text-base font-bold leading-8 ${styles.answer}`}><span className="mr-1">答案：</span><MathText text={question.answer} /></p>
-        {question.pitfall && <p className="mt-3 text-sm leading-7 text-slate-500"><span className="font-bold text-amber-700">易错提醒：</span><MathText text={question.pitfall} /></p>}
-        {isQuiz && <div className="mt-4 flex flex-col gap-2" aria-label="自行核对掌握情况"><button type="button" onClick={() => rate(true)} disabled={!ready} aria-pressed={attempt?.correct === true} className={`w-full rounded-xl border px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${attempt?.correct === true ? "border-teal-300 bg-teal-100 text-teal-800" : "border-teal-100 bg-white text-teal-700 hover:bg-teal-50"}`}>我已独立做对，并能解释</button><button type="button" onClick={() => rate(false)} disabled={!ready} aria-pressed={attempt?.correct === false} className={`w-full rounded-xl border px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${attempt?.correct === false ? "border-amber-300 bg-amber-100 text-amber-800" : "border-amber-100 bg-white text-amber-700 hover:bg-amber-50"}`}>还需要巩固，再练一遍</button></div>}
+      {question.type === "quiz" && <form className="mt-5" onSubmit={event => { event.preventDefault(); void submit(); }} noValidate>
+        <div className="space-y-4">
+          {question.fields.map((field, index) => {
+            const inputId = index === 0 ? `draft-${question.id}` : `draft-${question.id}-${field.id}`;
+            const result = feedback?.fields.find(item => item.id === field.id);
+            const className = "mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base leading-7 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-50";
+            return <div key={field.id}>
+              <label htmlFor={inputId} className="block text-sm font-bold leading-7 text-slate-600">{field.label}</label>
+              {field.kind === "choice"
+                ? <select id={inputId} data-math-input={question.id} data-field-id={field.id} value={values[field.id] ?? ""} disabled={!ready || pending} onChange={event => changeField(field.id, event.target.value)} className={className}><option value="">请选择你的判断……</option>{field.options?.map(option => <option key={option} value={option}>{option}</option>)}</select>
+                : <input id={inputId} data-math-input={question.id} data-field-id={field.id} type="text" autoComplete="off" value={values[field.id] ?? ""} disabled={!ready || pending} maxLength={200} onChange={event => changeField(field.id, event.target.value)} placeholder={ready ? "输入这一小问的答案……" : "正在载入学习记录……"} className={className} />}
+              {field.hint && <p className="mt-1 text-xs leading-6 text-slate-500">{field.hint}</p>}
+              {result && <p data-math-field-result={field.id} className={`mt-2 text-sm leading-7 ${result.correct ? "text-teal-700" : "text-amber-800"}`}>{result.correct ? "✓ 这一项正确" : "✗ 这一项需要订正"} · 正确答案：<MathText text={result.expected} /></p>}
+            </div>;
+          })}
+        </div>
+        <p className="mt-3 text-xs leading-6 text-slate-500">填写每个小问后提交，系统会自动判分，并显示正确答案与解析。提交前不会显示解答。</p>
+        <button type="submit" disabled={!ready || pending} className={`mt-3 block w-full rounded-xl border px-4 py-3 text-sm font-bold transition disabled:opacity-50 ${styles.checkButton}`}>{pending ? "正在提交判题……" : "提交答案"}</button>
+        {notice && <p role="alert" className="mt-3 rounded-xl border border-amber-100 bg-white px-4 py-3 text-sm leading-7 text-amber-800">{notice}</p>}
+        {feedback && <p data-math-feedback={question.id} role="status" className={`mt-3 rounded-xl border bg-white px-4 py-3 text-sm font-bold leading-7 ${feedback.correct ? "border-teal-200 text-teal-800" : "border-amber-200 text-amber-800"}`}>{feedback.correct ? "✓ 回答正确！" : "✗ 还有小问需要订正。"} 本题答对 {feedback.fields.filter(field => field.correct).length} / {feedback.fields.length} 项。</p>}
+        {!feedback && attempt?.gradingVersion === 2 && attempt.checked && <p className="mt-3 text-xs leading-6 text-slate-500">上次提交：{attempt.correct ? "系统判对" : "需要订正"}。本次提交后重新显示答案与解析。</p>}
+      </form>}
+      {solution && <div data-math-answer={question.id} className="mt-5 border-t border-slate-200/80 pt-4">
+        {solution.steps.length > 0 && <ol className="space-y-3 text-[15px] leading-8 text-slate-700">{solution.steps.map((step, index) => <li key={index} className="whitespace-pre-wrap"><span className={`mr-2 font-semibold ${styles.accent}`}>{index + 1}.</span><MathText text={step} /></li>)}</ol>}
+        <p className={`mt-4 whitespace-pre-wrap rounded-xl border px-4 py-3 text-base font-bold leading-8 ${styles.answer}`}><span className="mr-1">答案：</span><MathText text={solution.answer} /></p>
+        {solution.pitfall && <p className="mt-3 text-sm leading-7 text-slate-500"><span className="font-bold text-amber-700">易错提醒：</span><MathText text={solution.pitfall} /></p>}
       </div>}
     </article>
   );
@@ -86,21 +132,19 @@ function TextBlock({ block }: { block: Extract<NationalDayMathBlock, { type: "te
 
 export default function NationalDayMathBook({ subjectId, sections, stats }: {
   subjectId: string;
-  sections: NationalDayMathSection[];
+  sections: NationalDayMathPublicSection[];
   stats: { examples: number; diagnostic: number; unitQuiz: number; comprehensive: number; answers: number };
 }) {
   const learning = useNationalDayMathProgress(subjectId);
   const { progress, ready, saveDraft, recordAttempt } = learning;
-  const [hideQuizAnswers, setHideQuizAnswers] = useState(false);
-  const [answerEpoch, setAnswerEpoch] = useState(0);
   const chapters = sections.filter((section) => section.kind === "chapter");
   const complete = new Set(progress.completedSections);
   const finished = chapters.filter((section) => complete.has(section.id)).length;
-  const allQuizIds = new Set(sections.flatMap((section) => section.blocks.filter((block): block is NationalDayMathQuestion => block.type === "quiz").map((block) => block.id)));
+  const allQuizIds = new Set(sections.flatMap((section) => section.blocks.filter(block => block.type === "quiz").map(block => block.id)));
   const attempts = Object.entries(progress.attempts).filter(([id]) => allQuizIds.has(id)).map(([, attempt]) => attempt);
-  const checked = attempts.filter((attempt) => attempt.checked).length;
-  const mastered = attempts.filter((attempt) => attempt.checked && attempt.correct === true).length;
-  const mistakes = attempts.filter((attempt) => attempt.checked && attempt.correct === false).length;
+  const checked = attempts.filter(attempt => attempt.checked && attempt.gradingVersion === 2).length;
+  const mastered = attempts.filter(attempt => attempt.checked && attempt.gradingVersion === 2 && attempt.correct === true).length;
+  const mistakes = attempts.filter(attempt => attempt.checked && attempt.gradingVersion === 2 && attempt.correct === false).length;
   const quizCount = stats.diagnostic + stats.unitQuiz + stats.comprehensive;
   const resume = sections.find((section) => section.id === progress.lastSection);
 
@@ -113,19 +157,18 @@ export default function NationalDayMathBook({ subjectId, sections, stats }: {
           <h1 className="mt-4 text-3xl font-black leading-snug tracking-tight text-slate-800 sm:text-4xl">把全书连成一个体系，<br />从上往下，一步一步学。</h1>
           <p className="mt-4 text-[15px] leading-8 text-slate-600">刚刚整理的整份学习内容，都已放进这一页。先理解知识点，再看图解与例题，最后独立尝试下面的自测。</p>
           <p className="mt-4 text-sm font-bold leading-7 text-sky-800">7个单元＋4个主题活动 · {stats.examples}道例题 · {quizCount}道诊断与自测</p>
-          <p className="mt-3 text-sm leading-7 text-slate-500">所有知识点和例题答案默认完整展开。不用进入章节，不用打开PDF，直接往下读到底。每天约4.5小时有效学习，另留休息时间。</p>
-          <p className="mt-3 text-sm leading-7 text-slate-500">按所提供的2026秋苏教版六上教材整理。单纯看懂答案不等于学会，建议遮住解答重做，并用最后20题检查掌握。</p>
+          <p className="mt-3 text-sm leading-7 text-slate-500">所有知识点和117道教学例题完整展开。89道自测先输入答案并提交，再看系统判分和解析。不用进入章节，不用打开PDF。每天约4.5小时有效学习，另留休息时间。</p>
+          <p className="mt-3 text-sm leading-7 text-slate-500">按所提供的2026秋苏教版六上教材整理。单纯看懂答案不等于学会，用自测和最后20题检查掌握，再换数重做。</p>
         </header>
 
         <section aria-label="国庆数学学习进度" className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
           <h2 className="text-base font-bold">我的学习进度</h2>
           <p className="mt-3 text-sm leading-7 text-slate-600">已读完 {ready ? finished : "--"} / {chapters.length} 个单元与活动</p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-sky-50" role="progressbar" aria-label="已读完的单元与活动" aria-valuemin={0} aria-valuemax={chapters.length} aria-valuenow={finished}><div className={`h-full rounded-full transition-all ${styles.progressFill}`} style={{ width: `${chapters.length ? finished / chapters.length * 100 : 0}%` }} /></div>
-          <p className="mt-3 text-sm leading-7 text-slate-500">已核对 {ready ? checked : "--"} / {quizCount} 题 · 已掌握 {ready ? mastered : "--"} 题 · 待巩固 {ready ? mistakes : "--"} 题</p>
-          <p className="mt-2 text-xs leading-6 text-slate-400">作答草稿与掌握记录使用当前小朋友档案保存。自评是学习检查，不等同于考试成绩。</p>
+          <p className="mt-3 text-sm leading-7 text-slate-500">已提交 {ready ? checked : "--"} / {quizCount} 题 · 系统判对 {ready ? mastered : "--"} 题 · 待订正 {ready ? mistakes : "--"} 题</p>
+          <p className="mt-2 text-xs leading-6 text-slate-400">作答草稿和系统判题记录使用当前小朋友档案保存。旧版自行标记的结果不计入系统判对数。</p>
           {ready && resume && <a href={`#math-section-${resume.id}`} className="mt-3 block rounded-xl border border-sky-100 bg-sky-50 px-4 py-3 text-center text-sm font-semibold text-sky-800">回到上次学习的位置 ↓</a>}
-          <button type="button" onClick={() => { setHideQuizAnswers((value) => !value); setAnswerEpoch((value) => value + 1); }} aria-pressed={hideQuizAnswers} className="mt-3 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">{hideQuizAnswers ? "展开全部自测解答" : "遮住自测答案，先独立做一遍"}</button>
-          <p className="mt-2 text-xs leading-6 text-slate-400">这个开关只影响自测解答。知识点、图解和117道例题始终展开。</p>
+          <p className="mt-3 text-sm leading-7 text-slate-500">自测解答默认隐藏，提交这一题后才显示；重新修改输入，会再次隐藏解答。</p>
         </section>
 
         <div className="mt-10 space-y-12" aria-label="国庆数学全部学习内容">
@@ -142,7 +185,7 @@ export default function NationalDayMathBook({ subjectId, sections, stats }: {
             <p className={`text-xs font-bold tracking-wider ${styles.sectionLabel}`}>{section.day ? `第${section.day}天 · ` : section.kind === "review" ? "复习与速查 · " : "学习准备 · "}{String(index + 1).padStart(2, "0")}</p>
             <h2 className="mb-5 mt-3 text-2xl font-black leading-10 text-slate-800 sm:text-3xl">{section.title}</h2>
             {section.blocks.map((block, blockIndex) => {
-              if (block.type === "example" || block.type === "quiz") return <QuestionCard key={block.id} question={block} sectionId={section.id} tone={block.type === "example" && exampleIndex++ % 2 === 1 ? "white" : "tint"} hideQuizAnswers={hideQuizAnswers} answerEpoch={answerEpoch} ready={ready} attempt={progress.attempts[block.id]} saveDraft={saveDraft} recordAttempt={recordAttempt} />;
+              if (block.type === "example" || block.type === "quiz") return <QuestionCard key={block.id} question={block} sectionId={section.id} tone={block.type === "example" && exampleIndex++ % 2 === 1 ? "white" : "tint"} ready={ready} attempt={progress.attempts[block.id]} saveDraft={saveDraft} recordAttempt={recordAttempt} />;
               if (block.type === "diagram") return <NationalDayMathDiagram key={`${section.id}-${block.id}`} id={block.id} />;
               if (block.type === "text" || block.type === "heading" || block.type === "formula") return <TextBlock key={`${section.id}-${blockIndex}`} block={block} />;
               return null;

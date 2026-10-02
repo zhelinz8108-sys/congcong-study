@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import NationalDayMathBook from "@/components/national-day-math-book";
-import { NATIONAL_DAY_MATH_SECTIONS, NATIONAL_DAY_MATH_STATS } from "@/lib/national-day-math";
+import { NATIONAL_DAY_MATH_STATS } from "@/lib/national-day-math";
+import { getPublicNationalDayMathSections } from "@/lib/national-day-math-submission";
 
 export const metadata: Metadata = {
   title: "国庆数学 · 三天完整学习 | 聪聪学习计划",
@@ -9,5 +10,5 @@ export const metadata: Metadata = {
 
 export default async function NationalDayMathPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <NationalDayMathBook key={id} subjectId={id} sections={NATIONAL_DAY_MATH_SECTIONS} stats={NATIONAL_DAY_MATH_STATS} />;
+  return <NationalDayMathBook key={id} subjectId={id} sections={getPublicNationalDayMathSections()} stats={NATIONAL_DAY_MATH_STATS} />;
 }

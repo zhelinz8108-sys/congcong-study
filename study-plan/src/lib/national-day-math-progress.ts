@@ -8,6 +8,7 @@ export type NationalDayMathAttempt = {
   checked: boolean;
   correct: boolean | null;
   selfRated?: boolean;
+  gradingVersion?: 2;
 };
 
 export type NationalDayMathProgress = {
@@ -41,6 +42,7 @@ export function normalizeNationalDayMathProgress(value: unknown): NationalDayMat
         checked,
         correct: checked && typeof attempt.correct === "boolean" ? attempt.correct : null,
         ...(checked && attempt.selfRated === true ? { selfRated: true } : {}),
+        ...(checked && attempt.gradingVersion === 2 && attempt.selfRated !== true ? { gradingVersion: 2 as const } : {}),
       };
     }
   }

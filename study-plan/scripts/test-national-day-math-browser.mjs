@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 // Only the explicitly isolated local preview is allowed. No production URL,
 // credentials, package installation or browser belonging to the user is used.
@@ -11,8 +11,9 @@ assert.equal(cdpAddress.protocol, "http:");
 assert.equal(cdpAddress.port, "9227", "Use only the dedicated QA browser port");
 const output = new URL("../../tmp/math-web-qa/", import.meta.url);
 const storageKey = "study-plan-math:national-day:4ea6b4fe-bfd3-440f-b780-6d71c2011609:v1";
+const day3Rubrics = JSON.parse(await readFile(new URL("../src/data/national-day-math-grading-day3.json", import.meta.url), "utf8"));
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const findings = { url: PAGE_URL, checks: [], screenshots: [], expectedCloudErrors: 0, blockedRemoteRequests: [], runtimeExceptions: [] };
+const findings = { url: PAGE_URL, checks: [], screenshots: [], submitRequests: 0, expectedCloudErrors: 0, blockedRemoteRequests: [], runtimeExceptions: [] };
 let browser;
 
 class CDP {
@@ -93,7 +94,10 @@ try {
         const url = new URL(request.url);
         local = url.hostname === "127.0.0.1" && url.port === "3005";
       } catch { /* Reject unexpected destinations. */ }
-      if (local) void send("Fetch.continueRequest", { requestId: event.params.requestId });
+      if (local) {
+        if (request.method === "POST" && new URL(request.url).pathname === "/api/math/national-day/submit") findings.submitRequests++;
+        void send("Fetch.continueRequest", { requestId: event.params.requestId });
+      }
       else {
         findings.blockedRemoteRequests.push(request.url);
         void send("Fetch.failRequest", { requestId: event.params.requestId, errorReason: "BlockedByClient" });
@@ -109,6 +113,14 @@ try {
   await send("Runtime.enable");
   await send("Network.enable");
   await send("Fetch.enable", { patterns: [{ urlPattern: "*", requestStage: "Request" }] });
+  await send("Page.addScriptToEvaluateOnNewDocument", { source: `(() => {
+    if (location.origin !== 'http://127.0.0.1:3005') return;
+    const marker = 'math-submit-qa-initialized';
+    if (!sessionStorage.getItem(marker)) {
+      localStorage.removeItem(${JSON.stringify(storageKey)});
+      sessionStorage.setItem(marker, 'true');
+    }
+  })()` });
 
   async function evaluate(expression) {
     const result = await send("Runtime.evaluate", { expression, returnByValue: true, awaitPromise: true });
@@ -141,18 +153,44 @@ try {
     })()`);
     assert.ok(clicked, `Button available: ${text}`);
   }
-  async function fill(id, value) {
+  async function fill(questionId, fieldId, value) {
+    const selector = `#question-${questionId} [data-math-input][data-field-id="${fieldId}"]`;
     const changed = await evaluate(`(() => {
-      const input = document.getElementById(${JSON.stringify(`draft-${id}`)});
+      const input = document.querySelector(${JSON.stringify(selector)});
       if (!input || input.disabled) return false;
       input.focus();
-      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(input, ${JSON.stringify(value)});
+      const prototype = input.tagName === 'SELECT' ? HTMLSelectElement.prototype
+        : input.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(prototype, 'value').set.call(input, ${JSON.stringify(value)});
       input.dispatchEvent(new Event('input', {bubbles:true}));
       input.dispatchEvent(new Event('change', {bubbles:true}));
       return true;
     })()`);
-    assert.ok(changed, `Draft input ready: ${id}`);
-    await waitFor(`document.getElementById(${JSON.stringify(`draft-${id}`)}).value === ${JSON.stringify(value)}`, `controlled draft ${id}`);
+    assert.ok(changed, `Draft input ready: ${questionId}.${fieldId}`);
+    await waitFor(`document.querySelector(${JSON.stringify(selector)}).value === ${JSON.stringify(value)}`, `controlled draft ${questionId}.${fieldId}`);
+  }
+  async function submitQuestion(questionId, correct) {
+    await clickButton(`#question-${questionId}`, "提交答案");
+    await waitFor(`(() => {
+      const feedback = document.querySelector(${JSON.stringify(`[data-math-feedback="${questionId}"]`)});
+      return !!feedback && feedback.textContent.includes(${JSON.stringify(correct ? "回答正确" : "需要订正")});
+    })()`, `server ${correct ? "correct" : "incorrect"} feedback ${questionId}`);
+    assert.equal(await evaluate(`!!document.querySelector(${JSON.stringify(`[data-math-answer="${questionId}"]`)})`), true, `submitted solution ${questionId}`);
+    const attempt = await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(storageKey)})).attempts[${JSON.stringify(questionId)}]`);
+    assert.equal(attempt.checked, true, questionId);
+    assert.equal(attempt.correct, correct, questionId);
+    assert.equal(attempt.gradingVersion, 2, questionId);
+    assert.equal(attempt.selfRated, undefined, questionId);
+    return attempt;
+  }
+  async function assertQuizSolutionsHidden(label) {
+    const visible = await evaluate(`({
+      answers: document.querySelectorAll('[data-math-answer]').length,
+      quizzes: [...document.querySelectorAll('[data-math-question]:not([data-question-category="example"])')]
+        .filter(card => card.querySelector('[data-math-answer],[data-math-field-result],[data-math-feedback]')).map(card => card.id)
+    })`);
+    assert.deepEqual(visible, { answers: 117, quizzes: [] }, label);
+    findings.checks.push({ check: label, ...visible });
   }
   async function layout(label) {
     const metrics = await evaluate(`(() => ({
@@ -179,8 +217,16 @@ try {
     embedded: document.querySelectorAll('iframe,embed,object,details').length,
     address: location.href
   })`);
-  assert.deepEqual(initial, { questions: 206, examples: 117, quizzes: 89, answers: 206, diagrams: 7, embedded: 0, address: PAGE_URL });
-  findings.checks.push({ check: "complete native content and default answers", ...initial });
+  assert.deepEqual(initial, { questions: 206, examples: 117, quizzes: 89, answers: 117, diagrams: 7, embedded: 0, address: PAGE_URL });
+  findings.checks.push({ check: "complete native content; only teaching examples show default solutions", ...initial });
+  await assertQuizSolutionsHidden("all 89 quiz solutions and grading feedback are hidden before submission");
+  const initialControls = await evaluate(`({
+    choiceDefaults: [...document.querySelectorAll('[data-math-input]')].filter(input => input.tagName === 'SELECT' && input.value !== '').length,
+    selfOrRevealButtons: [...document.querySelectorAll('[data-national-day-math-book] button')]
+      .filter(button => /我已独立做对|还需要巩固，再练|核对答案与步骤|展开全部自测解答|遮住自测答案/.test(button.textContent)).length
+  })`);
+  assert.deepEqual(initialControls, { choiceDefaults: 0, selfOrRevealButtons: 0 });
+  findings.checks.push({ check: "choices start blank; no self-assessment or reveal-all controls", ...initialControls });
   const colors = await evaluate(`(() => {
     const sections = [...document.querySelectorAll('[data-math-theme]')];
     return {
@@ -218,51 +264,118 @@ try {
   await screenshot('desktop-rose-examples.png');
 
   await scrollTo("#question-diagnostic-001", "center");
-  await fill("diagnostic-001", "0.4");
-  await clickButton("#question-diagnostic-001", "核对答案与步骤");
-  await waitFor("document.querySelector('#question-diagnostic-001').textContent.includes('核对正确')", "automatic correct feedback");
-  const automatic = await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(storageKey)})).attempts['diagnostic-001']`);
-  assert.equal(automatic.value, "0.4");
-  assert.equal(automatic.checked, true);
-  assert.equal(automatic.correct, true);
-  findings.checks.push({ check: "diagnostic 1 automatic check", ...automatic });
+  await screenshot("desktop-before-submit.png");
+  const requestsBeforeBlank = findings.submitRequests;
+  await clickButton("#question-diagnostic-001", "提交答案");
+  await waitFor("document.querySelector('#question-diagnostic-001 [role=alert]')?.textContent.includes('请先完成')", "blank submission input notice");
+  await assertQuizSolutionsHidden("blank submission does not reveal answers");
+  assert.equal(findings.submitRequests, requestsBeforeBlank, "blank form must not send a grading request");
 
-  await clickButton('section[aria-label="国庆数学学习进度"]', "遮住自测答案");
-  await waitFor("document.querySelectorAll('[data-math-answer]').length === 117", "global quiz-answer hiding, including previously checked quiz");
-  assert.equal(await evaluate("!!document.querySelector('[data-math-answer=\"diagnostic-001\"]')"), false);
-  findings.checks.push({ check: "all 89 quiz answers hidden; 117 example answers remain", answers: 117 });
-  await clickButton('section[aria-label="国庆数学学习进度"]', "展开全部自测解答");
-  await waitFor("document.querySelectorAll('[data-math-answer]').length === 206", "restoring all answers");
+  await fill("diagnostic-001", "part1", "0.4");
+  const automatic = await submitQuestion("diagnostic-001", true);
+  assert.deepEqual(JSON.parse(automatic.value), { part1: "0.4" });
+  assert.equal(await evaluate("document.querySelectorAll('[data-math-answer]').length"), 118, "only the submitted quiz is revealed");
+  await screenshot("desktop-after-submit.png");
+  findings.checks.push({ check: "diagnostic 1 correct server submission reveals only its solution", ...automatic });
 
-  const draft = "2×100=200平方分米；面积单位换算的进率是100。";
+  await fill("diagnostic-001", "part1", "0.5");
+  await waitFor("!document.querySelector('[data-math-answer=\"diagnostic-001\"]') && !document.querySelector('[data-math-feedback=\"diagnostic-001\"]')", "editing hides previous solution and feedback");
+  await assertQuizSolutionsHidden("editing diagnostic 1 hides its solution again");
+  const wrongAttempt = await submitQuestion("diagnostic-001", false);
+  assert.deepEqual(JSON.parse(wrongAttempt.value), { part1: "0.5" });
+  assert.ok(await evaluate("document.querySelector('#question-diagnostic-001 [data-math-field-result]').textContent.includes('0.4')"), "wrong submission receives the correct answer");
+  await screenshot("desktop-incorrect-submit.png");
+  await fill("diagnostic-001", "part1", "0.4");
+  await waitFor("!document.querySelector('[data-math-answer=\"diagnostic-001\"]')", "corrected draft does not reveal answer until submitted");
+  await submitQuestion("diagnostic-001", true);
+  findings.checks.push({ check: "editing hides solutions; incorrect submission is marked wrong; correction is marked right", success: true });
+
   await scrollTo("#question-diagnostic-010", "center");
-  await fill("diagnostic-010", draft);
-  await clickButton("#question-diagnostic-010", "核对答案与步骤");
-  await waitFor("document.querySelector('#question-diagnostic-010').textContent.includes('请逐项对照参考解答')", "complex-answer self assessment");
-  await clickButton("#question-diagnostic-010", "我已独立做对，并能解释");
-  await waitFor(`JSON.parse(localStorage.getItem(${JSON.stringify(storageKey)})).attempts['diagnostic-010'].selfRated === true`, "self-rated mastery persistence");
+  await fill("diagnostic-010", "part1", "200");
+  const areaAttempt = await submitQuestion("diagnostic-010", true);
+  assert.deepEqual(JSON.parse(areaAttempt.value), { part1: "200" });
+  findings.checks.push({ check: "diagnostic 10 automatically grades square-unit conversion without self assessment", ...areaAttempt });
+
+  await scrollTo("#question-unit-048", "center");
+  const multipartFields = day3Rubrics["unit-048"].fields;
+  await fill("unit-048", multipartFields[0].id, multipartFields[0].accepted[0]);
+  const requestsBeforeIncomplete = findings.submitRequests;
+  await clickButton("#question-unit-048", "提交答案");
+  await waitFor("document.querySelector('#question-unit-048 [role=alert]')?.textContent.includes('请先完成')", "multipart missing-field notice");
+  assert.equal(await evaluate("!!document.querySelector('[data-math-answer=\"unit-048\"]')"), false);
+  assert.equal(findings.submitRequests, requestsBeforeIncomplete, "incomplete multipart form must not send a grading request");
+  for (const field of multipartFields) await fill("unit-048", field.id, field.accepted[0]);
+  const multipartAttempt = await submitQuestion("unit-048", true);
+  assert.deepEqual(JSON.parse(multipartAttempt.value), Object.fromEntries(multipartFields.map(field => [field.id, field.accepted[0]])));
+  assert.equal(await evaluate("document.querySelectorAll('#question-unit-048 [data-math-field-result]').length"), 4);
+  await screenshot("desktop-multipart-after-submit.png");
+  findings.checks.push({ check: "multipart incomplete answer stays hidden; all four completed fields are server graded", ...multipartAttempt });
+
+  await scrollTo("#question-unit-052", "center");
+  for (const field of day3Rubrics["unit-052"].fields) await fill("unit-052", field.id, field.accepted[0]);
+  await submitQuestion("unit-052", true);
+  findings.checks.push({ check: "text inputs and choice select both use field-id controlled drafts and server grading", success: true });
+
+  const invalidApiCases = [
+    { label: "malformed JSON", method: "POST", body: "{", status: 400 },
+    { label: "missing fields", method: "POST", body: JSON.stringify({ questionId: "diagnostic-001", answers: {} }), status: 400 },
+    { label: "non-string answer", method: "POST", body: JSON.stringify({ questionId: "diagnostic-001", answers: { part1: 0.4 } }), status: 400 },
+    { label: "unknown question", method: "POST", body: JSON.stringify({ questionId: "unknown-question", answers: {} }), status: 404 },
+    { label: "GET is not a submission", method: "GET", status: 405 },
+  ];
+  for (const apiCase of invalidApiCases) {
+    const apiResult = await evaluate(`(async () => {
+      const response = await fetch('/api/math/national-day/submit', {
+        method: ${JSON.stringify(apiCase.method)}, cache: 'no-store',
+        ${apiCase.body === undefined ? "" : `headers: {'Content-Type':'application/json'}, body: ${JSON.stringify(apiCase.body)},`}
+      });
+      const text = await response.text();
+      let body; try { body = JSON.parse(text); } catch { body = text; }
+      return { status: response.status, cacheControl: response.headers.get('cache-control'), body };
+    })()`);
+    assert.equal(apiResult.status, apiCase.status, apiCase.label);
+    if (apiResult.body && typeof apiResult.body === "object") {
+      for (const key of ["answer", "steps", "pitfall", "fields", "correct", "accepted"]) assert.equal(Object.hasOwn(apiResult.body, key), false, `${apiCase.label} leaked ${key}`);
+    } else assert.ok(!/"(?:answer|steps|accepted)"\s*:/.test(apiResult.body), `${apiCase.label} leaked answer text`);
+    findings.checks.push({ check: `invalid local API: ${apiCase.label}`, ...apiResult });
+  }
+
   await clickButton("#math-section-u1", "读完");
   const saved = await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(storageKey)}))`);
-  assert.equal(saved.attempts["diagnostic-010"].value, draft);
-  assert.equal(saved.attempts["diagnostic-010"].correct, true);
-  assert.equal(saved.attempts["diagnostic-010"].selfRated, true);
+  for (const questionId of ["diagnostic-001", "diagnostic-010", "unit-048", "unit-052"]) {
+    assert.equal(saved.attempts[questionId].correct, true, questionId);
+    assert.equal(saved.attempts[questionId].gradingVersion, 2, questionId);
+    assert.equal(saved.attempts[questionId].selfRated, undefined, questionId);
+    assert.ok(JSON.parse(saved.attempts[questionId].value), questionId);
+  }
   assert.ok(saved.completedSections.includes("u1"));
   assert.equal(saved.lastSection, "u1");
-  findings.checks.push({ check: "complex draft, self rating, completion and last section saved locally", attempt: saved.attempts["diagnostic-010"] });
+  findings.checks.push({ check: "JSON drafts, version 2 server results, completion and last section saved locally", attempt: saved.attempts["diagnostic-010"] });
   await delay(800);
   await send("Page.reload", { ignoreCache: true });
   await waitFor("!!document.querySelector('#draft-diagnostic-010') && !document.querySelector('#draft-diagnostic-010').disabled", "reload hydration");
-  assert.equal(await evaluate("document.getElementById('draft-diagnostic-010').value"), draft);
+  assert.equal(await evaluate("document.getElementById('draft-diagnostic-010').value"), "200");
+  assert.equal(await evaluate("document.getElementById('draft-diagnostic-001').value"), "0.4");
+  for (const field of multipartFields) assert.equal(await evaluate(`document.querySelector(${JSON.stringify(`#question-unit-048 [data-field-id="${field.id}"]`)}).value`), field.accepted[0]);
+  assert.equal(await evaluate("document.querySelector('#question-unit-052 select[data-field-id=longer]').value"), day3Rubrics["unit-052"].fields.find(field => field.id === "longer").accepted[0]);
   const reloaded = await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(storageKey)}))`);
-  assert.equal(reloaded.attempts["diagnostic-010"].correct, true);
-  assert.equal(reloaded.attempts["diagnostic-010"].selfRated, true);
+  for (const questionId of ["diagnostic-001", "diagnostic-010", "unit-048", "unit-052"]) {
+    assert.deepEqual(reloaded.attempts[questionId], saved.attempts[questionId], questionId);
+  }
   assert.ok(reloaded.completedSections.includes("u1"));
-  findings.checks.push({ check: "reload retains local draft, mastery and completed section", success: true });
+  assert.equal(reloaded.lastSection, "u1");
+  await assertQuizSolutionsHidden("reload restores drafts and grading history but hides every quiz solution again");
+  findings.checks.push({ check: "reload retains local JSON drafts, server results, select choices and completed section without solutions", success: true });
 
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await evaluate("window.scrollTo(0,0)");
   await layout("mobile 390");
   await screenshot("mobile-header.png");
+  await scrollTo("#question-diagnostic-001", "center");
+  await screenshot("mobile-before-submit.png");
+  await submitQuestion("diagnostic-001", true);
+  await screenshot("mobile-after-submit.png");
+  await layout("mobile 390 after submission");
   await scrollTo("#math-section-u5 svg", "center");
   await screenshot("mobile-circle-diagram.png");
   await scrollTo('#math-section-u6 [data-question-category="example"]');

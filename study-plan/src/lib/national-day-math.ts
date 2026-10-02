@@ -14,6 +14,30 @@ export type NationalDayMathQuestion = {
   pdfPage: number;
 };
 
+export type NationalDayMathPracticeField = {
+  id: string;
+  label: string;
+  kind: "answer" | "choice";
+  options?: string[];
+  hint?: string;
+};
+
+export type NationalDayMathPublicQuestion =
+  | (Omit<NationalDayMathQuestion, "type" | "accepted"> & { type: "example" })
+  | (Omit<NationalDayMathQuestion, "type" | "steps" | "answer" | "pitfall" | "accepted"> & {
+      type: "quiz";
+      fields: NationalDayMathPracticeField[];
+    });
+
+export type NationalDayMathSubmissionResult = {
+  questionId: string;
+  correct: boolean;
+  fields: { id: string; label: string; correct: boolean; expected: string }[];
+  answer: string;
+  steps: string[];
+  pitfall?: string;
+};
+
 export type NationalDayMathDiagramId = "decimals" | "whole" | "ratio" | "circle" | "scale" | "coordinates" | "bearing";
 
 export type NationalDayMathBlock =
@@ -31,6 +55,9 @@ export type NationalDayMathSection = {
   sourcePages: number[];
   blocks: NationalDayMathBlock[];
 };
+
+export type NationalDayMathPublicBlock = Exclude<NationalDayMathBlock, NationalDayMathQuestion> | NationalDayMathPublicQuestion;
+export type NationalDayMathPublicSection = Omit<NationalDayMathSection, "blocks"> & { blocks: NationalDayMathPublicBlock[] };
 
 export const NATIONAL_DAY_MATH_SECTIONS = book.sections as NationalDayMathSection[];
 export const NATIONAL_DAY_MATH_STATS = book.stats;

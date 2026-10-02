@@ -152,6 +152,19 @@ test("progress preserves drafts and ratings, repairs invalid values and deduplic
   assert.deepEqual(progress.createEmptyNationalDayMathProgress().completedSections, []);
 });
 
+test("only submitted system checks retain the new grading marker", () => {
+  const attempts = progress.normalizeNationalDayMathProgress({ attempts: {
+    system: { value: '{"part1":"0.4"}', checked: true, correct: true, gradingVersion: 2 },
+    self: { value: "0.4", checked: true, correct: true, selfRated: true, gradingVersion: 2 },
+    draft: { value: '{"part1":"0.5"}', checked: false, correct: true, gradingVersion: 2 },
+    legacy: { value: "0.4", checked: true, correct: true },
+  } }).attempts;
+  assert.equal(attempts.system.gradingVersion, 2);
+  for (const id of ["self", "draft", "legacy"]) assert.equal(attempts[id].gradingVersion, undefined);
+  assert.equal(attempts.self.selfRated, true);
+  assert.equal(attempts.draft.correct, null);
+});
+
 test("large Chinese drafts bypass the 64 KiB keepalive limit", () => {
   const small = progress.createEmptyNationalDayMathProgress();
   assert.equal(progress.createNationalDayMathCloudRequest(small).keepalive, true);

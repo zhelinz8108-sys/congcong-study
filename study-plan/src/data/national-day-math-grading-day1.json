@@ -1,0 +1,260 @@
+{
+  "diagnostic-001": {
+    "fields": [
+      { "id": "part1", "label": "0.8×0.5 的计算结果", "kind": "answer", "accepted": ["0.4"] }
+    ]
+  },
+  "diagnostic-002": {
+    "fields": [
+      { "id": "part1", "label": "1.2÷0.3 的计算结果", "kind": "answer", "accepted": ["4"] }
+    ]
+  },
+  "diagnostic-003": {
+    "fields": [
+      { "id": "part1", "label": "12/18 约分后的最简分数", "kind": "answer", "format": "reduced-fraction", "accepted": ["2/3"], "hint": "分数可以用斜线输入，例如 1/5。" }
+    ]
+  },
+  "diagnostic-004": {
+    "fields": [
+      { "id": "part1", "label": "1/2+1/4 的计算结果", "kind": "answer", "accepted": ["3/4"], "hint": "分数可以用斜线输入，例如 1/5。" }
+    ]
+  },
+  "diagnostic-005": {
+    "fields": [
+      { "id": "part1", "label": "1−2/5 的计算结果", "kind": "answer", "accepted": ["3/5"], "hint": "分数可以用斜线输入，例如 1/5。" }
+    ]
+  },
+  "diagnostic-006": {
+    "fields": [
+      { "id": "part1", "label": "3/4×2/3 的计算结果", "kind": "answer", "accepted": ["1/2"], "hint": "分数可以用斜线输入，例如 1/5。" }
+    ]
+  },
+  "diagnostic-007": {
+    "fields": [
+      { "id": "part1", "label": "3/4÷1/2 的计算结果", "kind": "answer", "accepted": ["3/2", "1又1/2"], "hint": "分数用斜线输入，带分数可输入“2又1/5”这样的格式。" }
+    ]
+  },
+  "diagnostic-008": {
+    "fields": [
+      { "id": "part1", "label": "0.25 化成的最简分数", "kind": "answer", "format": "reduced-fraction", "accepted": ["1/4"], "hint": "分数可以用斜线输入，例如 1/5。" }
+    ]
+  },
+  "diagnostic-009": {
+    "fields": [
+      { "id": "part1", "label": "方程中 x 的值", "kind": "answer", "accepted": ["20"] }
+    ]
+  },
+  "diagnostic-010": {
+    "fields": [
+      { "id": "part1", "label": "2 平方米合多少平方分米（单位：平方分米）", "kind": "answer", "accepted": ["200", "200平方分米"] }
+    ]
+  },
+  "diagnostic-011": {
+    "fields": [
+      { "id": "part1", "label": "0.6 千米合多少厘米（单位：厘米）", "kind": "answer", "accepted": ["60000", "60000厘米"] }
+    ]
+  },
+  "diagnostic-012": {
+    "fields": [
+      { "id": "part1", "label": "正方形的面积（单位：平方厘米）", "kind": "answer", "accepted": ["25", "25平方厘米"] }
+    ]
+  },
+  "unit-001": {
+    "fields": [
+      { "id": "part1", "label": "0.08×0.06 的计算结果", "kind": "answer", "accepted": ["0.0048"] },
+      {
+        "id": "part2",
+        "label": "定位小数点前为什么要补 0？",
+        "kind": "choice",
+        "accepted": ["两个乘数共4位小数，积的数字不足4位时要先在前面补0，再定位小数点。"],
+        "options": ["只按第一个乘数的小数位数确定积的小数位数，不足时补0。", "两个乘数共4位小数，积的数字不足4位时要先在前面补0，再定位小数点。", "两个乘数都是小数，任何积都只需要保留2位小数。"]
+      }
+    ]
+  },
+  "unit-002": {
+    "fields": [
+      { "id": "part1", "label": "6.48÷0.8 的商", "kind": "answer", "accepted": ["8.1"] },
+      { "id": "part2", "label": "验算：用求出的商乘以 0.8，积是多少？", "kind": "answer", "accepted": ["6.48"] },
+      {
+        "id": "part3",
+        "label": "哪种关系能检验这道除法？",
+        "kind": "choice",
+        "accepted": ["商×除数=被除数"],
+        "options": ["商×被除数=除数", "商+除数=被除数", "商×除数=被除数"]
+      }
+    ]
+  },
+  "unit-003": {
+    "fields": [
+      { "id": "part1", "label": "0.73×2.02 的得数保留两位小数", "kind": "answer", "format": "two-decimal", "accepted": ["1.47"] }
+    ]
+  },
+  "unit-004": {
+    "fields": [
+      { "id": "part1", "label": "40 元最多能买多少个羽毛球（单位：个）", "kind": "answer", "accepted": ["8", "8个"] },
+      { "id": "part2", "label": "13.6 吨橘子至少需要运多少次（单位：次）", "kind": "answer", "accepted": ["4", "4次"] }
+    ]
+  },
+  "unit-005": {
+    "fields": [
+      { "id": "part1", "label": "平行四边形菜地的高（单位：米）", "kind": "answer", "accepted": ["7.5", "7.5米"] }
+    ]
+  },
+  "unit-006": {
+    "fields": [
+      { "id": "part1", "label": "判断“0.54÷0.75 小于 0.54”", "kind": "choice", "accepted": ["错误"], "options": ["正确", "错误", "无法判断"] },
+      { "id": "part2", "label": "0.54÷0.75 的实际计算结果", "kind": "answer", "accepted": ["0.72"] },
+      {
+        "id": "part3",
+        "label": "第一个判断应依据什么条件？",
+        "kind": "choice",
+        "accepted": ["被除数大于0，除数大于0且小于1，商比被除数大。"],
+        "options": ["只要算式里有除号，商就一定比被除数小。", "被除数大于0，除数大于0且小于1，商比被除数大。", "除数是小数时，商一定等于被除数。"]
+      },
+      { "id": "part4", "label": "判断“1.6×1.3 小于 1.6”", "kind": "choice", "accepted": ["错误"], "options": ["正确", "错误", "无法判断"] },
+      { "id": "part5", "label": "1.6×1.3 的实际计算结果", "kind": "answer", "accepted": ["2.08"] },
+      {
+        "id": "part6",
+        "label": "第二个判断应依据什么条件？",
+        "kind": "choice",
+        "accepted": ["原数大于0，另一个乘数大于1，积比原数大。"],
+        "options": ["两个乘数都是小数时，积必定比每个乘数小。", "另一个乘数大于1时，无论原数正负，积都比原数大。", "原数大于0，另一个乘数大于1，积比原数大。"]
+      }
+    ]
+  },
+  "unit-007": {
+    "fields": [
+      { "id": "part1", "label": "0.8÷(8/9)+(5/6)×3.6 的结果", "kind": "answer", "accepted": ["3.9"] }
+    ]
+  },
+  "unit-008": {
+    "fields": [
+      { "id": "part1", "label": "今年计算机的数量（单位：台）", "kind": "answer", "accepted": ["176", "176台"] }
+    ]
+  },
+  "unit-009": {
+    "fields": [
+      { "id": "part1", "label": "（1）再修余下的一半，需修多少千米（单位：千米）", "kind": "answer", "accepted": ["7/20", "7/20千米"] },
+      { "id": "part2", "label": "（2）要使累计修到全长的一半，还需修多少千米（单位：千米）", "kind": "answer", "accepted": ["3/10", "3/10千米"] }
+    ]
+  },
+  "unit-010": {
+    "fields": [
+      { "id": "part1", "label": "合做 6 天后，这项工作的完成情况", "kind": "choice", "accepted": ["尚未完成"], "options": ["已经提前完成", "恰好完成", "尚未完成"] },
+      { "id": "part2", "label": "一直合做时的理论完成时间（单位：天）", "kind": "answer", "accepted": ["20/3", "20/3天", "6又2/3", "6又2/3天"], "hint": "请输入准确值；分数用斜线，带分数可用“又”连接。" }
+    ]
+  },
+  "unit-011": {
+    "fields": [
+      { "id": "part1", "label": "原有鸡蛋全部售出的总价（单位：元）", "kind": "answer", "accepted": ["89.6", "89.6元"] }
+    ]
+  },
+  "unit-012": {
+    "fields": [
+      { "id": "part1", "label": "两组平均每人采集的树种质量（单位：千克）", "kind": "answer", "accepted": ["0.05", "0.05千克", "1/20", "1/20千克"] }
+    ]
+  },
+  "unit-013": {
+    "fields": [
+      { "id": "part1", "label": "坐 4.2 千米的出租车费用（单位：元）", "kind": "answer", "accepted": ["13", "13元"] }
+    ]
+  },
+  "unit-014": {
+    "fields": [
+      { "id": "part1", "label": "地铁坐 8.8 千米的票价（单位：元）", "kind": "answer", "accepted": ["3", "3元"] },
+      {
+        "id": "part2",
+        "label": "能否仅凭给定的两档规则确定 10 千米的票价？",
+        "kind": "choice",
+        "accepted": ["不能，10千米超出了给定两档的范围，需要查询下一档规则。"],
+        "options": ["能，超过9千米也继续按第二档的总票价收费。", "不能，10千米超出了给定两档的范围，需要查询下一档规则。", "能，直接用距离乘第二档票价。"]
+      }
+    ]
+  },
+  "unit-015": {
+    "fields": [
+      { "id": "part1", "label": "年用气 300 立方米的总气费（单位：元）", "kind": "answer", "accepted": ["949.20", "949.20元"] }
+    ]
+  },
+  "unit-016": {
+    "fields": [
+      { "id": "part1", "label": "停 3 小时 1 分钟的停车费（单位：元）", "kind": "answer", "accepted": ["16", "16元"] }
+    ]
+  },
+  "unit-017": {
+    "fields": [
+      { "id": "part1", "label": "峰时 20、谷时 30 千瓦·时的合计费用（单位：元）", "kind": "answer", "accepted": ["22.00", "22.00元"] },
+      { "id": "part2", "label": "50 千瓦·时全部发生在谷时的费用（单位：元）", "kind": "answer", "accepted": ["18.00", "18.00元"] }
+    ]
+  },
+  "unit-018": {
+    "fields": [
+      { "id": "part1", "label": "3030.03 从左到右的第一个 3 表示 3 个什么计数单位？（填单位对应的数值）", "kind": "answer", "accepted": ["1000", "千"], "hint": "例如“百”对应的数值可输入 100，也可输入计数单位名称。" },
+      { "id": "part2", "label": "3030.03 从左到右的第二个 3 表示 3 个什么计数单位？（填单位对应的数值）", "kind": "answer", "accepted": ["10", "十"], "hint": "填计数单位的数值或名称。" },
+      { "id": "part3", "label": "3030.03 从左到右的第三个 3 表示 3 个什么计数单位？（填单位对应的数值）", "kind": "answer", "accepted": ["0.01", "1/100", "百分之一"], "hint": "填计数单位的数值或名称。" },
+      { "id": "part4", "label": "3030.03 共有多少个百分之一（只填个数）", "kind": "answer", "accepted": ["303003"] }
+    ]
+  },
+  "unit-019": {
+    "fields": [
+      { "id": "part1", "label": "0.9 与 0.88 之间应填哪个符号？", "kind": "choice", "accepted": [">"], "options": [">", "=", "<"] },
+      { "id": "part2", "label": "按这两个小数中最细的小数位比较，共同计数单位是多少？", "kind": "answer", "accepted": ["0.01", "1/100", "百分之一"] },
+      { "id": "part3", "label": "5/8 与 7/16 之间应填哪个符号？", "kind": "choice", "accepted": [">"], "options": [">", "=", "<"] },
+      { "id": "part4", "label": "把这两个分数通分到最小公分母比较，共同分数单位是多少？", "kind": "answer", "accepted": ["1/16", "十六分之一"], "hint": "分数可用斜线输入。" }
+    ]
+  },
+  "unit-020": {
+    "fields": [
+      { "id": "part1", "label": "130×32 的结果", "kind": "answer", "accepted": ["4160"] },
+      { "id": "part2", "label": "0.13×3.2 的结果", "kind": "answer", "accepted": ["0.416"] },
+      { "id": "part3", "label": "(13/5)×(32/7) 的结果", "kind": "answer", "accepted": ["416/35"], "hint": "请输入准确值，分数可用斜线输入。" }
+    ]
+  },
+  "unit-021": {
+    "fields": [
+      { "id": "part1", "label": "(6/7)÷(3/14) 的商", "kind": "answer", "accepted": ["4"] },
+      { "id": "part2", "label": "用商乘以 3/14 验算，乘积是多少？", "kind": "answer", "accepted": ["6/7"], "hint": "分数可用斜线输入。" }
+    ]
+  },
+  "unit-022": {
+    "fields": [
+      { "id": "part1", "label": "哪个班的人均占地面积较大？", "kind": "choice", "accepted": ["七年级"], "options": ["六年级", "七年级", "两班相同"] }
+    ]
+  },
+  "unit-023": {
+    "fields": [
+      { "id": "part1", "label": "(111)₂ 后面紧接着的二进制数（只填二进制数字串）", "kind": "answer", "format": "digits", "accepted": ["1000"], "hint": "只输入由 0、1 组成的数字串，不输入括号或下标。" },
+      { "id": "part2", "label": "(111)₂ 对应的十进制数", "kind": "answer", "accepted": ["7"] },
+      { "id": "part3", "label": "后一个二进制数对应的十进制数", "kind": "answer", "accepted": ["8"] }
+    ]
+  },
+  "unit-024": {
+    "fields": [
+      { "id": "part1", "label": "(1010110)₂ 对应的十进制数", "kind": "answer", "accepted": ["86"] }
+    ]
+  },
+  "unit-025": {
+    "fields": [
+      { "id": "part1", "label": "十进制 10 对应的二进制数（只填二进制数字串）", "kind": "answer", "format": "digits", "accepted": ["1010"], "hint": "只输入由 0、1 组成的数字串，不输入括号或下标。" },
+      {
+        "id": "part2",
+        "label": "用位权检验时，应该采用哪一种展开方法？",
+        "kind": "choice",
+        "accepted": ["从右向左的位权依次为1、2、4、8……，各位数字乘对应位权后求和。"],
+        "options": ["从右向左的位权依次为1、10、100、1000……，各位数字乘位权后求和。", "从右向左的位权依次为1、2、4、8……，各位数字乘对应位权后求和。", "不用位权，直接把每一位上的0和1加起来。"]
+      }
+    ]
+  },
+  "unit-026": {
+    "fields": [
+      { "id": "part1", "label": "判断“(102)₂ 是正确的二进制数”", "kind": "choice", "accepted": ["错误"], "options": ["正确", "错误", "无法判断"] },
+      { "id": "part2", "label": "判断“(100)₂=100（十进制）”", "kind": "choice", "accepted": ["错误"], "options": ["正确", "错误", "无法判断"] }
+    ]
+  },
+  "unit-027": {
+    "fields": [
+      { "id": "part1", "label": "(100)₅ 与 (100)₈ 中，哪个数值较大？", "kind": "choice", "accepted": ["(100)₈"], "options": ["(100)₅", "(100)₈", "两者相等"] },
+      { "id": "part2", "label": "两个数值的差（用十进制表示）", "kind": "answer", "accepted": ["39"] }
+    ]
+  }
+}

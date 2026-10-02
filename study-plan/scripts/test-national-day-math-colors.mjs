@@ -75,7 +75,7 @@ test("rich colors do not introduce chapter gates or side-by-side reading", () =>
   assert.match(ui, /data-math-section/);
   assert.match(ui, /data-math-theme/);
   assert.match(ui, /data-card-tone/);
-  assert.match(ui, /hideQuizAnswers/);
+  assert.match(ui, /solution && <div data-math-answer/);
   assert.match(ui, /useState\(false\)/);
   assert.match(ui, /bg-white/);
   assert.ok(!/<(?:iframe|embed|object|details)\b/.test(ui));
@@ -83,8 +83,8 @@ test("rich colors do not introduce chapter gates or side-by-side reading", () =>
   assert.ok(!/grid-template-columns|flex-direction:\s*row|column-count:\s*[2-9]/.test(css));
   assert.match(css, /\.example\[data-card-tone="white"\]/);
   for (const selector of ["sectionLabel", "heading", "example", "quiz", "answer", "formula", "diagram", "completeButton"]) assert.match(css, new RegExp(`\\.${selector}\\s*\\{[^}]*var\\(--math-`, "s"));
-  assert.match(ui, /border-teal-300 bg-teal-100 text-teal-800/);
-  assert.match(ui, /border-amber-300 bg-amber-100 text-amber-800/);
+  assert.match(ui, /border-teal-200 text-teal-800/);
+  assert.match(ui, /border-amber-200 text-amber-800/);
   const questions = book.sections.flatMap((section) => section.blocks).filter((block) => block.type === "example" || block.type === "quiz");
   assert.equal(questions.length, 206);
   assert.ok(questions.every((question) => question.answer && question.steps.length));
