@@ -62,22 +62,22 @@ export function useNationalDayProgress(subjectId: string, sectionId?: string) {
     saveCloudState(scope, storageKey, next);
   }, [scope, storageKey]);
 
-  const recordAttempt = useCallback((questionId: string, attempt: NationalDayAttempt) => {
-    update({ attempts: { ...current.current.attempts, [questionId]: attempt } });
+  const recordAttempt = useCallback((questionId: string, attempt: NationalDayAttempt, id?: string) => {
+    update({ attempts: { ...current.current.attempts, [questionId]: attempt }, ...(id ? { lastSection: id } : {}) });
   }, [update]);
 
   const saveDraft = useCallback((id: string, text: string) => {
-    update({ drafts: { ...current.current.drafts, [id]: text } });
+    update({ drafts: { ...current.current.drafts, [id]: text }, lastSection: id });
   }, [update]);
 
   const toggleWritingCheck = useCallback((id: string, label: string) => {
     const existing = current.current.writingChecks[id] ?? [];
     const next = existing.includes(label) ? existing.filter((item) => item !== label) : [...existing, label];
-    update({ writingChecks: { ...current.current.writingChecks, [id]: next } });
+    update({ writingChecks: { ...current.current.writingChecks, [id]: next }, lastSection: id });
   }, [update]);
 
   const completeSection = useCallback((id: string) => {
-    update({ completedSections: [...new Set([...current.current.completedSections, id])] });
+    update({ completedSections: [...new Set([...current.current.completedSections, id])], lastSection: id });
   }, [update]);
 
   return { progress, ready, recordAttempt, saveDraft, toggleWritingCheck, completeSection };

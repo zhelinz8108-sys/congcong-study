@@ -1,15 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { memo, useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
 import type { NationalDayBlock, NationalDayQuestion, NationalDaySection } from "@/lib/national-day-english";
 import { checkNationalDayAnswer } from "@/lib/national-day-english-answer";
-import { useNationalDayProgress, type NationalDayAttempt } from "@/lib/national-day-english-progress";
+import type { useNationalDayProgress, NationalDayAttempt } from "@/lib/national-day-english-progress";
 
 const ACTION = "w-full rounded-2xl border border-orange-200 bg-orange-100 px-5 py-3 text-sm font-bold text-orange-900 transition hover:bg-orange-200 focus-visible:outline-2 focus-visible:outline-orange-400";
 const SECONDARY = "w-full rounded-2xl border border-stone-200 bg-white px-5 py-3 text-sm font-semibold text-stone-600 transition hover:bg-stone-50";
 
-function SourceContent({ blocks }: { blocks: NationalDayBlock[] }) {
+const SourceContent = memo(function SourceContent({ blocks }: { blocks: NationalDayBlock[] }) {
   const groups: Array<{ title: string; blocks: NationalDayBlock[] }> = [];
   for (const block of blocks) {
     if (block.type === "heading") groups.push({ title: block.text, blocks: [] });
@@ -18,9 +17,9 @@ function SourceContent({ blocks }: { blocks: NationalDayBlock[] }) {
       groups[groups.length - 1].blocks.push(block);
     }
   }
-  return <div className="space-y-5">{groups.filter((group) => group.blocks.length > 0).map((group, index) => (
+  return <div className="space-y-5">{groups.map((group, index) => (
     <section key={`${group.title}-${index}`} className={`rounded-3xl border p-5 sm:p-6 ${/混淆|辨析|检查/.test(group.title) ? "border-amber-100 bg-amber-50/60" : /例句|故事|Visit|Morning|范例/.test(group.title) ? "border-sky-100 bg-sky-50/50" : "border-stone-200 bg-white"}`}>
-      {group.title && <h2 className="mb-4 text-lg font-bold leading-7 text-stone-800">{group.title}</h2>}
+      {group.title && <h3 className="mb-4 text-lg font-bold leading-7 text-stone-800">{group.title}</h3>}
       <div className="space-y-4">{group.blocks.map((block, blockIndex) => block.type === "table" ? (
         <div key={blockIndex} className="space-y-3">{block.rows.map((row, rowIndex) => (
           <article key={rowIndex} className="rounded-2xl border border-stone-200 bg-white p-4">
@@ -33,9 +32,9 @@ function SourceContent({ blocks }: { blocks: NationalDayBlock[] }) {
       ) : <p key={blockIndex} className="break-words text-base leading-8 text-stone-700">{block.text}</p>)}</div>
     </section>
   ))}</div>;
-}
+});
 
-function QuestionCard({ question, index, saved, onRecord }: {
+const QuestionCard = memo(function QuestionCard({ question, index, saved, onRecord }: {
   question: NationalDayQuestion;
   index: number;
   saved?: NationalDayAttempt;
@@ -63,7 +62,7 @@ function QuestionCard({ question, index, saved, onRecord }: {
   return (
     <article id={`question-${question.id}`} className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6">
       <p className="text-xs font-bold text-orange-700">练习 {index + 1}{saved?.checked ? saved.correct ? " · 已掌握 ✓" : " · 待巩固" : ""}</p>
-      <h3 className="mt-3 break-words text-lg font-semibold leading-8 text-stone-800">{question.prompt}</h3>
+      <h4 className="mt-3 break-words text-lg font-semibold leading-8 text-stone-800">{question.prompt}</h4>
       {question.options ? (
         <div className="mt-5 space-y-3">{question.options.map((option) => (
           <button key={option} type="button" aria-pressed={values[0] === option} onClick={() => { setValues([option]); submit([option]); }} className={`block w-full rounded-2xl border px-4 py-3 text-left text-base font-semibold transition ${values[0] === option ? "border-orange-300 bg-orange-50 text-orange-900" : "border-stone-200 bg-white text-stone-700 hover:bg-orange-50"}`}>{option === "/" ? "不填冠词" : option}</button>
@@ -108,97 +107,98 @@ function QuestionCard({ question, index, saved, onRecord }: {
       )}
     </article>
   );
-}
+});
 
-function WritingPractice({ section, draft: initialDraft, checks, onSave, onCheck }: {
+const WritingPractice = memo(function WritingPractice({ section, draft: initialDraft, checks, onSave, onCheck }: {
   section: NationalDaySection;
   draft: string;
   checks: string[];
-  onSave: (value: string) => void;
-  onCheck: (label: string) => void;
+  onSave: (id: string, value: string) => void;
+  onCheck: (id: string, label: string) => void;
 }) {
   const [draft, setDraft] = useState(initialDraft);
   const [saved, setSaved] = useState(false);
   const writing = section.writing!;
   const words = draft.match(/[A-Za-z]+(?:['’-][A-Za-z]+)*/g)?.length ?? 0;
-  const save = () => { onSave(draft); setSaved(true); };
+  const save = () => { onSave(section.id, draft); setSaved(true); };
   return <section className="rounded-3xl border border-sky-200 bg-sky-50/50 p-5 sm:p-6">
-    <h2 className="text-xl font-bold">{writing.label}</h2>
+    <h3 className="text-xl font-bold">{writing.label}</h3>
     <p className="mt-3 text-sm leading-7 text-stone-600">{writing.prompt}</p>
-    <label htmlFor="national-day-writing" className="mt-5 block text-xs font-semibold text-stone-500">写下自己的真实表达</label>
-    <textarea id="national-day-writing" value={draft} onChange={(event) => { setDraft(event.target.value); setSaved(false); }} onBlur={save} rows={8} className="mt-2 w-full resize-y rounded-2xl border border-sky-200 bg-white p-4 text-base leading-8 text-stone-800 outline-none focus:ring-2 focus:ring-sky-100" placeholder="从一句完整的英文开始……" />
+    <label htmlFor={`national-day-writing-${section.id}`} className="mt-5 block text-xs font-semibold text-stone-500">写下自己的真实表达</label>
+    <textarea id={`national-day-writing-${section.id}`} value={draft} onChange={(event) => { setDraft(event.target.value); setSaved(false); }} onBlur={save} rows={8} className="mt-2 w-full resize-y rounded-2xl border border-sky-200 bg-white p-4 text-base leading-8 text-stone-800 outline-none focus:ring-2 focus:ring-sky-100" placeholder="从一句完整的英文开始……" />
     <p className="mt-2 text-xs text-stone-500">{words} 个英文词{writing.minWords > 0 ? ` · 建议 ${writing.minWords}–80 词` : ""}{saved ? " · 草稿已保存" : ""}</p>
     <button type="button" onClick={save} className={`${SECONDARY} mt-4`}>保存我的草稿</button>
-    <fieldset className="mt-5 rounded-2xl bg-white p-4"><legend className="px-1 text-sm font-bold text-sky-800">写完后，自己检查一遍</legend>{["信息说清：时间、地点、活动和感受", "动词正确：be、时态、主谓一致", "词组正确：介词、搭配、单复数", "句子完整：顺序、大小写和标点"].map((label) => <label key={label} className="mt-3 flex cursor-pointer items-start gap-3 text-sm leading-6 text-stone-600"><input type="checkbox" checked={checks.includes(label)} onChange={() => onCheck(label)} className="mt-1 h-4 w-4 shrink-0 accent-orange-400" /><span>{label}</span></label>)}</fieldset>
-    {writing.referenceBlocks && <details className="mt-5"><summary className="cursor-pointer text-sm font-bold text-sky-800">写完后查看参考范例与检查方法 ↓</summary><p className="mt-3 text-xs leading-6 text-stone-500">范例只是其中一种写法，请保留自己的真实经历。</p><div className="mt-4"><SourceContent blocks={writing.referenceBlocks} /></div></details>}
+    <fieldset className="mt-5 rounded-2xl bg-white p-4"><legend className="px-1 text-sm font-bold text-sky-800">写完后，自己检查一遍</legend>{["信息说清：时间、地点、活动和感受", "动词正确：be、时态、主谓一致", "词组正确：介词、搭配、单复数", "句子完整：顺序、大小写和标点"].map((label) => <label key={label} className="mt-3 flex cursor-pointer items-start gap-3 text-sm leading-6 text-stone-600"><input type="checkbox" checked={checks.includes(label)} onChange={() => onCheck(section.id, label)} className="mt-1 h-4 w-4 shrink-0 accent-orange-400" /><span>{label}</span></label>)}</fieldset>
+    {writing.referenceBlocks && <div className="mt-5"><h4 className="text-sm font-bold text-sky-800">参考范例与检查方法</h4><p className="mt-3 text-xs leading-6 text-stone-500">范例只是其中一种写法，请保留自己的真实经历。</p><div className="mt-4"><SourceContent blocks={writing.referenceBlocks} /></div></div>}
   </section>;
-}
+});
 
-export default function NationalDayEnglishLesson({ subjectId, section, previous, next, pdfUrl }: {
-  subjectId: string;
+const EMPTY_CHECKS: string[] = [];
+
+export default function NationalDayEnglishSection({ section, index, pdfUrl, learning }: {
   section: NationalDaySection;
-  previous: { id: string; title: string } | null;
-  next: { id: string; title: string } | null;
+  index: number;
   pdfUrl: string;
+  learning: ReturnType<typeof useNationalDayProgress>;
 }) {
-  const { progress, ready, recordAttempt, saveDraft, toggleWritingCheck, completeSection } = useNationalDayProgress(subjectId, section.id);
-  const [onlyMistakes, setOnlyMistakes] = useState(false);
-  const [reviewQuestionIds, setReviewQuestionIds] = useState<string[]>([]);
-  const [showTranscript, setShowTranscript] = useState(false);
+  const { progress, ready, recordAttempt, saveDraft, toggleWritingCheck, completeSection } = learning;
   const [audioMessage, setAudioMessage] = useState("");
-  const base = `/subjects/${subjectId}/national-day-english`;
-  const questions = [...section.questions, ...(section.oralQuestions ?? [])];
+  const questions = useMemo(() => [...section.questions, ...(section.oralQuestions ?? [])], [section]);
   const checked = questions.filter((question) => progress.attempts[question.id]?.checked).length;
   const correct = questions.filter((question) => progress.attempts[question.id]?.checked && progress.attempts[question.id]?.correct).length;
-  const wrong = questions.filter((question) => progress.attempts[question.id]?.checked && progress.attempts[question.id]?.correct === false).length;
-  const visibleQuestions = questions.filter((question) => !onlyMistakes ||
-    (progress.attempts[question.id]?.correct !== true && reviewQuestionIds.includes(question.id)));
   const completed = progress.completedSections.includes(section.id);
+  const onRecord = useCallback((id: string, attempt: NationalDayAttempt) => {
+    recordAttempt(id, attempt, section.id);
+  }, [recordAttempt, section.id]);
   const speak = () => {
-    if (!("speechSynthesis" in window) || !section.audioText) { setAudioMessage("当前浏览器不支持朗读，可以展开文本完成阅读练习。"); return; }
+    if (!("speechSynthesis" in window) || !section.audioText) {
+      setAudioMessage("当前浏览器不支持朗读，可以直接阅读下方的完整文本。");
+      return;
+    }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(section.audioText);
     utterance.lang = "en-US";
     utterance.rate = 0.85;
     window.speechSynthesis.speak(utterance);
-    setAudioMessage("浏览器朗读中；可再听一遍，或展开文本核对。");
+    setAudioMessage("浏览器朗读中；可以再听一遍，再对照下方文本核对。");
   };
-  useEffect(() => () => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); }, []);
+  useEffect(() => () => {
+    if (section.audioText && "speechSynthesis" in window) window.speechSynthesis.cancel();
+  }, [section.audioText]);
 
-  return <main className="min-h-screen bg-white text-stone-800">
-    <div className="mx-auto max-w-3xl px-4 pb-20 pt-7 sm:px-6">
-      <Link href={base} className="inline-flex rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-500 hover:text-orange-700">← 国庆英语目录</Link>
-      <header className="mt-6 rounded-3xl border border-orange-100 bg-orange-50/50 p-6 sm:p-8">
-        <p className="text-xs font-bold text-orange-700">🍁 国庆英语 · {section.category === "lesson" ? "语法讲解" : section.category === "practice" ? "综合运用" : "随手速查"}</p>
-        <h1 className="mt-4 break-words text-2xl font-black leading-tight sm:text-3xl">{section.title}</h1>
-        <p className="mt-4 text-sm leading-7 text-stone-600">{questions.length > 0 ? "先读懂，再自己作答；核对时一起看理由。" : "按自己的节奏读，遇到不熟悉的表达就停下来练一练。"}</p>
-        <a href={`${pdfUrl}#page=${section.page}`} target="_blank" rel="noreferrer" className="mt-3 inline-block text-xs font-semibold text-orange-700 underline decoration-orange-200 underline-offset-4">对照原 PDF 第 {section.page} 页 ↗</a>
-        {questions.length > 0 && <a href="#national-day-exercises" className={`${SECONDARY} mt-5 block text-center`}>进入本节练习 ↓</a>}
-      </header>
-      <div className="mt-6"><SourceContent blocks={section.blocks} /></div>
-      {section.audioText && <section className="mt-6 rounded-3xl border border-sky-200 bg-sky-50/50 p-5 sm:p-6"><h2 className="text-xl font-bold">先听，再回答</h2><p className="mt-3 text-sm leading-7 text-stone-600">可以使用浏览器朗读听两遍：第一遍听大意，第二遍记细节。这是辅助朗读。</p><button type="button" onClick={speak} className={`${SECONDARY} mt-4`}>▶ 朗读 Sunday Morning</button><button type="button" onClick={() => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); setAudioMessage("朗读已停止。"); }} className="mt-3 block text-sm font-semibold text-stone-500">停止朗读</button>{audioMessage && <p aria-live="polite" className="mt-3 text-xs leading-6 text-stone-500">{audioMessage}</p>}<button type="button" aria-expanded={showTranscript} onClick={() => setShowTranscript(!showTranscript)} className={`${SECONDARY} mt-4`}>{showTranscript ? "收起听读文本 ↑" : "完成听读后，展开文本核对 ↓"}</button>{showTranscript && section.listeningBlocks && <div className="mt-4"><SourceContent blocks={section.listeningBlocks} /></div>}</section>}
+  return <section id={`section-${section.id}`} data-national-day-section={section.id} aria-labelledby={`section-title-${section.id}`} className="scroll-mt-6 border-t border-orange-100 pt-8" style={{ contentVisibility: "auto", containIntrinsicSize: "auto 6000px" }}>
+    <header className="mb-6 rounded-3xl border border-orange-100 bg-orange-50/50 p-6 sm:p-8">
+      <p className="text-xs font-bold text-orange-700">第 {String(index + 1).padStart(2, "0")} 节 · 原 PDF 第 {section.page} 页{completed ? " · 已学完 ✓" : ""}</p>
+      <h2 id={`section-title-${section.id}`} className="mt-3 break-words text-2xl font-black leading-snug sm:text-3xl">{section.title.replace(/^\d{2}(?:\.\d+)?\s+/, "")}</h2>
+      <a href={`${pdfUrl}#page=${section.page}`} target="_blank" rel="noreferrer" className="mt-3 inline-block text-xs font-semibold text-stone-500 underline decoration-stone-300 underline-offset-4">对照这一页原文 ↗</a>
+    </header>
 
-      {questions.length > 0 && <section id="national-day-exercises" className="mt-8 scroll-mt-6">
-        <h2 className="text-2xl font-bold">自己试一试</h2>
-        <p className="mt-3 text-sm leading-7 text-stone-500">选项点击即反馈；填空、改写和阅读题写好后核对。解释题与真实表达对照参考答案自评。</p>
-        <div className="mt-4 rounded-2xl border border-stone-200 p-4"><p className="text-sm font-semibold">已核对 {ready ? checked : "--"} / {questions.length} 题 · 已掌握 {ready ? correct : "--"} 题</p><label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-stone-600"><input type="checkbox" checked={onlyMistakes} onChange={(event) => {
-          setOnlyMistakes(event.target.checked);
-          setReviewQuestionIds(event.target.checked ? questions.filter((question) => progress.attempts[question.id]?.checked && progress.attempts[question.id]?.correct === false).map((question) => question.id) : []);
-        }} className="h-4 w-4 accent-orange-400" />只看待巩固 · {wrong} 题</label></div>
-        {!ready ? <p className="mt-6 text-sm text-stone-500">正在读取学习进度……</p> : <div className="mt-5 space-y-5">{visibleQuestions.map((question) => <QuestionCard key={question.id} question={question} index={questions.indexOf(question)} saved={progress.attempts[question.id]} onRecord={recordAttempt} />)}{onlyMistakes && visibleQuestions.length === 0 && <p className="rounded-2xl bg-emerald-50 p-5 text-sm leading-7 text-emerald-800">本页暂时没有待巩固题目。取消筛选即可查看全部题目。</p>}</div>}
-      </section>}
+    <SourceContent blocks={section.blocks} />
 
-      {section.writing && ready && <div className="mt-8"><WritingPractice section={section} draft={progress.drafts[section.id] ?? ""} checks={progress.writingChecks[section.id] ?? []} onSave={(value) => saveDraft(section.id, value)} onCheck={(label) => toggleWritingCheck(section.id, label)} /></div>}
-      <section className="mt-8 rounded-3xl border border-emerald-100 bg-emerald-50/50 p-5 sm:p-6">
-        <h2 className="text-xl font-bold">{completed ? "本节已学完 ✓" : "给今天的学习打个勾"}</h2>
-        <p className="mt-3 text-sm leading-7 text-stone-600">{questions.length > 0 && checked < questions.length ? `还剩 ${questions.length - checked} 题未核对。看完答案后，也要说清为什么。` : "把不确定的地方留在待巩固里，下次再练一遍。"}</p>
-        {!completed && <button type="button" disabled={!ready || checked < questions.length} onClick={() => completeSection(section.id)} className="mt-4 w-full rounded-2xl border border-emerald-200 bg-white px-5 py-3 text-sm font-bold text-emerald-800 transition enabled:hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50">本节学完了，保存进度</button>}
-      </section>
-      <nav aria-label="章节导航" className="mt-6 space-y-3">
-        {next && <Link href={`${base}/${next.id}`} className={`${ACTION} block text-center`}>下一节：{next.title} →</Link>}
-        {previous && <Link href={`${base}/${previous.id}`} className={`${SECONDARY} block text-center`}>← 上一节：{previous.title}</Link>}
-        <Link href={base} className={`${SECONDARY} block text-center`}>返回国庆英语目录</Link>
-      </nav>
-    </div>
-  </main>;
+    {section.audioText && <section className="mt-6 rounded-3xl border border-sky-200 bg-sky-50/50 p-5 sm:p-6">
+      <h3 className="text-xl font-bold">听读文本与朗读</h3>
+      <p className="mt-3 text-sm leading-7 text-stone-600">可以使用浏览器辅助朗读听两遍：第一遍听大意，第二遍记细节。完整文本直接放在下面。</p>
+      <button type="button" onClick={speak} className={`${SECONDARY} mt-4`}>▶ 朗读 Sunday Morning</button>
+      <button type="button" onClick={() => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); setAudioMessage("朗读已停止。"); }} className="mt-3 block text-sm font-semibold text-stone-500">停止朗读</button>
+      {audioMessage && <p aria-live="polite" className="mt-3 text-xs leading-6 text-stone-500">{audioMessage}</p>}
+      {section.listeningBlocks && <div className="mt-5"><SourceContent blocks={section.listeningBlocks} /></div>}
+    </section>}
+
+    {questions.length > 0 && <section id={`national-day-exercises-${section.id}`} className="mt-8">
+      <h3 className="text-2xl font-bold">自己试一试</h3>
+      <p className="mt-3 text-sm leading-7 text-stone-500">选项点击即反馈；填空、改写和阅读题写好后核对。解释题与真实表达对照参考答案自评。</p>
+      <p className="mt-4 rounded-2xl border border-stone-200 p-4 text-sm font-semibold">已核对 {ready ? checked : "--"} / {questions.length} 题 · 已掌握 {ready ? correct : "--"} 题</p>
+      {!ready ? <p className="mt-6 text-sm text-stone-500">正在读取学习进度……</p> : <div className="mt-5 space-y-5">
+        {questions.map((question, questionIndex) => <QuestionCard key={question.id} question={question} index={questionIndex} saved={progress.attempts[question.id]} onRecord={onRecord} />)}
+      </div>}
+    </section>}
+
+    {section.writing && ready && <div className="mt-8"><WritingPractice section={section} draft={progress.drafts[section.id] ?? ""} checks={progress.writingChecks[section.id] ?? EMPTY_CHECKS} onSave={saveDraft} onCheck={toggleWritingCheck} /></div>}
+
+    <section className="mt-8 rounded-3xl border border-emerald-100 bg-emerald-50/50 p-5 sm:p-6">
+      <h3 className="text-lg font-bold">{completed ? "本节已学完 ✓" : "给这一节打个勾"}</h3>
+      <p className="mt-3 text-sm leading-7 text-stone-600">{questions.length > 0 && checked < questions.length ? `还剩 ${questions.length - checked} 题未核对。看完答案后，也要说清为什么。` : "把不确定的地方留在待巩固里，下次再练一遍。"}</p>
+      {!completed && <button type="button" disabled={!ready || checked < questions.length} onClick={() => completeSection(section.id)} className="mt-4 w-full rounded-2xl border border-emerald-200 bg-white px-5 py-3 text-sm font-bold text-emerald-800 transition enabled:hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50">本节学完了，保存进度</button>}
+    </section>
+  </section>;
 }
