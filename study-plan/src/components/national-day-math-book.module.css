@@ -1,0 +1,91 @@
+.hero {
+  border-color: #e4def1;
+  background: linear-gradient(125deg, #fff5eb 0%, #ffffff 46%, #f3f0ff 100%);
+}
+
+.progressFill {
+  background: linear-gradient(90deg, #98c5e8, #b5acd9, #dfa8bb);
+}
+
+.section {
+  border-top-color: var(--math-border);
+}
+
+.sectionLabel {
+  color: var(--math-accent);
+  background: var(--math-soft);
+  border: 1px solid var(--math-border);
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.heading {
+  color: var(--math-accent);
+  border-left: 3px solid var(--math-marker);
+  padding-left: 12px;
+}
+
+.example {
+  border-color: var(--math-border);
+  background: var(--math-tint);
+}
+
+.example[data-card-tone="white"] {
+  background: #ffffff;
+}
+
+.quiz {
+  border-color: var(--math-practice-border);
+  background: var(--math-practice-soft);
+}
+
+.accent {
+  color: var(--math-accent);
+}
+
+.practiceAccent {
+  color: var(--math-practice-accent);
+}
+
+.checkButton {
+  color: var(--math-practice-accent);
+  border-color: var(--math-practice-border);
+  background: #ffffff;
+}
+
+.checkButton:hover {
+  background: var(--math-practice-soft);
+}
+
+.answer {
+  border-color: var(--math-border);
+  background: #ffffff;
+  color: var(--math-accent);
+  box-shadow: inset 3px 0 0 var(--math-marker);
+}
+
+.formula {
+  border-color: var(--math-border);
+  background: var(--math-soft);
+}
+
+.diagram {
+  border-color: var(--math-border);
+  background: var(--math-soft);
+}
+
+.completeButton {
+  border-color: var(--math-border);
+  background: var(--math-tint);
+  color: var(--math-accent);
+}
+
+.completeButton:hover {
+  background: var(--math-soft);
+}
+
+.footer {
+  border-color: #f0d3de;
+  background: linear-gradient(120deg, #fff7ef, #fff5fa);
+}

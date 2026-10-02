@@ -181,12 +181,41 @@ try {
   })`);
   assert.deepEqual(initial, { questions: 206, examples: 117, quizzes: 89, answers: 206, diagrams: 7, embedded: 0, address: PAGE_URL });
   findings.checks.push({ check: "complete native content and default answers", ...initial });
+  const colors = await evaluate(`(() => {
+    const sections = [...document.querySelectorAll('[data-math-theme]')];
+    return {
+      themes: [...new Set(sections.map(section => section.dataset.mathTheme))],
+      pageBackground: getComputedStyle(document.querySelector('main')).backgroundColor,
+      chapterColors: ['u1', 'u2', 'u4', 'u6'].map(id => {
+        const section = document.querySelector('#math-section-' + id);
+        const examples = [...section.querySelectorAll('[data-question-category="example"]')];
+        return { id, theme: section.dataset.mathTheme,
+          first: getComputedStyle(examples[0]).backgroundColor,
+          second: getComputedStyle(examples[1]).backgroundColor,
+          title: getComputedStyle(section.querySelector('h3')).color };
+      })
+    };
+  })()`);
+  assert.equal(colors.themes.length, 6, 'all six chapter color families are rendered');
+  assert.equal(colors.pageBackground, 'rgb(255, 255, 255)', 'page background remains white');
+  assert.equal(new Set(colors.chapterColors.map(chapter => chapter.first)).size, 4, 'blue, violet, apricot and rose examples have visibly different backgrounds');
+  for (const chapter of colors.chapterColors) {
+    assert.notEqual(chapter.first, chapter.second, `${chapter.id}: examples alternate soft and white surfaces`);
+    assert.equal(chapter.second, 'rgb(255, 255, 255)');
+  }
+  findings.checks.push({ check: 'six light chapter themes and alternating example colors', ...colors });
   await layout("desktop 1440");
   await screenshot("desktop-header.png");
   await scrollTo("#math-section-u1");
   await screenshot("desktop-calculation.png");
   await scrollTo("#math-section-u5 svg", "center");
   await screenshot("desktop-circle-diagram.png");
+  await scrollTo('#math-section-u2 [data-question-category="example"]');
+  await screenshot('desktop-violet-examples.png');
+  await scrollTo('#math-section-u4 [data-question-category="example"]');
+  await screenshot('desktop-apricot-examples.png');
+  await scrollTo('#math-section-u6 [data-question-category="example"]');
+  await screenshot('desktop-rose-examples.png');
 
   await scrollTo("#question-diagnostic-001", "center");
   await fill("diagnostic-001", "0.4");
@@ -236,6 +265,8 @@ try {
   await screenshot("mobile-header.png");
   await scrollTo("#math-section-u5 svg", "center");
   await screenshot("mobile-circle-diagram.png");
+  await scrollTo('#math-section-u6 [data-question-category="example"]');
+  await screenshot('mobile-rose-example.png');
   await scrollTo("#national-day-math-end", "end");
   const footer = await evaluate(`(() => {
     const end = document.querySelector('#national-day-math-end');

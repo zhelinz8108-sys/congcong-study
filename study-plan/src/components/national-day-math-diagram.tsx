@@ -1,4 +1,5 @@
 import type { NationalDayMathDiagramId } from "@/lib/national-day-math";
+import styles from "./national-day-math-book.module.css";
 
 const titles: Record<NationalDayMathDiagramId, string> = {
   decimals: "小数乘法：把面积看成小格",
@@ -22,8 +23,8 @@ const captions: Record<NationalDayMathDiagramId, string> = {
 
 export default function NationalDayMathDiagram({ id }: { id: NationalDayMathDiagramId }) {
   return (
-    <figure className="my-8 rounded-3xl border border-cyan-100 bg-cyan-50/30 p-4 sm:p-6" data-math-diagram={id}>
-      <figcaption className="mb-4 text-base font-bold text-teal-800">{titles[id]}</figcaption>
+    <figure className={`my-8 rounded-3xl border p-4 sm:p-6 ${styles.diagram}`} data-math-diagram={id}>
+      <figcaption className={`mb-4 text-base font-bold ${styles.accent}`}>{titles[id]}</figcaption>
       <svg viewBox={id === "scale" ? "70 0 380 385" : "70 0 380 295"} role="img" aria-labelledby={`math-diagram-${id}`} className="mx-auto block h-auto w-full max-w-lg text-teal-800" style={{ fontFamily: "Arial, Microsoft YaHei, sans-serif", fontSize: 16 }}>
         <title id={`math-diagram-${id}`}>{`${titles[id]}。${captions[id]}`}</title>
         {id === "decimals" && <>
