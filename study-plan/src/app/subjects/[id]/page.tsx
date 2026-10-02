@@ -1066,6 +1066,19 @@ export default function SubjectPage() {
       {isMath && (
         <div className="space-y-4">
           <Link
+            href={`/subjects/${id}/national-day-math`}
+            className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
+            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-stone-900">国庆数学</h2>
+                <p className="mt-1 text-sm leading-6 text-stone-400">六上三天学习 · 完整知识点 · 117道例题 · 89道自测</p>
+              </div>
+              <span className="text-stone-400">→</span>
+            </div>
+          </Link>
+          <Link
             href={`/subjects/${id}/math`}
             className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
             style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
