@@ -31,6 +31,7 @@ const report = {
     screenshots: [],
     cloudMock: true,
     submitted: 0,
+    questionRequests: [],
   },
   cloud = new Map();
 class CDP {
@@ -132,6 +133,8 @@ browser.listeners.push((event) => {
       });
     } else {
       if (address.pathname.endsWith("/check")) report.submitted++;
+      if (address.pathname === "/api/math/holiday-700/questions")
+        report.questionRequests.push(address.searchParams.get("chapter"));
       void send("Fetch.continueRequest", { requestId });
     }
   }
@@ -164,10 +167,17 @@ async function select(index, value) {
   await delay(100);
 }
 async function show(question) {
-  await evaluate(
-    `document.querySelectorAll('[aria-pressed]')[${Number(question.chapter_id.slice(-2)) - 1}].click()`,
+  if (
+    (await evaluate(
+      `location.pathname.endsWith('/${question.chapter_id}')`,
+    )) === false
+  ) {
+    await send("Page.navigate", { url: `${url}/${question.chapter_id}` });
+  }
+  await waitFor(
+    `document.querySelector('select') && !document.querySelector('select').disabled`,
+    "chapter progress ready",
   );
-  await delay(100);
   await select(1, question.type);
   await waitFor(
     `!!document.querySelector('[data-question="${question.id}"]')&&!document.querySelector('[aria-busy="true"]')`,
@@ -293,9 +303,30 @@ try {
   });
   await send("Page.navigate", { url });
   await waitFor(
-    `document.querySelectorAll('[data-question]').length===10`,
-    "initial ten questions",
+    `document.querySelectorAll('[data-chapter]').length===7&&!document.body.textContent.includes('正在读取答题记录')`,
+    "chapter overview ready",
   );
+  assert.equal(
+    await evaluate(`document.querySelectorAll('[data-question]').length`),
+    0,
+  );
+  assert.equal(await evaluate(`document.querySelectorAll('select').length`), 0);
+  assert.equal(report.questionRequests.length, 0);
+  assert.ok(
+    await evaluate(
+      `document.querySelector('[data-chapter="CH01"]').textContent.includes('正确率 —')`,
+    ),
+  );
+  await screenshot("desktop-chapters.png");
+  report.checks.push(
+    "overview contains seven chapter entrances, no questions or question API calls, unanswered accuracy absent",
+  );
+  await evaluate(`document.querySelector('[data-chapter="CH01"]').click()`);
+  await waitFor(
+    `location.pathname.endsWith('/CH01')&&document.querySelectorAll('[data-question]').length===10&&!document.querySelector('[aria-busy="true"]')`,
+    "click opens chapter one only",
+  );
+  assert.deepEqual([...new Set(report.questionRequests)], ["CH01"]);
   assert.equal(
     await evaluate(`document.querySelectorAll('[data-feedback]').length`),
     0,
@@ -306,7 +337,7 @@ try {
   );
   await screenshot("desktop-top.png");
   report.checks.push(
-    "initial answers hidden, no defaults, seven chapter colors",
+    "chapter click loads questions only in that chapter, initial answers hidden, no defaults",
   );
   const first = questions[0];
   await evaluate(
@@ -379,7 +410,7 @@ try {
   await delay(1000);
   await send("Page.reload");
   await waitFor(
-    `!!document.querySelector('[data-question="${numeric.id}"]')`,
+    `document.querySelector('[name="${numeric.id}"]')?.value==='123'&&!document.querySelector('[aria-busy="true"]')`,
     "reload preserves filter",
   );
   assert.equal(
@@ -431,6 +462,76 @@ try {
     "page two",
   );
   report.checks.push("pagination reaches remaining chapter questions");
+  await show(first);
+  await fill(
+    first,
+    wrong(
+      first,
+      privateAnswer(first.id).answer,
+      canonical(privateAnswer(first.id).answer),
+    ),
+  );
+  await submit(first, false);
+  await waitFor(
+    `document.querySelector('[data-practice-stats="CH01"]').textContent.includes('正确率')`,
+    "chapter accuracy updates",
+  );
+  await evaluate(
+    `[...document.querySelectorAll('a')].find(e=>e.textContent.includes('返回章节目录')).click()`,
+  );
+  await waitFor(
+    `document.querySelectorAll('[data-chapter]').length===7&&!document.body.textContent.includes('正在读取答题记录')`,
+    "return to chapters with saved statistics",
+  );
+  const savedAttempts = [...cloud.values()][0].attempts;
+  const chapterAttempts = Object.entries(savedAttempts).filter(([id]) =>
+    id.startsWith("M6A_CH01_"),
+  );
+  const answered = chapterAttempts.length,
+    correct = chapterAttempts.filter(([, a]) => a.correct).length;
+  const accuracy = Math.round((correct / answered) * 1000) / 10;
+  const chapterText = await evaluate(
+    `document.querySelector('[data-chapter="CH01"]').textContent`,
+  );
+  assert.ok(chapterText.includes(`已答 ${answered} 题`), chapterText);
+  assert.ok(chapterText.includes(`答对 ${correct} 题`), chapterText);
+  assert.ok(chapterText.includes(`正确率 ${accuracy}%`), chapterText);
+  assert.ok(
+    await evaluate(
+      `document.querySelector('[data-chapter="CH02"]').textContent.includes('正确率 —')`,
+    ),
+  );
+  assert.equal(
+    await evaluate(`document.querySelectorAll('[data-question]').length`),
+    0,
+  );
+  await screenshot("desktop-chapter-accuracy.png");
+  report.checks.push(
+    "returning overview shows unique answered count and latest-submission accuracy, including partial/multi-item failures",
+  );
+  const requestIndex = report.questionRequests.length;
+  await evaluate(`document.querySelector('[data-chapter="CH02"]').click()`);
+  await waitFor(
+    `location.pathname.endsWith('/CH02')&&document.querySelectorAll('[data-question]').length===10&&!document.querySelector('[aria-busy="true"]')`,
+    "chapter two ignores restored chapter one location",
+  );
+  assert.ok(
+    await evaluate(
+      `[...document.querySelectorAll('[data-question]')].every(e=>e.dataset.question.startsWith('M6A_CH02_'))`,
+    ),
+  );
+  assert.deepEqual(
+    [...new Set(report.questionRequests.slice(requestIndex))],
+    ["CH02"],
+  );
+  assert.ok(
+    await evaluate(
+      `document.querySelector('[data-practice-stats="CH02"]').textContent.includes('正确率 —')`,
+    ),
+  );
+  report.checks.push(
+    "independent chapter URLs load only their chapter, with isolated counts and accuracy",
+  );
   const diagram = questions.find((q) => q.diagram);
   await show(diagram);
   await send("Emulation.setDeviceMetricsOverride", {

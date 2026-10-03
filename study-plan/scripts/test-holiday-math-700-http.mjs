@@ -8,6 +8,25 @@ import {
   canonicalHolidayAnswer as canonical,
 } from "./holiday-math-test-utils.mjs";
 const origin = "http://127.0.0.1:3005";
+const practicePath =
+  "/subjects/4ea6b4fe-bfd3-440f-b780-6d71c2011609/national-day-math-practice";
+const overview = await fetch(`${origin}${practicePath}`);
+assert.equal(overview.status, 200);
+const overviewHtml = await overview.text();
+assert.equal((overviewHtml.match(/data-chapter="CH0[1-7]"/g) ?? []).length, 7);
+assert.ok(overviewHtml.includes("正确率"));
+assert.ok(!overviewHtml.includes('id="holiday-questions"'));
+for (let chapter = 1; chapter <= 7; chapter++) {
+  const response = await fetch(`${origin}${practicePath}/CH0${chapter}`);
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.ok(html.includes("返回章节目录"));
+  assert.ok(html.includes("本章练习进度"));
+  assert.ok(html.includes('id="holiday-questions"'));
+  assert.ok(!html.includes("data-chapter="));
+}
+const missingChapter = await fetch(`${origin}${practicePath}/CH99`);
+assert.equal(missingChapter.status, 404);
 const { holidayPrivateAnswer: privateAnswer } = await loadHolidayTestModule(
   "src/server/holiday-math-700/private-bank.ts",
 );

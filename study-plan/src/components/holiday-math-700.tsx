@@ -18,6 +18,10 @@ import {
   useHolidayMathProgress,
   type HolidayAttempt,
 } from "@/lib/holiday-math-700-progress";
+import {
+  holidayMathStats,
+  holidayAccuracyLabel,
+} from "@/lib/holiday-math-700-stats";
 import Rich from "./holiday-math-rich-text";
 import s from "./holiday-math-700.module.css";
 
@@ -540,12 +544,43 @@ function QuestionCard({
 export default function HolidayMath700({
   subjectId,
   chapters,
+  chapterId,
 }: {
   subjectId: string;
   chapters: HolidayChapter[];
+  chapterId?: string;
 }) {
-  const progress = useHolidayMathProgress(subjectId),
-    location = progress.progress.location;
+  const progress = useHolidayMathProgress(subjectId);
+  const savedLocation = progress.progress.location;
+  const location =
+    chapterId && savedLocation.chapter !== chapterId
+      ? { chapter: chapterId, difficulty: "", type: "", page: 1, id: "" }
+      : savedLocation;
+  const currentChapter = chapters.find((c) => c.chapter_id === chapterId);
+  const overviewUrl = `/subjects/${subjectId}/national-day-math-practice`;
+  const stats = holidayMathStats(progress.progress.attempts, chapterId);
+  const total =
+    currentChapter?.count ?? chapters.reduce((sum, c) => sum + c.count, 0);
+  const locate = progress.locate;
+  // The URL owns the chapter; a cloud-restored location must never load another chapter.
+  useEffect(() => {
+    if (!progress.ready || !chapterId || savedLocation.chapter === chapterId)
+      return;
+    let active = true;
+    void Promise.resolve().then(() => {
+      if (active)
+        locate({
+          chapter: chapterId,
+          difficulty: "",
+          type: "",
+          page: 1,
+          id: "",
+        });
+    });
+    return () => {
+      active = false;
+    };
+  }, [progress.ready, chapterId, savedLocation.chapter, locate]);
   const [data, setData] = useState<{
       questions: HolidayQuestion[];
       total: number;
@@ -567,7 +602,7 @@ export default function HolidayMath700({
   );
   const requestedWrongIds = wrongOnly ? wrongIds : "";
   useEffect(() => {
-    if (!progress.ready) return;
+    if (!chapterId || !progress.ready) return;
     const controller = new AbortController();
     const params = new URLSearchParams({
       chapter: location.chapter,
@@ -601,6 +636,7 @@ export default function HolidayMath700({
       });
     return () => controller.abort();
   }, [
+    chapterId,
     progress.ready,
     location.chapter,
     location.type,
@@ -619,36 +655,61 @@ export default function HolidayMath700({
       .getElementById("holiday-questions")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  const attempts = Object.values(progress.progress.attempts),
-    completed = attempts.filter((a) => a.correct).length;
   return (
     <main className={s.page}>
       <div className={s.wrap} style={chapterStyle(location.chapter)}>
-        <Link className={s.action} href={`/subjects/${subjectId}`}>
-          ← 返回数学
+        <Link
+          className={s.action}
+          href={chapterId ? overviewUrl : `/subjects/${subjectId}`}
+        >
+          {chapterId ? "← 返回章节目录" : "← 返回数学"}
         </Link>
         <header className={s.hero}>
           <p className={s.eyebrow}>NATIONAL DAY · MATH PRACTICE</p>
-          <h1 className={s.title}>国庆数学练习</h1>
+          <h1 className={s.title}>
+            {currentChapter ? currentChapter.chapter_title : "国庆数学练习"}
+          </h1>
           <p className={s.intro}>
-            七个章节，700 道题。从会算到会想，按自己的节奏向下练。
+            {currentChapter
+              ? `国庆数学练习 · 第 ${Number(chapterId?.slice(-2))} 章 · ${total} 道题。按自己的节奏，逐题练习。`
+              : "七个章节，700 道题。先选择一个章节，进入后再开始答题。"}
           </p>
           <p className={s.muted}>
             13 种题型 · 原题 SVG 图示 · 分步提示 · 提交后判题解析
           </p>
         </header>
-        <section className={s.panel}>
-          <h2 className={s.sectionHead}>我的练习进度</h2>
-          <p>
-            已提交 {attempts.length}/700 题 · 全部答对 {completed} 题 · 曾答错{" "}
-            {attempts.filter((a) => a.wrongCount > 0).length} 题
-          </p>
+        <section className={s.panel} data-practice-stats={chapterId ?? "all"}>
+          <h2 className={s.sectionHead}>
+            {chapterId ? "本章练习进度" : "我的练习进度"}
+          </h2>
+          <div aria-live="polite" aria-atomic="true">
+            <p>
+              {progress.ready
+                ? `已答 ${stats.answered}/${total} 题 · 答对 ${stats.correct} 题 · 曾答错 ${stats.previouslyWrong} 题`
+                : "正在读取答题记录…"}
+            </p>
+            <p className={s.accuracy}>
+              正确率{" "}
+              <strong>
+                {progress.ready
+                  ? holidayAccuracyLabel(stats.accuracy)
+                  : "读取中…"}
+              </strong>
+              {progress.ready && stats.answered === 0 && (
+                <span className={s.muted}> 尚未作答</span>
+              )}
+            </p>
+          </div>
           <progress
             className={s.progress}
-            aria-label="全部答对的题目进度"
-            value={completed}
-            max={700}
+            aria-label={chapterId ? "本章已答题目进度" : "已答题目总进度"}
+            value={stats.answered}
+            max={total}
           />
+          <p className={s.muted}>
+            正确率 = 答对题数 ÷
+            已答题数。每题以最近一次提交为准，多空、多小题全部正确才算答对；重复提交不增加已答题数。
+          </p>
           <p className={s.muted} role="status">
             {
               {
@@ -665,170 +726,188 @@ export default function HolidayMath700({
             </button>
           )}
         </section>
-        <section className={s.panel}>
-          <h2 className={s.sectionHead}>选择章节</h2>
-          <div className={s.chapters}>
-            {chapters.map((chapter, i) => (
-              <button
-                key={chapter.chapter_id}
-                type="button"
-                style={chapterStyle(chapter.chapter_id)}
-                className={s.chapter}
-                aria-pressed={location.chapter === chapter.chapter_id}
-                disabled={!progress.ready}
-                onClick={() => filter({ chapter: chapter.chapter_id })}
-              >
-                <strong>
-                  {String(i + 1).padStart(2, "0")} · {chapter.chapter_title}
-                </strong>
-                <span className={s.muted}>
-                  {" "}
-                  {chapter.count} 题 · 已答{" "}
-                  {
-                    Object.keys(progress.progress.attempts).filter((id) =>
-                      id.includes(`_${chapter.chapter_id}_`),
-                    ).length
-                  }{" "}
-                  题
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-        <section className={s.panel}>
-          <h2 className={s.sectionHead}>安排本次练习</h2>
-          <label className={s.inputUnit}>
-            <span className={s.fieldLabel}>练习范围</span>
-            <select
-              className={s.select}
-              disabled={!progress.ready}
-              value={wrongOnly ? "wrong" : "chapter"}
-              onChange={(e) => {
-                setWrongOnly(e.target.value === "wrong");
-                filter({});
-              }}
-            >
-              <option value="chapter">当前章节全部题目</option>
-              <option value="wrong">当前章节错题记录（改对后仍保留）</option>
-            </select>
-          </label>
-          <label className={s.inputUnit}>
-            <span className={s.fieldLabel}>题型</span>
-            <select
-              className={s.select}
-              disabled={!progress.ready}
-              value={location.type}
-              onChange={(e) => filter({ type: e.target.value })}
-            >
-              <option value="">全部题型</option>
-              {Object.entries(HOLIDAY_TYPE_LABELS).map(([type, label]) => (
-                <option value={type} key={type}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={s.inputUnit}>
-            <span className={s.fieldLabel}>难度</span>
-            <select
-              className={s.select}
-              disabled={!progress.ready}
-              value={location.difficulty}
-              onChange={(e) => filter({ difficulty: e.target.value })}
-            >
-              <option value="">全部难度</option>
-              {Object.entries(difficultyLabels).map(([type, label]) => (
-                <option key={type} value={type}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <p className={s.muted}>
-            每页 10 题，上下排列。难度标签来自原题库编者，尚未经过学生实测。
-          </p>
-        </section>
-        <section
-          id="holiday-questions"
-          style={{ scrollMarginTop: 90 }}
-          aria-busy={loading}
-        >
-          <h2 className={s.sectionHead}>
-            {
-              chapters.find((c) => c.chapter_id === location.chapter)
-                ?.chapter_title
-            }{" "}
-            · {wrongOnly ? "错题订正" : "章节练习"}
-          </h2>
-          {error && (
-            <div className={s.notice} role="alert">
-              {error}
-              <button
-                className={s.action}
-                onClick={() => setRetry((v) => v + 1)}
-              >
-                重新加载
-              </button>
-            </div>
-          )}
-          {loading || !progress.ready ? (
-            <p className={s.panel} role="status">
-              正在加载题目…
+        {!chapterId && (
+          <section className={s.panel}>
+            <h2 className={s.sectionHead}>选择章节</h2>
+            <p className={s.muted}>
+              点击章节进入练习，题目只在对应章节内显示。
             </p>
-          ) : (
-            data && (
-              <>
-                <p className={s.muted}>
-                  {data.total} 题 · 第 {data.page}/{data.pages} 页
+            <div className={s.chapters}>
+              {chapters.map((chapter, i) => {
+                const chapterStats = holidayMathStats(
+                  progress.progress.attempts,
+                  chapter.chapter_id,
+                );
+                return (
+                  <Link
+                    key={chapter.chapter_id}
+                    href={`${overviewUrl}/${chapter.chapter_id}`}
+                    prefetch={false}
+                    data-chapter={chapter.chapter_id}
+                    style={chapterStyle(chapter.chapter_id)}
+                    className={s.chapter}
+                  >
+                    <strong className={s.chapterTitle}>
+                      {String(i + 1).padStart(2, "0")} · {chapter.chapter_title}
+                    </strong>
+                    <span className={s.chapterMeta}>
+                      {progress.ready
+                        ? `共 ${chapter.count} 题 · 已答 ${chapterStats.answered} 题 · 答对 ${chapterStats.correct} 题`
+                        : `共 ${chapter.count} 题 · 正在读取进度…`}
+                    </span>
+                    <span className={s.chapterAccuracy}>
+                      正确率{" "}
+                      {progress.ready
+                        ? holidayAccuracyLabel(chapterStats.accuracy)
+                        : "读取中…"}
+                      {progress.ready &&
+                        chapterStats.answered === 0 &&
+                        " · 尚未作答"}
+                    </span>
+                    <span className={s.chapterEnter}>进入章节练习 →</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+        {chapterId && (
+          <>
+            <section className={s.panel}>
+              <h2 className={s.sectionHead}>安排本次练习</h2>
+              <label className={s.inputUnit}>
+                <span className={s.fieldLabel}>练习范围</span>
+                <select
+                  className={s.select}
+                  disabled={!progress.ready}
+                  value={wrongOnly ? "wrong" : "chapter"}
+                  onChange={(e) => {
+                    setWrongOnly(e.target.value === "wrong");
+                    filter({});
+                  }}
+                >
+                  <option value="chapter">当前章节全部题目</option>
+                  <option value="wrong">
+                    当前章节错题记录（改对后仍保留）
+                  </option>
+                </select>
+              </label>
+              <label className={s.inputUnit}>
+                <span className={s.fieldLabel}>题型</span>
+                <select
+                  className={s.select}
+                  disabled={!progress.ready}
+                  value={location.type}
+                  onChange={(e) => filter({ type: e.target.value })}
+                >
+                  <option value="">全部题型</option>
+                  {Object.entries(HOLIDAY_TYPE_LABELS).map(([type, label]) => (
+                    <option value={type} key={type}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={s.inputUnit}>
+                <span className={s.fieldLabel}>难度</span>
+                <select
+                  className={s.select}
+                  disabled={!progress.ready}
+                  value={location.difficulty}
+                  onChange={(e) => filter({ difficulty: e.target.value })}
+                >
+                  <option value="">全部难度</option>
+                  {Object.entries(difficultyLabels).map(([type, label]) => (
+                    <option key={type} value={type}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className={s.muted}>
+                每页 10 题，上下排列。难度标签来自原题库编者，尚未经过学生实测。
+              </p>
+            </section>
+            <section
+              id="holiday-questions"
+              style={{ scrollMarginTop: 90 }}
+              aria-busy={loading}
+            >
+              <h2 className={s.sectionHead}>
+                {currentChapter?.chapter_title} ·{" "}
+                {wrongOnly ? "错题订正" : "章节练习"}
+              </h2>
+              {error && (
+                <div className={s.notice} role="alert">
+                  {error}
+                  <button
+                    className={s.action}
+                    onClick={() => setRetry((v) => v + 1)}
+                  >
+                    重新加载
+                  </button>
+                </div>
+              )}
+              {loading || !progress.ready ? (
+                <p className={s.panel} role="status">
+                  正在加载题目…
                 </p>
-                {data.questions.length === 0 ? (
-                  <p className={s.panel}>
-                    这个范围暂时没有题目，请选择其他题型或章节。
-                  </p>
-                ) : (
-                  data.questions.map((question) => (
-                    <QuestionCard
-                      key={question.id}
-                      question={question}
-                      progress={progress}
-                    />
-                  ))
-                )}
-                <nav className={s.panel} aria-label="题目分页">
-                  <button
-                    className={s.action}
-                    disabled={data.page <= 1}
-                    onClick={() => page(data.page - 1)}
-                  >
-                    ↑ 上一页
-                  </button>
-                  <label className={s.inputUnit}>
-                    <span className={s.fieldLabel}>跳转页码</span>
-                    <select
-                      className={s.select}
-                      aria-label="跳转页码"
-                      value={data.page}
-                      onChange={(e) => page(Number(e.target.value))}
-                    >
-                      {Array.from({ length: data.pages }, (_, i) => (
-                        <option key={i} value={i + 1}>
-                          第 {i + 1} 页
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button
-                    className={s.action}
-                    disabled={data.page >= data.pages}
-                    onClick={() => page(data.page + 1)}
-                  >
-                    下一页 ↓
-                  </button>
-                </nav>
-              </>
-            )
-          )}
-        </section>
+              ) : (
+                data && (
+                  <>
+                    <p className={s.muted}>
+                      {data.total} 题 · 第 {data.page}/{data.pages} 页
+                    </p>
+                    {data.questions.length === 0 ? (
+                      <p className={s.panel}>
+                        这个范围暂时没有题目，请选择其他题型或章节。
+                      </p>
+                    ) : (
+                      data.questions.map((question) => (
+                        <QuestionCard
+                          key={question.id}
+                          question={question}
+                          progress={progress}
+                        />
+                      ))
+                    )}
+                    <nav className={s.panel} aria-label="题目分页">
+                      <button
+                        className={s.action}
+                        disabled={data.page <= 1}
+                        onClick={() => page(data.page - 1)}
+                      >
+                        ↑ 上一页
+                      </button>
+                      <label className={s.inputUnit}>
+                        <span className={s.fieldLabel}>跳转页码</span>
+                        <select
+                          className={s.select}
+                          aria-label="跳转页码"
+                          value={data.page}
+                          onChange={(e) => page(Number(e.target.value))}
+                        >
+                          {Array.from({ length: data.pages }, (_, i) => (
+                            <option key={i} value={i + 1}>
+                              第 {i + 1} 页
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <button
+                        className={s.action}
+                        disabled={data.page >= data.pages}
+                        onClick={() => page(data.page + 1)}
+                      >
+                        下一页 ↓
+                      </button>
+                    </nav>
+                  </>
+                )
+              )}
+            </section>
+          </>
+        )}
         <aside className={s.panel}>
           <h2 className={s.sectionHead}>练习与判分说明</h2>
           <p className={s.muted}>
