@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 250" width="100%" style="max-width:300px" role="img" aria-label="大圆内并排放着两个同样大的小圆，两个小圆的直径连起来恰好是大圆的一条直径，标注大圆半径 6 厘米" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="300" height="250" fill="#ffffff"/>
+<circle cx="150.0" cy="115.0" r="100.0" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="100.0" cy="115.0" r="50.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="200.0" cy="115.0" r="50.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<line x1="50.0" y1="115.0" x2="250.0" y2="115.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="150.0" y="237.0" font-size="14" text-anchor="middle" fill="#1f2937">大圆半径 6 厘米</text>
+</svg>

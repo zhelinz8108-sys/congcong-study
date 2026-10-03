@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 250" width="100%" style="max-width:260px" role="img" aria-label="4 个同心圆组成的靶子，最里面的圆半径标注 1 厘米，最外面的圆环涂色" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="260" height="250" fill="#ffffff"/>
+<circle cx="130.0" cy="120.0" r="104.0" fill="#cbd5e1" stroke="#2563eb" stroke-width="2"/>
+<circle cx="130.0" cy="120.0" r="78.0" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="130.0" cy="120.0" r="26.0" fill="none" stroke="#2563eb" stroke-width="2"/>
+<circle cx="130.0" cy="120.0" r="52.0" fill="none" stroke="#2563eb" stroke-width="2"/>
+<circle cx="130.0" cy="120.0" r="3" fill="#1f2937"/>
+<line x1="130.0" y1="120.0" x2="156.0" y2="120.0" stroke="#dc2626" stroke-width="1.5"/>
+<text x="143.0" y="90.0" font-size="11" text-anchor="middle" fill="#1f2937">1 厘米</text>
+</svg>

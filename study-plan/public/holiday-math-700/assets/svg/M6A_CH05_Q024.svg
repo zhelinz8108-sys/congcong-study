@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 240" width="100%" style="max-width:280px" role="img" aria-label="一个扇形，圆心角标注 90°，半径标注 6 厘米" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="280" height="240" fill="#ffffff"/>
+<path d="M50.0,200.0 L200.0,200.0 A150.0,150.0 0 0 0 50.0,50.0 Z" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<path d="M76.0,200.0 A26.0,26.0 0 0 0 50.0,174.0" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+<text x="88.0" y="178.0" font-size="13" text-anchor="middle" fill="#dc2626">90°</text>
+<text x="125.0" y="220.0" font-size="14" text-anchor="middle" fill="#1f2937">6 厘米</text>
+</svg>

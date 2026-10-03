@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 250" width="100%" style="max-width:340px" role="img" aria-label="两个同心圆组成的圆环，外圆半径标注 5 厘米，内圆半径标注 3 厘米，圆环部分涂色" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="340" height="250" fill="#ffffff"/>
+<circle cx="150.0" cy="125.0" r="95.0" fill="#cbd5e1" stroke="#2563eb" stroke-width="2"/>
+<circle cx="150.0" cy="125.0" r="55.0" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="150.0" cy="125.0" r="3" fill="#1f2937"/>
+<text x="154.0" y="117.0" font-size="14" fill="#1f2937">O</text>
+<line x1="150.0" y1="125.0" x2="226.0" y2="68.0" stroke="#2563eb" stroke-width="2"/>
+<text x="232.0" y="64.0" font-size="13" text-anchor="start" fill="#1f2937">R = 5 厘米</text>
+<line x1="150.0" y1="125.0" x2="95.0" y2="125.0" stroke="#dc2626" stroke-width="2"/>
+<text x="122.5" y="145.0" font-size="13" text-anchor="middle" fill="#1f2937">r = 3 厘米</text>
+</svg>

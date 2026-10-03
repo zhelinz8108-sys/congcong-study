@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 160" width="100%" style="max-width:360px" role="img" aria-label="三个同样大小的圆排成一排，相邻两圆相接，三个圆心用点标出，在同一条虚线上" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="360" height="160" fill="#ffffff"/>
+<circle cx="105.0" cy="80.0" r="45.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="105.0" cy="80.0" r="3" fill="#1f2937"/>
+<circle cx="195.0" cy="80.0" r="45.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="195.0" cy="80.0" r="3" fill="#1f2937"/>
+<circle cx="285.0" cy="80.0" r="45.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="285.0" cy="80.0" r="3" fill="#1f2937"/>
+<line x1="50.0" y1="80.0" x2="340.0" y2="80.0" stroke="#64748b" stroke-width="1" stroke-dasharray="5 4"/>
+</svg>

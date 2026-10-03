@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 210" width="100%" style="max-width:320px" role="img" aria-label="长 10 厘米、宽 6 厘米的长方形中画了一个最大的圆，圆与长方形上下两条边相接" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="320" height="210" fill="#ffffff"/>
+<rect x="50.0" y="45.0" width="200.0" height="120.0" fill="none" stroke="#1f2937" stroke-width="2"/>
+<circle cx="150.0" cy="105.0" r="60.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<text x="150.0" y="187.0" font-size="14" text-anchor="middle" fill="#1f2937">10 厘米</text>
+<text x="258.0" y="110.0" font-size="14" text-anchor="start" fill="#1f2937">6 厘米</text>
+</svg>

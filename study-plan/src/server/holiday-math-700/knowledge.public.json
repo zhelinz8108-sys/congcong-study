@@ -1,0 +1,1613 @@
+[
+  {
+    "id": "K01-01",
+    "chapter_id": "CH01",
+    "name": "一个数乘小数的意义",
+    "textbook_topic": "一个数乘小数（例1）",
+    "textbook_pages": [
+      2
+    ],
+    "review_topic": "知识点1 一个数乘小数的意义",
+    "review_pages": [
+      11,
+      12
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-02",
+    "chapter_id": "CH01",
+    "name": "小数乘小数的算理（分数/单位换算/面积模型）",
+    "textbook_topic": "一个数乘小数（例2、例3）",
+    "textbook_pages": [
+      2,
+      3
+    ],
+    "review_topic": "知识点2 从面积和分数理解小数乘法",
+    "review_pages": [
+      12
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-03",
+    "chapter_id": "CH01",
+    "name": "小数乘法竖式与积的小数位数",
+    "textbook_topic": "一个数乘小数（例3、练习一）",
+    "textbook_pages": [
+      3,
+      4,
+      5,
+      6
+    ],
+    "review_topic": "知识点3 计算、补0与化简",
+    "review_pages": [
+      12,
+      13
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-04",
+    "chapter_id": "CH01",
+    "name": "积的近似值",
+    "textbook_topic": "一个数乘小数（例4）",
+    "textbook_pages": [
+      4,
+      5
+    ],
+    "review_topic": "知识点4 积的近似值与钱数",
+    "review_pages": [
+      13
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-05",
+    "chapter_id": "CH01",
+    "name": "积与第一个乘数的大小关系",
+    "textbook_topic": "练习一第10、11题",
+    "textbook_pages": [
+      6
+    ],
+    "review_topic": "知识点5 积会变大还是变小",
+    "review_pages": [
+      14
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-06",
+    "chapter_id": "CH01",
+    "name": "除数是小数的除法算理（商不变）",
+    "textbook_topic": "一个数除以小数（例5）",
+    "textbook_pages": [
+      7,
+      8
+    ],
+    "review_topic": "知识点6 除以小数的意义与商不变",
+    "review_pages": [
+      14
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-07",
+    "chapter_id": "CH01",
+    "name": "除数是小数的竖式与补0",
+    "textbook_topic": "一个数除以小数（例5、练习二）",
+    "textbook_pages": [
+      8,
+      11,
+      12
+    ],
+    "review_topic": "知识点7 计算步骤与补0",
+    "review_pages": [
+      14,
+      15
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-08",
+    "chapter_id": "CH01",
+    "name": "商的近似值与单位换算",
+    "textbook_topic": "一个数除以小数（例6）",
+    "textbook_pages": [
+      9
+    ],
+    "review_topic": "知识点8 商的近似值",
+    "review_pages": [
+      15
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-09",
+    "chapter_id": "CH01",
+    "name": "进一法与去尾法",
+    "textbook_topic": "一个数除以小数（例7）",
+    "textbook_pages": [
+      10,
+      11,
+      12
+    ],
+    "review_topic": "知识点9 截尾法、进一法",
+    "review_pages": [
+      15,
+      16
+    ],
+    "planned_questions": 11,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-10",
+    "chapter_id": "CH01",
+    "name": "商与被除数的大小关系",
+    "textbook_topic": "练习二第9、10题",
+    "textbook_pages": [
+      12
+    ],
+    "review_topic": "知识点10 商与被除数的大小",
+    "review_pages": [
+      16
+    ],
+    "planned_questions": 6,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-11",
+    "chapter_id": "CH01",
+    "name": "有限小数、无限小数、循环小数",
+    "textbook_topic": "你知道吗（教材13页）",
+    "textbook_pages": [
+      13
+    ],
+    "review_topic": "知识点11 有限小数、循环小数",
+    "review_pages": [
+      16,
+      17
+    ],
+    "planned_questions": 5,
+    "core": false,
+    "extension": true
+  },
+  {
+    "id": "K01-12",
+    "chapter_id": "CH01",
+    "name": "小数乘除法解决实际问题",
+    "textbook_topic": "练习一、练习二综合题",
+    "textbook_pages": [
+      5,
+      6,
+      11,
+      12
+    ],
+    "review_topic": "单元自测",
+    "review_pages": [
+      17,
+      18
+    ],
+    "planned_questions": 12,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K01-13",
+    "chapter_id": "CH01",
+    "name": "分段计费中的小数乘除",
+    "textbook_topic": "生活中的分段计费",
+    "textbook_pages": [
+      26,
+      27,
+      28
+    ],
+    "review_topic": "综合实践 分段计费",
+    "review_pages": [
+      30,
+      31,
+      32
+    ],
+    "planned_questions": 5,
+    "core": false,
+    "extension": true
+  },
+  {
+    "id": "K02-01",
+    "chapter_id": "CH02",
+    "name": "分数四则混合运算顺序",
+    "textbook_topic": "例1",
+    "textbook_pages": [
+      15
+    ],
+    "review_topic": "知识点1 混合运算顺序",
+    "review_pages": [
+      19
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-02",
+    "chapter_id": "CH02",
+    "name": "运算律在分数小数中的应用（简算）",
+    "textbook_topic": "例1、练习三",
+    "textbook_pages": [
+      15,
+      17,
+      18
+    ],
+    "review_topic": "知识点2 运算律与常用简算",
+    "review_pages": [
+      20
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-03",
+    "chapter_id": "CH02",
+    "name": "分数小数混合运算（统一表示）",
+    "textbook_topic": "练习三第5题",
+    "textbook_pages": [
+      17
+    ],
+    "review_topic": "知识点3 分数和小数混算",
+    "review_pages": [
+      20,
+      21
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-04",
+    "chapter_id": "CH02",
+    "name": "有方向的估算（够不够）",
+    "textbook_topic": "例2",
+    "textbook_pages": [
+      16
+    ],
+    "review_topic": "知识点4 有方向的估算",
+    "review_pages": [
+      21
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-05",
+    "chapter_id": "CH02",
+    "name": "求一个数的几分之几及剩余部分",
+    "textbook_topic": "例3",
+    "textbook_pages": [
+      19,
+      21
+    ],
+    "review_topic": "知识点5 找单位1",
+    "review_pages": [
+      21,
+      22
+    ],
+    "planned_questions": 10,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-06",
+    "chapter_id": "CH02",
+    "name": "比一个数多（少）几分之几",
+    "textbook_topic": "例4",
+    "textbook_pages": [
+      20,
+      21,
+      22
+    ],
+    "review_topic": "知识点6 比单位1多或少几分之几",
+    "review_pages": [
+      22
+    ],
+    "planned_questions": 10,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-07",
+    "chapter_id": "CH02",
+    "name": "分率与具体数量的区分",
+    "textbook_topic": "练习四第11题",
+    "textbook_pages": [
+      22
+    ],
+    "review_topic": "知识点7 分率不等于具体数量",
+    "review_pages": [
+      22,
+      23
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-08",
+    "chapter_id": "CH02",
+    "name": "单位1改变与已知部分求整体",
+    "textbook_topic": "练习五第7、8题",
+    "textbook_pages": [
+      25
+    ],
+    "review_topic": "知识点8 比较标准改变",
+    "review_pages": [
+      23
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-09",
+    "chapter_id": "CH02",
+    "name": "多部分与两步以上分数应用题",
+    "textbook_topic": "练习四第14题",
+    "textbook_pages": [
+      22
+    ],
+    "review_topic": "知识点9 多个部分与两步以上",
+    "review_pages": [
+      23,
+      24
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-10",
+    "chapter_id": "CH02",
+    "name": "工程问题（工作总量看作1）",
+    "textbook_topic": "例5、练习五",
+    "textbook_pages": [
+      23,
+      24,
+      25
+    ],
+    "review_topic": "知识点10 工程问题",
+    "review_pages": [
+      24
+    ],
+    "planned_questions": 10,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-11",
+    "chapter_id": "CH02",
+    "name": "环形反向相遇与合作结构",
+    "textbook_topic": "练习五第3题",
+    "textbook_pages": [
+      24
+    ],
+    "review_topic": "知识点11 环形相遇",
+    "review_pages": [
+      25
+    ],
+    "planned_questions": 5,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K02-12",
+    "chapter_id": "CH02",
+    "name": "生活中的分段计费",
+    "textbook_topic": "主题活动 生活中的分段计费",
+    "textbook_pages": [
+      26,
+      27,
+      28,
+      29
+    ],
+    "review_topic": "综合实践 分段计费",
+    "review_pages": [
+      30,
+      31,
+      32,
+      33
+    ],
+    "planned_questions": 8,
+    "core": false,
+    "extension": true
+  },
+  {
+    "id": "K02-13",
+    "chapter_id": "CH02",
+    "name": "拓展：重叠计数、三分损益、跳水计分",
+    "textbook_topic": "你知道吗/思考题",
+    "textbook_pages": [
+      18,
+      22
+    ],
+    "review_topic": "知识点13 教材探究",
+    "review_pages": [
+      26,
+      27
+    ],
+    "planned_questions": 3,
+    "core": false,
+    "extension": true
+  },
+  {
+    "id": "K03-01",
+    "chapter_id": "CH03",
+    "name": "整数、分数、小数的计数单位",
+    "textbook_topic": "例1",
+    "textbook_pages": [
+      31
+    ],
+    "review_topic": "知识点1 计数单位与个数",
+    "review_pages": [
+      35
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-02",
+    "chapter_id": "CH03",
+    "name": "数由若干个计数单位组成",
+    "textbook_topic": "例1、练习六第1题",
+    "textbook_pages": [
+      31,
+      33,
+      40
+    ],
+    "review_topic": "知识点1 计数单位与个数",
+    "review_pages": [
+      35
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-03",
+    "chapter_id": "CH03",
+    "name": "分数基本性质与小数性质的联系",
+    "textbook_topic": "例1后",
+    "textbook_pages": [
+      32
+    ],
+    "review_topic": "知识点3 分数基本性质与小数性质",
+    "review_pages": [
+      36
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-04",
+    "chapter_id": "CH03",
+    "name": "比较大小即比较相同计数单位的个数",
+    "textbook_topic": "例2",
+    "textbook_pages": [
+      32,
+      33
+    ],
+    "review_topic": "知识点2 比较大小",
+    "review_pages": [
+      36
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-05",
+    "chapter_id": "CH03",
+    "name": "加减法意义与算法的一致性",
+    "textbook_topic": "例3、例4",
+    "textbook_pages": [
+      33,
+      34
+    ],
+    "review_topic": "知识点4 加减法的统一意义",
+    "review_pages": [
+      36,
+      37
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-06",
+    "chapter_id": "CH03",
+    "name": "加法运算律解释算法",
+    "textbook_topic": "例4",
+    "textbook_pages": [
+      34,
+      35
+    ],
+    "review_topic": "知识点4",
+    "review_pages": [
+      37
+    ],
+    "planned_questions": 6,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-07",
+    "chapter_id": "CH03",
+    "name": "乘法的意义（整数/分数/小数）",
+    "textbook_topic": "例5",
+    "textbook_pages": [
+      35,
+      36
+    ],
+    "review_topic": "知识点5 乘法的统一意义",
+    "review_pages": [
+      37
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-08",
+    "chapter_id": "CH03",
+    "name": "积的计数单位与个数",
+    "textbook_topic": "例5",
+    "textbook_pages": [
+      36,
+      37
+    ],
+    "review_topic": "知识点5 积的计数单位",
+    "review_pages": [
+      37
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-09",
+    "chapter_id": "CH03",
+    "name": "乘法运算律解释竖式",
+    "textbook_topic": "例5",
+    "textbook_pages": [
+      37
+    ],
+    "review_topic": "知识点6 运算律解释笔算",
+    "review_pages": [
+      38
+    ],
+    "planned_questions": 6,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-10",
+    "chapter_id": "CH03",
+    "name": "除法意义与商的计数单位",
+    "textbook_topic": "例6",
+    "textbook_pages": [
+      38
+    ],
+    "review_topic": "知识点7 除法的统一意义",
+    "review_pages": [
+      38
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-11",
+    "chapter_id": "CH03",
+    "name": "除以一个数等于乘它的倒数",
+    "textbook_topic": "例6",
+    "textbook_pages": [
+      39
+    ],
+    "review_topic": "知识点8 除以非0数",
+    "review_pages": [
+      39
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K03-12",
+    "chapter_id": "CH03",
+    "name": "二进制记数法",
+    "textbook_topic": "二进制的秘密",
+    "textbook_pages": [
+      42,
+      43
+    ],
+    "review_topic": "知识点1-2 满二进一与位权",
+    "review_pages": [
+      41,
+      42
+    ],
+    "planned_questions": 8,
+    "core": false,
+    "extension": true
+  },
+  {
+    "id": "K03-13",
+    "chapter_id": "CH03",
+    "name": "五进制、八进制",
+    "textbook_topic": "二进制的秘密 自主思考",
+    "textbook_pages": [
+      43
+    ],
+    "review_topic": "知识点3 五进制八进制",
+    "review_pages": [
+      42,
+      44
+    ],
+    "planned_questions": 4,
+    "core": false,
+    "extension": true
+  },
+  {
+    "id": "K04-01",
+    "chapter_id": "CH04",
+    "name": "比的意义、读写与前后项",
+    "textbook_topic": "例1",
+    "textbook_pages": [
+      45
+    ],
+    "review_topic": "知识点1 比表示倍数关系",
+    "review_pages": [
+      45,
+      46
+    ],
+    "planned_questions": 6,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-02",
+    "chapter_id": "CH04",
+    "name": "比与分数、除法的关系",
+    "textbook_topic": "例1",
+    "textbook_pages": [
+      46
+    ],
+    "review_topic": "知识点1",
+    "review_pages": [
+      46
+    ],
+    "planned_questions": 6,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-03",
+    "chapter_id": "CH04",
+    "name": "比值与不同类量的比",
+    "textbook_topic": "例2、例3",
+    "textbook_pages": [
+      47,
+      48
+    ],
+    "review_topic": "知识点1 比值",
+    "review_pages": [
+      46,
+      47
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-04",
+    "chapter_id": "CH04",
+    "name": "用比值比较（形状、优惠、成功率）",
+    "textbook_topic": "例2、练习七",
+    "textbook_pages": [
+      47,
+      49,
+      50,
+      51
+    ],
+    "review_topic": "知识点2 用共同标准比较",
+    "review_pages": [
+      47,
+      48
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-05",
+    "chapter_id": "CH04",
+    "name": "比的基本性质",
+    "textbook_topic": "例4",
+    "textbook_pages": [
+      52
+    ],
+    "review_topic": "知识点3 比的基本性质",
+    "review_pages": [
+      48
+    ],
+    "planned_questions": 6,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-06",
+    "chapter_id": "CH04",
+    "name": "化简比（整数、分数、小数、单位）",
+    "textbook_topic": "例5",
+    "textbook_pages": [
+      53,
+      55
+    ],
+    "review_topic": "知识点3 最简整数比",
+    "review_pages": [
+      48,
+      49
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-07",
+    "chapter_id": "CH04",
+    "name": "按比分配（两项、三项）",
+    "textbook_topic": "例6、练习八",
+    "textbook_pages": [
+      53,
+      54,
+      55,
+      56
+    ],
+    "review_topic": "知识点4 按比分配",
+    "review_pages": [
+      49,
+      50
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-08",
+    "chapter_id": "CH04",
+    "name": "已知差或一部分求其他量",
+    "textbook_topic": "练习九第14题、期末复习",
+    "textbook_pages": [
+      63,
+      115
+    ],
+    "review_topic": "知识点4 已知差用份数差",
+    "review_pages": [
+      50
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-09",
+    "chapter_id": "CH04",
+    "name": "配制与稀释",
+    "textbook_topic": "练习八第8题、练习九第11题",
+    "textbook_pages": [
+      56,
+      62
+    ],
+    "review_topic": "知识点5 配制与稀释",
+    "review_pages": [
+      51
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-10",
+    "chapter_id": "CH04",
+    "name": "比例的意义、内项外项",
+    "textbook_topic": "例7",
+    "textbook_pages": [
+      58
+    ],
+    "review_topic": "知识点6 比例是两个比相等",
+    "review_pages": [
+      52
+    ],
+    "planned_questions": 6,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-11",
+    "chapter_id": "CH04",
+    "name": "比例的基本性质与判断",
+    "textbook_topic": "例8、试一试",
+    "textbook_pages": [
+      59,
+      60,
+      61
+    ],
+    "review_topic": "知识点7 比例基本性质",
+    "review_pages": [
+      52,
+      53
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-12",
+    "chapter_id": "CH04",
+    "name": "求比例中的未知项",
+    "textbook_topic": "例9",
+    "textbook_pages": [
+      60,
+      61
+    ],
+    "review_topic": "知识点7 求未知项",
+    "review_pages": [
+      53
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-13",
+    "chapter_id": "CH04",
+    "name": "用比例解决实际问题",
+    "textbook_topic": "例9、练习九",
+    "textbook_pages": [
+      60,
+      62
+    ],
+    "review_topic": "知识点8 列比例要有不变关系",
+    "review_pages": [
+      53,
+      54
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K04-14",
+    "chapter_id": "CH04",
+    "name": "黄金比与斐波那契数列",
+    "textbook_topic": "神奇的黄金比",
+    "textbook_pages": [
+      64,
+      65,
+      66,
+      67
+    ],
+    "review_topic": "综合活动 黄金比",
+    "review_pages": [
+      57,
+      58,
+      59,
+      60
+    ],
+    "planned_questions": 5,
+    "core": false,
+    "extension": true
+  },
+  {
+    "id": "K04-15",
+    "chapter_id": "CH04",
+    "name": "边长比与面积比",
+    "textbook_topic": "练习七第2题、练习八第4题",
+    "textbook_pages": [
+      49,
+      55
+    ],
+    "review_topic": "知识点8 面积随边长平方变化",
+    "review_pages": [
+      54
+    ],
+    "planned_questions": 5,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-01",
+    "chapter_id": "CH05",
+    "name": "圆心、半径、直径及关系",
+    "textbook_topic": "例1",
+    "textbook_pages": [
+      69,
+      70
+    ],
+    "review_topic": "知识点1 圆心定位置半径定大小",
+    "review_pages": [
+      61,
+      62
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-02",
+    "chapter_id": "CH05",
+    "name": "圆及组合图形的对称轴",
+    "textbook_topic": "例1、整理与练习第2题",
+    "textbook_pages": [
+      70,
+      84
+    ],
+    "review_topic": "知识点1",
+    "review_pages": [
+      62
+    ],
+    "planned_questions": 5,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-03",
+    "chapter_id": "CH05",
+    "name": "弧、圆心角与扇形",
+    "textbook_topic": "例2",
+    "textbook_pages": [
+      72,
+      85
+    ],
+    "review_topic": "知识点2 圆弧圆心角扇形",
+    "review_pages": [
+      62,
+      63
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-04",
+    "chapter_id": "CH05",
+    "name": "用圆设计图案",
+    "textbook_topic": "例3",
+    "textbook_pages": [
+      73,
+      75
+    ],
+    "review_topic": "知识点1 设计图案",
+    "review_pages": [
+      62
+    ],
+    "planned_questions": 5,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-05",
+    "chapter_id": "CH05",
+    "name": "圆的位置与大小",
+    "textbook_topic": "练习十",
+    "textbook_pages": [
+      74
+    ],
+    "review_topic": "知识点1",
+    "review_pages": [
+      61
+    ],
+    "planned_questions": 5,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-06",
+    "chapter_id": "CH05",
+    "name": "圆周率的意义与历史",
+    "textbook_topic": "例4、你知道吗",
+    "textbook_pages": [
+      76,
+      77,
+      78
+    ],
+    "review_topic": "知识点3 圆周率",
+    "review_pages": [
+      63
+    ],
+    "planned_questions": 5,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-07",
+    "chapter_id": "CH05",
+    "name": "圆的周长计算",
+    "textbook_topic": "例4、练习十一",
+    "textbook_pages": [
+      77,
+      82
+    ],
+    "review_topic": "知识点3 周长",
+    "review_pages": [
+      63,
+      64
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-08",
+    "chapter_id": "CH05",
+    "name": "由周长求半径或直径",
+    "textbook_topic": "练习十一第10题",
+    "textbook_pages": [
+      83
+    ],
+    "review_topic": "知识点3",
+    "review_pages": [
+      64
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-09",
+    "chapter_id": "CH05",
+    "name": "圆面积公式的推导",
+    "textbook_topic": "例5",
+    "textbook_pages": [
+      79,
+      80,
+      87
+    ],
+    "review_topic": "知识点4 分割拼图",
+    "review_pages": [
+      64
+    ],
+    "planned_questions": 6,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-10",
+    "chapter_id": "CH05",
+    "name": "圆面积计算（含由周长求面积）",
+    "textbook_topic": "例6、练习十一",
+    "textbook_pages": [
+      81,
+      82,
+      83
+    ],
+    "review_topic": "知识点4 半径要平方",
+    "review_pages": [
+      64,
+      65
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-11",
+    "chapter_id": "CH05",
+    "name": "圆环面积",
+    "textbook_topic": "例7",
+    "textbook_pages": [
+      81,
+      82
+    ],
+    "review_topic": "知识点6 圆环",
+    "review_pages": [
+      66,
+      67
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-12",
+    "chapter_id": "CH05",
+    "name": "半圆与组合图形的周长、面积",
+    "textbook_topic": "试一试、练习十一第7题",
+    "textbook_pages": [
+      81,
+      82,
+      86
+    ],
+    "review_topic": "知识点5、7 半圆与组合图",
+    "review_pages": [
+      65,
+      66,
+      67,
+      68
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-13",
+    "chapter_id": "CH05",
+    "name": "周长相同比面积；半径变化的影响",
+    "textbook_topic": "练习十一第12题",
+    "textbook_pages": [
+      83,
+      87
+    ],
+    "review_topic": "知识点8 相同周长比较面积",
+    "review_pages": [
+      68,
+      69
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-14",
+    "chapter_id": "CH05",
+    "name": "车轮滚动、绕线等实际问题",
+    "textbook_topic": "整理与练习第8、9题",
+    "textbook_pages": [
+      85,
+      116
+    ],
+    "review_topic": "单元自测",
+    "review_pages": [
+      70,
+      71
+    ],
+    "planned_questions": 6,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K05-15",
+    "chapter_id": "CH05",
+    "name": "体育中的数学（跑道、赛制、场地）",
+    "textbook_topic": "体育中的数学",
+    "textbook_pages": [
+      88,
+      89,
+      90,
+      91
+    ],
+    "review_topic": "综合活动 体育中的数学",
+    "review_pages": [
+      72,
+      73,
+      74,
+      75,
+      76
+    ],
+    "planned_questions": 6,
+    "core": false,
+    "extension": true
+  },
+  {
+    "id": "K06-01",
+    "chapter_id": "CH06",
+    "name": "放大与缩小的意义（形状不变）",
+    "textbook_topic": "例1",
+    "textbook_pages": [
+      93,
+      94
+    ],
+    "review_topic": "知识点1 保持形状",
+    "review_pages": [
+      78
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-02",
+    "chapter_id": "CH06",
+    "name": "判断放缩比及前后项含义",
+    "textbook_topic": "例1、练一练",
+    "textbook_pages": [
+      93,
+      94,
+      96
+    ],
+    "review_topic": "知识点1",
+    "review_pages": [
+      78
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-03",
+    "chapter_id": "CH06",
+    "name": "在方格纸上画放缩后的图形",
+    "textbook_topic": "例2、练习十二",
+    "textbook_pages": [
+      95,
+      96,
+      97
+    ],
+    "review_topic": "知识点3 方格纸画放缩",
+    "review_pages": [
+      79,
+      80
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-04",
+    "chapter_id": "CH06",
+    "name": "对应边与对应角",
+    "textbook_topic": "练习十二第5题",
+    "textbook_pages": [
+      97
+    ],
+    "review_topic": "知识点2 求新长度与原长度",
+    "review_pages": [
+      78,
+      79
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-05",
+    "chapter_id": "CH06",
+    "name": "放缩后周长、面积的变化",
+    "textbook_topic": "练习十二第6题",
+    "textbook_pages": [
+      97
+    ],
+    "review_topic": "知识点4 长度周长面积变化",
+    "review_pages": [
+      80,
+      81
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-06",
+    "chapter_id": "CH06",
+    "name": "比例尺的意义",
+    "textbook_topic": "例3",
+    "textbook_pages": [
+      98
+    ],
+    "review_topic": "知识点5 比例尺必须统一单位",
+    "review_pages": [
+      81,
+      82
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-07",
+    "chapter_id": "CH06",
+    "name": "线段比例尺与数值比例尺",
+    "textbook_topic": "例3后、练一练",
+    "textbook_pages": [
+      99
+    ],
+    "review_topic": "知识点5",
+    "review_pages": [
+      82
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-08",
+    "chapter_id": "CH06",
+    "name": "求比例尺",
+    "textbook_topic": "练一练、练习十三",
+    "textbook_pages": [
+      99,
+      101
+    ],
+    "review_topic": "知识点6 三种基本问题",
+    "review_pages": [
+      82,
+      83
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-09",
+    "chapter_id": "CH06",
+    "name": "已知比例尺求实际距离",
+    "textbook_topic": "例4",
+    "textbook_pages": [
+      99,
+      100,
+      101
+    ],
+    "review_topic": "知识点6",
+    "review_pages": [
+      83
+    ],
+    "planned_questions": 10,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-10",
+    "chapter_id": "CH06",
+    "name": "已知比例尺求图上距离",
+    "textbook_topic": "例4练一练",
+    "textbook_pages": [
+      100,
+      101
+    ],
+    "review_topic": "知识点6",
+    "review_pages": [
+      83
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-11",
+    "chapter_id": "CH06",
+    "name": "换比例尺与比例尺综合问题",
+    "textbook_topic": "练习十三第6、7题",
+    "textbook_pages": [
+      102
+    ],
+    "review_topic": "知识点7 换图纸与路线长度",
+    "review_pages": [
+      84
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K06-12",
+    "chapter_id": "CH06",
+    "name": "平面图中按方向和比例尺定位",
+    "textbook_topic": "练习十三第4题",
+    "textbook_pages": [
+      100,
+      101
+    ],
+    "review_topic": "知识点7",
+    "review_pages": [
+      84
+    ],
+    "planned_questions": 5,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-01",
+    "chapter_id": "CH07",
+    "name": "行、列与数对",
+    "textbook_topic": "例1",
+    "textbook_pages": [
+      104
+    ],
+    "review_topic": "知识点1 数对是有顺序的两个数",
+    "review_pages": [
+      87,
+      88
+    ],
+    "planned_questions": 12,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-02",
+    "chapter_id": "CH07",
+    "name": "数对与图形（同行同列、平行相等）",
+    "textbook_topic": "试一试、练习十四第2题",
+    "textbook_pages": [
+      105,
+      109
+    ],
+    "review_topic": "知识点2 数对中的规律",
+    "review_pages": [
+      88,
+      89
+    ],
+    "planned_questions": 10,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-03",
+    "chapter_id": "CH07",
+    "name": "数对与平移、规律",
+    "textbook_topic": "练一练、期末复习第23题",
+    "textbook_pages": [
+      105,
+      117
+    ],
+    "review_topic": "知识点2 平移",
+    "review_pages": [
+      89
+    ],
+    "planned_questions": 10,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-04",
+    "chapter_id": "CH07",
+    "name": "方向（北偏东等）",
+    "textbook_topic": "例2",
+    "textbook_pages": [
+      105,
+      106
+    ],
+    "review_topic": "知识点3",
+    "review_pages": [
+      89,
+      90
+    ],
+    "planned_questions": 9,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-05",
+    "chapter_id": "CH07",
+    "name": "用方向和距离描述位置",
+    "textbook_topic": "例2",
+    "textbook_pages": [
+      106,
+      107
+    ],
+    "review_topic": "知识点3 观测点方向距离",
+    "review_pages": [
+      90
+    ],
+    "planned_questions": 12,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-06",
+    "chapter_id": "CH07",
+    "name": "按方向和距离画出位置",
+    "textbook_topic": "例3、试一试",
+    "textbook_pages": [
+      107,
+      108
+    ],
+    "review_topic": "知识点5 画点",
+    "review_pages": [
+      91,
+      92
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-07",
+    "chapter_id": "CH07",
+    "name": "观测点改变与相对位置",
+    "textbook_topic": "练习十四第7题",
+    "textbook_pages": [
+      111
+    ],
+    "review_topic": "知识点4 相对观测点与反向方位",
+    "review_pages": [
+      91
+    ],
+    "planned_questions": 10,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-08",
+    "chapter_id": "CH07",
+    "name": "描述与计算路线",
+    "textbook_topic": "练习十四第1、8题",
+    "textbook_pages": [
+      109,
+      111
+    ],
+    "review_topic": "知识点5 路线",
+    "review_pages": [
+      92
+    ],
+    "planned_questions": 10,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-09",
+    "chapter_id": "CH07",
+    "name": "雷达图中的位置",
+    "textbook_topic": "练习十四第4题",
+    "textbook_pages": [
+      110
+    ],
+    "review_topic": "知识点3",
+    "review_pages": [
+      90
+    ],
+    "planned_questions": 7,
+    "core": true,
+    "extension": false
+  },
+  {
+    "id": "K07-10",
+    "chapter_id": "CH07",
+    "name": "围棋棋盘中的位置（文化拓展）",
+    "textbook_topic": "单元主题图",
+    "textbook_pages": [
+      103
+    ],
+    "review_topic": "第7单元导入",
+    "review_pages": [
+      87
+    ],
+    "planned_questions": 4,
+    "core": false,
+    "extension": true
+  },
+  {
+    "id": "K07-11",
+    "chapter_id": "CH07",
+    "name": "数对与旋转、轴对称",
+    "textbook_topic": "期末复习第23题",
+    "textbook_pages": [
+      117
+    ],
+    "review_topic": "综合18",
+    "review_pages": [
+      101
+    ],
+    "planned_questions": 8,
+    "core": true,
+    "extension": false
+  }
+]

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 236" width="100%" style="max-width:480px" role="img" aria-label="方格纸上的五个长方形：甲长 4 宽 2，乙长 2 宽 1，丙长 3 宽 1，丁长 2 宽 2，戊长 6 宽 3" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="480" height="236" fill="#ffffff"/>
+<line x1="34" y1="206" x2="34" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="60" y1="206" x2="60" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="86" y1="206" x2="86" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="112" y1="206" x2="112" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="138" y1="206" x2="138" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="164" y1="206" x2="164" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="190" y1="206" x2="190" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="216" y1="206" x2="216" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="242" y1="206" x2="242" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="268" y1="206" x2="268" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="294" y1="206" x2="294" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="320" y1="206" x2="320" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="346" y1="206" x2="346" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="372" y1="206" x2="372" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="398" y1="206" x2="398" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="424" y1="206" x2="424" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="450" y1="206" x2="450" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="206" x2="450" y2="206" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="180" x2="450" y2="180" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="154" x2="450" y2="154" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="128" x2="450" y2="128" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="102" x2="450" y2="102" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="76" x2="450" y2="76" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="50" x2="450" y2="50" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="24" x2="450" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<polygon points="60.0,180.0 164.0,180.0 164.0,128.0 60.0,128.0" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+<text x="112.0" y="159.0" font-size="14" text-anchor="middle" fill="#1f2937">甲</text>
+<polygon points="190.0,180.0 242.0,180.0 242.0,154.0 190.0,154.0" fill="#fde68a" stroke="#2563eb" stroke-width="2"/>
+<text x="216.0" y="172.0" font-size="14" text-anchor="middle" fill="#1f2937">乙</text>
+<polygon points="268.0,180.0 346.0,180.0 346.0,154.0 268.0,154.0" fill="#fde68a" stroke="#2563eb" stroke-width="2"/>
+<text x="307.0" y="172.0" font-size="14" text-anchor="middle" fill="#1f2937">丙</text>
+<polygon points="372.0,180.0 424.0,180.0 424.0,128.0 372.0,128.0" fill="#fde68a" stroke="#2563eb" stroke-width="2"/>
+<text x="398.0" y="159.0" font-size="14" text-anchor="middle" fill="#1f2937">丁</text>
+<polygon points="190.0,128.0 346.0,128.0 346.0,50.0 190.0,50.0" fill="#dcfce7" stroke="#2563eb" stroke-width="2"/>
+<text x="268.0" y="94.0" font-size="14" text-anchor="middle" fill="#1f2937">戊</text>
+</svg>

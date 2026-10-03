@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 250" width="100%" style="max-width:260px" role="img" aria-label="边长 8 厘米的正方形，四个角上各有一个以顶点为圆心的四分之一圆（涂色），中间留白" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="260" height="250" fill="#ffffff"/>
+<rect x="40.0" y="35.0" width="180.0" height="180.0" fill="#ffffff" stroke="#1f2937" stroke-width="2"/>
+<path d="M40.0,215.0 L130.0,215.0 A90.0,90.0 0 0 0 40.0,125.0 Z" fill="#cbd5e1" stroke="#2563eb" stroke-width="2"/>
+<path d="M220.0,215.0 L220.0,125.0 A90.0,90.0 0 0 0 130.0,215.0 Z" fill="#cbd5e1" stroke="#2563eb" stroke-width="2"/>
+<path d="M220.0,35.0 L130.0,35.0 A90.0,90.0 0 0 0 220.0,125.0 Z" fill="#cbd5e1" stroke="#2563eb" stroke-width="2"/>
+<path d="M40.0,35.0 L40.0,125.0 A90.0,90.0 0 0 0 130.0,35.0 Z" fill="#cbd5e1" stroke="#2563eb" stroke-width="2"/>
+<rect x="40.0" y="35.0" width="180.0" height="180.0" fill="none" stroke="#1f2937" stroke-width="2"/>
+<text x="130.0" y="237.0" font-size="14" text-anchor="middle" fill="#1f2937">8 厘米</text>
+</svg>

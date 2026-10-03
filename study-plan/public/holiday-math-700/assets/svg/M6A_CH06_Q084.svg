@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 438 230" width="100%" style="max-width:438px" role="img" aria-label="方格纸上的长方形 A 长 10 格、宽 6 格，长方形 B 长 5 格、宽 3 格" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="438" height="230" fill="#ffffff"/>
+<line x1="34" y1="200" x2="34" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="56" y1="200" x2="56" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="78" y1="200" x2="78" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="100" y1="200" x2="100" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="122" y1="200" x2="122" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="144" y1="200" x2="144" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="166" y1="200" x2="166" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="188" y1="200" x2="188" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="210" y1="200" x2="210" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="232" y1="200" x2="232" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="254" y1="200" x2="254" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="276" y1="200" x2="276" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="298" y1="200" x2="298" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="320" y1="200" x2="320" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="342" y1="200" x2="342" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="364" y1="200" x2="364" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="386" y1="200" x2="386" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="408" y1="200" x2="408" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="200" x2="408" y2="200" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="178" x2="408" y2="178" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="156" x2="408" y2="156" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="134" x2="408" y2="134" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="112" x2="408" y2="112" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="90" x2="408" y2="90" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="68" x2="408" y2="68" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="46" x2="408" y2="46" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="24" x2="408" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<polygon points="56.0,178.0 276.0,178.0 276.0,46.0 56.0,46.0" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+<text x="166.0" y="117.0" font-size="14" text-anchor="middle" fill="#1f2937">A</text>
+<polygon points="298.0,178.0 408.0,178.0 408.0,112.0 298.0,112.0" fill="#fde68a" stroke="#2563eb" stroke-width="2"/>
+<text x="353.0" y="150.0" font-size="14" text-anchor="middle" fill="#1f2937">B</text>
+</svg>

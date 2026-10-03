@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 210" width="100%" style="max-width:380px" role="img" aria-label="运动场示意图：上下两条直道各长 80 米，两端是半圆，右端半圆的直径标注 60 米" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="380" height="210" fill="#ffffff"/>
+<path d="M110,45 L270,45 A60,60 0 0 1 270,165 L110,165 A60,60 0 0 1 110,45 Z" fill="#dcfce7" stroke="#2563eb" stroke-width="2"/>
+<line x1="270.0" y1="45.0" x2="270.0" y2="165.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="190.0" y="37.0" font-size="14" text-anchor="middle" fill="#1f2937">80 米</text>
+<text x="278.0" y="110.0" font-size="14" text-anchor="start" fill="#1f2937">60 米</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 220" width="100%" style="max-width:420px" role="img" aria-label="两个扇形：甲圆心角 60°、半径 6 厘米；乙圆心角 90°、半径 4 厘米" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="420" height="220" fill="#ffffff"/>
+<path d="M40.0,190.0 L190.0,190.0 A150.0,150.0 0 0 0 115.0,60.1 Z" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<path d="M64.0,190.0 A24.0,24.0 0 0 0 52.0,169.2" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+<text x="80.0" y="175.0" font-size="12" text-anchor="middle" fill="#dc2626">60°</text>
+<text x="115.0" y="210.0" font-size="14" text-anchor="middle" fill="#1f2937">甲：半径 6 厘米</text>
+<path d="M270.0,190.0 L370.0,190.0 A100.0,100.0 0 0 0 270.0,90.0 Z" fill="#fde68a" stroke="#2563eb" stroke-width="2"/>
+<path d="M292.0,190.0 A22.0,22.0 0 0 0 270.0,168.0" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+<text x="306.0" y="172.0" font-size="12" text-anchor="middle" fill="#dc2626">90°</text>
+<text x="320.0" y="210.0" font-size="14" text-anchor="middle" fill="#1f2937">乙：半径 4 厘米</text>
+</svg>

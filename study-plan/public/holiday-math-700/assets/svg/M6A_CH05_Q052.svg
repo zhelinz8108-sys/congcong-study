@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 200" width="100%" style="max-width:440px" role="img" aria-label="左边是平均分成许多小扇形的圆，右边是拼成的近似长方形，长标注 15.7 厘米，宽未标注" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="440" height="200" fill="#ffffff"/>
+<circle cx="70.0" cy="100.0" r="50.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<line x1="70.0" y1="100.0" x2="120.0" y2="100.0" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="116.2" y2="80.9" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="105.4" y2="64.6" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="89.1" y2="53.8" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="70.0" y2="50.0" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="50.9" y2="53.8" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="34.6" y2="64.6" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="23.8" y2="80.9" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="20.0" y2="100.0" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="23.8" y2="119.1" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="34.6" y2="135.4" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="50.9" y2="146.2" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="70.0" y2="150.0" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="89.1" y2="146.2" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="105.4" y2="135.4" stroke="#2563eb" stroke-width="1"/>
+<line x1="70.0" y1="100.0" x2="116.2" y2="119.1" stroke="#2563eb" stroke-width="1"/>
+<rect x="160.0" y="80.0" width="208.0" height="50.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<path d="M160,80 Q173.0,73 186,80" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M160,130 Q173.0,137 186,130" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<line x1="173.0" y1="80.0" x2="160.0" y2="130.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M186,80 Q199.0,73 212,80" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M186,130 Q199.0,137 212,130" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<line x1="199.0" y1="80.0" x2="212.0" y2="130.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M212,80 Q225.0,73 238,80" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M212,130 Q225.0,137 238,130" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<line x1="225.0" y1="80.0" x2="212.0" y2="130.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M238,80 Q251.0,73 264,80" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M238,130 Q251.0,137 264,130" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<line x1="251.0" y1="80.0" x2="264.0" y2="130.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M264,80 Q277.0,73 290,80" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M264,130 Q277.0,137 290,130" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<line x1="277.0" y1="80.0" x2="264.0" y2="130.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M290,80 Q303.0,73 316,80" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M290,130 Q303.0,137 316,130" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<line x1="303.0" y1="80.0" x2="316.0" y2="130.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M316,80 Q329.0,73 342,80" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M316,130 Q329.0,137 342,130" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<line x1="329.0" y1="80.0" x2="316.0" y2="130.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M342,80 Q355.0,73 368,80" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<path d="M342,130 Q355.0,137 368,130" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+<line x1="355.0" y1="80.0" x2="368.0" y2="130.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="264.0" y="66.0" font-size="14" text-anchor="middle" fill="#1f2937">长 = 15.7 厘米</text>
+<text x="376.0" y="110.0" font-size="14" text-anchor="start" fill="#1f2937">宽 = ?</text>
+<text x="138.0" y="106.0" font-size="22" text-anchor="middle" fill="#1f2937">→</text>
+</svg>

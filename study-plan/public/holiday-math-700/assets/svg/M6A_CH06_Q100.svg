@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 300" width="100%" style="max-width:360px" role="img" aria-label="以 O 地为中心的平面图：一条射线指向 A 地，与正北方向的夹角标注 30°，偏向东，标注图上距离 2 厘米，比例尺 1∶4000" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="360" height="300" fill="#ffffff"/>
+<line x1="320" y1="64" x2="320" y2="40" stroke="#1f2937" stroke-width="1.5"/><polygon points="320,34 315,44 325,44" fill="#1f2937"/><text x="320" y="30" font-size="13" text-anchor="middle" fill="#1f2937">北</text>
+<line x1="150.0" y1="55.0" x2="150.0" y2="285.0" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5 4"/>
+<line x1="20.0" y1="170.0" x2="300.0" y2="170.0" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5 4"/>
+<line x1="150.0" y1="170.0" x2="200.0" y2="83.4" stroke="#2563eb" stroke-width="2"/>
+<circle cx="200.0" cy="83.4" r="3.5" fill="#dc2626"/>
+<text x="206.0" y="77.4" font-size="14" fill="#1f2937">A 地</text>
+<path d="M165.0,144.0 A30.0,30.0 0 0 0 150.0,140.0" fill="none" stroke="#dc2626" stroke-width="1.5"/>
+<text x="161.9" y="129.6" font-size="12" text-anchor="middle" fill="#dc2626">30°</text>
+<text x="183.0" y="136.7" font-size="12" text-anchor="start" fill="#1f2937">2 厘米</text>
+<circle cx="150.0" cy="170.0" r="4" fill="#1f2937"/>
+<text x="110.0" y="188.0" font-size="14" fill="#1f2937">O 地</text>
+<text x="20.0" y="286.0" font-size="13" text-anchor="start" fill="#1f2937">比例尺 1∶4000</text>
+</svg>

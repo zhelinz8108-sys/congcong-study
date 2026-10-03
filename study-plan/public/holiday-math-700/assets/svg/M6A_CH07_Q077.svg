@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 272 236" width="100%" style="max-width:272px" role="img" aria-label="方格图上起点 (1,1)、书店 (3,5)、终点 (6,4)" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="272" height="236" fill="#ffffff"/>
+<line x1="34" y1="206" x2="34" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="60" y1="206" x2="60" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="86" y1="206" x2="86" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="112" y1="206" x2="112" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="138" y1="206" x2="138" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="164" y1="206" x2="164" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="190" y1="206" x2="190" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="216" y1="206" x2="216" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="242" y1="206" x2="242" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="206" x2="242" y2="206" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="180" x2="242" y2="180" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="154" x2="242" y2="154" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="128" x2="242" y2="128" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="102" x2="242" y2="102" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="76" x2="242" y2="76" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="50" x2="242" y2="50" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="24" x2="242" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<text x="34" y="222" font-size="12" text-anchor="middle" fill="#1f2937">0</text>
+<text x="60" y="222" font-size="12" text-anchor="middle" fill="#1f2937">1</text>
+<text x="86" y="222" font-size="12" text-anchor="middle" fill="#1f2937">2</text>
+<text x="112" y="222" font-size="12" text-anchor="middle" fill="#1f2937">3</text>
+<text x="138" y="222" font-size="12" text-anchor="middle" fill="#1f2937">4</text>
+<text x="164" y="222" font-size="12" text-anchor="middle" fill="#1f2937">5</text>
+<text x="190" y="222" font-size="12" text-anchor="middle" fill="#1f2937">6</text>
+<text x="216" y="222" font-size="12" text-anchor="middle" fill="#1f2937">7</text>
+<text x="242" y="222" font-size="12" text-anchor="middle" fill="#1f2937">8</text>
+<text x="26" y="184" font-size="12" text-anchor="end" fill="#1f2937">1</text>
+<text x="26" y="158" font-size="12" text-anchor="end" fill="#1f2937">2</text>
+<text x="26" y="132" font-size="12" text-anchor="end" fill="#1f2937">3</text>
+<text x="26" y="106" font-size="12" text-anchor="end" fill="#1f2937">4</text>
+<text x="26" y="80" font-size="12" text-anchor="end" fill="#1f2937">5</text>
+<text x="26" y="54" font-size="12" text-anchor="end" fill="#1f2937">6</text>
+<text x="26" y="28" font-size="12" text-anchor="end" fill="#1f2937">7</text>
+<circle cx="60.0" cy="180.0" r="3.5" fill="#1f2937"/>
+<text x="68.0" y="174.0" font-size="14" fill="#1f2937">起点</text>
+<circle cx="112.0" cy="76.0" r="3.5" fill="#1f2937"/>
+<text x="120.0" y="70.0" font-size="14" fill="#1f2937">书店</text>
+<circle cx="190.0" cy="102.0" r="3.5" fill="#1f2937"/>
+<text x="198.0" y="96.0" font-size="14" fill="#1f2937">终点</text>
+</svg>

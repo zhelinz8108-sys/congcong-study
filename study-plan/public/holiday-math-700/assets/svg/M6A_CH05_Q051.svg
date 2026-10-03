@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 190" width="100%" style="max-width:320px" role="img" aria-label="一个半圆形花坛，直径边紧靠一堵墙，标出半径 4 米" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="320" height="190" fill="#ffffff"/>
+<path d="M160.0,150.0 L270.0,150.0 A110.0,110.0 0 0 0 50.0,150.0 Z" fill="#dcfce7" stroke="#2563eb" stroke-width="2"/>
+<line x1="20.0" y1="150.0" x2="300.0" y2="150.0" stroke="#1f2937" stroke-width="5"/>
+<text x="290.0" y="172.0" font-size="14" text-anchor="middle" fill="#1f2937">墙</text>
+<line x1="160.0" y1="150.0" x2="237.0" y2="71.9" stroke="#2563eb" stroke-width="1.5"/>
+<text x="209.5" y="122.5" font-size="13" text-anchor="start" fill="#1f2937">4 米</text>
+</svg>

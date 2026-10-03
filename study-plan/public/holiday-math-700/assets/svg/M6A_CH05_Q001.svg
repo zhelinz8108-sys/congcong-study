@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 220" width="100%" style="max-width:300px" role="img" aria-label="圆心为 O 的圆，从圆心到圆上画了一条半径，标注 5 厘米" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="300" height="220" fill="#ffffff"/>
+<circle cx="150.0" cy="110.0" r="80.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<circle cx="150.0" cy="110.0" r="3" fill="#1f2937"/>
+<text x="136.0" y="115.0" font-size="14" fill="#1f2937">O</text>
+<line x1="150.0" y1="110.0" x2="230.0" y2="110.0" stroke="#2563eb" stroke-width="2"/>
+<text x="190.0" y="102.0" font-size="14" text-anchor="middle" fill="#1f2937">5 厘米</text>
+</svg>

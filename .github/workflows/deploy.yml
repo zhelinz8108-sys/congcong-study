@@ -84,8 +84,12 @@ jobs:
             study-plan/ "$SERVER_USER@$SERVER_HOST:$REMOTE_APP_DIR/"
 
       - name: Install, migrate, build, and restart service
+        env:
+          HOLIDAY_MATH_700_KEY: ${{ secrets.HOLIDAY_MATH_700_KEY }}
         shell: bash
         run: |
+          printf '%s\n' "$HOLIDAY_MATH_700_KEY" | ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
+            "sudo node '$REMOTE_APP_DIR/scripts/configure-holiday-math-key.mjs'"
           ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" "
             set -e
             cd '$REMOTE_APP_DIR'

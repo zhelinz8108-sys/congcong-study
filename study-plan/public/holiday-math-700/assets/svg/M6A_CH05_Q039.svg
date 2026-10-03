@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 190" width="100%" style="max-width:300px" role="img" aria-label="一个半圆，弧的上方标注“弧长 9.42 米”，直径没有标注" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="300" height="190" fill="#ffffff"/>
+<path d="M150.0,150.0 L260.0,150.0 A110.0,110.0 0 0 0 40.0,150.0 Z" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<text x="150.0" y="32.0" font-size="14" text-anchor="middle" fill="#1f2937">弧长 9.42 米</text>
+</svg>

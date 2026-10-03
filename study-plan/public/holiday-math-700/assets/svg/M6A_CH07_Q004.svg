@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 246 184" width="100%" style="max-width:246px" role="img" aria-label="方格图，横轴、纵轴标有数字 0 到 7 和 0 到 5；点 A 在 (1,1)，点 B 在 (5,1)，点 C 在 B 的正上方第 4 行" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="246" height="184" fill="#ffffff"/>
+<line x1="34" y1="154" x2="34" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="60" y1="154" x2="60" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="86" y1="154" x2="86" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="112" y1="154" x2="112" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="138" y1="154" x2="138" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="164" y1="154" x2="164" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="190" y1="154" x2="190" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="216" y1="154" x2="216" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="154" x2="216" y2="154" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="128" x2="216" y2="128" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="102" x2="216" y2="102" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="76" x2="216" y2="76" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="50" x2="216" y2="50" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="24" x2="216" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<text x="34" y="170" font-size="12" text-anchor="middle" fill="#1f2937">0</text>
+<text x="60" y="170" font-size="12" text-anchor="middle" fill="#1f2937">1</text>
+<text x="86" y="170" font-size="12" text-anchor="middle" fill="#1f2937">2</text>
+<text x="112" y="170" font-size="12" text-anchor="middle" fill="#1f2937">3</text>
+<text x="138" y="170" font-size="12" text-anchor="middle" fill="#1f2937">4</text>
+<text x="164" y="170" font-size="12" text-anchor="middle" fill="#1f2937">5</text>
+<text x="190" y="170" font-size="12" text-anchor="middle" fill="#1f2937">6</text>
+<text x="216" y="170" font-size="12" text-anchor="middle" fill="#1f2937">7</text>
+<text x="26" y="132" font-size="12" text-anchor="end" fill="#1f2937">1</text>
+<text x="26" y="106" font-size="12" text-anchor="end" fill="#1f2937">2</text>
+<text x="26" y="80" font-size="12" text-anchor="end" fill="#1f2937">3</text>
+<text x="26" y="54" font-size="12" text-anchor="end" fill="#1f2937">4</text>
+<text x="26" y="28" font-size="12" text-anchor="end" fill="#1f2937">5</text>
+<circle cx="60.0" cy="128.0" r="3.5" fill="#1f2937"/>
+<text x="68.0" y="122.0" font-size="14" fill="#1f2937">A</text>
+<circle cx="164.0" cy="128.0" r="3.5" fill="#1f2937"/>
+<text x="172.0" y="122.0" font-size="14" fill="#1f2937">B</text>
+<circle cx="164.0" cy="50.0" r="3.5" fill="#1f2937"/>
+<text x="172.0" y="44.0" font-size="14" fill="#1f2937">C</text>
+</svg>

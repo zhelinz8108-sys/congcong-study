@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 324 184" width="100%" style="max-width:324px" role="img" aria-label="方格纸上两个直角三角形：A 的两条直角边是 4 格和 2 格；B 的两条直角边是 2 格和 1 格" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="324" height="184" fill="#ffffff"/>
+<line x1="34" y1="154" x2="34" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="60" y1="154" x2="60" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="86" y1="154" x2="86" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="112" y1="154" x2="112" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="138" y1="154" x2="138" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="164" y1="154" x2="164" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="190" y1="154" x2="190" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="216" y1="154" x2="216" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="242" y1="154" x2="242" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="268" y1="154" x2="268" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="294" y1="154" x2="294" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="154" x2="294" y2="154" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="128" x2="294" y2="128" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="102" x2="294" y2="102" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="76" x2="294" y2="76" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="50" x2="294" y2="50" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<line x1="34" y1="24" x2="294" y2="24" stroke="#bcd3f2" stroke-dasharray="3 3"/>
+<polygon points="60.0,128.0 164.0,128.0 60.0,76.0" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+<text x="94.7" y="115.7" font-size="14" text-anchor="middle" fill="#1f2937">A</text>
+<polygon points="216.0,128.0 268.0,128.0 216.0,102.0" fill="#fde68a" stroke="#2563eb" stroke-width="2"/>
+<text x="233.3" y="124.3" font-size="14" text-anchor="middle" fill="#1f2937">B</text>
+</svg>

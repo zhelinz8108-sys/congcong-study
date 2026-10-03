@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" width="100%" style="max-width:260px" role="img" aria-label="钟面显示 4 时整，分针指向 12、时针指向 4，两针之间较小的扇形涂色，标注分针长 6 厘米" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="260" height="260" fill="#ffffff"/>
+<circle cx="130.0" cy="115.0" r="100.0" fill="#ffffff" stroke="#1f2937" stroke-width="2"/>
+<path d="M130.0,115.0 L216.6,165.0 A100.0,100.0 0 0 0 130.0,15.0 Z" fill="#fde68a" stroke="#2563eb" stroke-width="2"/>
+<line x1="130.0" y1="27.0" x2="130.0" y2="15.0" stroke="#1f2937" stroke-width="2"/>
+<line x1="174.0" y1="38.8" x2="180.0" y2="28.4" stroke="#1f2937" stroke-width="1"/>
+<line x1="206.2" y1="71.0" x2="216.6" y2="65.0" stroke="#1f2937" stroke-width="1"/>
+<line x1="218.0" y1="115.0" x2="230.0" y2="115.0" stroke="#1f2937" stroke-width="2"/>
+<line x1="206.2" y1="159.0" x2="216.6" y2="165.0" stroke="#1f2937" stroke-width="1"/>
+<line x1="174.0" y1="191.2" x2="180.0" y2="201.6" stroke="#1f2937" stroke-width="1"/>
+<line x1="130.0" y1="203.0" x2="130.0" y2="215.0" stroke="#1f2937" stroke-width="2"/>
+<line x1="86.0" y1="191.2" x2="80.0" y2="201.6" stroke="#1f2937" stroke-width="1"/>
+<line x1="53.8" y1="159.0" x2="43.4" y2="165.0" stroke="#1f2937" stroke-width="1"/>
+<line x1="42.0" y1="115.0" x2="30.0" y2="115.0" stroke="#1f2937" stroke-width="2"/>
+<line x1="53.8" y1="71.0" x2="43.4" y2="65.0" stroke="#1f2937" stroke-width="1"/>
+<line x1="86.0" y1="38.8" x2="80.0" y2="28.4" stroke="#1f2937" stroke-width="1"/>
+<text x="130.0" y="46.0" font-size="13" text-anchor="middle" fill="#1f2937">12</text>
+<text x="204.0" y="120.0" font-size="13" text-anchor="middle" fill="#1f2937">3</text>
+<text x="130.0" y="194.0" font-size="13" text-anchor="middle" fill="#1f2937">6</text>
+<text x="56.0" y="120.0" font-size="13" text-anchor="middle" fill="#1f2937">9</text>
+<line x1="130.0" y1="115.0" x2="130.0" y2="15.0" stroke="#1f2937" stroke-width="2.5"/>
+<line x1="130.0" y1="115.0" x2="182.0" y2="145.0" stroke="#1f2937" stroke-width="4"/>
+<text x="130.0" y="237.0" font-size="14" text-anchor="middle" fill="#1f2937">分针长 6 厘米</text>
+</svg>

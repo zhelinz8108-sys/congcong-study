@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="100%" style="max-width:240px" role="img" aria-label="正方形里画了一个最大的圆，圆与正方形四条边都相接，正方形下方标注面积 64 平方厘米" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="240" height="240" fill="#ffffff"/>
+<rect x="35.0" y="35.0" width="170.0" height="170.0" fill="none" stroke="#1f2937" stroke-width="2"/>
+<circle cx="120.0" cy="120.0" r="85.0" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<text x="120.0" y="227.0" font-size="14" text-anchor="middle" fill="#1f2937">面积 64 平方厘米</text>
+</svg>

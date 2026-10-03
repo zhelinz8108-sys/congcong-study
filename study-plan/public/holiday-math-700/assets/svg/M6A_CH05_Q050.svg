@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 280" width="100%" style="max-width:320px" role="img" aria-label="环形铁片，外圆直径标注 14 厘米，内圆直径标注 10 厘米，圆环部分涂色" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="320" height="280" fill="#ffffff"/>
+<circle cx="160.0" cy="120.0" r="100.0" fill="#cbd5e1" stroke="#2563eb" stroke-width="2"/>
+<circle cx="160.0" cy="120.0" r="70.0" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<line x1="60.0" y1="234.0" x2="260.0" y2="234.0" stroke="#2563eb" stroke-width="1"/>
+<line x1="60.0" y1="120.0" x2="60.0" y2="238.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<line x1="260.0" y1="120.0" x2="260.0" y2="238.0" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="160.0" y="252.0" font-size="13" text-anchor="middle" fill="#1f2937">外圆直径 14 厘米</text>
+<line x1="90.0" y1="120.0" x2="230.0" y2="120.0" stroke="#dc2626" stroke-width="1.5"/>
+<text x="160.0" y="112.0" font-size="13" text-anchor="middle" fill="#1f2937">内圆直径 10 厘米</text>
+</svg>

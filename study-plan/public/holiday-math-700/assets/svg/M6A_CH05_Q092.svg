@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 220" width="100%" style="max-width:340px" role="img" aria-label="边长 6 厘米的正方形，左右两侧各有一个以正方形的边为直径的半圆，半圆画在正方形外面" font-family="'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif">
+<rect x="0" y="0" width="340" height="220" fill="#ffffff"/>
+<path d="M110.0,110.0 L110.0,50.0 A60.0,60.0 0 0 0 110.0,170.0 Z" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<path d="M230.0,110.0 L230.0,170.0 A60.0,60.0 0 0 0 230.0,50.0 Z" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+<rect x="110.0" y="50.0" width="120.0" height="120.0" fill="#e0ecff" stroke="#1f2937" stroke-width="2"/>
+<text x="170.0" y="192.0" font-size="14" text-anchor="middle" fill="#1f2937">6 厘米</text>
+</svg>
