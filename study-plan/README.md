@@ -35,6 +35,32 @@ builds the Next.js application, restarts the service, and checks `/api/health`.
 See [CLOUD_DEPLOYMENT.md](./CLOUD_DEPLOYMENT.md) for the server environment, GitHub Secrets,
 HTTPS, backup, restore, and verification checklist.
 
+## National Day mathematics knowledge (117 examples and 89 quizzes)
+
+`/subjects/[id]/national-day-math` is a light, single-column chapter directory.
+Readers at `/national-day-math/preparation`, `/u1` through `/u7`, and `/review`
+contain only the selected chapter, with all original knowledge, formulas, SVG
+diagrams, examples and interactive quizzes preserved. The four thematic activities
+are grouped with their corresponding chapter: segmented billing with chapter 2,
+binary numbers with chapter 3, the golden ratio with chapter 4, and sports with
+chapter 5. Preparation and whole-book review have separate entries.
+
+Chapter cards and readers display submitted count and accuracy using current
+version 2 server-graded records only; old self-assessment marks are excluded.
+The profile scope, question IDs and eleven reading-completion IDs are unchanged.
+Queued cloud saves finish before another chapter loads progress. Old long-page
+`#math-section-*` bookmarks redirect to the corresponding chapter reader.
+Example answers remain visible; quiz answers are returned only after submission.
+
+```bash
+node --test scripts/test-national-day-math-chapters.mjs scripts/test-national-day-math-submission.mjs
+```
+
+`scripts/test-national-day-math-browser.mjs` uses the isolated local preview and
+dedicated QA Chrome described below. It mocks cloud progress, covers all nine
+readers, multi-field grading, immediate navigation, reloads and mobile layout,
+and never writes production student progress.
+
 ## National Day mathematics practice (700 questions)
 
 `/subjects/[id]/national-day-math-practice` is the chapter directory only. It does

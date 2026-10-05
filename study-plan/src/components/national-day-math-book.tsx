@@ -8,6 +8,7 @@ import styles from "./national-day-math-book.module.css";
 import { useNationalDayMathProgress } from "@/lib/national-day-math-progress";
 import type { NationalDayMathAttempt } from "@/lib/national-day-math-progress";
 import type { NationalDayMathBlock, NationalDayMathPublicQuestion, NationalDayMathPublicSection, NationalDayMathSubmissionResult } from "@/lib/national-day-math";
+import { nationalDayMathChapterStats, type NationalDayMathChapterSummary } from "@/lib/national-day-math-chapters";
 
 function MathText({ text }: { text: string }) {
   // Fractions stay selectable native HTML, with a spoken equivalent for readers.
@@ -130,48 +131,46 @@ function TextBlock({ block }: { block: Extract<NationalDayMathBlock, { type: "te
   return <p className="my-3 whitespace-pre-wrap break-words text-[16px] leading-9 text-slate-700"><MathText text={block.text} /></p>;
 }
 
-export default function NationalDayMathBook({ subjectId, sections, stats }: {
+export default function NationalDayMathBook({ subjectId, sections, chapter, nextChapter }: {
   subjectId: string;
   sections: NationalDayMathPublicSection[];
-  stats: { examples: number; diagnostic: number; unitQuiz: number; comprehensive: number; answers: number };
+  chapter: NationalDayMathChapterSummary;
+  nextChapter?: NationalDayMathChapterSummary;
 }) {
   const learning = useNationalDayMathProgress(subjectId);
   const { progress, ready, saveDraft, recordAttempt } = learning;
   const chapters = sections.filter((section) => section.kind === "chapter");
   const complete = new Set(progress.completedSections);
   const finished = chapters.filter((section) => complete.has(section.id)).length;
-  const allQuizIds = new Set(sections.flatMap((section) => section.blocks.filter(block => block.type === "quiz").map(block => block.id)));
-  const attempts = Object.entries(progress.attempts).filter(([id]) => allQuizIds.has(id)).map(([, attempt]) => attempt);
-  const checked = attempts.filter(attempt => attempt.checked && attempt.gradingVersion === 2).length;
-  const mastered = attempts.filter(attempt => attempt.checked && attempt.gradingVersion === 2 && attempt.correct === true).length;
-  const mistakes = attempts.filter(attempt => attempt.checked && attempt.gradingVersion === 2 && attempt.correct === false).length;
-  const quizCount = stats.diagnostic + stats.unitQuiz + stats.comprehensive;
+  const stats = nationalDayMathChapterStats(chapter.quizIds, progress.attempts);
+  const quizCount = stats.total;
   const resume = sections.find((section) => section.id === progress.lastSection);
 
   return (
-    <main className="min-h-screen bg-white text-slate-800" data-national-day-math-book>
+    <main className="min-h-screen bg-white text-slate-800" data-national-day-math-book data-math-chapter={chapter.id}>
       <div className="mx-auto max-w-3xl px-4 pb-20 pt-8 sm:px-6">
-        <Link href={`/subjects/${subjectId}`} className="inline-block rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-500 transition hover:bg-sky-50 hover:text-sky-700">← 返回数学</Link>
+        <Link href={`/subjects/${subjectId}/national-day-math`} className={styles.directoryBack}>← 返回章节目录</Link>
         <header className={`mt-6 rounded-[28px] border p-6 sm:p-8 ${styles.hero}`}>
           <p className="text-sm font-bold text-sky-700">🍁 国庆数学 · 三天完整学习</p>
-          <h1 className="mt-4 text-3xl font-black leading-snug tracking-tight text-slate-800 sm:text-4xl">把全书连成一个体系，<br />从上往下，一步一步学。</h1>
-          <p className="mt-4 text-[15px] leading-8 text-slate-600">刚刚整理的整份学习内容，都已放进这一页。先理解知识点，再看图解与例题，最后独立尝试下面的自测。</p>
-          <p className="mt-4 text-sm font-bold leading-7 text-sky-800">7个单元＋4个主题活动 · {stats.examples}道例题 · {quizCount}道诊断与自测</p>
-          <p className="mt-3 text-sm leading-7 text-slate-500">所有知识点和117道教学例题完整展开。89道自测先输入答案并提交，再看系统判分和解析。不用进入章节，不用打开PDF。每天约4.5小时有效学习，另留休息时间。</p>
+          <h1 className="mt-4 text-3xl font-black leading-snug tracking-tight text-slate-800 sm:text-4xl">{chapter.title}</h1>
+          <p className="mt-4 text-[15px] leading-8 text-slate-600">{chapter.subtitle}。先理解知识点，再看图解与例题，最后独立完成本章自测。</p>
+          <p className="mt-4 text-sm font-bold leading-7 text-sky-800">本部分 · {chapter.examples}道例题 · {quizCount}道诊断与自测</p>
+          <p className="mt-3 text-sm leading-7 text-slate-500">本章知识点与教学例题完整展开，从上往下学习。自测先输入答案并提交，再看系统判分和解析。各章分开阅读，原有学习记录继续保留。</p>
           <p className="mt-3 text-sm leading-7 text-slate-500">按所提供的2026秋苏教版六上教材整理。单纯看懂答案不等于学会，用自测和最后20题检查掌握，再换数重做。</p>
         </header>
 
         <section aria-label="国庆数学学习进度" className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
-          <h2 className="text-base font-bold">我的学习进度</h2>
-          <p className="mt-3 text-sm leading-7 text-slate-600">已读完 {ready ? finished : "--"} / {chapters.length} 个单元与活动</p>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-sky-50" role="progressbar" aria-label="已读完的单元与活动" aria-valuemin={0} aria-valuemax={chapters.length} aria-valuenow={finished}><div className={`h-full rounded-full transition-all ${styles.progressFill}`} style={{ width: `${chapters.length ? finished / chapters.length * 100 : 0}%` }} /></div>
-          <p className="mt-3 text-sm leading-7 text-slate-500">已提交 {ready ? checked : "--"} / {quizCount} 题 · 系统判对 {ready ? mastered : "--"} 题 · 待订正 {ready ? mistakes : "--"} 题</p>
+          <h2 className="text-base font-bold">本部分学习进度</h2>
+          {chapters.length > 0 && <><p className="mt-3 text-sm leading-7 text-slate-600">已读完 {ready ? finished : "--"} / {chapters.length} 个单元与活动</p>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-sky-50" role="progressbar" aria-label="已读完的单元与活动" aria-valuemin={0} aria-valuemax={chapters.length} aria-valuenow={finished}><div className={`h-full rounded-full transition-all ${styles.progressFill}`} style={{ width: `${finished / chapters.length * 100}%` }} /></div></>}
+          <p className="mt-3 text-sm leading-7 text-slate-500">已答 {ready ? stats.answered : "--"} / {quizCount} 题 · 系统判对 {ready ? stats.correct : "--"} 题 · 待订正 {ready ? stats.wrong : "--"} 题</p>
+          <p className="mt-3 text-base font-bold text-sky-800">正确率 {ready ? stats.accuracy === null ? "— · 尚未作答" : `${stats.accuracy}%` : "读取中…"}</p>
           <p className="mt-2 text-xs leading-6 text-slate-400">作答草稿和系统判题记录使用当前小朋友档案保存。旧版自行标记的结果不计入系统判对数。</p>
           {ready && resume && <a href={`#math-section-${resume.id}`} className="mt-3 block rounded-xl border border-sky-100 bg-sky-50 px-4 py-3 text-center text-sm font-semibold text-sky-800">回到上次学习的位置 ↓</a>}
           <p className="mt-3 text-sm leading-7 text-slate-500">自测解答默认隐藏，提交这一题后才显示；重新修改输入，会再次隐藏解答。</p>
         </section>
 
-        <div className="mt-10 space-y-12" aria-label="国庆数学全部学习内容">
+        <div className="mt-10 space-y-12" aria-label="本章全部学习内容">
           {sections.map((section, index) => {
             const palette = getNationalDayMathPalette(section.id);
             const colors = {
@@ -196,9 +195,10 @@ export default function NationalDayMathBook({ subjectId, sections, stats }: {
         </div>
 
         <footer id="national-day-math-end" className={`mt-12 rounded-3xl border p-6 text-center ${styles.footer}`}>
-          <h2 className="text-xl font-bold text-slate-800">已经读到全书最后了 🍁</h2>
-          <p className="mt-3 text-sm leading-8 text-slate-600">全部知识点、{stats.examples}道例题和{quizCount}道诊断、自测、综合题，都在上方。把不熟悉的部分换数重做，第二天和一周后再检查一次。</p>
-          <Link href={`/subjects/${subjectId}`} className="mt-4 inline-block text-sm font-semibold text-sky-700">← 返回数学</Link>
+          <h2 className="text-xl font-bold text-slate-800">这一部分读完了 🍁</h2>
+          <p className="mt-3 text-sm leading-8 text-slate-600">本部分知识点、{chapter.examples}道例题和{quizCount}道自测，都在上方。把不熟悉的部分换数重做，第二天和一周后再检查一次。</p>
+          {nextChapter && <Link href={`/subjects/${subjectId}/national-day-math/${nextChapter.id}`} prefetch={false} className={styles.directoryBack}>继续：{nextChapter.title} →</Link>}
+          <Link href={`/subjects/${subjectId}/national-day-math`} className="mt-4 block text-sm font-semibold text-sky-700">← 返回章节目录</Link>
         </footer>
       </div>
     </main>

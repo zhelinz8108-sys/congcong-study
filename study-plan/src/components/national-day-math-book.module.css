@@ -89,3 +89,48 @@
   border-color: #f0d3de;
   background: linear-gradient(120deg, #fff7ef, #fff5fa);
 }
+
+.directoryBack {
+  display: inline-block;
+  margin-top: 12px;
+  border: 1px solid #cfe2f5;
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: #f5f9ff;
+  color: #235a91;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.directoryCard {
+  display: block;
+  border: 1px solid var(--math-border);
+  border-left: 5px solid var(--math-marker);
+  border-radius: 20px;
+  padding: 22px;
+  background: var(--math-soft);
+  color: var(--math-accent);
+  transition: box-shadow 0.2s;
+}
+
+.directoryCard:hover,
+.directoryCard:focus-visible {
+  box-shadow: 0 0 0 2px var(--math-border);
+  outline: none;
+}
+
+.directoryLabel {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.directoryAccuracy {
+  display: inline-block;
+  margin-top: 10px;
+  border: 1px solid var(--math-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}

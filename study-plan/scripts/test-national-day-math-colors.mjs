@@ -64,7 +64,7 @@ test("reading surfaces stay pale and accent text meets WCAG AA", () => {
   }
 });
 
-test("rich colors do not introduce chapter gates or side-by-side reading", () => {
+test("rich chapter colors preserve vertical reading and complete source content", () => {
   const ui = read("../src/components/national-day-math-book.tsx");
   const css = read("../src/components/national-day-math-book.module.css");
   assert.match(ui, /getNationalDayMathPalette/);

@@ -1,14 +1,27 @@
 import type { Metadata } from "next";
-import NationalDayMathBook from "@/components/national-day-math-book";
-import { NATIONAL_DAY_MATH_STATS } from "@/lib/national-day-math";
+import NationalDayMathDirectory from "@/components/national-day-math-directory";
+import { getNationalDayMathChapterSummaries } from "@/lib/national-day-math-chapters";
 import { getPublicNationalDayMathSections } from "@/lib/national-day-math-submission";
 
 export const metadata: Metadata = {
   title: "国庆数学 · 三天完整学习 | 聪聪学习计划",
-  description: "六上数学三天学习长页：完整知识点、图解、117道带步骤例题和89道自测题。",
+  description:
+    "按教材章节学习六上数学：完整知识点、图解、117道带步骤例题和89道自测题。",
 };
 
-export default async function NationalDayMathPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function NationalDayMathPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
-  return <NationalDayMathBook key={id} subjectId={id} sections={getPublicNationalDayMathSections()} stats={NATIONAL_DAY_MATH_STATS} />;
+  return (
+    <NationalDayMathDirectory
+      key={id}
+      subjectId={id}
+      chapters={getNationalDayMathChapterSummaries(
+        getPublicNationalDayMathSections(),
+      )}
+    />
+  );
 }

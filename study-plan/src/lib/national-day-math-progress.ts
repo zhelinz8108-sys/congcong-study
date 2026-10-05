@@ -136,7 +136,9 @@ export function useNationalDayMathProgress(subjectId: string, sectionId?: string
       scope, value: createEmptyNationalDayMathProgress(), ready: false, pending: [],
     };
     session.current = current;
-    void loadCloudState<NationalDayMathProgress>(scope, storageKey, current.value).then((loaded) => {
+    // Chapter navigation unmounts the previous reader. Finish its queued save
+    // before fetching, so a just-submitted result cannot be replaced by stale cloud state.
+    void flushNationalDayMathProgress(scope).then(() => loadCloudState<NationalDayMathProgress>(scope, storageKey, current.value)).then((loaded) => {
       if (!active) return;
       let next = normalizeNationalDayMathProgress(loaded);
       for (const mutation of current.pending) next = mutation(next);

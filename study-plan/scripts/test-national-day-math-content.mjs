@@ -41,13 +41,18 @@ test("all seven original diagrams have native SVG equivalents and binary notatio
   for (const id of diagrams) assert.ok(svg.includes(id), id);
 });
 
-test("the website uses one light vertical book, not PDF embeds or chapter gates", () => {
+test("the website uses a chapter directory and light vertical readers, never PDF embeds", () => {
   const ui = read("../src/components/national-day-math-book.tsx");
   const route = read("../src/app/subjects/[id]/national-day-math/page.tsx");
   const subject = read("../src/app/subjects/[id]/page.tsx");
   assert.match(subject, /href=\{`\/subjects\/\$\{id\}\/national-day-math`\}/);
   assert.match(subject, /国庆数学/);
   assert.match(route, /getPublicNationalDayMathSections/);
+  assert.match(route, /NationalDayMathDirectory/);
+  const directory = read("../src/components/national-day-math-directory.tsx");
+  assert.match(directory, /data-math-chapter-link/);
+  assert.ok(!/data-math-question|sections\.map/.test(directory));
+  assert.match(ui, /返回章节目录/);
   assert.match(ui, /sections\.map/);
   assert.match(ui, /bg-white/);
   assert.match(ui, /useState\(false\)/);
