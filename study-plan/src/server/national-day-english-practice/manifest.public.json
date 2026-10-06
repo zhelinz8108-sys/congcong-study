@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "publicSha256": "817f651b69225531197d0e67b5b18cdcdbcd4e96e983226815c934861fbe6b81",
+  "chapters": 24,
+  "items": 2400,
+  "singleChoices": 1440,
+  "clozePassages": 192,
+  "clozeBlanks": 960,
+  "chapterItems": 100,
+  "sequence": "CH01-Q001 through CH24-Q100; global serial 1 through 2400"
+}

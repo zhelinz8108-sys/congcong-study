@@ -15,7 +15,11 @@
     "math:import:reset": "node scripts/import-math-question-bank.mjs --reset",
     "atlantic:download-pdfs": "node scripts/download_atlantic_library_pdfs.mjs",
     "atlantic:audit-pdfs": "node scripts/audit_atlantic_library_pdfs.mjs",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:holiday-english": "node scripts/test-national-day-english-practice.mjs && node scripts/test-english-practice-progress.mjs",
+    "test:holiday-english:privacy": "node scripts/test-national-day-english-practice-privacy.mjs --build",
+    "test:holiday-english:http": "node scripts/test-national-day-english-practice-http.mjs",
+    "test:holiday-english:browser": "node scripts/test-national-day-english-practice-browser.mjs"
   },
   "dependencies": {
     "@next/env": "16.2.1",
