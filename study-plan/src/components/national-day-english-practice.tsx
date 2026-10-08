@@ -21,12 +21,12 @@ import s from "./national-day-english-practice.module.css";
 
 const letters: EnglishPracticeLetter[] = ["A", "B", "C", "D"];
 const palettes = [
-  ["#27739c", "#eaf6fd", "#f7fcff", "#c5e2f2"],
-  ["#99601b", "#fff4dd", "#fffdf7", "#f1d8a8"],
-  ["#21836d", "#e7f8ef", "#f7fcf9", "#bce5d5"],
-  ["#8256af", "#f2ebfc", "#fcfaff", "#decaf1"],
-  ["#b7526b", "#ffeef2", "#fff9fa", "#f1ccd7"],
-  ["#ad622d", "#fff0e4", "#fffbf7", "#eed1ba"],
+  ["#9f4f35", "#ffeade", "#fffaf5", "#efc5ad"],
+  ["#91601e", "#fff2cf", "#fffdf3", "#ecd395"],
+  ["#ae4e41", "#ffe7e0", "#fff9f6", "#efbdb0"],
+  ["#985b2d", "#ffecd3", "#fffaf2", "#edc9a3"],
+  ["#a64645", "#ffe6e4", "#fff9f7", "#efb8b3"],
+  ["#876043", "#f6ecdd", "#fffbf5", "#e1cbb1"],
 ];
 
 function chapterStyle(number: number): CSSProperties {
