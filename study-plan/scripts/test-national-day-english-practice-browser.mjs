@@ -73,7 +73,14 @@ async function run() {
     assert.equal(await evaluate(`document.querySelectorAll('[data-feedback]').length`), 0);
     assert.equal(await evaluate(`document.querySelector('[data-nav="next"]').disabled`), true);
     await layout("desktop initial"); await screenshot("desktop-one-question.png");
+    assert.ok(await evaluate(`(()=>{const p=document.querySelector('[data-question-scroll]');return p.scrollHeight<=p.clientHeight+1;})()`), "Normal short question shows all options without scrolling");
     await evaluate(`document.querySelector('button[type="submit"]').click()`); await delay(250); assert.equal(report.submissions, 0);
+    await evaluate(`document.querySelector('[data-question] input').focus()`);
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowDown", code: "ArrowDown", windowsVirtualKeyCode: 40 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "ArrowDown", code: "ArrowDown", windowsVirtualKeyCode: 40 });
+    assert.equal(await evaluate(`document.querySelector('[data-question] input:checked')?.value`), "B", "Native keyboard selection remains available");
+    assert.equal(await active(), qid(1));
+    assert.equal(await evaluate(`document.querySelectorAll('[data-result="correct"], [data-result="incorrect"]').length`), 0, "Selection must not imply correctness");
     await choose(qid(1), false); await submit(qid(1), false);
     await send("Input.dispatchMouseEvent", { type: "mouseWheel", x: 800, y: 450, deltaX: 0, deltaY: 500 });
     await delay(300); assert.equal(await active(), qid(1)); await layout("wrong feedback"); await screenshot("desktop-one-question-feedback.png");
@@ -85,7 +92,7 @@ async function run() {
     report.checks.push("One item; selection, submission, timers and wheel never advance; manual navigation; empty blocked");
     await jump(10); await choose(qid(10)); await submit(qid(10), true); await next(11);
     const original = list({ chapter: "CH01", page: 2 }).blocks[0].questions[0];
-    assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('[data-question] label')).map(e=>e.querySelector('span:last-child').textContent)`), original.options);
+    assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('[data-option-text]')).map(e=>e.textContent)`), original.options);
     await jump(26); const cloze = list({ chapter: "CH01", page: 3 }).blocks.at(-1); assert.equal(cloze.kind, "cloze");
     assert.ok(await evaluate(`document.querySelector('[data-active-question]').textContent.includes(${JSON.stringify(cloze.text.split("{1}")[0].trim())})`));
     assert.ok(await evaluate(`!document.querySelector('[data-active-question]').textContent.includes('{1}')`));
@@ -114,8 +121,8 @@ async function run() {
     await reloadQuestion(qid(29)); controls.holdCheck = false;
     assert.equal(await evaluate(`document.querySelectorAll('[data-feedback]').length`), 0); assert.ok(!cloudState().attempts[qid(29)]);
     report.checks.push("Cancelled grading cannot leak stale answers or change attempts");
-    for (const [width, height, mobile] of [[1366, 768, false], [390, 844, true]]) {
-      await viewport(width, height, mobile); await delay(100); await layout(`${width}x${height}`); await screenshot(`${mobile ? "mobile" : "laptop"}-one-question.png`);
+    for (const [width, height, mobile] of [[1920, 1080, false], [3840, 1866, false], [1366, 768, false], [390, 844, true]]) {
+      await viewport(width, height, mobile); await delay(100); await layout(`${width}x${height}`); await screenshot(`${width}x${height}-one-question.png`);
     }
     await evaluate(`document.documentElement.style.fontSize='20px'`); await layout("enlarged mobile"); await evaluate(`document.documentElement.style.fontSize=''`);
     report.checks.push("Laptop/mobile/enlarged text: no horizontal overflow, bounded content, visible manual controls");
@@ -128,7 +135,11 @@ async function run() {
       await jump(number, chapter); await choose(qid(number, chapter)); await submit(qid(number, chapter), true);
       await layout(`long-content ${chapter} desktop`);
       await screenshot(`desktop-extreme-${chapter}.png`);
-      await viewport(390, 844, true); await layout(`long-content ${chapter} mobile`);
+      await viewport(390, 844, true); await delay(100); await layout(`long-content ${chapter} mobile`);
+      const feedbackVisible = `(()=>{const p=document.querySelector('[data-question-scroll]').getBoundingClientRect(),f=document.querySelector('[data-feedback]').getBoundingClientRect();return f.top>=p.top-1&&f.top<p.bottom-16;})()`;
+      assert.ok(await evaluate(feedbackVisible), "Feedback title stays visible after resizing");
+      await choose(qid(number, chapter), false); await submit(qid(number, chapter), false);
+      assert.ok(await evaluate(feedbackVisible), "Direct mobile submission reveals feedback title");
       await screenshot(`mobile-extreme-${chapter}.png`);
     }
     report.checks.push("Longest passage, stem, options and explanation checked at desktop/mobile sizes");

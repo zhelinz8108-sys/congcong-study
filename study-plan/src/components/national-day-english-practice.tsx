@@ -86,15 +86,28 @@ function QuestionOptions({ question, selected, result, busy, onChange }: {
       <legend className={s.questionLegend}>选择一个正确选项</legend>
       {question.options.map((option, index) => {
         const letter = letters[index];
+        const marker = result?.correctOption === letter ? "✓" : result && selected === letter ? "×" : selected === letter ? "●" : "";
         return (
           <label key={letter} className={s.option} data-selected={selected === letter} data-result={result ? result.correctOption === letter ? "correct" : selected === letter ? "incorrect" : "" : ""}>
             <input type="radio" name={question.id} value={letter} checked={selected === letter} onChange={() => onChange(letter)} />
             <span className={s.optionLetter}>{letter}</span>
-            <span className={s.optionText}>{option}</span>
+            <span className={s.optionText} data-option-text>{option}</span>
+            <span className={s.optionChoice} aria-hidden="true">{marker}</span>
           </label>
         );
       })}
     </fieldset>
+  );
+}
+
+function QuestionStem({ text }: { text: string }) {
+  const context = /^([^\n：:]{2,24}[：:])\s*([\s\S]+)$/.exec(text);
+  const hasContext = context && /[\u3400-\u9fff]/.test(context[1]);
+  return (
+    <div className={s.stem}>
+      {hasContext && <p className={s.context}>{context[1].replace(/[：:]$/, "")}</p>}
+      <p className={s.sentence} lang="en">{hasContext ? context[2] : text}</p>
+    </div>
   );
 }
 
@@ -143,12 +156,20 @@ function FocusQuestion({ block, question, progressState, navigate }: {
     const container = questionScroll.current;
     const panel = container?.querySelector<HTMLElement>(`[data-feedback="${question.id}"]`);
     if (!container || !panel) return;
-    const box = container.getBoundingClientRect();
-    const feedbackBox = panel.getBoundingClientRect();
-    // Reveal only this question's feedback inside its bounded reading pane.
-    // This never scrolls the document, changes the question, or focuses a next button.
-    const top = feedbackBox.height > box.height - 20 ? feedbackBox.top - box.top - 10 : feedbackBox.bottom - box.bottom + 14;
-    if (top > 0) container.scrollBy({ top, behavior: "instant" });
+    const reveal = () => {
+      const box = container.getBoundingClientRect();
+      const feedbackBox = panel.getBoundingClientRect();
+      // Reveal only this question's feedback inside its bounded reading pane.
+      // This never scrolls the document, changes the question, or focuses a next button.
+      const top = feedbackBox.height > box.height - 20 ? feedbackBox.top - box.top - 10 : feedbackBox.bottom - box.bottom + 14;
+      if (top > 0) container.scrollBy({ top, behavior: "instant" });
+    };
+    reveal();
+    // Keep the feedback readable when the window/font size changes after submitting.
+    const observer = new ResizeObserver(reveal);
+    observer.observe(container);
+    observer.observe(panel);
+    return () => observer.disconnect();
   }, [result, question.id]);
   useEffect(() => () => {
     request.current?.abort();
@@ -207,7 +228,7 @@ function FocusQuestion({ block, question, progressState, navigate }: {
   }
 
   return (
-    <article className={s.focusCard} data-block={block.id} data-active-question={question.id}>
+    <article className={s.focusCard} data-block={block.id} data-active-question={question.id} data-kind={cloze ? "cloze" : "choice"}>
       <form ref={form} className={s.focusForm} onSubmit={submit} noValidate>
         <header className={s.questionHeader}>
           <div className={s.questionHeading}>
@@ -230,7 +251,7 @@ function FocusQuestion({ block, question, progressState, navigate }: {
               <p className={s.clozeNote}>完整短文保留在这里。<strong>高亮的第 {pad(question.number)} 空</strong>是当前题目，只提交这一空。</p>
               <ClozePassage block={block} activeQuestion={question.id} />
             </>
-          ) : <p className={s.stem} lang="en">{block.stem}</p>}
+          ) : <QuestionStem text={block.stem ?? ""} />}
           <QuestionOptions question={question} selected={selected} result={result} busy={busy} onChange={change} />
           {error && <p className={s.error} role="alert">{error}</p>}
           {result && <Result result={result} />}
