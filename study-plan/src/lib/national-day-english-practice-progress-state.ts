@@ -101,7 +101,7 @@ function blockMembers(blockId: string): string[] | undefined {
     `${match[1]}-Q${String(start + index).padStart(3, "0")}`);
 }
 
-/** Apply a complete, current submission atomically; keep expected answers and explanations transient. */
+/** Apply a current single-question or legacy complete-block submission atomically. */
 export function applyEnglishPracticeFeedback(
   progress: EnglishPracticeProgress,
   raw: unknown,
@@ -109,8 +109,12 @@ export function applyEnglishPracticeFeedback(
 ): EnglishPracticeProgress {
   const value = object(raw);
   if (!value || typeof value.blockId !== "string" || !timestamp(at) || !Array.isArray(value.results)) return progress;
-  const members = blockMembers(value.blockId);
-  if (!members || value.results.length !== members.length || value.maxScore !== members.length ||
+  const allMembers = blockMembers(value.blockId);
+  if (!allMembers) return progress;
+  const singleQuestion = Object.prototype.hasOwnProperty.call(value, "questionId");
+  if (singleQuestion && (!validEnglishPracticeId(value.questionId) || !allMembers.includes(value.questionId))) return progress;
+  const members = singleQuestion ? [value.questionId as string] : allMembers;
+  if (value.results.length !== members.length || value.maxScore !== members.length ||
     !integer(value.score, 0, members.length)) return progress;
   const results = value.results.map(object);
   const byId = new Map<string, Record<string, unknown>>();
@@ -118,6 +122,7 @@ export function applyEnglishPracticeFeedback(
     if (!result || !validEnglishPracticeId(result.questionId) || !members.includes(result.questionId) ||
       byId.has(result.questionId) || typeof result.correct !== "boolean" ||
       !validEnglishPracticeLetter(result.selected) ||
+      (singleQuestion && progress.drafts[result.questionId] !== result.selected) ||
       (progress.drafts[result.questionId] && progress.drafts[result.questionId] !== result.selected)) return progress;
     byId.set(result.questionId, result);
   }

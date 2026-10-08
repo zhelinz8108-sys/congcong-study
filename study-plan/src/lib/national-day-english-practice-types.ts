@@ -43,9 +43,17 @@ export type EnglishPracticeResult = {
 };
 export type EnglishPracticeFeedback = {
   blockId: string;
+  /** Present only when one numbered question (including one cloze blank) was graded. */
+  questionId?: string;
   results: EnglishPracticeResult[];
   score: number;
   maxScore: number;
+};
+export type EnglishPracticeSingleFeedback = EnglishPracticeFeedback & {
+  questionId: string;
+  results: [EnglishPracticeResult];
+  score: 0 | 1;
+  maxScore: 1;
 };
 export const ENGLISH_PRACTICE_DIFFICULTY_LABELS: Record<EnglishPracticeDifficulty,string> = {
   medium: "中等", hard: "困难", extreme: "超级困难",

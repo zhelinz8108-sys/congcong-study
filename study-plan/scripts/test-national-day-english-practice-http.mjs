@@ -79,6 +79,34 @@ for (const page of [1, 3]) {
     assert.equal(invalid.status, 400); assert.deepEqual(Object.keys(invalid.json), ["error"]);
   }
   assert.equal((await request("/api/english/holiday-2400/check", { block_id: block.id, answers }, "https://untrusted.example")).status, 403);
+  for (const question of block.questions) {
+    const payload = { block_id: block.id, question_id: question.id, answers: { [question.id]: answers[question.id] } };
+    const individual = await request("/api/english/holiday-2400/check", payload);
+    assert.equal(individual.status, 200);
+    assert.equal(individual.json.questionId, question.id);
+    assert.equal(individual.json.maxScore, 1);
+    assert.equal(individual.json.score, 1);
+    assert.deepEqual(individual.json.results.map((result) => result.questionId), [question.id]);
+    assert.equal(individual.json.results[0].explanation, answer(question.id).explanation);
+    for (const other of block.questions.filter((item) => item.id !== question.id)) {
+      assert.ok(!individual.text.includes(other.id), "Unsubmitted blanks must not receive feedback");
+    }
+    const incorrect = await request("/api/english/holiday-2400/check", {
+      ...payload, answers: { [question.id]: "ABCD"[("ABCD".indexOf(answers[question.id]) + 1) % 4] },
+    });
+    assert.equal(incorrect.status, 200); assert.equal(incorrect.json.score, 0);
+    assert.equal(incorrect.json.results.length, 1);
+    for (const invalidPayload of [
+      { ...payload, question_id: "CH24-Q100" },
+      { ...payload, answers: {} },
+      { ...payload, answers: { [question.id]: "E" } },
+      { ...payload, answers: { ...payload.answers, "CH24-Q100": "A" } },
+      { ...payload, expected: "forbidden" },
+    ]) {
+      const invalid = await request("/api/english/holiday-2400/check", invalidPayload);
+      assert.equal(invalid.status, invalidPayload.question_id === "CH24-Q100" ? 404 : 400); assert.deepEqual(Object.keys(invalid.json), ["error"]);
+    }
+  }
 }
 assert.equal((await request("/api/english/holiday-2400/questions?chapter=CH01&page=1", undefined, base, false)).status, 401);
 assert.equal((await request("/api/english/holiday-2400/check", { block_id: "CH01-B001", answers: { "CH01-Q001": "A" } }, base, false)).status, 401);
@@ -95,6 +123,6 @@ if (base.startsWith("https")) {
     progress[scope] = { readable: true, hash: createHash("sha256").update(JSON.stringify(result.json.payload)).digest("hex") };
   }
 }
-const report = { origin: base, url: `${base}${route}`, chapters: 24, scoringItems: 2400, singleChoices: 1440, clozePassages: 192, clozeBlanks: 960, stablePdfOrder: true, anonymousBlocked: true, privateAssetsExcluded: true, gradingVerified: true, progressReadOnly: progress, studentDataWrites: 0 };
+const report = { origin: base, url: `${base}${route}`, chapters: 24, scoringItems: 2400, singleChoices: 1440, clozePassages: 192, clozeBlanks: 960, stablePdfOrder: true, anonymousBlocked: true, privateAssetsExcluded: true, gradingVerified: true, individualClozePrivacyVerified: true, progressReadOnly: progress, studentDataWrites: 0 };
 if (process.env.ENGLISH_QA_REPORT) writeFileSync(process.env.ENGLISH_QA_REPORT, JSON.stringify(report, null, 2));
 console.log(JSON.stringify(report, null, 2));

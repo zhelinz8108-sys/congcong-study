@@ -219,6 +219,15 @@ async function run() {
     await post(missing, 400);
     const complete = await post(clozeBody, 200);
     ensure(complete.results.length === 5 && complete.score === 5, "Local complete-cloze grading failed.");
+    for (const question of passage.items) {
+      const itemBody = { block_id: clozeBody.block_id, question_id: question.id, answers: { [question.id]: question.letter } };
+      const single = await post(itemBody, 200);
+      ensure(single.questionId === question.id && single.results.length === 1 && single.maxScore === 1 && single.score === 1, "Individual blank grading failed.");
+      ensure(single.results[0].questionId === question.id, "Individual grading returned another blank.");
+      ensure(!passage.items.filter((item) => item.id !== question.id).some((item) => JSON.stringify(single).includes(item.id)), "Unsubmitted blank feedback was revealed.");
+      await post({ ...itemBody, answers: clozeBody.answers }, 400);
+      await post({ ...itemBody, question_id: "CH02-Q026" }, 404);
+    }
   }
   console.log(JSON.stringify({ result: "passed", frozenOrderedItems: sourceItems, reviewedSourceAvailable: sourceAvailable, chapters: bank.length, clientRoots: clientRoots.length, clientGraphModules: visited.size, scannedBundles, privateExplanationCanaries: privateCanaries, localApiChecks, progressWrites: 0 }));
 }

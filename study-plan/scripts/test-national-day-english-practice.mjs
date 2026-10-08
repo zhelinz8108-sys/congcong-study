@@ -16,7 +16,7 @@ async function run() {
   assert.equal(bank.length, manifest.chapters);
   assert.equal(manifest.items, 2400);
   const { ENGLISH_PRACTICE_CHAPTERS, englishPracticeBlock, listEnglishPracticeBlocks } = await loadHolidayTestModule("src/server/national-day-english-practice/public-bank.ts");
-  const { EnglishPracticeInputError, gradeEnglishPracticeBlock } = await loadHolidayTestModule("src/server/national-day-english-practice/service.ts");
+  const { EnglishPracticeInputError, gradeEnglishPracticeBlock, gradeEnglishPracticeQuestion, gradeEnglishPracticeSubmission } = await loadHolidayTestModule("src/server/national-day-english-practice/service.ts");
   const { englishPracticePrivateAnswer } = await loadHolidayTestModule("src/server/national-day-english-practice/private-bank.ts");
   const forbidden = new Set(["correct", "letter", "explanation", "correctOption", "correctText", "levels", "skill"]);
   function noPrivateFields(value) {
@@ -29,6 +29,15 @@ async function run() {
   function invalid(blockId, answers, status = 400) {
     assert.throws(() => gradeEnglishPracticeBlock(blockId, answers), (error) => error instanceof EnglishPracticeInputError && error.status === status);
   }
+  let invalidIndividualCases = 0;
+  function invalidQuestion(blockId, questionId, answers, status = 400) {
+    assert.throws(() => gradeEnglishPracticeQuestion(blockId, questionId, answers), (error) => error instanceof EnglishPracticeInputError && error.status === status);
+    invalidIndividualCases++;
+  }
+  function invalidSubmission(body, status = 400) {
+    assert.throws(() => gradeEnglishPracticeSubmission(body), (error) => error instanceof EnglishPracticeInputError && error.status === status);
+    invalidIndividualCases++;
+  }
   // Invalid/incomplete answers must be rejected before even attempting decryption.
   const savedKey = process.env.HOLIDAY_MATH_700_KEY;
   delete process.env.HOLIDAY_MATH_700_KEY;
@@ -36,6 +45,26 @@ async function run() {
   invalid("CH01-B001", {});
   invalid("CH01-B001", { "CH01-Q001": "Z" });
   invalid("CH01-B069", { "CH01-Q001": "A" }, 404);
+  // The explicit single-item contract must also reject malformed requests before private access.
+  invalidQuestion("CH01-B026", "CH01-Q026", {});
+  invalidQuestion("CH01-B026", "CH01-Q026", { "CH01-Q026": "A", "CH01-Q027": "A" });
+  invalidQuestion("CH01-B026", "CH01-Q026", { "CH01-Q027": "A" });
+  invalidQuestion("CH01-B026", "CH01-Q031", { "CH01-Q031": "A" }, 404);
+  invalidQuestion("CH01-B026", "CH02-Q026", { "CH02-Q026": "A" }, 404);
+  invalidQuestion("CH01-B001", "CH01-Q001", { "CH01-Q001": "Z" });
+  invalidQuestion("CH01-B001", null, { "CH01-Q001": "A" });
+  invalidQuestion("CH01-B001", "CH01-Q000", { "CH01-Q001": "A" });
+  invalidQuestion("CH01-B069", "CH01-Q001", { "CH01-Q001": "A" }, 404);
+  invalidSubmission({ block_id: "CH01-B026", question_id: "CH01-Q026", answers: { "CH01-Q026": "A" }, extra: true });
+  invalidSubmission({ block_id: "CH01-B026", question_id: "CH01-Q026" });
+  invalidSubmission({ question_id: "CH01-Q026", answers: { "CH01-Q026": "A" } });
+  invalidSubmission({ block_id: "CH01-B026", answers: { "CH01-Q026": "A" } });
+  invalidSubmission({ block_id: "CH01-B026", question_id: undefined, answers: { "CH01-Q026": "A" } });
+  invalidSubmission({ block_id: "CH01-B026", question_id: "CH01-Q026", answers: null });
+  invalidSubmission({ block_id: null, question_id: "CH01-Q026", answers: {} }, 404);
+  invalidSubmission(JSON.parse('{"block_id":"CH01-B001","question_id":"CH01-Q001","answers":{"CH01-Q001":"A"},"__proto__":{}}'));
+  invalidSubmission(null);
+  invalidSubmission([]);
   if (savedKey === undefined) delete process.env.HOLIDAY_MATH_700_KEY;
   else process.env.HOLIDAY_MATH_700_KEY = savedKey;
   if (!source) {
@@ -61,6 +90,8 @@ async function run() {
   assert.equal(ENGLISH_PRACTICE_CHAPTERS.length, 24);
   let correctCases = 0;
   let wrongCases = 0;
+  let individualCorrectCases = 0;
+  let individualWrongCases = 0;
   let clozePassages = 0;
   let expectedSerial = 1;
   const difficulties = { "中等": "medium", "困难": "hard", "超级困难": "extreme" };
@@ -115,12 +146,47 @@ async function run() {
         allIds.push(question.id);
         correct[question.id] = rawQuestion.letter;
         wrong[question.id] = "ABCD"[("ABCD".indexOf(rawQuestion.letter) + 1) % 4];
+        const oneCorrect = gradeEnglishPracticeSubmission({ block_id: blockId, question_id: question.id, answers: { [question.id]: correct[question.id] } });
+        const oneWrong = gradeEnglishPracticeQuestion(blockId, question.id, { [question.id]: wrong[question.id] });
+        assert.deepEqual(oneCorrect, {
+          blockId,
+          questionId: question.id,
+          results: [{ questionId: question.id, selected: rawQuestion.letter, correct: true,
+            correctOption: rawQuestion.letter, correctText: rawQuestion.correct, explanation: rawQuestion.explanation }],
+          score: 1, maxScore: 1,
+        }, "Single-item response contains only the requested question's feedback.");
+        assert.equal(oneWrong.questionId, question.id);
+        assert.equal(oneWrong.results.length, 1);
+        assert.equal(oneWrong.results[0].questionId, question.id);
+        assert.equal(oneWrong.results[0].correct, false);
+        assert.equal(oneWrong.results[0].selected, wrong[question.id]);
+        assert.equal(oneWrong.score, 0);
+        assert.equal(oneWrong.maxScore, 1);
+        // In particular, no unsubmitted cloze sibling's ID or private record may be returned.
+        for (const sibling of block.questions.filter((item) => item.id !== question.id)) {
+          assert.equal(JSON.stringify(oneCorrect).includes(sibling.id), false);
+          assert.equal(JSON.stringify(oneWrong).includes(sibling.id), false);
+        }
+        individualCorrectCases++;
+        individualWrongCases++;
+        const foreignChapter = chapterIndex === 23 ? "CH01" : `CH${String(chapterIndex + 2).padStart(2, "0")}`;
+        const foreignId = `${foreignChapter}-Q001`;
+        invalidQuestion(blockId, foreignId, { [foreignId]: "A" }, 404);
+        invalidQuestion(blockId, question.id, {});
+        invalidQuestion(blockId, question.id, null);
+        invalidQuestion(blockId, question.id, []);
+        invalidQuestion(blockId, question.id, { [foreignId]: "A" });
+        invalidQuestion(blockId, question.id, { [question.id]: "A", [foreignId]: "A" });
+        invalidQuestion(blockId, question.id, { [question.id]: "a" });
+        invalidQuestion(blockId, question.id, { [question.id]: true });
       }
       const good = gradeEnglishPracticeBlock(blockId, correct);
       const bad = gradeEnglishPracticeBlock(blockId, wrong);
       assert.equal(good.blockId, blockId);
       assert.equal(good.score, rawQuestions.length);
       assert.equal(good.maxScore, rawQuestions.length);
+      assert.equal(Object.hasOwn(good, "questionId"), false, "Legacy full-block feedback must remain unchanged.");
+      assert.deepEqual(gradeEnglishPracticeSubmission({ block_id: blockId, answers: correct }), good);
       assert.equal(bad.score, 0);
       assert.equal(bad.maxScore, rawQuestions.length);
       for (const [questionIndex, result] of good.results.entries()) {
@@ -156,6 +222,8 @@ async function run() {
   }
   assert.equal(correctCases, 2400);
   assert.equal(wrongCases, 2400);
+  assert.equal(individualCorrectCases, 2400);
+  assert.equal(individualWrongCases, 2400);
   assert.equal(clozePassages, 192);
   assert.equal(new Set(allIds).size, 2400);
   assert.equal(expectedSerial, 2401);
@@ -168,7 +236,7 @@ async function run() {
   assert.equal(Buffer.from(encrypted.iv, "base64").length, 12);
   assert.equal(Buffer.from(encrypted.tag, "base64").length, 16);
   assert.ok(!JSON.stringify(encrypted).includes(source[0].questions[0].explanation));
-  console.log(JSON.stringify({ result: "passed", chapters: 24, pages: 240, frozenOrderedItems: 2400, reviewedSourceAvailable: sourceAvailable, correctGradingCases: correctCases, wrongGradingCases: wrongCases, intactClozePassages: clozePassages, publicAnswerFields: 0, privateAnswers: "encrypted only" }));
+  console.log(JSON.stringify({ result: "passed", chapters: 24, pages: 240, frozenOrderedItems: 2400, reviewedSourceAvailable: sourceAvailable, correctGradingCases: correctCases, wrongGradingCases: wrongCases, individualCorrectCases, individualWrongCases, invalidIndividualCases, intactClozePassages: clozePassages, publicAnswerFields: 0, privateAnswers: "encrypted only" }));
 }
 
 run().catch((error) => {
