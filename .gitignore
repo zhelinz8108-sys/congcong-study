@@ -57,3 +57,8 @@ _question_bank_scan/
 英语/
 **/__pycache__/
 *.pyc
+
+# Never publish plaintext answer keys or source audits in this public repository.
+study-plan/content/grade6-bank/answers.private.json
+study-plan/content/grade6-bank/import-audit.private.json
+study-plan/content/grade6-bank/private/

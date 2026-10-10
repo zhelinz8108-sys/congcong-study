@@ -26,6 +26,18 @@ async function main() {
 
     CREATE INDEX IF NOT EXISTS idx_student_cloud_state_updated
       ON student_cloud_state (student_id, updated_at DESC);
+
+    CREATE TABLE IF NOT EXISTS grade6_bank_responses (
+      student_id TEXT NOT NULL, subject_id TEXT NOT NULL, question_id TEXT NOT NULL,
+      answers JSONB NOT NULL DEFAULT '{}'::jsonb,
+      submitted BOOLEAN NOT NULL DEFAULT FALSE, outcome TEXT,
+      score INTEGER, max_score INTEGER NOT NULL DEFAULT 0,
+      submissions INTEGER NOT NULL DEFAULT 0,
+      revision INTEGER NOT NULL DEFAULT 1,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (student_id, subject_id, question_id)
+    );
+    ALTER TABLE grade6_bank_responses ADD COLUMN IF NOT EXISTS revision INTEGER NOT NULL DEFAULT 1;
   `);
   console.log("PostgreSQL migrations completed.");
 }

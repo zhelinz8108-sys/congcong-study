@@ -99,6 +99,7 @@ jobs:
               set +a
             fi
             npm ci
+            npm run test:grade6-bank
             npm run db:migrate
             npm run build
             sudo cp deploy/study-plan.service /etc/systemd/system/study-plan.service

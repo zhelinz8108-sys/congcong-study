@@ -1143,7 +1143,7 @@ export default function SubjectPage() {
               <div>
                 <h2 className="text-2xl font-bold text-stone-900">题库</h2>
                 <p className="mt-1 text-sm text-stone-400">
-                  分数 · 500 题 · 答案详解
+                  六上 · 章节专项 · 综合练习 · 由易到难
                 </p>
               </div>
               <span className="text-stone-400">→</span>
