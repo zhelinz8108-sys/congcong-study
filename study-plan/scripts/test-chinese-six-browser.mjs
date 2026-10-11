@@ -36,6 +36,24 @@ async function shot(name) { await page.screenshot({ path: path.join(output, name
 async function noOverflow() {
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "horizontal overflow");
 }
+async function singleColumn(locator, label) {
+  const boxes = await locator.evaluateAll(elements => elements.map(element => {
+    const rect = element.getBoundingClientRect();
+    return { left: rect.left, top: rect.top, bottom: rect.bottom, width: rect.width };
+  }));
+  assert.ok(boxes.length >= 2, `${label}: expected multiple entries`);
+  for (let i = 1; i < boxes.length; i++) {
+    assert.ok(Math.abs(boxes[i].left - boxes[0].left) <= 1, `${label}: entries must align`);
+    assert.ok(Math.abs(boxes[i].width - boxes[0].width) <= 1, `${label}: entries must use one column`);
+    assert.ok(boxes[i].top >= boxes[i - 1].bottom - 1, `${label}: entries must not sit side by side`);
+  }
+}
+async function stackedWorkspace() {
+  const navigation = await page.locator("aside").boundingBox();
+  const content = await page.locator("aside + div").boundingBox();
+  assert.ok(navigation && content && content.y >= navigation.y + navigation.height - 1, "Study navigation must be above content");
+  assert.ok(Math.abs(navigation.x - content.x) <= 1 && Math.abs(navigation.width - content.width) <= 1, "Study content must use the full single column");
+}
 try {
   await page.goto(`${origin}/subjects/qa-chinese`);
   await page.getByRole("link", { name: /^六上/ }).waitFor();
@@ -44,17 +62,39 @@ try {
   await page.getByRole("heading", { name: "六上语文", exact: true }).waitFor();
   assert.equal(await page.locator('[role="tabpanel"] a').count(), 34);
   await shot("hub-desktop.png"); checks.push("Chinese homepage entry; 34 lessons/gardens");
+  for (const width of [390, 1440, 1920, 2560]) {
+    await page.setViewportSize({ width, height: 1000 });
+    for (const [name, count] of [["课内复习", 34], ["句子专项", 13], ["阅读训练", 40], ["作文训练", 80]]) {
+      await page.getByRole("tab", { name: new RegExp(name) }).click();
+      const entries = page.locator('[role="tabpanel"] a');
+      assert.equal(await entries.count(), count);
+      await singleColumn(entries, `${name} at ${width}px`);
+      await noOverflow();
+    }
+    await page.getByRole("tab", { name: /阅读训练/ }).click();
+    const methods = page.locator("summary").filter({ hasText: "阅读方法" });
+    if (!await methods.evaluate(element => element.parentElement.open)) await methods.click();
+    await singleColumn(page.locator("details a"), `Reading methods at ${width}px`);
+    if (width === 1920) {
+      await page.getByRole("tab", { name: /课内复习/ }).click();
+      await shot("hub-wide-single-column.png");
+    }
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  checks.push("All four content lists and reading methods stay single-column at 390/1440/1920/2560px");
   await page.getByRole("tab", { name: /句子专项/ }).click();
   assert.equal(await page.locator('[role="tabpanel"] a').count(), 13);
   await page.getByRole("tab", { name: /阅读训练/ }).click();
   assert.equal(await page.locator('[role="tabpanel"] a').count(), 40);
-  await page.locator("summary").filter({ hasText: "阅读方法" }).click();
+  const methods = page.locator("summary").filter({ hasText: "阅读方法" });
+  if (!await methods.evaluate(element => element.parentElement.open)) await methods.click();
   await page.getByRole("link", { name: /01.*根据文本想象画面/ }).click();
   await page.getByRole("heading", { name: "根据文本想象画面", exact: true }).waitFor();
   await page.locator("img").first().waitFor();
   await page.waitForFunction(() => [...document.images].some(i => i.naturalWidth > 100));
   checks.push("24 reading method links and authenticated source images");
   await page.goto(`${base}/study/sentence-01`);
+  await stackedWorkspace();
   await page.getByRole("button", { name: "开始练习", exact: true }).click();
   assert.equal(await page.locator("[data-feedback]").count(), 0);
   await page.getByRole("textbox", { name: "你的答案" }).fill("这是第一次提交的答案。");
@@ -94,6 +134,9 @@ try {
   for (const button of await options.all()) assert.ok(await button.isDisabled());
   assert.ok(await page.getByText(/回答正确/).isVisible());
   checks.push("choice immediately graded and all options locked");
+  await page.setViewportSize({ width: 1920, height: 1000 });
+  await stackedWorkspace(); await noOverflow(); await shot("practice-wide-single-column.png");
+  checks.push("Study and practice navigation sits above the main content on wide screens");
   await page.setViewportSize({ width: 390, height: 844 });
   await noOverflow(); await shot("practice-mobile.png");
   await page.goto(base);
