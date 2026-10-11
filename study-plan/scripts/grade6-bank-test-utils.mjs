@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createDecipheriv, scryptSync } from "node:crypto";
+import { createDecipheriv, createHash, scryptSync } from "node:crypto";
 import nextEnv from "@next/env";
 
 // Tests use the same sealed deployment assets. Secrets stay in process memory.
@@ -27,6 +27,21 @@ export async function readTestBankAnswers() {
   const { data } = await context();
   const raw = await open(Buffer.from(data.ciphertext, "base64"), Buffer.from(data.iv, "base64"), Buffer.from(data.tag, "base64"), "grade6-bank-v1:answers");
   return JSON.parse(raw.toString("utf8"));
+}
+// Local tests only. Native reference answers are decrypted in this server-side
+// Node process, never exported to browser fixtures, logs or the public bundle.
+export async function readTestNativeBankAnswers() {
+  const data = JSON.parse(await fs.readFile(path.join(root, "sealed", "native-answers.encrypted.json"), "utf8"));
+  const secret = process.env.HOLIDAY_MATH_700_KEY?.trim();
+  if (!secret || !/^[a-f0-9]{64}$/i.test(secret)) throw new Error("Existing answer-key configuration is required");
+  const publicRaw = await fs.readFile(path.join(root, "questions.native.public.json"), "utf8");
+  if (data.version !== 1 || data.publicDigest !== createHash("sha256").update(publicRaw).digest("hex") || Buffer.from(data.salt, "base64").length !== 16 || Buffer.from(data.iv, "base64").length !== 12 || Buffer.from(data.tag, "base64").length !== 16) throw new Error("Native test release pair is invalid");
+  const salt = Buffer.from(data.salt, "base64");
+  const key = scryptSync(secret, Buffer.concat([Buffer.from("grade6-native-v1:"), salt]), 32);
+  const d = createDecipheriv("aes-256-gcm", key, Buffer.from(data.iv, "base64"));
+  d.setAAD(Buffer.from("grade6-native-v1:answers:" + data.publicDigest));
+  d.setAuthTag(Buffer.from(data.tag, "base64"));
+  return JSON.parse(Buffer.concat([d.update(Buffer.from(data.ciphertext, "base64")), d.final()]).toString("utf8"));
 }
 export async function readTestBankImage(relative) {
   const base = path.resolve(root, "sealed", "private"), resolved = path.resolve(base, relative);

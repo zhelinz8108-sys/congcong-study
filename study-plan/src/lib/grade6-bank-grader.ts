@@ -33,7 +33,41 @@ export function bankNumber(raw: string): number | null {
   return null;
 }
 
-function matchesRule(raw: string, rule: BankRule) {
+type ExactBankNumber = { numerator: bigint; denominator: bigint };
+function exactDecimal(value: string): ExactBankNumber | null {
+  if (value.length > 128 || !/^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/.test(value)) return null;
+  const negative = value.startsWith("-"), unsigned = value.replace(/^[+-]/, "");
+  const [whole, decimals = ""] = unsigned.split(".");
+  return { numerator: BigInt(negative ? -1 : 1) * BigInt((whole || "0") + decimals), denominator: BigInt(10) ** BigInt(decimals.length) };
+}
+
+/** Exact decimal/fraction arithmetic for reviewed native questions. Relative
+ * floating-point tolerance can otherwise accept a wrong last decimal digit on
+ * a large answer. No expression evaluation, scientific notation or rounding. */
+export function bankExactNumber(raw: string): ExactBankNumber | null {
+  const value = normalizeBankAnswer(raw);
+  if (value.length > 256) return null;
+  const plain = exactDecimal(value);
+  if (plain) return plain;
+  if (value.endsWith("%")) {
+    const percent = exactDecimal(value.slice(0, -1));
+    return percent ? { numerator: percent.numerator, denominator: percent.denominator * BigInt(100) } : null;
+  }
+  const mixed = /^([+-]?\d+)(?:又|带)(\d+)\/(\d+)$/.exec(value);
+  if (mixed) {
+    const denominator = BigInt(mixed[3]);
+    if (!denominator) return null;
+    const negative = mixed[1].startsWith("-"), whole = BigInt(mixed[1].replace(/^[+-]/, ""));
+    return { numerator: BigInt(negative ? -1 : 1) * (whole * denominator + BigInt(mixed[2])), denominator };
+  }
+  const parts = value.split("/");
+  if (parts.length !== 2) return null;
+  const top = exactDecimal(parts[0]), bottom = exactDecimal(parts[1]);
+  if (!top || !bottom || !bottom.numerator) return null;
+  return { numerator: top.numerator * bottom.denominator, denominator: top.denominator * bottom.numerator };
+}
+
+function matchesRule(raw: string, rule: BankRule, exact: boolean) {
   let value = normalizeBankAnswer(raw);
   if (rule.unit) {
     const unit = normalizeBankAnswer(rule.unit);
@@ -43,6 +77,10 @@ function matchesRule(raw: string, rule: BankRule) {
     const normalizedExpected = normalizeBankAnswer(expected);
     if (normalizedExpected === value || /^[a-z]$/i.test(value) && normalizedExpected.toLowerCase() === value.toLowerCase()) return true;
     if (!rule.numeric) return false;
+    if (exact) {
+      const actual = bankExactNumber(value), wanted = bankExactNumber(expected);
+      return actual !== null && wanted !== null && actual.numerator * wanted.denominator === wanted.numerator * actual.denominator;
+    }
     const actual = bankNumber(value), wanted = bankNumber(expected);
     return actual !== null && wanted !== null && Number.isFinite(actual) && Math.abs(actual - wanted) <= 1e-8 * Math.max(1, Math.abs(wanted));
   });
@@ -50,13 +88,13 @@ function matchesRule(raw: string, rule: BankRule) {
 
 export function gradeBankAnswer(privateAnswer: BankPrivateAnswer, answers: BankAnswers) {
   if (privateAnswer.answerStatus === "missing" || privateAnswer.answerStatus === "mismatch") {
-    return { outcome: "missing" as BankOutcome, score: null, maxScore: 0, fields: [], message: "原资料的配套答案缺失或错配，这题已保存，但暂不计入正确率。" };
+    return { outcome: "missing" as BankOutcome, score: null, maxScore: 0, fields: [], message: "答案待核对，不计入正确率。" };
   }
   if (privateAnswer.reviewRequired || !privateAnswer.rules.length) {
-    return { outcome: "review" as BankOutcome, score: null, maxScore: 0, fields: [], message: "作答已保存。此题含过程、作图或尚未可靠结构化的答案，需要核验，暂不计入正确率。" };
+    return { outcome: "review" as BankOutcome, score: null, maxScore: 0, fields: [], message: "过程或作图待核验，不计入正确率。" };
   }
-  const fields = privateAnswer.rules.map((rule) => ({ id: rule.id, correct: matchesRule(answers[rule.id] ?? "", rule) }));
+  const fields = privateAnswer.rules.map((rule) => ({ id: rule.id, correct: matchesRule(answers[rule.id] ?? "", rule, privateAnswer.answerStatus === "verified_native") }));
   const score = fields.filter((field) => field.correct).length;
   const correct = score === fields.length;
-  return { outcome: (correct ? "correct" : "incorrect") as BankOutcome, score, maxScore: fields.length, fields, message: correct ? "答对了！可以看完解析后，手动进入下一题。" : `这题还有需要订正的地方。${fields.length > 1 ? `已答对 ${score}/${fields.length} 项。` : ""}看看答案，再想一遍。` };
+  return { outcome: (correct ? "correct" : "incorrect") as BankOutcome, score, maxScore: fields.length, fields, message: correct ? "" : "请订正标出的作答。" };
 }

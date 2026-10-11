@@ -3,9 +3,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { STUDENT_PROFILE_COOKIE, parseStudentProfileCookie } from "@/lib/family-access";
 import { holidayAccess, holidayBody, holidayHeaders } from "@/server/holiday-math-700/http";
 import type { BankAnswers, BankQuestion } from "@/lib/grade6-bank-types";
+import { assertBankDrawing } from "@/lib/grade6-bank-native-validation";
+import { bankNativeInputSchema } from "@/lib/grade6-bank-input-schema";
 
 export const bankHeaders = holidayHeaders;
-export const bankAccess = holidayAccess;
+export function bankAccess(request: NextRequest, write = false) {
+  const qa = request.headers.get("x-grade6-qa");
+  if (qa && (qa !== "isolated-memory-v1" || process.env.NODE_ENV === "production" || process.env.GRADE6_BANK_TEST_MEMORY !== "1")) return NextResponse.json({ error: "Isolated test memory required" }, { status: 403, headers: bankHeaders });
+  return holidayAccess(request, write);
+}
 export const bankBody = holidayBody;
 export function bankProfile(request: NextRequest) {
   return parseStudentProfileCookie(request.cookies.get(STUDENT_PROFILE_COOKIE)?.value);
@@ -13,6 +19,11 @@ export function bankProfile(request: NextRequest) {
 export function bankSubject(value: unknown) {
   if (typeof value !== "string" || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value)) throw new Error("请选择有效的学科");
   return value;
+}
+/** Reject a pre-migration browser before it can canonicalize an old aggregate
+ * into the first native blank. This token is public, not a write credential. */
+export function bankInputSchema(value: unknown, question: BankQuestion) {
+  if (question.native && value !== bankNativeInputSchema(question)) throw new Error("提交字段已更新，请刷新页面后重新填写本题");
 }
 export function bankStudentAnswers(value: unknown, question: BankQuestion, submitting: boolean): BankAnswers {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("请填写作答内容");
@@ -24,6 +35,14 @@ export function bankStudentAnswers(value: unknown, question: BankQuestion, submi
     if (typeof answer !== "string" || answer.length > 3000) throw new Error("提交内容过长或格式不正确");
     if (submitting && !answer.trim()) throw new Error("请先完成每一项作答，再提交");
     if (field.kind === "choice" && answer && !field.choices?.includes(answer)) throw new Error("请选择题目提供的选项");
+    if (field.kind === "drawing" && answer.trim()) {
+      const block = question.native?.blocks.find((block) => block.type === "drawing" && block.fieldId === field.id);
+      try {
+        if (block?.type !== "drawing") throw new Error("Missing drawing canvas");
+        assertBankDrawing(answer, block.viewBox);
+      }
+      catch { throw new Error("提交格式不正确，请检查绘图内容"); }
+    }
     result[field.id] = answer.trim();
   }
   return result;

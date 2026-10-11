@@ -1,3 +1,5 @@
+import type { BankNativeContent } from "./grade6-bank-native-types";
+
 export type BankDifficulty = 1 | 2 | 3 | 4;
 export const BANK_DIFFICULTIES = [
   { value: 1, label: "基础起步", description: "先把概念和基本计算练熟" },
@@ -6,7 +8,7 @@ export const BANK_DIFFICULTIES = [
   { value: 4, label: "拓展挑战", description: "尝试更有深度的推理" },
 ] as const;
 
-export type BankInput = { id: string; label: string; kind?: "text" | "choice"; choices?: string[] };
+export type BankInput = { id: string; label: string; kind?: "text" | "choice" | "drawing"; choices?: string[] };
 export type BankQuestion = {
   id: string;
   collectionId: string;
@@ -21,6 +23,7 @@ export type BankQuestion = {
   prompt: string;
   questionImages: string[];
   inputs: BankInput[];
+  native?: BankNativeContent;
 };
 export type BankQuestionRef = Pick<BankQuestion, "id" | "number" | "difficulty" | "topic" | "kind">;
 export type BankCollection = {
@@ -58,6 +61,8 @@ export type BankResponse = {
   revision: number;
   /** Server revision the local unsaved edit was based on; never server-trusted. */
   baseRevision?: number;
+  /** Local-only marker distinguishing a fresh partial native draft from legacy aggregate text. */
+  nativeInputSchema?: string;
 };
 export type BankProgress = { responses: Record<string, BankResponse>; lastQuestionId: string; updatedAt: string };
 

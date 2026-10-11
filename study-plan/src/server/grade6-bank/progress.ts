@@ -4,6 +4,7 @@ import type { BankAnswers, BankProgress, BankResponse, BankFeedback } from "@/li
 
 let schema: Promise<void> | null = null;
 const testMemory = () => process.env.NODE_ENV !== "production" && process.env.GRADE6_BANK_TEST_MEMORY === "1";
+export const bankIsIsolatedTestMemory = testMemory;
 // Development route bundles can load this module independently. All test-only
 // endpoints must share one isolated store so cross-route CAS is exercised.
 const testRuntime = globalThis as typeof globalThis & { grade6BankTestMemory?: Map<string, BankProgress> };

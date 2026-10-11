@@ -12,17 +12,42 @@ const cookie = `congcong_family_access=${token}`;
 const root = "content/grade6-bank";
 const manifest = JSON.parse(await fs.readFile(root + "/manifest.json", "utf8"));
 const questions = JSON.parse(await fs.readFile(root + "/questions.public.json", "utf8"));
+// Keep the existing npm command useful after the all-or-nothing migration.
+// An incomplete or malformed native file must fail, never silently select the
+// legacy crop/aggregate-field assertions. The delegated test retains its own
+// no-database handshake and isolated-memory request guard before any mutation.
+let nativeRaw = null;
+try { nativeRaw = await fs.readFile(root + "/questions.native.public.json", "utf8"); }
+catch (error) { if (error.code !== "ENOENT") throw error; }
+if (nativeRaw !== null) {
+  const release = JSON.parse(nativeRaw);
+  assert.equal(release.version, 1);
+  assert.equal(manifest.total, 2394);
+  assert.equal(release.total, manifest.total);
+  assert(Array.isArray(release.questions));
+  assert.equal(release.questions.length, manifest.total);
+  const nativeIds = release.questions.map((q) => q.id);
+  assert.equal(new Set(nativeIds).size, manifest.total);
+  assert.deepEqual([...nativeIds].sort(), questions.map((q) => q.id).sort());
+  await import("./test-grade6-bank-native-http.mjs");
+  process.exit(0);
+}
 const answers = await readTestBankAnswers();
 const amap = new Map(answers.map((a) => [a.id, a]));
 const revisions = new Map();
 async function request(address, body, method = "GET", origin = base, authenticated = true) {
-  const r = await fetch(base + address, { method, headers: { ...(authenticated ? { Cookie: cookie } : {}), ...(body ? { "Content-Type": "application/json", Origin: origin } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}), redirect: "manual", signal: AbortSignal.timeout(60000) });
+  const r = await fetch(base + address, { method, headers: { "X-Grade6-QA": "isolated-memory-v1", ...(authenticated ? { Cookie: cookie } : {}), ...(body ? { "Content-Type": "application/json", Origin: origin } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}), redirect: "manual", signal: AbortSignal.timeout(60000) });
   const text = await r.text(); let json; try { json = JSON.parse(text); } catch { /* HTML/image */ }
-  return { status: r.status, text, json, cache: r.headers.get("cache-control"), type: r.headers.get("content-type") };
+  return { status: r.status, text, json, cache: r.headers.get("cache-control"), type: r.headers.get("content-type"), isolated: r.headers.get("x-grade6-qa-memory") };
 }
 const rootRoute = `/subjects/${subject}/math/problem-bank`;
+const handshake = await request("/api/math/grade6-bank/qa-mode");
+assert.equal(handshake.status, 200);
+assert.equal(handshake.isolated, "isolated");
+assert.equal(handshake.json.isolatedTestMemory, true);
 const initialProgress = await request(`/api/math/grade6-bank/progress?subject_id=${subject}`);
 assert.equal(initialProgress.status, 200);
+assert.equal(initialProgress.isolated, "isolated", "Refuse mutations outside isolated development memory");
 for (const [id, response] of Object.entries(initialProgress.json.responses)) revisions.set(id, response.revision);
 const html = await request(rootRoute); assert.equal(html.status, 200); assert(html.text.includes("章节专项训练")); assert(html.text.includes("综合练习"));
 assert(!html.text.includes("answers.private")); assert(!html.text.includes("sourceKeyImages"));

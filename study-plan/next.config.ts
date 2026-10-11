@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     "/api/math/grade6-bank/**": [
       "./content/grade6-bank/manifest.json",
       "./content/grade6-bank/questions.public.json",
+      "./content/grade6-bank/questions.native.public.json",
       "./content/grade6-bank/public/**/*",
       "./content/grade6-bank/sealed/**/*",
     ],

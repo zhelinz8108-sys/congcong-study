@@ -8,21 +8,33 @@ import assert from "node:assert/strict";
 // replaced locally. No network, database, credentials or production writes.
 const hookPath = new URL("../src/lib/grade6-bank-progress.ts", import.meta.url);
 const componentPath = new URL("../src/components/grade6-bank.tsx", import.meta.url);
+const validationSource=fs.readFileSync(new URL("../src/lib/grade6-bank-native-validation.ts",import.meta.url),"utf8");
+const validationCode=ts.transpileModule(validationSource,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const validationContext={module:{exports:{}},exports:{}};validationContext.exports=validationContext.module.exports;
+vm.runInNewContext(validationCode,validationContext);
+const schemaSource=fs.readFileSync(new URL("../src/lib/grade6-bank-input-schema.ts",import.meta.url),"utf8");
+const schemaCode=ts.transpileModule(schemaSource,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+const schemaContext={module:{exports:{}},exports:{},require:name=>{if(name.endsWith("grade6-bank-native-validation"))return validationContext.module.exports;throw new Error(name);}};schemaContext.exports=schemaContext.module.exports;
+vm.runInNewContext(schemaCode,schemaContext);
 
 async function testProgressHook() {
   const text=fs.readFileSync(hookPath,"utf8");
   const compiled=ts.transpileModule(text,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
   const storage=new Map(); const response=(answers={},revision=0,submitted=false)=>({answers,revision,submitted,outcome:submitted?"correct":null,score:submitted?1:null,maxScore:submitted?1:0,submissions:submitted?1:0,updatedAt:revision?"2026-10-11T01:00:00.000Z":""});
-  let canonicalize=false;let remote={},failDraft=false,holdDraft=null,holdResolve=null,forcePostConflict=false; const calls=[];
+  let canonicalize=false;let remote={},failDraft=false,holdDraft=null,holdResolve=null,forcePostConflict=false; const calls=[],questionSchemas=new Map();
   const fetchMock=async(url,options={})=>{
    const body=options.body?JSON.parse(options.body):null; calls.push({url,method:options.method??"GET",body});
+   if(!options.method&&url.startsWith("/api/math/grade6-bank/questions/")){const id=decodeURIComponent(url.split("/").at(-1));return {ok:true,status:200,json:async()=>structuredClone(questionSchemas.get(id)??{id,inputs:[{id:"a",label:"答案",kind:"text"},{id:"b",label:"第二空",kind:"text"}]})};}
    if(!options.method)return {ok:true,status:200,json:async()=>structuredClone({responses:remote,lastQuestionId:"q",updatedAt:""})};
+   const schema=questionSchemas.get(body.question_id);
+   if(schema?.native)assert.equal(body.input_schema,schemaContext.module.exports.bankNativeInputSchema(schema),"every native PUT/POST carries the exact public schema token");
    if(options.method==="PUT"&&failDraft)throw new Error("offline");
    if(options.method==="PUT"&&holdDraft){const gate=holdDraft;holdDraft=null;await gate;}
    if(options.method==="POST"&&forcePostConflict){forcePostConflict=false;remote.q=response({a:"new-cloud"},remote.q.revision+1,true);}
    const old=remote[body.question_id]??response();
    if(body.base_revision!==old.revision)return {ok:false,status:409,json:async()=>({error:"conflict",response:structuredClone(old)})};
-   const canonical=canonicalize?Object.fromEntries([...new Set([...Object.keys(body.answers),"b"])].map(id=>[id,(body.answers[id]??"").trim()])):body.answers;const saved=response(canonical,old.revision+1,options.method==="POST");remote[body.question_id]=saved;
+   const canonicalFields=questionSchemas.get(body.question_id)?.inputs.map(field=>field.id)??["b"];
+   const canonical=canonicalize?Object.fromEntries([...new Set([...Object.keys(body.answers),...canonicalFields])].map(id=>[id,(body.answers[id]??"").trim()])):body.answers;const saved=response(canonical,old.revision+1,options.method==="POST");remote[body.question_id]=saved;
    return {ok:true,status:200,json:async()=>options.method==="POST"?{response:structuredClone(saved),feedback:{questionId:body.question_id,outcome:"correct",score:1,maxScore:1,fields:[],message:"ok",answerText:"private",answerImages:[]}}:structuredClone(saved)};
   };
   const settle=async()=>{for(let i=0;i<30;i++)await new Promise(resolve=>setImmediate(resolve));};
@@ -30,7 +42,7 @@ async function testProgressHook() {
    const states=[],refs=[],effects=[],events=new Map();let si=0,ri=0;
    const react={useState:(init)=>{const i=si++;states[i]=typeof init==="function"?init():init;return [states[i],v=>{states[i]=typeof v==="function"?v(states[i]):v;}];},useRef:v=>{const i=ri++;refs[i]={current:v};return refs[i];},useCallback:f=>f,useEffect:f=>effects.push(f)};
    const surface={addEventListener:(n,f)=>events.set(n,f),removeEventListener:(n)=>events.delete(n)};
-   const context={module:{exports:{}},exports:{},require:n=>{if(n==="react")return react;throw new Error(n);},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},fetch:fetchMock,AbortSignal,setTimeout,clearTimeout,document:{...surface,visibilityState:"visible"},window:surface,console};
+   const context={module:{exports:{}},exports:{},require:n=>{if(n==="react")return react;if(n.endsWith("grade6-bank-native-validation"))return validationContext.module.exports;if(n.endsWith("grade6-bank-input-schema"))return schemaContext.module.exports;throw new Error(n);},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},fetch:fetchMock,AbortSignal,setTimeout,clearTimeout,document:{...surface,visibilityState:"visible"},window:surface,console};
    context.exports=context.module.exports;vm.runInNewContext(compiled,context);
    const hook=context.module.exports.useGrade6BankProgress("subject");
    const cleanup=effects.map(f=>f());return {hook,states,events,cleanup:()=>cleanup.forEach(f=>f?.())};
@@ -81,7 +93,91 @@ async function testProgressHook() {
   assert.deepEqual(JSON.parse(storage.get(key)).dirtyQuestionIds,[]);assert.deepEqual(JSON.parse(storage.get(key)).conflicts,{});
   assert.equal(calls.filter(c=>c.method!=="GET").length,equalAnswerWrites,"matching submitted record must not be downgraded by PUT");h.cleanup();
 
-  console.log(JSON.stringify({passed:true,scenarios:["no local grade promotion","failed dirty/base persistence","online retry","preserve later edits with server revision","GET stale conflict blocks auto retry","first manual conflict no overwrite","second explicit submit","POST conflict then explicit retry","future client clock cannot override","server trim / empty field equivalence","pagehide save before accept then reload","equal other-device submission keeps server grade"],writes:calls.filter(c=>c.method!=="GET").length}));
+  const nativeQuestion={id:"q",inputs:[{id:"blank-1",label:"第1空",kind:"text"},{id:"blank-2",label:"第2空",kind:"text"}],native:{version:1,blocks:[{type:"paragraph",content:[{type:"blank",fieldId:"blank-1"},{type:"blank",fieldId:"blank-2"}]}]}};
+  questionSchemas.set("q",nativeQuestion);
+  storage.clear();remote={q:response({"old-aggregate":"3/4，1/2"},5,true)};
+  const cleanLegacyWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();h.hook.observeQuestion(nativeQuestion);
+  assert.equal(calls.filter(c=>c.method!=="GET").length,cleanLegacyWrites,"clean late GET legacy answers must remain read-only");
+  assert.equal(h.hook.getResponse("q").answers["old-aggregate"],"3/4，1/2");h.cleanup();
+
+  remote={q:response({},5)};
+  storage.set(key,JSON.stringify({responses:{q:response({"old-aggregate":"older-v1-draft"},5)},lastQuestionId:"q"}));
+  const oldVersionWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();
+  assert.equal(calls.filter(c=>c.method!=="GET").length,oldVersionWrites,"old v1 cache without dirtyQuestionIds must pause before PUT");assert.equal(h.states[2],"legacy");h.cleanup();
+
+  // Old local dirty caches can load before their question component. The hook
+  // must inspect public fields BEFORE any PUT, pause only that legacy record,
+  // and retain it across reload. No comma-based guessing or empty rewrite.
+  remote={q:response({},5),other:response({},0)};
+  storage.set(key,JSON.stringify({responses:{q:{...response({"old-aggregate":"3/4，1/2"},5),baseRevision:5},other:response({a:"keep-other"},0)},lastQuestionId:"q",updatedAt:"",dirtyQuestionIds:["q","other"]}));
+  const dirtyLegacyCalls=calls.length;h=mount();await settle();
+  assert.equal(calls.slice(dirtyLegacyCalls).filter(c=>c.method!=="GET"&&c.body.question_id==="q").length,0,"legacy cache must not send a write on read");
+  assert.equal(remote.other.answers.a,"keep-other","other native/legacy-compatible questions still save normally");
+  assert.equal(h.states[2],"legacy");assert.equal(h.hook.getResponse("q").answers["old-aggregate"],"3/4，1/2");
+  assert.deepEqual(JSON.parse(storage.get(key)).pausedLegacyQuestionIds,["q"]);
+  assert.equal(h.hook.getLegacyAnswers("q")["old-aggregate"],"3/4，1/2");h.cleanup();
+  const pausedReloadWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();h.hook.observeQuestion(nativeQuestion);await h.hook.flush();
+  assert.equal(calls.filter(c=>c.method!=="GET").length,pausedReloadWrites,"paused legacy cache must not retry after reload");
+  h.hook.draft("q",{"blank-1":"3/4","blank-2":""});await h.hook.flush();
+  assert.deepEqual(JSON.parse(JSON.stringify(remote.q.answers)),{"blank-1":"3/4","blank-2":""});
+  assert.equal(h.states[2],"saved");assert.deepEqual(JSON.parse(storage.get(key)).pausedLegacyQuestionIds,[]);
+  assert.equal(JSON.parse(storage.get(key)).legacyHistory.q["old-aggregate"],"3/4，1/2");h.cleanup();
+  h=mount();await settle();assert.equal(h.hook.getLegacyAnswers("q")["old-aggregate"],"3/4，1/2","explicit new input must not delete old history");h.cleanup();
+
+  storage.clear();remote={q:response({},8)};storage.set(key,JSON.stringify({responses:{q:{...response({"blank-1":"2/3","blank-2":"4"},8),baseRevision:8}},dirtyQuestionIds:["q"]}));
+  const nativeDirtyWrites=calls.length;h=mount();await settle();assert.equal(calls.slice(nativeDirtyWrites).filter(c=>c.method==="PUT").length,1,"already-native dirty fields should resume sync");assert.equal(remote.q.answers["blank-1"],"2/3");assert.equal(h.states[2],"saved");h.cleanup();
+
+  // A cloud revision change while old text is paused must retain the normal
+  // conflict barrier. An explicit native edit alone is not permission to
+  // overwrite the other device's submitted answer.
+  remote={q:response({"blank-1":"cloud","blank-2":"latest"},11,true)};storage.set(key,JSON.stringify({responses:{q:{...response({"old-aggregate":"old-local"},10),baseRevision:10}},dirtyQuestionIds:["q"],pausedLegacyQuestionIds:["q"],legacyHistory:{q:{"old-aggregate":"old-local"}}}));
+  const revisionWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();h.hook.observeQuestion(nativeQuestion);h.hook.draft("q",{"blank-1":"student","blank-2":"new"});await h.hook.flush();
+  assert.equal(calls.filter(c=>c.method!=="GET").length,revisionWrites);assert.equal(remote.q.answers["blank-1"],"cloud");
+  await assert.rejects(h.hook.submit("q",{"blank-1":"student","blank-2":"new"}),/没有覆盖/);assert.equal(remote.q.revision,11);h.cleanup();
+
+  // Reused text IDs are the dangerous case: old answer-1 contained the whole
+  // response, while the native question reuses it for only the first blank.
+  const reused={id:"q",inputs:[{id:"answer-1",label:"第1空",kind:"text"},{id:"blank-2",label:"第2空",kind:"text"}],native:{version:1,blocks:[{type:"paragraph",content:[{type:"blank",fieldId:"answer-1"},{type:"blank",fieldId:"blank-2"}]}]}};
+  questionSchemas.set("q",reused);storage.clear();remote={q:response({"answer-1":"完整的旧聚合作答"},15,true)};
+  const reusedCleanWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();h.hook.observeQuestion(reused);
+  assert.deepEqual(JSON.parse(JSON.stringify(schemaContext.module.exports.bankCurrentAnswers(reused,h.hook.getResponse("q").answers))),{});
+  assert.equal(schemaContext.module.exports.bankLegacyAnswerEntries(reused,h.hook.getResponse("q").answers)[0][1],"完整的旧聚合作答");
+  assert.equal(calls.filter(c=>c.method!=="GET").length,reusedCleanWrites,"clean same-name aggregate GET never writes");h.cleanup();
+
+  remote={q:response({},15)};storage.set(key,JSON.stringify({responses:{q:{...response({"answer-1":"旧答案即使没有逗号也不猜"},15),baseRevision:15}},dirtyQuestionIds:["q"]}));
+  const reusedDirtyWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();assert.equal(h.states[2],"legacy");
+  assert.equal(calls.filter(c=>c.method!=="GET").length,reusedDirtyWrites);assert.equal(h.hook.getLegacyAnswers("q")["answer-1"],"旧答案即使没有逗号也不猜");h.cleanup();
+  h=mount();await settle();await h.hook.flush();assert.equal(calls.filter(c=>c.method!=="GET").length,reusedDirtyWrites,"same-name aggregate stays paused after reload");
+  h.hook.observeQuestion(reused);h.hook.draft("q",{"answer-1":"重新填写的第一空"});failDraft=true;await h.hook.flush();
+  const nativeSchema=schemaContext.module.exports.bankNativeInputSchema(reused);
+  assert.equal(JSON.parse(storage.get(key)).responses.q.nativeInputSchema,nativeSchema);h.cleanup();
+  failDraft=false;canonicalize=true;const partialBefore=calls.length;h=mount();await settle();
+  assert.equal(calls.slice(partialBefore).filter(c=>c.method==="PUT").length,1,"explicit partial native draft can resume with exact local schema marker");
+  assert.deepEqual(JSON.parse(JSON.stringify(remote.q.answers)),{"answer-1":"重新填写的第一空","blank-2":""});
+  assert.equal(h.hook.getLegacyAnswers("q")["answer-1"],"旧答案即使没有逗号也不猜");h.cleanup();
+
+  remote={q:response({},17)};storage.set(key,JSON.stringify({responses:{q:{...response({"answer-1":"","blank-2":""},17),baseRevision:17}},dirtyQuestionIds:["q"]}));
+  const emptyBefore=calls.length;h=mount();await settle();assert.equal(calls.slice(emptyBefore).filter(c=>c.method==="PUT").length,0,"equivalent empty draft need not rewrite the server");assert.equal(h.states[2],"saved","complete empty native fields are not legacy");assert.deepEqual(JSON.parse(JSON.stringify(h.hook.getLegacyAnswers("q"))),{});h.cleanup();
+
+  remote={q:response({"answer-1":"cloud","blank-2":"latest"},19,true)};
+  storage.set(key,JSON.stringify({responses:{q:{...response({"answer-1":"partial-native"},18),baseRevision:18,nativeInputSchema:nativeSchema}},dirtyQuestionIds:["q"],legacyHistory:{q:{"answer-1":"完整的旧聚合作答"}}}));
+  const partialConflictWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();
+  assert.equal(h.states[2],"conflict");assert.equal(calls.filter(c=>c.method!=="GET").length,partialConflictWrites,"a native schema marker cannot grant revision overwrite rights");
+  assert.equal(h.hook.getLegacyAnswers("q")["answer-1"],"完整的旧聚合作答");h.cleanup();canonicalize=false;
+
+  const choiceQuestion={id:"q",inputs:[{id:"answer-1",label:"选择",kind:"choice",choices:["A","B","C","D"]}],native:{version:1,blocks:[{type:"paragraph",content:[{type:"blank",fieldId:"answer-1"}]}]}};
+  questionSchemas.set("q",choiceQuestion);storage.clear();remote={q:response({"answer-1":"旧聚合作答：两个答案"},12,true)};
+  const cleanChoiceWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();h.hook.observeQuestion(choiceQuestion);await h.hook.flush();
+  assert.equal(calls.filter(c=>c.method!=="GET").length,cleanChoiceWrites,"late GET invalid choice remains read-only");assert.equal(h.hook.getResponse("q").answers["answer-1"],"旧聚合作答：两个答案");h.cleanup();
+  remote={q:response({},12)};storage.set(key,JSON.stringify({responses:{q:{...response({"answer-1":"3/4，1/2"},12),baseRevision:12}},dirtyQuestionIds:["q"]}));
+  const dirtyChoiceWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();await h.hook.flush();
+  assert.equal(calls.filter(c=>c.method!=="GET").length,dirtyChoiceWrites,"same-name invalid legacy choice must pause before PUT");assert.equal(h.states[2],"legacy");assert.equal(h.hook.getLegacyAnswers("q")["answer-1"],"3/4，1/2");h.cleanup();
+  h=mount();await settle();await h.hook.flush();assert.equal(calls.filter(c=>c.method!=="GET").length,dirtyChoiceWrites,"invalid choice stays paused after reload");
+  h.hook.draft("q",{"answer-1":"B"});await h.hook.flush();assert.equal(remote.q.answers["answer-1"],"B");assert.equal(h.states[2],"saved");assert.equal(h.hook.getLegacyAnswers("q")["answer-1"],"3/4，1/2");h.cleanup();
+  storage.clear();remote={q:response({},13)};storage.set(key,JSON.stringify({responses:{q:{...response({"answer-1":"C"},13),baseRevision:13}},dirtyQuestionIds:["q"]}));
+  const validChoiceWrites=calls.length;h=mount();await settle();assert.equal(calls.slice(validChoiceWrites).filter(c=>c.method==="PUT").length,1,"valid native choice still saves normally");assert.equal(remote.q.answers["answer-1"],"C");h.cleanup();
+
+  console.log(JSON.stringify({passed:true,scenarios:["no local grade promotion","failed dirty/base persistence","online retry","preserve later edits with server revision","GET stale conflict blocks auto retry","first manual conflict no overwrite","second explicit submit","POST conflict then explicit retry","future client clock cannot override","server trim / empty field equivalence","pagehide save before accept then reload","equal other-device submission keeps server grade","clean late GET legacy remains read-only","old v1 legacy cache pauses before PUT","dirty legacy pauses before PUT and survives reload","other questions continue saving","explicit native input resumes sync without deleting history","native dirty fields resume normally","legacy pause preserves cloud revision conflict barrier","same-name aggregate clean GET stays historic","same-name dirty aggregate pauses across reload","explicit partial native schema persists and resumes","complete empty native fields remain valid","native schema does not bypass revision conflict","same-name invalid choice GET remains read-only","dirty invalid choice pauses and survives reload","explicit choice resumes and preserves historic text","valid native choice still saves"],mockWrites:calls.filter(c=>c.method!=="GET").length,studentWrites:0}));
 
 }
 
@@ -90,7 +186,7 @@ async function testQuestionControls() {
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
   const states=[];let index=0,lastDraft=null;
   const jsx=(type,props)=>({type,props});const react={useState:init=>{const i=index++;if(!(i in states))states[i]=typeof init==="function"?init():init;return[states[i],value=>{states[i]=typeof value==="function"?value(states[i]):value;}];},useRef:v=>({current:v}),useEffect:()=>{},useMemo:f=>f()};
-  const context={module:{exports:{}},exports:{},require:name=>{if(name==="react")return react;if(name==="react/jsx-runtime")return{jsx,jsxs:jsx,Fragment:"fragment"};if(name==="next/link")return{default:"link"};if(name==="./grade6-bank.module.css")return{default:new Proxy({},{get:(_,key)=>String(key)})};if(name.endsWith("grade6-bank-progress"))return{};if(name.endsWith("grade6-bank-types"))return{BANK_DIFFICULTIES:[{value:1,label:"基础"}],bankStats:()=>({})};throw new Error(name);},console};
+  const context={module:{exports:{}},exports:{},require:name=>{if(name==="react")return react;if(name==="react/jsx-runtime")return{jsx,jsxs:jsx,Fragment:"fragment"};if(name==="next/link")return{default:"link"};if(name==="./grade6-bank.module.css")return{default:new Proxy({},{get:(_,key)=>String(key)})};if(name==="./grade6-bank-native")return{Grade6BankNative:()=>null};if(name.endsWith("grade6-bank-progress"))return{};if(name.endsWith("grade6-bank-input-schema"))return schemaContext.module.exports;if(name.endsWith("grade6-bank-types"))return{BANK_DIFFICULTIES:[{value:1,label:"基础"}],bankStats:()=>({})};throw new Error(name);},console};
   context.exports=context.module.exports;vm.runInNewContext(code,context);
   const record=(a,b,revision,submitted=false)=>({answers:{a,b},revision,submitted,outcome:submitted?"correct":null,score:submitted?2:null,maxScore:2,submissions:0,updatedAt:""});
   const progress={progress:{responses:{q:record("old-a","old-b",1)}},getResponse:id=>progress.progress.responses[id],draft:(id,answers)=>{lastDraft=structuredClone(answers);progress.progress.responses[id]={...progress.progress.responses[id],answers,baseRevision:progress.progress.responses[id].revision,submitted:false};},submit:async(id,answers)=>{progress.progress.responses[id]={...progress.progress.responses[id],answers,revision:progress.progress.responses[id].revision+1,submitted:true};return{questionId:id,outcome:"correct",score:2,maxScore:2,fields:[],message:"ok",answerText:"private-analysis",answerImages:[]};}};
@@ -104,7 +200,16 @@ async function testQuestionControls() {
   tree=render();const submit=nodes(tree).find(n=>n.type==="button"&&n.props.children==="提交答案");assert(submit);submit.props.onClick();for(let i=0;i<10;i++)await new Promise(resolve=>setImmediate(resolve));
   tree=render();assert(nodes(tree).some(n=>n.type==="section"&&n.props["data-outcome"]==="correct"));
   progress.progress.responses.q=record("external-a","external-b",4,true);tree=render();assert(!nodes(tree).some(n=>n.type==="section"&&n.props["data-outcome"]),"new server revision must hide old feedback");
-  console.log(JSON.stringify({passed:true,componentScenarios:["clean multi-input refresh","partial edit preserves other latest blanks","external revision invalidates feedback"]}));
+  // A migrated multi-blank question never guesses how to split an old aggregate.
+  // Old submitted records remain readable and are not rewritten on render.
+  states.length=0;lastDraft=null;
+  progress.progress.responses.q={...record("","",5,true),answers:{"old-aggregate":"3/4, 1/2"}};
+  tree=render();assert.equal(lastDraft,null);assert(nodes(tree).some(n=>n.type==="details"));
+  assert.deepEqual(nodes(tree).filter(n=>n.type==="textarea").map(n=>n.props.value),["",""]);
+  nodes(tree).find(n=>n.type==="textarea").props.onChange({target:{value:"3/4"}});
+  assert.deepEqual(lastDraft,{a:"3/4"},"explicit edit must not send unknown old keys");
+  assert(nodes(render()).some(n=>n.type==="details"),"historic aggregate remains visible after editing");
+  console.log(JSON.stringify({passed:true,componentScenarios:["clean multi-input refresh","partial edit preserves other latest blanks","external revision invalidates feedback","legacy answers read without writes","never comma-split old fields","explicit edit drops unknown payload keys"]}));
 
 }
 

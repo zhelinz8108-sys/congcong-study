@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { bankAccess, bankBody, bankFailure, bankHeaders, bankProfile, bankSubject, bankStudentAnswers } from "@/server/grade6-bank/http";
+import { bankAccess, bankBody, bankFailure, bankHeaders, bankInputSchema, bankProfile, bankSubject, bankStudentAnswers } from "@/server/grade6-bank/http";
 import { getBankQuestion, getPrivateBankAnswer, readBankImage } from "@/server/grade6-bank/bank";
 import { bankBaseRevision, BankRevisionConflict, saveBankResponse } from "@/server/grade6-bank/progress";
 import { gradeBankAnswer } from "@/lib/grade6-bank-grader";
@@ -9,10 +9,11 @@ export async function POST(request: NextRequest) {
   const denied = bankAccess(request, true); if (denied) return denied;
   try {
     const body = await bankBody(request);
-    if (Object.keys(body).some((key) => !["subject_id", "question_id", "answers", "base_revision"].includes(key))) throw new Error("提交字段不正确");
+    if (Object.keys(body).some((key) => !["subject_id", "question_id", "answers", "base_revision", "input_schema"].includes(key))) throw new Error("提交字段不正确");
     const baseRevision = bankBaseRevision(body.base_revision);
     const subject = bankSubject(body.subject_id), q = typeof body.question_id === "string" ? await getBankQuestion(body.question_id) : undefined;
     if (!q) return NextResponse.json({ error: "题目不存在" }, { status: 404, headers: bankHeaders });
+    bankInputSchema(body.input_schema, q);
     const answer = await getPrivateBankAnswer(q.id);
     if (!answer) throw new Error("Missing private answer record");
     const studentAnswers = bankStudentAnswers(body.answers, q, true), graded = gradeBankAnswer(answer, studentAnswers);

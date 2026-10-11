@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { BankManifest, BankQuestion } from "@/lib/grade6-bank-types";
 import type { BankPrivateAnswer } from "@/lib/grade6-bank-grader";
+import { nativeBankQuestion, nativeBankAnswer } from "./native-release";
 
 const root = path.join(process.cwd(), "content", "grade6-bank");
 let manifestPromise: Promise<BankManifest> | null = null;
@@ -43,9 +44,12 @@ export function getBankManifest() {
 }
 export async function getBankQuestion(id: string) {
   questionsPromise ??= readFile(path.join(root, "questions.public.json"), "utf8").then((raw) => new Map((JSON.parse(raw) as BankQuestion[]).map((q) => [q.id, q])));
-  return (await questionsPromise).get(id);
+  const question = (await questionsPromise).get(id);
+  return question ? nativeBankQuestion(question) : undefined;
 }
 export async function getPrivateBankAnswer(id: string) {
+  const native = await nativeBankAnswer(id);
+  if (native) return native;
   answersPromise ??= sealedAnswers().then(async (data) => {
     const bytes = await decrypt(Buffer.from(data.ciphertext, "base64"), Buffer.from(data.iv, "base64"), Buffer.from(data.tag, "base64"), "grade6-bank-v1:answers");
     const rows = JSON.parse(bytes.toString("utf8")) as BankPrivateAnswer[];
