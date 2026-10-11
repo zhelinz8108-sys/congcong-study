@@ -53,7 +53,12 @@ export function Grade6BankDirectory({ subjectId, manifest }: { subjectId: string
         return <section key={mode} className={styles.collectionPanel} data-mode={mode} aria-labelledby={headingId}>
           <header className={styles.sectionTitle}>
             <div className={styles.panelEyebrow}><span>{mode === "chapter" ? "按章节练熟" : "用整卷检验"}</span><span className={styles.panelCount}>{collections.length} {mode === "chapter" ? "组" : "套"} · {total.toLocaleString()} 题</span></div>
-            <div className={styles.panelHeading}><span className={styles.panelStep} aria-hidden="true">{mode === "chapter" ? "01" : "02"}</span><h2 id={headingId}>{mode === "chapter" ? "章节专项训练" : "综合练习"}</h2></div>
+            <div className={styles.panelHeading}>
+              <span className={styles.panelIcon} aria-hidden="true">
+                {mode === "chapter" ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" focusable="false"><path d="M12 6c-2.5-2-5.5-2.5-9-2v15c3.5-.5 6.5 0 9 2 2.5-2 5.5-2.5 9-2V4c-3.5-.5-6.5 0-9 2Z" /><path d="M12 6v15M6 8l3 1M6 12l3 1M15 9l3-1M15 13l3-1" /></svg> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" focusable="false"><path d="M9 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3" /><rect x="9" y="2" width="6" height="4" rx="1" /><path d="m8 11 1.5 1.5L12 10M15 11h2M8 17h9" /></svg>}
+              </span>
+              <h2 id={headingId}>{mode === "chapter" ? "章节专项训练" : "综合练习"}</h2>
+            </div>
             <p>{mode === "chapter" ? "按教材章节归类，基础 → 提高 → 应用 → 挑战" : "月考与跨单元检测，按原卷顺序独立完成"}</p>
           </header>
           <div className={styles.cards}>{collections.map((c) => <CollectionCard key={c.id} collection={c} subjectId={subjectId} responses={progress.responses} ready={ready} />)}</div>
