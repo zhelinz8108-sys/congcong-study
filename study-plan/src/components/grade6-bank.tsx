@@ -43,7 +43,7 @@ export function Grade6BankDirectory({ subjectId, manifest }: { subjectId: string
   const stats = bankStats(manifest.collections.flatMap((c) => c.questions.map((q) => q.id)), progress.responses);
   return <main className={styles.page}><div className={styles.wrap}>
     <Link className={styles.back} href={`/subjects/${subjectId}`}>← 返回数学</Link>
-    <header className={styles.hero}><div className={styles.eyebrow}>六上数学 · 一步一步练熟</div><h1>先练一个章节，再试一份整卷。</h1><p>把课内基础、专项提高和拓展挑战串成一条练习路线。选好章节，从简单题开始；学完一阶段，再用月考和综合卷检验掌握。</p><div className={styles.tags}><span>{manifest.total.toLocaleString()} 道题</span><span>章节专项 · 由易到难</span><span>综合练习 · 原卷顺序</span><span>提交后查看答案</span></div></header>
+    <h1 className={styles.pageTitle}>六上数学题库</h1>
     <section className={styles.overview} aria-label="题库学习进度"><div className={styles.overviewTop}><h2>我的练习进度</h2><div className={styles.stats}><span>已答<b>{ready ? stats.answered : "—"} / {manifest.total}</b></span><span>答对<b>{ready ? stats.correct : "—"}</b></span><span>正确率<b>{ready && stats.accuracy !== null ? `${stats.accuracy}%` : "—"}</b></span></div></div><div className={styles.track}><div className={styles.fill} style={{ width: `${stats.answered / Math.max(1, manifest.total) * 100}%` }} /></div><p className={styles.note}>{syncText[sync]} · 正确率只统计可可靠自动判分的已提交题{stats.review ? ` · ${stats.review} 题待核验` : ""}</p></section>
     <div className={styles.columns}>
       {(["chapter", "exam"] as const).map((mode) => {
