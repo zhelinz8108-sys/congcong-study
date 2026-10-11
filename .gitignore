@@ -62,3 +62,7 @@ _question_bank_scan/
 study-plan/content/grade6-bank/answers.private.json
 study-plan/content/grade6-bank/import-audit.private.json
 study-plan/content/grade6-bank/private/
+
+# Chinese learning sources and reference answers are served behind family access.
+study-plan/content/chinese-six/*.private.json
+study-plan/content/chinese-six/pages/

@@ -45,6 +45,9 @@ export async function PUT(
   context: RouteContext<"/api/progress/[scope]">,
 ) {
   const { scope } = await context.params;
+  if (scope === "chinese:six:v1") {
+    return NextResponse.json({ error: "六上答题记录只能通过单次提交接口保存" }, { status: 403 });
+  }
   if (!validScope(scope)) {
     return NextResponse.json({ error: "无效的进度类型" }, { status: 400 });
   }
@@ -83,6 +86,9 @@ export async function DELETE(
   context: RouteContext<"/api/progress/[scope]">,
 ) {
   const { scope } = await context.params;
+  if (scope === "chinese:six:v1") {
+    return NextResponse.json({ error: "六上答题记录不能直接清除，请开始新的练习" }, { status: 403 });
+  }
   if (!validScope(scope)) {
     return NextResponse.json({ error: "无效的进度类型" }, { status: 400 });
   }

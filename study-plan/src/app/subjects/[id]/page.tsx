@@ -1185,6 +1185,19 @@ export default function SubjectPage() {
               </span>
             </div>
           </Link>
+          <Link
+            href={`/subjects/${id}/chinese/six`}
+            className="block rounded-lg border border-rose-200 bg-white p-5 shadow-sm transition-colors hover:border-rose-300 hover:bg-rose-50"
+            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-stone-900">六上</h2>
+                <p className="mt-2 text-sm leading-6 text-stone-500">课内复习 · 句子专项 · 阅读训练 · 作文训练</p>
+              </div>
+              <span className="text-stone-400">→</span>
+            </div>
+          </Link>
         </div>
       )}
 

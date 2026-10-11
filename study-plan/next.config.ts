@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
+    "/api/chinese/six/**": ["./content/chinese-six/sealed/**/*"],
+    "/subjects/*/chinese/six/**": ["./content/chinese-six/sealed/bank.encrypted.json"],
     "/api/math/grade6-bank/**": [
       "./content/grade6-bank/manifest.json",
       "./content/grade6-bank/questions.public.json",
@@ -22,6 +24,8 @@ const nextConfig: NextConfig = {
   },
   outputFileTracingExcludes: {
     "/*": [
+      "./content/chinese-six/*.private.json",
+      "./content/chinese-six/pages/**/*",
       "./content/grade6-bank/answers.private.json",
       "./content/grade6-bank/import-audit.private.json",
       "./content/grade6-bank/private/**/*",
