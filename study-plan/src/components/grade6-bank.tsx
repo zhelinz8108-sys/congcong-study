@@ -29,7 +29,7 @@ function SourceImage({ src, alt }: { src: string; alt: string }) {
 
 function CollectionCard({ collection, subjectId, responses, ready }: { collection: BankCollection; subjectId: string; responses: Parameters<typeof bankStats>[1]; ready: boolean }) {
   const stats = bankStats(collection.questions.map((q) => q.id), responses);
-  return <Link className={styles.card} style={palette(collection.palette)} href={`/subjects/${subjectId}/math/problem-bank/${collection.id}`} prefetch={false}>
+  return <Link className={`${styles.card} ${styles.directoryCard}`} style={palette(collection.palette)} href={`/subjects/${subjectId}/math/problem-bank/${collection.id}`} prefetch={false}>
     <div className={styles.cardHead}><h3>{collection.title}</h3><span className={styles.arrow} aria-hidden="true">↗</span></div>
     <p>{collection.subtitle}</p>
     <div className={styles.cardStats}><span>{collection.questionCount} 题</span><span>已答 {ready ? stats.answered : "—"}</span><span title="只统计系统能可靠判分的题；过程、画图及答案待核验题不计入">正确率 {ready && stats.accuracy !== null ? `${stats.accuracy}%` : "—"}</span>{stats.review > 0 && <span>待核验 {stats.review}</span>}</div>
@@ -46,7 +46,19 @@ export function Grade6BankDirectory({ subjectId, manifest }: { subjectId: string
     <header className={styles.hero}><div className={styles.eyebrow}>六上数学 · 一步一步练熟</div><h1>先练一个章节，再试一份整卷。</h1><p>把课内基础、专项提高和拓展挑战串成一条练习路线。选好章节，从简单题开始；学完一阶段，再用月考和综合卷检验掌握。</p><div className={styles.tags}><span>{manifest.total.toLocaleString()} 道题</span><span>章节专项 · 由易到难</span><span>综合练习 · 原卷顺序</span><span>提交后查看答案</span></div></header>
     <section className={styles.overview} aria-label="题库学习进度"><div className={styles.overviewTop}><h2>我的练习进度</h2><div className={styles.stats}><span>已答<b>{ready ? stats.answered : "—"} / {manifest.total}</b></span><span>答对<b>{ready ? stats.correct : "—"}</b></span><span>正确率<b>{ready && stats.accuracy !== null ? `${stats.accuracy}%` : "—"}</b></span></div></div><div className={styles.track}><div className={styles.fill} style={{ width: `${stats.answered / Math.max(1, manifest.total) * 100}%` }} /></div><p className={styles.note}>{syncText[sync]} · 正确率只统计可可靠自动判分的已提交题{stats.review ? ` · ${stats.review} 题待核验` : ""}</p></section>
     <div className={styles.columns}>
-      {(["chapter", "exam"] as const).map((mode) => <section key={mode}><header className={styles.sectionTitle}><h2>{mode === "chapter" ? "章节专项训练" : "综合练习"}</h2><p>{mode === "chapter" ? "按教材章节归类，基础 → 提高 → 应用 → 挑战" : "月考、跨单元与综合卷，保留原卷的题目次序"}</p></header><div className={styles.cards}>{manifest.collections.filter((c) => c.mode === mode).map((c) => <CollectionCard key={c.id} collection={c} subjectId={subjectId} responses={progress.responses} ready={ready} />)}</div></section>)}
+      {(["chapter", "exam"] as const).map((mode) => {
+        const collections = manifest.collections.filter((c) => c.mode === mode);
+        const total = collections.reduce((sum, c) => sum + c.questionCount, 0);
+        const headingId = `bank-directory-${mode}`;
+        return <section key={mode} className={styles.collectionPanel} data-mode={mode} aria-labelledby={headingId}>
+          <header className={styles.sectionTitle}>
+            <div className={styles.panelEyebrow}><span>{mode === "chapter" ? "按章节练熟" : "用整卷检验"}</span><span className={styles.panelCount}>{collections.length} {mode === "chapter" ? "组" : "套"} · {total.toLocaleString()} 题</span></div>
+            <div className={styles.panelHeading}><span className={styles.panelStep} aria-hidden="true">{mode === "chapter" ? "01" : "02"}</span><h2 id={headingId}>{mode === "chapter" ? "章节专项训练" : "综合练习"}</h2></div>
+            <p>{mode === "chapter" ? "按教材章节归类，基础 → 提高 → 应用 → 挑战" : "月考与跨单元检测，按原卷顺序独立完成"}</p>
+          </header>
+          <div className={styles.cards}>{collections.map((c) => <CollectionCard key={c.id} collection={c} subjectId={subjectId} responses={progress.responses} ready={ready} />)}</div>
+        </section>;
+      })}
     </div>
     <aside className={styles.steps}>每次只做一道题，提交后看答案与解析，再手动点“下一题”。画图、过程题与源答案待核验题会明确说明，不会冒充系统判对，也不会计入正确率。旧题库已从这个入口移除，其他板块的题目和学习记录不受影响。</aside>
   </div></main>;
