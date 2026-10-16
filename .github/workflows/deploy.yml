@@ -6,21 +6,22 @@ on:
       - main
   workflow_dispatch:
 
+# Never interrupt a release between stopping the service and its health check.
 concurrency:
   group: production-deploy
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 40
     env:
       SERVER_HOST: ${{ secrets.SERVER_HOST }}
       SERVER_USER: ${{ secrets.SERVER_USER }}
       SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
       SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-      REMOTE_APP_DIR: /www/study-plan
-      SERVICE_NAME: study-plan
+      RELEASE_NAME: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+      REMOTE_RELEASE_DIR: /www/study-plan-releases/${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
 
     steps:
       - name: Checkout
@@ -52,84 +53,35 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "$SERVER_PORT" "$SERVER_HOST" >> ~/.ssh/known_hosts
 
-      - name: Prepare persistent application data
+      - name: Prepare isolated release directory
         shell: bash
         run: |
           ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" "
             set -e
-            sudo install -d -m 0755 -o ubuntu -g ubuntu /var/lib/study-plan/uploads/study-uploads
-            if [ -d '$REMOTE_APP_DIR/public/uploads' ]; then
-              sudo cp -a '$REMOTE_APP_DIR/public/uploads/.' /var/lib/study-plan/uploads/
-            fi
-            sudo chown -R ubuntu:ubuntu /var/lib/study-plan/uploads
-            sudo chmod -R a+rX /var/lib/study-plan/uploads
-            if [ -f /etc/study-plan.env ]; then
-              sudo chgrp ubuntu /etc/study-plan.env
-              sudo chmod 0640 /etc/study-plan.env
-            fi
+            sudo install -d -m 0755 -o ubuntu -g ubuntu /www/study-plan-releases
+            test ! -e '$REMOTE_RELEASE_DIR'
+            install -d -m 0755 '$REMOTE_RELEASE_DIR'
           "
 
-      - name: Sync application files
+      - name: Upload release without touching the running application
         shell: bash
         run: |
-          rsync -az --checksum --delete \
+          rsync -az --checksum \
             -e "ssh -i ~/.ssh/deploy_key -p $SERVER_PORT" \
             --exclude ".env*" \
             --exclude ".data/" \
             --exclude "node_modules/" \
             --exclude ".next/" \
+            --exclude ".next-*/" \
             --exclude "*.log" \
             --exclude "public/listening/" \
             --exclude "public/uploads/" \
             --exclude "content/english-six" \
             --exclude "content/toefl-listening/" \
-            study-plan/ "$SERVER_USER@$SERVER_HOST:$REMOTE_APP_DIR/"
+            study-plan/ "$SERVER_USER@$SERVER_HOST:$REMOTE_RELEASE_DIR/"
 
-      - name: Install, migrate, build, and restart service
-        env:
-          HOLIDAY_MATH_700_KEY: ${{ secrets.HOLIDAY_MATH_700_KEY }}
+      - name: Build, verify, and activate with rollback
         shell: bash
         run: |
-          printf '%s\n' "$HOLIDAY_MATH_700_KEY" | ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
-            "sudo node '$REMOTE_APP_DIR/scripts/configure-holiday-math-key.mjs'"
-          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" "
-            set -e
-            cd '$REMOTE_APP_DIR'
-            if [ -r /etc/study-plan.env ]; then
-              set -a
-              . /etc/study-plan.env
-              set +a
-            fi
-            npm ci
-            npm run test:grade6-bank
-            npm run test:chinese-six:sealed
-            npm run test:chinese-six
-            npm run db:migrate
-            npm run build -- --webpack
-            sudo cp deploy/study-plan.service /etc/systemd/system/study-plan.service
-            sudo cp deploy/nginx.conf /etc/nginx/sites-available/study-plan
-            sudo ln -sfn /etc/nginx/sites-available/study-plan /etc/nginx/sites-enabled/study-plan
-            sudo systemctl daemon-reload
-            sudo nginx -t
-            sudo systemctl reload nginx
-            sudo systemctl restart '$SERVICE_NAME'
-            sudo systemctl is-active --quiet '$SERVICE_NAME'
-
-            ready=0
-            for attempt in 1 2 3 4 5 6; do
-              if curl --fail --silent --show-error http://127.0.0.1:3001/api/health >/dev/null; then
-                ready=1
-                break
-              fi
-              sleep 5
-            done
-            test "\$ready" -eq 1
-
-            if ! command -v certbot >/dev/null 2>&1; then
-              sudo apt-get update
-              sudo DEBIAN_FRONTEND=noninteractive apt-get install -y certbot python3-certbot-nginx
-            fi
-            sudo certbot --nginx --non-interactive --agree-tos --register-unsafely-without-email \
-              --redirect --keep-until-expiring -d congcong-study.cn
-            curl --fail --silent --show-error --head https://congcong-study.cn >/dev/null
-          "
+          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
+            "sudo -n bash '$REMOTE_RELEASE_DIR/scripts/release-production.sh' '$RELEASE_NAME' '$GITHUB_SHA'"
