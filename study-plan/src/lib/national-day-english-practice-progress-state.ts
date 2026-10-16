@@ -127,6 +127,7 @@ export function applyEnglishPracticeFeedback(
     byId.set(result.questionId, result);
   }
   if (results.filter((result) => result?.correct === true).length !== value.score) return progress;
+  if (members.every(id => progress.attempts[id])) return progress;
   const next: EnglishPracticeProgress = {
     ...progress,
     attempts: { ...progress.attempts },
@@ -137,12 +138,13 @@ export function applyEnglishPracticeFeedback(
   for (const id of members) {
     const result = byId.get(id)!;
     const old = progress.attempts[id];
+    if (old) continue;
     const correct = result.correct as boolean;
     const selected = result.selected as EnglishPracticeLetter;
     next.drafts[id] = selected;
     next.attempts[id] = {
-      correct, selected, submissions: Math.min((old?.submissions ?? 0) + 1, Number.MAX_SAFE_INTEGER),
-      wrongCount: Math.min((old?.wrongCount ?? 0) + (correct ? 0 : 1), Number.MAX_SAFE_INTEGER), at,
+      correct, selected, submissions: 1,
+      wrongCount: correct ? 0 : 1, at,
     };
   }
   return next;

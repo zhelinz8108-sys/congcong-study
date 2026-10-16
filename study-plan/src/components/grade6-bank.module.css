@@ -82,6 +82,24 @@
 .feedback h3 { font-size:16px; font-weight:800; margin-bottom:9px; }
 .feedback p { font-size:14px; line-height:1.85; white-space:pre-wrap; }
 .feedback .questionImage { margin:17px 0 0; border-radius:8px; }
+.solution { margin-top:20px; color:#604532; }
+.solution h4 { font-size:14px; line-height:1.6; font-weight:750; margin-bottom:6px; color:#825028; }
+.solution p { overflow-wrap:anywhere; }
+.solution :global([role="text"][aria-label]) { display:inline-flex; flex-direction:column; align-items:stretch; margin:0 .13em; transform:translateY(.08em); vertical-align:middle; white-space:nowrap; font-size:.78em; line-height:1; font-variant-numeric:tabular-nums; }
+.solution :global([role="text"][aria-label] > span) { display:block; min-width:1.35em; padding:.1em .18em; text-align:center; line-height:1; }
+.solution :global([role="text"][aria-label] > span + span) { border-top:1.5px solid currentColor; }
+.solutionThought { padding-bottom:18px; border-bottom:1px solid #ead6be; }
+.solutionSteps { list-style:none; display:flex; flex-direction:column; gap:17px; margin:20px 0; padding:0; }
+.solutionSteps > li { display:flex; align-items:flex-start; gap:13px; }
+.solutionSteps > li > div { min-width:0; flex:1; }
+.solutionNumber { display:flex; align-items:center; justify-content:center; flex:0 0 27px; height:27px; margin-top:1px; border-radius:9px; border:1px solid #e8caa5; background:#fff4df; font-size:12px; font-weight:750; color:#925729; }
+.solutionAnswer { padding:14px 17px; border:1px solid #e8ccaa; border-radius:12px; background:#fffdfa; }
+.solutionAnswer h4 { color:#945c29; }
+.solutionPitfalls { margin-top:16px; font-size:13px; color:#97714f; }
+.solutionPitfalls summary { cursor:pointer; width:fit-content; font-weight:650; }
+.solutionPitfalls ul { margin:9px 0 0; padding-left:18px; }
+.solutionPitfalls li { margin-top:6px; line-height:1.85; }
+.solutionReview { padding:12px 15px; margin-bottom:17px; border:1px solid #edc9a6; border-radius:10px; background:#fff1dd; }
 .actions { border-top:1px solid var(--line); padding:20px 25px; background:#fffefa; }
 .buttonRow { display:grid; grid-template-columns:1fr 1.6fr 1fr; gap:12px; }
 .button { min-height:46px; border:1px solid var(--line); border-radius:12px; background:white; color:#916444; font-size:14px; font-weight:750; padding:10px 12px; transition:background .15s; }

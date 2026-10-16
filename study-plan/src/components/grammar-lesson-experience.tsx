@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { GrammarLesson } from "@/lib/grammar-course";
+import { useEnglishLocked } from "@/lib/use-english-locked";
+import EnglishLockedTask from "@/components/english-locked-task";
 import {
   EMPTY_GRAMMAR_COURSE_PROGRESS,
   loadGrammarCourseProgress,
@@ -34,10 +36,10 @@ export default function GrammarLessonExperience({
   previousLesson: { n: number; title: string } | null;
   nextLesson: { n: number; title: string } | null;
 }) {
+  const locked = useEnglishLocked("grammar-course", subjectId);
   const [progress, setProgress] = useState<GrammarCourseProgress>(EMPTY_GRAMMAR_COURSE_PROGRESS);
   const [progressReady, setProgressReady] = useState(false);
   const [activeTask, setActiveTask] = useState(0);
-  const [revealed, setRevealed] = useState(false);
   const [completedNow, setCompletedNow] = useState(false);
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function GrammarLessonExperience({
 
   const lessonKey = String(lesson.n);
   const practice = progress.lessonPractice[lessonKey] ?? { answered: [], mastered: [] };
-  const answeredSet = useMemo(() => new Set(practice.answered), [practice.answered]);
+  const answeredSet = useMemo(() => new Set([...practice.answered, ...lesson.tasks.map((_, index) => index).filter(index => locked.records[`lesson:${lesson.n}:task:${index}`])]), [practice.answered, lesson.tasks, lesson.n, locked.records]);
   const masteredSet = useMemo(() => new Set(practice.mastered), [practice.mastered]);
   const isComplete = progress.completedLessons.includes(lesson.n);
   const task = lesson.tasks[activeTask];
@@ -69,30 +71,6 @@ export default function GrammarLessonExperience({
     });
   };
 
-  const rateTask = (mastered: boolean) => {
-    saveWith((current) => {
-      const oldPractice = current.lessonPractice[lessonKey] ?? { answered: [], mastered: [] };
-      const masteredItems = new Set(oldPractice.mastered);
-      if (mastered) masteredItems.add(activeTask);
-      else masteredItems.delete(activeTask);
-      return {
-        ...current,
-        lessonPractice: {
-          ...current.lessonPractice,
-          [lessonKey]: {
-            answered: uniqueSorted([...oldPractice.answered, activeTask]),
-            mastered: uniqueSorted([...masteredItems]),
-          },
-        },
-        lastLesson: lesson.n,
-        updatedAt: new Date().toISOString(),
-      };
-    });
-    if (activeTask < lesson.tasks.length - 1) {
-      setActiveTask((value) => value + 1);
-      setRevealed(false);
-    }
-  };
 
   const completeLesson = () => {
     saveWith((current) => ({
@@ -184,7 +162,7 @@ export default function GrammarLessonExperience({
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">04 · Transfer lab</p>
                   <h2 className="mt-2 text-2xl font-black">10项迁移训练</h2>
-                  <p className="mt-2 text-sm font-medium text-slate-600">先独立判断，再展开答案。根据真实掌握情况记录反馈。</p>
+                  <p className="mt-2 text-sm font-medium text-slate-600">先写下答案与理由，再提交。首次作答永久锁定。</p>
                   <p className="mt-4 text-sm font-black text-cyan-700">已检查 {answeredSet.size} / {lesson.tasks.length}</p>
                 </div>
                 <div className="mt-5 h-2 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-cyan-300 transition-all" style={{ width: `${taskPercent}%` }} /></div>
@@ -192,24 +170,13 @@ export default function GrammarLessonExperience({
               <div className="p-5 sm:p-7">
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {lesson.tasks.map((_, index) => (
-                    <button key={index} type="button" onClick={() => { setActiveTask(index); setRevealed(false); }} className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-xs font-black transition ${index === activeTask ? "bg-violet-100 text-violet-800 ring-1 ring-violet-200" : masteredSet.has(index) ? "bg-emerald-100 text-emerald-800" : answeredSet.has(index) ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-500 hover:bg-violet-50 hover:text-violet-700"}`}>{masteredSet.has(index) ? "✓" : index + 1}</button>
+                    <button key={index} type="button" onClick={() => setActiveTask(index)} className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl text-xs font-black transition ${index === activeTask ? "bg-violet-100 text-violet-800 ring-1 ring-violet-200" : masteredSet.has(index) ? "bg-emerald-100 text-emerald-800" : answeredSet.has(index) ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-500 hover:bg-violet-50 hover:text-violet-700"}`}>{masteredSet.has(index) ? "✓" : index + 1}</button>
                   ))}
                 </div>
                 <div className="mt-5 rounded-[26px] border border-violet-100 bg-violet-50/50 p-5 sm:p-7">
                   <div><span className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-black text-violet-700 ring-1 ring-violet-100">任务 {activeTask + 1}</span><p className="mt-3 text-xs font-bold text-slate-400">先想，再核对</p></div>
                   <p className="mt-6 whitespace-pre-line text-lg font-black leading-8 text-slate-900">{task.prompt}</p>
-                  {!revealed ? (
-                    <button type="button" onClick={() => setRevealed(true)} className="mt-6 w-full rounded-2xl bg-violet-100 px-5 py-3.5 text-sm font-black text-violet-800 ring-1 ring-violet-200 transition hover:bg-violet-200">显示答案与判断依据</button>
-                  ) : (
-                    <div aria-live="polite" className="mt-6">
-                      <div className="rounded-2xl border border-emerald-200 bg-white p-5"><p className="text-xs font-black uppercase tracking-[0.16em] text-emerald-600">参考答案</p><p className="mt-3 text-sm font-bold leading-7 text-slate-700">{task.answer}</p></div>
-                      <p className="mt-4 text-center text-xs font-bold text-slate-400">你的判断和理由都对吗？</p>
-                      <div className="mt-3 space-y-3">
-                        <button type="button" onClick={() => rateTask(false)} className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-black text-amber-800 transition hover:bg-amber-100">还不稳，稍后再练</button>
-                        <button type="button" onClick={() => rateTask(true)} className="rounded-2xl bg-emerald-100 px-5 py-3 text-sm font-black text-emerald-800 ring-1 ring-emerald-200 transition hover:bg-emerald-200">判断正确，我掌握了</button>
-                      </div>
-                    </div>
-                  )}
+                  <div className="mt-5"><EnglishLockedTask key={`lesson:${lesson.n}:task:${activeTask}`} id={`lesson:${lesson.n}:task:${activeTask}`} prompt={task.prompt} hidePrompt locked={locked} /></div>
                 </div>
               </div>
             </section>
@@ -217,15 +184,15 @@ export default function GrammarLessonExperience({
             {lesson.deepPractice.length > 0 && (
               <section className="rounded-[32px] border border-amber-200 bg-amber-50 p-5 sm:p-8">
                 <div><p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Bonus · High load</p><h2 className="mt-2 text-2xl font-black">本课属于高负荷难点，加练3题</h2><span className="mt-3 block text-3xl">🔥</span></div>
-                <div className="mt-5 space-y-3">{lesson.deepPractice.map((item, index) => <details key={item.prompt} className="group rounded-2xl bg-white p-4 ring-1 ring-amber-200"><summary className="cursor-pointer list-none text-sm font-black leading-7 text-slate-800">{index + 1}. {item.prompt}<span className="float-right text-amber-600 group-open:rotate-45">＋</span></summary><p className="mt-3 border-t border-amber-100 pt-3 text-sm font-semibold leading-7 text-slate-600">{item.answer}</p></details>)}</div>
+                <div className="mt-5 space-y-3">{lesson.deepPractice.map((item, index) => <article key={item.prompt} className="rounded-2xl bg-white p-4 ring-1 ring-amber-200"><EnglishLockedTask id={`lesson:${lesson.n}:deep:${index}`} prompt={`${index + 1}. ${item.prompt}`} locked={locked} /></article>)}</div>
               </section>
             )}
 
             <section className={`rounded-[34px] border p-6 text-center text-slate-900 sm:p-9 ${isComplete || completedNow ? "border-emerald-200 bg-emerald-50" : "border-cyan-200 bg-cyan-50"}`}>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-700">Lesson checkpoint</p>
               <h2 className="mt-3 text-3xl font-black">{isComplete || completedNow ? "本课已点亮" : "完成本课，点亮课程地图"}</h2>
-              <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-slate-600">已检查 {answeredSet.size}/10 项，其中 {masteredSet.size} 项标记为掌握。未掌握的任务会保留为黄色，随时可以回来重练。</p>
-              {!isComplete && !completedNow && <button type="button" onClick={completeLesson} className="mt-6 rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-cyan-800 ring-1 ring-cyan-200 transition hover:bg-cyan-100">完成并保存本课</button>}
+              <p className="mx-auto mt-3 max-w-xl text-sm font-medium leading-7 text-slate-600">已检查 {answeredSet.size}/10 项。新作答永久锁定，开放题保留待教师评价；历史自评不算客观成绩。</p>
+              {!isComplete && !completedNow && <button type="button" disabled={!locked.ready || answeredSet.size < lesson.tasks.length} onClick={completeLesson} className="mt-6 rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-cyan-800 ring-1 ring-cyan-200 transition hover:bg-cyan-100 disabled:opacity-50">完成并保存本课</button>}
               {(isComplete || completedNow) && nextLesson && <Link href={`/subjects/${subjectId}/grammar/lesson/${nextLesson.n}`} className="mt-6 inline-flex rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-emerald-700 ring-1 ring-emerald-200 transition hover:-translate-y-0.5">进入第 {nextLesson.n} 课 →</Link>}
             </section>
           </div>

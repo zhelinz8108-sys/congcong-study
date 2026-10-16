@@ -1,113 +1,38 @@
-import { NextResponse } from "next/server";
-import { v4 as uuid } from "uuid";
+import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
-import {
-  ensureMathQuestionBankSchema,
-  gradeMathResponse,
-  type MathQuestionForGrading,
-} from "@/lib/math-question-bank";
-import { submitLocalAttempt } from "@/lib/math-local-store";
-
+import { STUDENT_PROFILE_COOKIE, parseStudentProfileCookie } from "@/lib/family-access";
+import { legacyMathQuestions } from "@/server/legacy-math-first";
+import { unsafeSubmissionOrigin } from "@/server/submission-request";
+import { ensureFirstSubmissionSchema } from "@/server/first-submission";
+import { ensureMathQuestionBankSchema } from "@/lib/math-question-bank";
 export const dynamic = "force-dynamic";
-
-type Params = { params: Promise<{ id: string }> };
-
-export async function POST(_request: Request, { params }: Params) {
-  const { id: attemptId } = await params;
-
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (unsafeSubmissionOrigin(request)) return NextResponse.json({ error: "请求来源不正确" }, { status: 403 });
+  const { id } = await params;
+  const profile = parseStudentProfileCookie(request.cookies.get(STUDENT_PROFILE_COOKIE)?.value);
+  await Promise.all([ensureFirstSubmissionSchema(), ensureMathQuestionBankSchema()]);
+  const client = await pool.connect();
   try {
-    await ensureMathQuestionBankSchema();
-
-    const attemptResult = await pool.query("SELECT * FROM math_attempts WHERE id = $1", [
-      attemptId,
-    ]);
-    const attempt = attemptResult.rows[0];
+    await client.query("BEGIN");
+    const result = await client.query("SELECT * FROM math_attempts WHERE id=$1 AND student_id=$2 FOR UPDATE", [id, profile.id]);
+    const attempt = result.rows[0];
     if (!attempt) {
-      const local = await submitLocalAttempt(attemptId);
-      if ("attempt" in local) return NextResponse.json(local.attempt);
-      return NextResponse.json({ error: local.error }, { status: local.status });
+      await client.query("ROLLBACK");
+      return NextResponse.json({ error: "练习记录不存在" }, { status: 404 });
     }
-
-    const questionsResult = await pool.query<MathQuestionForGrading>(
-      `
-        SELECT id, question_type, correct_answer, score, auto_grade
-        FROM math_questions
-        WHERE set_id = $1
-        ORDER BY question_order ASC
-      `,
-      [attempt.set_id]
-    );
-    const responsesResult = await pool.query(
-      "SELECT * FROM math_responses WHERE attempt_id = $1",
-      [attemptId]
-    );
-    const responses = new Map(responsesResult.rows.map((row) => [row.question_id, row]));
-
-    let totalScore = 0;
-    let maxScore = 0;
-    let correctCount = 0;
-
-    for (const question of questionsResult.rows) {
-      const response = responses.get(question.id);
-      const grade = gradeMathResponse(
-        question,
-        response?.response_text ?? "",
-        response?.self_rating ?? null
-      );
-      totalScore += grade.score;
-      maxScore += grade.maxScore;
-      if (grade.isCorrect) correctCount += 1;
-
-      await pool.query(
-        `
-          INSERT INTO math_responses (
-            id, attempt_id, question_id, response_text, self_rating,
-            is_correct, grading_status, score, max_score, feedback, updated_at
-          )
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW())
-          ON CONFLICT (attempt_id, question_id) DO UPDATE SET
-            is_correct = EXCLUDED.is_correct,
-            grading_status = EXCLUDED.grading_status,
-            score = EXCLUDED.score,
-            max_score = EXCLUDED.max_score,
-            feedback = EXCLUDED.feedback,
-            updated_at = NOW()
-        `,
-        [
-          response?.id ?? uuid(),
-          attemptId,
-          question.id,
-          response?.response_text ?? "",
-          response?.self_rating ?? null,
-          grade.isCorrect,
-          grade.status,
-          grade.score,
-          grade.maxScore,
-          grade.feedback,
-        ]
-      );
+    if (attempt.status === "submitted") {
+      await client.query("COMMIT");
+      return NextResponse.json(attempt);
     }
-
-    const updateResult = await pool.query(
-      `
-        UPDATE math_attempts
-        SET
-          submitted_at = NOW(),
-          total_score = $2,
-          max_score = $3,
-          correct_count = $4,
-          total_count = $5,
-          status = 'submitted'
-        WHERE id = $1
-        RETURNING *
-      `,
-      [attemptId, totalScore, maxScore, correctCount, questionsResult.rowCount]
-    );
-
-    return NextResponse.json(updateResult.rows[0]);
+    const questions = await legacyMathQuestions(profile.id, attempt.set_id, client);
+    const graded = questions.filter(question => question.locked && question.grading_status !== "self_review");
+    const saved = await client.query(`UPDATE math_attempts SET submitted_at=NOW(), status='submitted',total_score=$3,max_score=$4,correct_count=$5,total_count=$6
+      WHERE id=$1 AND student_id=$2 AND status!='submitted' RETURNING *`, [id, profile.id,
+      graded.reduce((sum, q) => sum + Number(q.response_score ?? 0), 0), graded.reduce((sum, q) => sum + Number(q.max_score ?? 0), 0), graded.filter(q => q.is_correct).length, graded.length]);
+    await client.query("COMMIT");
+    return NextResponse.json(saved.rows[0] ?? attempt);
   } catch {
-    const local = await submitLocalAttempt(attemptId);
-    if ("attempt" in local) return NextResponse.json(local.attempt);
-    return NextResponse.json({ error: local.error }, { status: local.status });
-  }
+    await client.query("ROLLBACK");
+    return NextResponse.json({ error: "无法读取首次答题成绩，请稍后重试" }, { status: 503 });
+  } finally { client.release(); }
 }

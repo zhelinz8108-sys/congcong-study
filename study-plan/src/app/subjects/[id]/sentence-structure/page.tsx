@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useEnglishLocked } from "@/lib/use-english-locked";
 import {
   ABILITY_LEVELS,
   ADVANCED_STRUCTURES,
@@ -121,7 +122,9 @@ export default function SentenceStructurePage() {
   const [activePatternId, setActivePatternId] = useState("svo");
   const [activeVerbSystemId, setActiveVerbSystemId] = useState("ordinary");
   const [challengeIndex, setChallengeIndex] = useState(0);
-  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+  const locked = useEnglishLocked("sentence-structure", id);
+  const savedChallenge = locked.records[`ss-${challengeIndex + 1}`];
+  const selectedChoice = savedChallenge ? Number(savedChallenge.response) : null;
 
   const activePattern = useMemo(
     () => SENTENCE_PATTERNS.find((pattern) => pattern.id === activePatternId) ?? SENTENCE_PATTERNS[0],
@@ -132,7 +135,6 @@ export default function SentenceStructurePage() {
   const challenge = QUICK_CHALLENGES[challengeIndex];
 
   const nextChallenge = () => {
-    setSelectedChoice(null);
     setChallengeIndex((index) => (index + 1) % QUICK_CHALLENGES.length);
   };
 
@@ -602,7 +604,7 @@ export default function SentenceStructurePage() {
                 <div className="mt-4 space-y-2">
                   {challenge.choices.map((choice, index) => {
                     const answered = selectedChoice !== null;
-                    const isCorrect = index === challenge.answer;
+                    const isCorrect = Boolean(savedChallenge && savedChallenge.feedback.answer.startsWith(`${String.fromCharCode(65 + index)}.`));
                     const isSelected = index === selectedChoice;
                     const stateClass = !answered
                       ? "border-white/20 bg-white/10 hover:bg-white/20"
@@ -615,8 +617,8 @@ export default function SentenceStructurePage() {
                       <button
                         key={choice}
                         type="button"
-                        disabled={answered}
-                        onClick={() => setSelectedChoice(index)}
+                        disabled={answered || !locked.ready || locked.busy}
+                        onClick={() => { void locked.submit(`ss-${challengeIndex + 1}`, String(index)).catch(() => undefined); }}
                         className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-sm font-bold transition ${stateClass}`}
                       >
                         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/15 text-xs font-black">{String.fromCharCode(65 + index)}</span>
@@ -625,12 +627,13 @@ export default function SentenceStructurePage() {
                     );
                   })}
                 </div>
-                {selectedChoice !== null && (
+                <p className="mt-3 text-xs">{locked.error || (locked.busy ? "正在提交…" : "点击选项即提交，提交后不能修改。")}</p>
+                {savedChallenge && (
                   <div aria-live="polite" className="mt-4 rounded-2xl bg-white p-4 text-slate-900">
-                    <p className={`text-sm font-black ${selectedChoice === challenge.answer ? "text-emerald-700" : "text-rose-700"}`}>
-                      {selectedChoice === challenge.answer ? "答对了，结构找得很准！" : `正确答案是 ${String.fromCharCode(65 + challenge.answer)}。`}
+                    <p className={`text-sm font-black ${savedChallenge.feedback.correct ? "text-emerald-700" : "text-rose-700"}`}>
+                      {savedChallenge.feedback.correct ? "答对了 · 已锁定" : `正确答案是 ${savedChallenge.feedback.answer} · 已锁定`}
                     </p>
-                    <p className="mt-2 text-xs font-bold leading-6 text-slate-600">{challenge.explanation}</p>
+                    <p className="mt-2 text-xs font-bold leading-6 text-slate-600">{savedChallenge.feedback.explanation}</p>
                   </div>
                 )}
               </div>

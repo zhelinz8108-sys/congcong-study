@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import index from "@/data/chinese-six-index.json";
-import { emptySixProgress, SIX_MODULES, sixAttemptStats, type SixItemSummary, type SixModule, type SixProgress } from "@/lib/chinese-six";
+import { emptySixProgress, SIX_MODULES, sixFirstAttempt, sixAttemptStats, type SixItemSummary, type SixModule, type SixProgress } from "@/lib/chinese-six";
 import styles from "./chinese-six.module.css";
 
 const items = index.items as SixItemSummary[];
@@ -60,7 +60,7 @@ export default function ChineseSixHub({ subjectId }: { subjectId: string }) {
       </div>
       <div id="six-items" role="tabpanel" aria-labelledby={`tab-${module}`} className={styles.list}>
         {filtered.map(item => {
-          const attempt = progress.attempts[progress.current[item.id]];
+          const attempt = sixFirstAttempt(progress, item.id);
           const stats = attempt ? sixAttemptStats(attempt, item.questionCount) : null;
           return <Link key={item.id} className={styles.item} href={`${base}/study/${item.id}`}>
             <div><p className={styles.muted}>{item.group}</p><h2>{item.title}</h2>

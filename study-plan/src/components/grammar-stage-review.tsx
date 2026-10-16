@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { GrammarStage } from "@/lib/grammar-course";
+import { useEnglishLocked } from "@/lib/use-english-locked";
+import EnglishLockedTask from "@/components/english-locked-task";
 import {
   EMPTY_GRAMMAR_COURSE_PROGRESS,
   loadGrammarCourseProgress,
@@ -30,8 +32,8 @@ export default function GrammarStageReview({
   stage: GrammarStage;
   lessonTitles: Array<{ n: number; title: string }>;
 }) {
+  const locked = useEnglishLocked("grammar-stage", subjectId);
   const [progress, setProgress] = useState<GrammarCourseProgress>(EMPTY_GRAMMAR_COURSE_PROGRESS);
-  const [revealed, setRevealed] = useState<number[]>([]);
   const [draft, setDraft] = useState("");
   const [ready, setReady] = useState(false);
 
@@ -48,9 +50,11 @@ export default function GrammarStageReview({
     };
   }, [stage.number]);
 
-  const wordCount = useMemo(() => draft.trim().split(/\s+/).filter(Boolean).length, [draft]);
   const completed = progress.completedStages.includes(stage.number);
-  const allQuestionsChecked = revealed.length === stage.review.questions.length;
+  const submittedQuestions = stage.review.questions.filter((_, index) => locked.records[`stage:${stage.number}:question:${index}`]).length;
+  const allQuestionsChecked = submittedQuestions === stage.review.questions.length;
+  const writingRecord = locked.records[`stage:${stage.number}:writing`];
+  const writingValue = typeof writingRecord?.response === "string" ? writingRecord.response : draft;
 
   const persist = (next: GrammarCourseProgress) => {
     setProgress(next);
@@ -58,6 +62,7 @@ export default function GrammarStageReview({
   };
 
   const saveDraft = () => {
+    if (writingRecord) return;
     persist({
       ...progress,
       stageDrafts: { ...progress.stageDrafts, [String(stage.number)]: draft },
@@ -98,11 +103,11 @@ export default function GrammarStageReview({
         </section>
 
         <section className="mt-8 rounded-[32px] border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          <div><p className="text-xs font-black uppercase tracking-[0.18em] text-violet-600">02 · Six checks</p><h2 className="mt-2 text-2xl font-black">6个问题，检查是否真正理解</h2><p className="mt-3 text-xs font-black text-violet-700">已核对 {revealed.length} / 6</p></div>
+          <div><p className="text-xs font-black uppercase tracking-[0.18em] text-violet-600">02 · Six checks</p><h2 className="mt-2 text-2xl font-black">6个问题，检查是否真正理解</h2><p className="mt-3 text-xs font-black text-violet-700">已提交 {submittedQuestions} / 6</p></div>
           <div className="mt-6 space-y-3">
             {stage.review.questions.map((question, index) => {
-              const open = revealed.includes(index);
-              return <article key={question.prompt} className={`rounded-2xl border p-4 transition ${open ? "border-emerald-200 bg-emerald-50/60" : "border-slate-200 bg-slate-50"}`}><span className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-black ${open ? "bg-emerald-100 text-emerald-700" : "bg-white text-slate-400 ring-1 ring-slate-200"}`}>{open ? "✓" : index + 1}</span><div className="mt-3"><p className="text-sm font-black leading-7 text-slate-800">{question.prompt}</p>{open ? <p className="mt-3 border-t border-emerald-200 pt-3 text-sm font-semibold leading-7 text-emerald-900">{question.answer}</p> : <button type="button" onClick={() => setRevealed((items) => uniqueSorted([...items, index]))} className="mt-3 rounded-xl bg-white px-4 py-2 text-xs font-black text-violet-700 ring-1 ring-violet-200">展开参考答案</button>}</div></article>;
+              const open = !!locked.records[`stage:${stage.number}:question:${index}`];
+              return <article key={question.prompt} className={`rounded-2xl border p-4 transition ${open ? "border-orange-200 bg-orange-50/60" : "border-stone-200 bg-white"}`}><span className="mb-3 block text-xs font-bold text-orange-700">{index + 1}</span><EnglishLockedTask id={`stage:${stage.number}:question:${index}`} prompt={question.prompt} locked={locked} /></article>;
             })}
           </div>
         </section>
@@ -116,8 +121,9 @@ export default function GrammarStageReview({
               <div className="mt-5 rounded-2xl bg-white p-4 ring-1 ring-violet-100"><p className="text-xs font-black text-violet-700">提交前自检</p><p className="mt-2 text-xs font-semibold leading-6 text-slate-600">{stage.review.check}</p></div>
             </div>
             <div>
-              <textarea value={draft} onChange={(event) => setDraft(event.target.value)} onBlur={saveDraft} placeholder="在这里完成英文写作……" className="min-h-72 w-full resize-y rounded-[24px] border border-violet-200 bg-white p-5 text-sm font-semibold leading-7 text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 focus:ring-violet-200/40" />
-              <div className="mt-3 space-y-3"><p className={`text-xs font-black ${wordCount >= 80 ? "text-emerald-700" : "text-slate-500"}`}>{wordCount} words {wordCount >= 80 ? "· 已达到建议长度" : "· 建议至少80词"}</p><button type="button" onClick={saveDraft} className="w-full rounded-xl bg-white px-4 py-3 text-xs font-black text-violet-700 ring-1 ring-violet-200 transition hover:bg-violet-100">保存草稿</button></div>
+              <textarea value={writingValue} disabled={!!writingRecord || locked.busy || !locked.ready} onChange={(event) => setDraft(event.target.value)} onBlur={saveDraft} placeholder="在这里完成英文写作……" className="min-h-72 w-full resize-y rounded-[24px] border border-violet-200 bg-white p-5 text-sm font-semibold leading-7 text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 focus:ring-violet-200/40" />
+              <div className="mt-3 space-y-3"><p className="text-xs font-black text-stone-500">{writingValue.trim().split(/\s+/).filter(Boolean).length} words · 首次提交后锁定</p><button type="button" disabled={!!writingRecord || locked.busy || !locked.ready || !draft.trim()} onClick={() => void locked.submit(`stage:${stage.number}:writing`, draft).catch(() => undefined)} className="w-full rounded-xl bg-white px-4 py-3 text-xs font-black text-violet-700 ring-1 ring-violet-200 transition hover:bg-violet-100">{writingRecord ? "已提交 · 已锁定" : "提交作文"}</button></div>
+              {locked.error && <p role="alert" className="mt-3 text-sm text-rose-700">{locked.error}</p>}
             </div>
           </div>
         </section>
@@ -125,8 +131,8 @@ export default function GrammarStageReview({
         <section className={`mt-8 rounded-[34px] border p-6 text-center text-slate-900 sm:p-9 ${completed ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-white"}`}>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-700">Stage checkpoint</p>
           <h2 className="mt-3 text-3xl font-black">{completed ? `阶段 ${stage.number} 已完成` : "准备好点亮这一阶段了吗？"}</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm font-semibold leading-7 text-slate-500">{allQuestionsChecked ? "6个理解问题已经全部核对。" : `还差 ${stage.review.questions.length - revealed.length} 个问题未核对。`} {wordCount >= 80 ? "写作已经达到建议长度。" : "写作可以继续完善，也可以稍后回来补充。"}</p>
-          {!completed && <button type="button" disabled={!allQuestionsChecked} onClick={completeStage} className="mt-6 rounded-2xl bg-violet-100 px-7 py-3.5 text-sm font-black text-violet-800 ring-1 ring-violet-200 transition enabled:hover:bg-violet-200 disabled:cursor-not-allowed disabled:opacity-35">完成阶段并保存进度</button>}
+          <p className="mx-auto mt-3 max-w-2xl text-sm font-semibold leading-7 text-slate-500">{allQuestionsChecked ? "6个理解问题已经全部提交。" : `还差 ${stage.review.questions.length - submittedQuestions} 个问题未提交。`} {writingRecord ? "作文已锁定，保留待教师评价。" : "写作请完成后提交。"}</p>
+          {!completed && <button type="button" disabled={!allQuestionsChecked || !writingRecord} onClick={completeStage} className="mt-6 rounded-2xl bg-violet-100 px-7 py-3.5 text-sm font-black text-violet-800 ring-1 ring-violet-200 transition enabled:hover:bg-violet-200 disabled:cursor-not-allowed disabled:opacity-35">完成阶段并保存进度</button>}
           {completed && stage.number < 12 && <Link href={`/subjects/${subjectId}/grammar/lesson/${stage.lastLesson + 1}`} className="mt-6 inline-flex rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-emerald-700 ring-1 ring-emerald-200">进入下一阶段 →</Link>}
           {completed && stage.number === 12 && <Link href={`/subjects/${subjectId}/grammar/practice/mixed`} className="mt-6 inline-flex rounded-2xl bg-white px-7 py-3.5 text-sm font-black text-emerald-700 ring-1 ring-emerald-200">进入500题综合挑战 →</Link>}
           {!ready && <p className="mt-3 text-xs text-slate-400">正在读取云端进度……</p>}

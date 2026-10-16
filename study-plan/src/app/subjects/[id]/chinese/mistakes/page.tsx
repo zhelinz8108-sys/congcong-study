@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { clearCloudState, loadCloudState } from "@/lib/cloud-progress";
 
 type MistakeRecord = {
   id: string;
@@ -20,19 +19,6 @@ type MistakeRecord = {
   updatedAt: string;
 };
 
-const mistakesStorageKey = "congcong_chinese_reading_mistakes";
-const mistakesCloudScope = "chinese:reading:mistakes:v1";
-
-function readMistakes() {
-  if (typeof window === "undefined") return [];
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(mistakesStorageKey) ?? "[]");
-    return Array.isArray(parsed) ? (parsed as MistakeRecord[]) : [];
-  } catch {
-    return [];
-  }
-}
-
 function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
@@ -44,17 +30,15 @@ function formatDate(value: string) {
 
 export default function ChineseMistakesPage() {
   const { id: subjectId } = useParams<{ id: string }>();
-  const [mistakes, setMistakes] = useState<MistakeRecord[]>(() => readMistakes());
+  const [mistakes, setMistakes] = useState<MistakeRecord[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
-    void loadCloudState<MistakeRecord[]>(
-      mistakesCloudScope,
-      mistakesStorageKey,
-      [],
-    ).then((saved) => {
-      if (active) setMistakes(saved);
-    });
+    void fetch("/api/chinese/reading/progress", { cache: "no-store" }).then(async res => {
+      const data = await res.json(); if (!res.ok) throw new Error(data.error || "读取失败。");
+      if (active) setMistakes(data.mistakes ?? []);
+    }).catch(e => { if (active) setError(e instanceof Error ? e.message : "读取失败。"); });
     return () => {
       active = false;
     };
@@ -68,11 +52,6 @@ export default function ChineseMistakesPage() {
     });
     return Array.from(map.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [mistakes]);
-
-  const clearMistakes = () => {
-    setMistakes([]);
-    void clearCloudState(mistakesCloudScope, mistakesStorageKey);
-  };
 
   return (
     <main className="min-h-screen bg-[#f7f6f2] px-5 py-8 text-slate-950">
@@ -100,7 +79,7 @@ export default function ChineseMistakesPage() {
               </p>
               <h1 className="mt-3 text-4xl font-black tracking-tight">语文错题与薄弱点</h1>
               <p className="mt-4 max-w-2xl text-base leading-8 text-stone-600">
-                这里记录阅读训练里答错、部分正确或不会的题。复习时先看错因标签，再回到原题按踩分点重新组织答案。
+                首次答案永久保留，错题与待复核题可回看解析。
               </p>
             </div>
             <div className="rounded-[24px] bg-stone-50 p-5 text-center">
@@ -110,6 +89,7 @@ export default function ChineseMistakesPage() {
           </div>
         </section>
 
+        {error && <p role="alert">{error}</p>}
         {mistakes.length === 0 ? (
           <section className="rounded-[32px] border border-dashed border-stone-300 bg-white p-10 text-center">
             <h2 className="text-2xl font-black">暂时没有语文阅读错题</h2>
@@ -125,16 +105,6 @@ export default function ChineseMistakesPage() {
           </section>
         ) : (
           <section className="space-y-4">
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={clearMistakes}
-                className="rounded-xl border border-rose-100 bg-white px-4 py-2 text-sm font-black text-rose-700 transition hover:bg-rose-50"
-              >
-                清空云端错题
-              </button>
-            </div>
-
             {grouped.map(([topicName, records]) => (
               <article
                 key={topicName}

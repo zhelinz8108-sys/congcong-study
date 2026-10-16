@@ -5,8 +5,14 @@ import { holidayAccess, holidayBody, holidayHeaders } from "@/server/holiday-mat
 import type { BankAnswers, BankQuestion } from "@/lib/grade6-bank-types";
 import { assertBankDrawing } from "@/lib/grade6-bank-native-validation";
 import { bankNativeInputSchema } from "@/lib/grade6-bank-input-schema";
+import { isRetiredBankQuestion } from "./bank";
 
 export const bankHeaders = holidayHeaders;
+export function bankRetired(id: unknown) {
+  return typeof id === "string" && isRetiredBankQuestion(id)
+    ? NextResponse.json({ error: "这道重复题已移出题库，原作答记录已保留。请返回目录继续练习。", code: "QUESTION_RETIRED" }, { status: 410, headers: bankHeaders })
+    : null;
+}
 export function bankAccess(request: NextRequest, write = false) {
   const qa = request.headers.get("x-grade6-qa");
   if (qa && (qa !== "isolated-memory-v1" || process.env.NODE_ENV === "production" || process.env.GRADE6_BANK_TEST_MEMORY !== "1")) return NextResponse.json({ error: "Isolated test memory required" }, { status: 403, headers: bankHeaders });

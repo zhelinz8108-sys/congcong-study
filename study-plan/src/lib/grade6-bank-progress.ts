@@ -10,8 +10,11 @@ const validRevision = (value: unknown): value is number => typeof value === "num
 // canonicalizations are not other-device edits and must not create conflicts.
 const sameAnswers = (a: BankAnswers, b: BankAnswers) => [...new Set([...Object.keys(a), ...Object.keys(b)])].every((id) => (a[id] ?? "").trim() === (b[id] ?? "").trim());
 type Conflict = { revision: number; acknowledged: boolean };
-type LocalSnapshot = BankProgress & { dirtyQuestionIds?: string[]; conflicts?: Record<string, Conflict>; pausedLegacyQuestionIds?: string[]; legacyHistory?: Record<string, BankAnswers> };
+type LocalSnapshot = BankProgress & { dirtyQuestionIds?: string[]; conflicts?: Record<string, Conflict>; pausedLegacyQuestionIds?: string[]; pausedRetiredQuestionIds?: string[]; legacyHistory?: Record<string, BankAnswers> };
 const conflictMessage = "这道题的云端记录已在其他页面更新。本机答案已保留，这次没有覆盖云端；确认要使用本机答案后，请再次手动点“提交答案”。";
+const locked = (record?: BankResponse) => !!record && (record.submitted || record.submissions > 0);
+const lockedMessage = "这道题已提交并锁定，不能修改或重新提交。";
+const retiredMessage = "这道重复题已移出题库，原作答已保留，不能再提交。";
 
 export function normalizeBankProgress(raw: unknown): BankProgress {
   const result = blank();
@@ -44,21 +47,43 @@ export function useGrade6BankProgress(subjectId: string) {
   const dirty = useRef(new Set<string>()), failed = useRef(new Set<string>()), conflicts = useRef(new Map<string, Conflict>());
   const server = useRef(new Map<string, BankResponse>()), edits = useRef(new Map<string, number>());
   const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>()), queue = useRef<Promise<void>>(Promise.resolve());
-  const schemas = useRef(new Map<string, BankQuestion>()), pausedLegacy = useRef(new Set<string>());
+  const schemas = useRef(new Map<string, BankQuestion>()), pausedLegacy = useRef(new Set<string>()), pausedRetired = useRef(new Set<string>());
   const legacyHistory = useRef<Record<string, BankAnswers>>({});
 
   const mirror = useCallback((next: BankProgress) => {
     state.current = next;
     if (alive.current) setProgress(next);
-    const cached: LocalSnapshot = { ...next, dirtyQuestionIds: [...dirty.current], conflicts: Object.fromEntries(conflicts.current), pausedLegacyQuestionIds: [...pausedLegacy.current], legacyHistory: legacyHistory.current };
+    const cached: LocalSnapshot = { ...next, dirtyQuestionIds: [...dirty.current], conflicts: Object.fromEntries(conflicts.current), pausedLegacyQuestionIds: [...pausedLegacy.current], pausedRetiredQuestionIds: [...pausedRetired.current], legacyHistory: legacyHistory.current };
     try { localStorage.setItem(key, JSON.stringify(cached)); } catch { /* Memory and dirty revisions remain available. */ }
   }, [key]);
   const remember = useCallback((questionId: string, response: BankResponse) => {
     mirror({ responses: { ...state.current.responses, [questionId]: response }, lastQuestionId: questionId, updatedAt: response.updatedAt });
   }, [mirror]);
   const status = useCallback(() => {
-    if (alive.current) setSync(conflicts.current.size ? "conflict" : failed.current.size ? "offline" : pausedLegacy.current.size ? "legacy" : dirty.current.size ? "saving" : "saved");
+    const active = (ids: Iterable<string>) => [...ids].some(id => !pausedRetired.current.has(id));
+    if (alive.current) setSync(active(conflicts.current.keys()) ? "conflict" : active(failed.current) ? "offline" : active(pausedLegacy.current) ? "legacy" : active(dirty.current) ? "saving" : "saved");
   }, []);
+  const pauseRetired = useCallback((id: string) => {
+    // A 410 is permanent for this question ID, not a network failure. Keep the
+    // unsaved response dirty so future cloud refreshes cannot discard it, but
+    // exclude it from every write/retry queue. Keep a second read-only history
+    // copy in case an existing first submission later becomes authoritative.
+    pausedRetired.current.add(id);
+    const current = state.current.responses[id];
+    if (current) {
+      const history = { ...legacyHistory.current[id] };
+      for (const [field, value] of Object.entries(current.answers)) {
+        // A native first blank may reuse an old aggregate field ID. Archive
+        // the new draft separately instead of overwriting that older text.
+        history[field in history && history[field] !== value ? `retired-draft:${field}` : field] = value;
+      }
+      legacyHistory.current = { ...legacyHistory.current, [id]: history };
+      if (!locked(current)) dirty.current.add(id);
+    }
+    failed.current.delete(id); conflicts.current.delete(id); pausedLegacy.current.delete(id);
+    const timer = timers.current.get(id); if (timer) clearTimeout(timer);
+    timers.current.delete(id); mirror(state.current); status();
+  }, [mirror, status]);
   const pauseLegacy = useCallback((id: string, question: BankQuestion) => {
     const current = state.current.responses[id];
     if (!current || !dirty.current.has(id)) return false;
@@ -72,10 +97,17 @@ export function useGrade6BankProgress(subjectId: string) {
     timers.current.delete(id); mirror(state.current); status(); return true;
   }, [mirror, status]);
   const observeQuestion = useCallback((question: BankQuestion) => {
+    if (pausedRetired.current.has(question.id)) return;
     schemas.current.set(question.id, question);
     pauseLegacy(question.id, question);
   }, [pauseLegacy]);
   const keepConflict = useCallback((questionId: string, response: BankResponse, acknowledged: boolean) => {
+    if (locked(response)) {
+      server.current.set(questionId, response);
+      dirty.current.delete(questionId); failed.current.delete(questionId); conflicts.current.delete(questionId); pausedLegacy.current.delete(questionId);
+      const timer = timers.current.get(questionId); if (timer) clearTimeout(timer);
+      timers.current.delete(questionId); remember(questionId, response); status(); return;
+    }
     const old = state.current.responses[questionId];
     server.current.set(questionId, response);
     conflicts.current.set(questionId, { revision: response.revision, acknowledged });
@@ -89,7 +121,7 @@ export function useGrade6BankProgress(subjectId: string) {
   const accept = useCallback((questionId: string, saved: BankResponse, answers: BankAnswers, edit: number) => {
     server.current.set(questionId, saved); failed.current.delete(questionId);
     const current = state.current.responses[questionId];
-    if (current && (edits.current.get(questionId) ?? 0) === edit && sameAnswers(current.answers, answers)) {
+    if (locked(saved) || current && (edits.current.get(questionId) ?? 0) === edit && sameAnswers(current.answers, answers)) {
       dirty.current.delete(questionId); conflicts.current.delete(questionId); pausedLegacy.current.delete(questionId);
       const { baseRevision: _base, ...clean } = saved;
       void _base;
@@ -104,7 +136,7 @@ export function useGrade6BankProgress(subjectId: string) {
   const enqueueDraft = useCallback((questionId: string) => {
     const scopeVersion = scope.current;
     const task = queue.current.then(async () => {
-      if (scope.current !== scopeVersion || !dirty.current.has(questionId) || conflicts.current.has(questionId) || pausedLegacy.current.has(questionId)) return;
+      if (scope.current !== scopeVersion || !dirty.current.has(questionId) || pausedRetired.current.has(questionId)) return;
       if (alive.current) setSync(conflicts.current.size ? "conflict" : "saving");
       try {
         // Cached drafts can be restored before their question component loads.
@@ -113,6 +145,8 @@ export function useGrade6BankProgress(subjectId: string) {
         let question = schemas.current.get(questionId);
         if (!question) {
           const response = await fetch("/api/math/grade6-bank/questions/" + encodeURIComponent(questionId), { cache: "no-store", signal: AbortSignal.timeout(15000) });
+          if (scope.current !== scopeVersion) return;
+          if (response.status === 410) { pauseRetired(questionId); return; }
           if (!response.ok) throw new Error("Question schema unavailable");
           const raw = await response.json() as BankQuestion;
           if (raw.id !== questionId || !Array.isArray(raw.inputs)) throw new Error("Invalid question schema");
@@ -121,7 +155,7 @@ export function useGrade6BankProgress(subjectId: string) {
           if (scope.current !== scopeVersion) return;
           schemas.current.set(questionId, question);
         }
-        if (scope.current !== scopeVersion || !dirty.current.has(questionId) || conflicts.current.has(questionId) || pausedLegacy.current.has(questionId)) return;
+        if (scope.current !== scopeVersion || !dirty.current.has(questionId) || conflicts.current.has(questionId) || pausedLegacy.current.has(questionId) || pausedRetired.current.has(questionId)) return;
         if (pauseLegacy(questionId, question)) return;
         const current = state.current.responses[questionId]; if (!current) return;
         const answers = { ...current.answers }, edit = edits.current.get(questionId) ?? 0;
@@ -129,6 +163,7 @@ export function useGrade6BankProgress(subjectId: string) {
         const result = await fetch("/api/math/grade6-bank/draft", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject_id: subjectId, question_id: questionId, answers, base_revision: baseRevision, ...(question.native ? { input_schema: bankNativeInputSchema(question) } : {}) }), cache: "no-store", keepalive: true, signal: AbortSignal.timeout(15000) });
         const data = await result.json();
         if (scope.current !== scopeVersion) return;
+        if (result.status === 410) { pauseRetired(questionId); return; }
         if (result.status === 409) {
           const remote = normalizeBankProgress({ responses: { [questionId]: data.response } }).responses[questionId];
           if (!remote || !validRevision(data.response?.revision)) throw new Error("Invalid conflict record");
@@ -138,16 +173,19 @@ export function useGrade6BankProgress(subjectId: string) {
         const saved = normalizeBankProgress({ responses: { [questionId]: data } }).responses[questionId];
         if (!saved || !validRevision(data.revision)) throw new Error("Invalid draft revision");
         accept(questionId, saved, answers, edit);
-      } catch (error) { if (scope.current === scopeVersion) { failed.current.add(questionId); status(); } throw error; }
+      } catch (error) { if (scope.current === scopeVersion) { if (!pausedRetired.current.has(questionId)) failed.current.add(questionId); status(); } throw error; }
     });
     // Rejections keep dirty data and cannot break the serial write queue.
     queue.current = task.then(() => undefined, () => undefined);
     return task;
-  }, [subjectId, accept, keepConflict, pauseLegacy, status]);
+  }, [subjectId, accept, keepConflict, pauseLegacy, pauseRetired, status]);
   const flush = useCallback(() => {
     for (const timer of timers.current.values()) clearTimeout(timer);
     timers.current.clear();
-    for (const id of dirty.current) if (!conflicts.current.has(id) && !pausedLegacy.current.has(id)) void enqueueDraft(id).catch(() => undefined);
+    // Even a conflicted or legacy-paused cache needs one public schema check:
+    // it may have been retired while offline. The write barrier below remains
+    // intact; probing an unknown schema never authorizes a PUT or POST.
+    for (const id of dirty.current) if (!pausedRetired.current.has(id) && ((!conflicts.current.has(id) && !pausedLegacy.current.has(id)) || !schemas.current.has(id))) void enqueueDraft(id).catch(() => undefined);
     return queue.current;
   }, [enqueueDraft]);
 
@@ -155,7 +193,7 @@ export function useGrade6BankProgress(subjectId: string) {
     alive.current = true; scope.current++; let canceled = false, refreshing = false;
     const activeTimers = timers.current;
     const activeScope = scope.current;
-    dirty.current.clear(); failed.current.clear(); conflicts.current.clear(); server.current.clear(); edits.current.clear(); schemas.current.clear(); pausedLegacy.current.clear(); legacyHistory.current = {};
+    dirty.current.clear(); failed.current.clear(); conflicts.current.clear(); server.current.clear(); edits.current.clear(); schemas.current.clear(); pausedLegacy.current.clear(); pausedRetired.current.clear(); legacyHistory.current = {};
     let cached: LocalSnapshot | null = null;
     try { cached = JSON.parse(localStorage.getItem(key) ?? "null") as LocalSnapshot | null; } catch { /* New bank. */ }
     const local = normalizeBankProgress(cached);
@@ -166,6 +204,9 @@ export function useGrade6BankProgress(subjectId: string) {
     }
     for (const [id, c] of Object.entries(cached?.conflicts ?? {})) if (dirty.current.has(id) && c && validRevision(c.revision)) conflicts.current.set(id, { revision: c.revision, acknowledged: c.acknowledged === true });
     for (const id of Array.isArray(cached?.pausedLegacyQuestionIds) ? cached.pausedLegacyQuestionIds : []) if (dirty.current.has(id)) pausedLegacy.current.add(id);
+    for (const id of Array.isArray(cached?.pausedRetiredQuestionIds) ? cached.pausedRetiredQuestionIds : []) if (local.responses[id]) {
+      pausedRetired.current.add(id); conflicts.current.delete(id); pausedLegacy.current.delete(id);
+    }
     // Treat saved history as plain display text, never as pending answers.
     const historic = normalizeBankProgress({ responses: Object.fromEntries(Object.entries(cached?.legacyHistory ?? {}).map(([id, answers]) => [id, { answers }])) });
     legacyHistory.current = Object.fromEntries(Object.entries(historic.responses).map(([id, response]) => [id, response.answers]));
@@ -191,6 +232,14 @@ export function useGrade6BankProgress(subjectId: string) {
         for (const id of dirty.current) {
           const edit = state.current.responses[id]; if (!edit) continue;
           const latest = remote.responses[id];
+          if (locked(latest)) {
+            dirty.current.delete(id); conflicts.current.delete(id); failed.current.delete(id); pausedLegacy.current.delete(id);
+            continue;
+          }
+          if (pausedRetired.current.has(id)) {
+            responses[id] = edit;
+            continue;
+          }
           if (latest && sameAnswers(edit.answers, latest.answers)) {
             // A pagehide save may reach the server after this scope unmounts,
             // so accept its authoritative record instead of a false conflict.
@@ -210,10 +259,10 @@ export function useGrade6BankProgress(subjectId: string) {
         void flush();
       } catch {
         if (canceled) return;
-        mirror(state.current); setReady(true);
-        for (const id of dirty.current) failed.current.add(id);
+        mirror(state.current); setReady(false);
+        for (const id of dirty.current) if (!pausedRetired.current.has(id)) failed.current.add(id);
         setSync(conflicts.current.size ? "conflict" : pausedLegacy.current.size ? "legacy" : "offline");
-        void flush();
+        // Do not replay drafts before authoritative locks have been read.
       } finally { refreshing = false; release(); }
     };
     void refresh();
@@ -230,7 +279,9 @@ export function useGrade6BankProgress(subjectId: string) {
   }, [key, subjectId, mirror, flush, status]);
 
   const draft = useCallback((id: string, answers: BankAnswers) => {
+    if (pausedRetired.current.has(id)) return;
     const old = state.current.responses[id];
+    if (locked(old) || locked(server.current.get(id))) return;
     const question = schemas.current.get(id);
     if (old && question) {
       const historic = bankLegacyAnswerEntries(question, old.answers, old.nativeInputSchema);
@@ -247,7 +298,9 @@ export function useGrade6BankProgress(subjectId: string) {
   }, [remember, enqueueDraft, status]);
   const submit = useCallback(async (questionId: string, answers: BankAnswers): Promise<BankFeedback> => {
     const scopeVersion = scope.current;
+    if (pausedRetired.current.has(questionId)) throw new Error(retiredMessage);
     const old = state.current.responses[questionId];
+    if (locked(old) || locked(server.current.get(questionId))) throw new Error(lockedMessage);
     if (!old || !sameAnswers(old.answers, answers)) {
       // A mounted question can still display its old clean inputs after a GET
       // restores another device's answer. Without an intervening input edit,
@@ -258,6 +311,8 @@ export function useGrade6BankProgress(subjectId: string) {
     await flush();
     const task = queue.current.then(async () => {
       if (scope.current !== scopeVersion) throw new Error("页面已切换，请在当前页面重新提交。");
+      if (pausedRetired.current.has(questionId)) throw new Error(retiredMessage);
+      if (locked(state.current.responses[questionId]) || locked(server.current.get(questionId))) throw new Error(lockedMessage);
       const conflict = conflicts.current.get(questionId);
       if (conflict && !conflict.acknowledged) {
         const current = state.current.responses[questionId];
@@ -273,10 +328,11 @@ export function useGrade6BankProgress(subjectId: string) {
         const result = await fetch("/api/math/grade6-bank/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject_id: subjectId, question_id: questionId, answers, base_revision: baseRevision, ...(question?.native ? { input_schema: bankNativeInputSchema(question) } : {}) }), cache: "no-store", signal: AbortSignal.timeout(30000) });
         const data = await result.json();
         if (scope.current !== scopeVersion) throw new Error("页面已切换，提交结果将从云端重新读取。");
+        if (result.status === 410) { pauseRetired(questionId); throw new Error(retiredMessage); }
         if (result.status === 409) {
           const remote = normalizeBankProgress({ responses: { [questionId]: data.response } }).responses[questionId];
           if (!remote || !validRevision(data.response?.revision)) throw new Error("Invalid conflict record");
-          keepConflict(questionId, remote, true); throw new Error(conflictMessage);
+          keepConflict(questionId, remote, true); throw new Error(locked(remote) ? lockedMessage : conflictMessage);
         }
         if (!result.ok) throw new Error(data.error || "提交失败，请重试");
         const saved = normalizeBankProgress({ responses: { [questionId]: data.response } }).responses[questionId];
@@ -285,7 +341,7 @@ export function useGrade6BankProgress(subjectId: string) {
         return data.feedback as BankFeedback;
       } catch (error) {
         if (scope.current === scopeVersion) {
-          if (!conflicts.current.has(questionId)) {
+          if (!pausedRetired.current.has(questionId) && !conflicts.current.has(questionId) && !locked(state.current.responses[questionId])) {
             dirty.current.add(questionId); failed.current.add(questionId);
             const pending = state.current.responses[questionId];
             if (pending) remember(questionId, { ...pending, submitted: false, outcome: null, score: null, maxScore: 0, baseRevision: pending.baseRevision ?? pending.revision });
@@ -297,8 +353,17 @@ export function useGrade6BankProgress(subjectId: string) {
     });
     queue.current = task.then(() => undefined, () => undefined);
     return task;
-  }, [subjectId, flush, draft, remember, keepConflict, accept, status]);
+  }, [subjectId, flush, draft, remember, keepConflict, accept, pauseRetired, status]);
   const getResponse = useCallback((id: string) => state.current.responses[id], []);
   const getLegacyAnswers = useCallback((id: string) => legacyHistory.current[id] ?? {}, []);
-  return { progress, ready, sync, draft, submit, flush, getResponse, getLegacyAnswers, observeQuestion };
+  const feedback = useCallback(async (questionId: string): Promise<BankFeedback> => {
+    const response = await fetch(`/api/math/grade6-bank/feedback?subject_id=${encodeURIComponent(subjectId)}&question_id=${encodeURIComponent(questionId)}`, { cache: "no-store", signal: AbortSignal.timeout(30000) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "解析读取失败");
+    const saved = normalizeBankProgress({ responses: { [questionId]: result.response } }).responses[questionId];
+    if (!locked(saved)) throw new Error("尚未提交");
+    keepConflict(questionId, saved, false);
+    return result.feedback as BankFeedback;
+  }, [subjectId, keepConflict]);
+  return { progress, ready, sync, draft, submit, feedback, flush, getResponse, getLegacyAnswers, observeQuestion };
 }

@@ -209,6 +209,7 @@ const sessionContext = { module: { exports: {} }, exports: {}, require(name) {
   if (name.endsWith("grade6-bank-progress")) return { useGrade6BankProgress: () => null };
   if (name.endsWith("grade6-bank-types")) return { BANK_DIFFICULTIES: [{ value: 1, label: "基础起步" }] };
   if (name === "./grade6-bank-native") return context.module.exports;
+  if (name === "./grade6-bank-solution") return { Grade6BankSolution: () => null };
   return context.require(name);
 } };
 sessionContext.exports = sessionContext.module.exports;
@@ -216,7 +217,7 @@ vm.runInNewContext(sessionCode, sessionContext);
 let drafts = 0;
 const question = { id: "native-history", number: 1, difficulty: 1, inputs: [{ id: "blank-1", label: "第1空", kind: "text" }], native: { version: 1, blocks: [{ type: "paragraph", content: [{ type: "blank", fieldId: "blank-1" }] }] }, questionImages: [], prompt: "" };
 const record = { answers: {}, revision: 1, submitted: false };
-const progress = { progress: { responses: { [question.id]: record } }, getResponse: () => record, draft: (_id, answers) => { drafts++; record.answers = answers; record.revision++; } };
+const progress = { ready: true, progress: { responses: { [question.id]: record } }, getResponse: () => record, draft: (_id, answers) => { drafts++; record.answers = answers; record.revision++; } };
 const sessionProps = { question, collection: { palette: 0, questionCount: 1 }, position: 0, count: 1, progress, go: () => { throw new Error("Unexpected automatic navigation"); } };
 function sessionRender() { cursor = 0; effects = []; const nodes = expand(sessionContext.module.exports.TestQuestionSession(sessionProps)); for (const effect of effects) effect(); return nodes; }
 assert(!sessionRender().some((node) => node.type === "details"));

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { memo, useState, type CSSProperties } from "react";
+import { memo, useEffect, useState, type CSSProperties } from "react";
 import NationalDayMathDiagram from "@/components/national-day-math-diagram";
 import { getNationalDayMathPalette } from "@/lib/national-day-math-colors";
 import styles from "./national-day-math-book.module.css";
@@ -49,15 +49,26 @@ const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, rea
   const [feedback, setFeedback] = useState<NationalDayMathSubmissionResult | null>(null);
   const values = draftFields(attempt?.value ?? "", question);
   const solution = question.type === "example" ? question : feedback;
+  const locked = isQuiz && (attempt?.checked || !!feedback);
+  useEffect(() => {
+    if (!isQuiz || !attempt?.checked) return;
+    let active = true;
+    void fetch(`/api/math/national-day/submit?questionId=${encodeURIComponent(question.id)}`, { cache: "no-store" }).then(async response => {
+      const result = await response.json(); if (!response.ok) throw new Error(result.error || "解析读取失败");
+      if (active) setFeedback(result);
+    }).catch(error => { if (active) setNotice(error instanceof Error ? error.message : "解析读取失败"); });
+    return () => { active = false; };
+  }, [isQuiz, question.id, attempt?.checked]);
 
   function changeField(id: string, value: string) {
+    if (locked) return;
     saveDraft(question.id, JSON.stringify({ ...values, [id]: value }), sectionId);
     setFeedback(null);
     setNotice("");
   }
 
   async function submit() {
-    if (question.type !== "quiz" || pending || !ready) return;
+    if (question.type !== "quiz" || pending || !ready || locked) return;
     setFeedback(null);
     const missing = question.fields.find(field => !values[field.id]?.trim());
     if (missing) {
@@ -80,7 +91,7 @@ const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, rea
       }
       setFeedback(result as NationalDayMathSubmissionResult);
       recordAttempt(question.id, {
-        value: JSON.stringify(values), checked: true, correct: result.correct, gradingVersion: 2,
+        value: JSON.stringify(result.answers ?? values), checked: true, correct: result.correct, gradingVersion: 2,
       }, sectionId);
     } catch (error) {
       setNotice(error instanceof Error && error.name === "TimeoutError"
@@ -103,18 +114,18 @@ const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, rea
             return <div key={field.id}>
               <label htmlFor={inputId} className="block text-sm font-bold leading-7 text-slate-600">{field.label}</label>
               {field.kind === "choice"
-                ? <select id={inputId} data-math-input={question.id} data-field-id={field.id} value={values[field.id] ?? ""} disabled={!ready || pending} onChange={event => changeField(field.id, event.target.value)} className={className}><option value="">请选择你的判断……</option>{field.options?.map(option => <option key={option} value={option}>{option}</option>)}</select>
-                : <input id={inputId} data-math-input={question.id} data-field-id={field.id} type="text" autoComplete="off" value={values[field.id] ?? ""} disabled={!ready || pending} maxLength={200} onChange={event => changeField(field.id, event.target.value)} placeholder={ready ? "输入这一小问的答案……" : "正在载入学习记录……"} className={className} />}
+                ? <select id={inputId} data-math-input={question.id} data-field-id={field.id} value={values[field.id] ?? ""} disabled={!ready || pending || locked} onChange={event => changeField(field.id, event.target.value)} className={className}><option value="">请选择你的判断……</option>{field.options?.map(option => <option key={option} value={option}>{option}</option>)}</select>
+                : <input id={inputId} data-math-input={question.id} data-field-id={field.id} type="text" autoComplete="off" value={values[field.id] ?? ""} disabled={!ready || pending || locked} maxLength={200} onChange={event => changeField(field.id, event.target.value)} placeholder={ready ? "输入这一小问的答案……" : "正在载入学习记录……"} className={className} />}
               {field.hint && <p className="mt-1 text-xs leading-6 text-slate-500">{field.hint}</p>}
               {result && <p data-math-field-result={field.id} className={`mt-2 text-sm leading-7 ${result.correct ? "text-teal-700" : "text-amber-800"}`}>{result.correct ? "✓ 这一项正确" : "✗ 这一项需要订正"} · 正确答案：<MathText text={result.expected} /></p>}
             </div>;
           })}
         </div>
         <p className="mt-3 text-xs leading-6 text-slate-500">填写每个小问后提交，系统会自动判分，并显示正确答案与解析。提交前不会显示解答。</p>
-        <button type="submit" disabled={!ready || pending} className={`mt-3 block w-full rounded-xl border px-4 py-3 text-sm font-bold transition disabled:opacity-50 ${styles.checkButton}`}>{pending ? "正在提交判题……" : "提交答案"}</button>
+        <button type="submit" disabled={!ready || pending || locked} className={`mt-3 block w-full rounded-xl border px-4 py-3 text-sm font-bold transition disabled:opacity-50 ${styles.checkButton}`}>{pending ? "正在提交判题……" : locked ? "已提交 · 已锁定" : "提交答案"}</button>
         {notice && <p role="alert" className="mt-3 rounded-xl border border-amber-100 bg-white px-4 py-3 text-sm leading-7 text-amber-800">{notice}</p>}
         {feedback && <p data-math-feedback={question.id} role="status" className={`mt-3 rounded-xl border bg-white px-4 py-3 text-sm font-bold leading-7 ${feedback.correct ? "border-teal-200 text-teal-800" : "border-amber-200 text-amber-800"}`}>{feedback.correct ? "✓ 回答正确！" : "✗ 还有小问需要订正。"} 本题答对 {feedback.fields.filter(field => field.correct).length} / {feedback.fields.length} 项。</p>}
-        {!feedback && attempt?.gradingVersion === 2 && attempt.checked && <p className="mt-3 text-xs leading-6 text-slate-500">上次提交：{attempt.correct ? "系统判对" : "需要订正"}。本次提交后重新显示答案与解析。</p>}
+        {!feedback && locked && <p className="mt-3 text-xs leading-6 text-slate-500">已提交，正在读取原答案与解析。</p>}
       </form>}
       {solution && <div data-math-answer={question.id} className="mt-5 border-t border-slate-200/80 pt-4">
         {solution.steps.length > 0 && <ol className="space-y-3 text-[15px] leading-8 text-slate-700">{solution.steps.map((step, index) => <li key={index} className="whitespace-pre-wrap"><span className={`mr-2 font-semibold ${styles.accent}`}>{index + 1}.</span><MathText text={step} /></li>)}</ol>}

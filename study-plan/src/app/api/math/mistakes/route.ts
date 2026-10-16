@@ -1,62 +1,27 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
-import { ensureMathQuestionBankSchema, MATH_STUDENT_ID } from "@/lib/math-question-bank";
-import { getLocalMistakes } from "@/lib/math-local-store";
+import { ensureMathQuestionBankSchema } from "@/lib/math-question-bank";
+import { STUDENT_PROFILE_COOKIE, parseStudentProfileCookie } from "@/lib/family-access";
+import { legacyMathQuestions } from "@/server/legacy-math-first";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+const headers = { "Cache-Control": "private, no-store" };
+export async function GET(request: NextRequest) {
+  const student = parseStudentProfileCookie(request.cookies.get(STUDENT_PROFILE_COOKIE)?.value);
   try {
     await ensureMathQuestionBankSchema();
 
-    const result = await pool.query(
-      `
-        WITH latest AS (
-          SELECT
-            q.id AS question_id,
-            q.question_number,
-            q.question_type,
-            q.prompt,
-            q.options,
-            q.correct_answer,
-            q.explanation,
-            q.review_status,
-            q.auto_grade,
-            qs.id AS set_id,
-            qs.title AS set_title,
-            qs.category,
-            qs.unit_label,
-            r.response_text,
-            r.self_rating,
-            r.is_correct,
-            r.grading_status,
-            r.score,
-            r.max_score,
-            r.feedback,
-            a.id AS attempt_id,
-            a.submitted_at,
-            ROW_NUMBER() OVER (PARTITION BY q.id ORDER BY a.submitted_at DESC) AS row_number
-          FROM math_responses r
-          JOIN math_attempts a ON a.id = r.attempt_id
-          JOIN math_questions q ON q.id = r.question_id
-          JOIN math_question_sets qs ON qs.id = q.set_id
-          WHERE a.student_id = $1 AND a.status = 'submitted'
-        )
-        SELECT *
-        FROM latest
-        WHERE row_number = 1 AND is_correct = false
-        ORDER BY submitted_at DESC
-        LIMIT 200
-      `,
-      [MATH_STUDENT_ID]
-    );
-
-    if (result.rowCount === 0) {
-      return NextResponse.json(await getLocalMistakes());
+    const sets = await pool.query<{ id: string; title: string; category: string; unit_label: string }>("SELECT id,title,category,unit_label FROM math_question_sets ORDER BY id");
+    const mistakes = [];
+    for (const set of sets.rows) {
+      for (const question of await legacyMathQuestions(student.id, set.id)) {
+        if (!question.locked || question.is_correct !== false || question.grading_status === "self_review") continue;
+        mistakes.push({ ...question, question_id: question.id, set_title: set.title, category: set.category, unit_label: set.unit_label, score: question.response_score });
+      }
     }
-
-    return NextResponse.json({ mistakes: result.rows, storage: "database" });
+    return NextResponse.json({ mistakes: mistakes.slice(0, 200), storage: "database" }, { headers });
   } catch {
-    return NextResponse.json(await getLocalMistakes());
+    return NextResponse.json({ error: "暂时无法读取首次作答错题记录" }, { status: 503, headers });
   }
 }

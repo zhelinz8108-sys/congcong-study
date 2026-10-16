@@ -6,20 +6,21 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MathText } from "@/components/math-text";
 import {
-  MATH_GENERATED_DIFFICULTIES,
-  MATH_GENERATED_UNITS,
-  PDF_MATH_SOURCE_SUMMARY,
-  generateMathQuestions,
-  getGeneratedUnitTotal,
-  gradeGeneratedMathQuestion,
   type MathGeneratedDifficulty,
   type MathGeneratedQuestion,
   type MathGeneratedUnit,
 } from "@/lib/math-generated-practice";
+import publicMeta from "@/data/math-generated-meta.public.json";
+const MATH_GENERATED_UNITS = publicMeta.units as MathGeneratedUnit[];
+const MATH_GENERATED_DIFFICULTIES = publicMeta.difficulties as { key: MathGeneratedDifficulty; label: string; desc: string; offset: number }[];
+const PDF_MATH_SOURCE_SUMMARY = publicMeta.source;
+const getGeneratedUnitTotal = () => 300;
+type PublicGeneratedQuestion = Omit<MathGeneratedQuestion, "answer" | "acceptableAnswers" | "explanation" | "wrongReasons">;
 
 type AnswerRecord = {
   value: string;
   isCorrect: boolean;
+  feedback: { answer: string; explanation: string; wrongReason: string };
 };
 
 type SpeechTune = {
@@ -543,10 +544,16 @@ export default function GeneratedMathPracticePage() {
     MATH_GENERATED_UNITS.find((unit) => unit.id === selectedUnitId) ?? MATH_GENERATED_UNITS[0];
   const difficultyMeta = MATH_GENERATED_DIFFICULTIES.find((item) => item.key === difficulty)!;
 
-  const questions = useMemo(
-    () => generateMathQuestions(selectedUnitId, difficulty, 100),
-    [difficulty, selectedUnitId]
-  );
+  const [questions, setQuestions] = useState<PublicGeneratedQuestion[]>([]);
+  const [pending, setPending] = useState(false), [notice, setNotice] = useState("");
+  useEffect(() => {
+    let active = true; setQuestions([]); setNotice("");
+    void fetch(`/api/math/generated-practice?unit=${selectedUnitId}&difficulty=${difficulty}`, { cache: "no-store" }).then(async response => {
+      const result = await response.json(); if (!response.ok) throw new Error(result.error || "学习记录暂不可用");
+      if (active) { setQuestions(result.questions); setAnswers(result.attempts); }
+    }).catch(error => { if (active) setNotice(error instanceof Error ? error.message : "学习记录暂不可用"); });
+    return () => { active = false; };
+  }, [selectedUnitId, difficulty, id]);
 
   const currentQuestion = questions[currentIndex];
   const currentAnswer = answers[currentQuestion?.id ?? ""];
@@ -560,25 +567,21 @@ export default function GeneratedMathPracticePage() {
     setStarted(true);
     setShowSessionReview(true);
     setCurrentIndex(0);
-    setAnswers({});
     setDrafts({});
   };
 
-  const recordAnswer = (question: MathGeneratedQuestion, value: string) => {
-    setAnswers((prev) => {
-      if (prev[question.id]) {
-        return prev;
-      }
-
-      const isCorrect = gradeGeneratedMathQuestion(question, value);
-      return {
-        ...prev,
-        [question.id]: { value, isCorrect },
-      };
-    });
+  const recordAnswer = async (question: PublicGeneratedQuestion, value: string) => {
+    if (answers[question.id] || pending) return;
+    setPending(true); setNotice("");
+    try {
+      const response = await fetch("/api/math/generated-practice", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question_id: question.id, value }), cache: "no-store" });
+      const result = await response.json(); if (!response.ok) throw new Error(result.error || "提交失败");
+      setAnswers(prev => ({ ...prev, [question.id]: result }));
+    } catch (error) { setNotice(error instanceof Error ? error.message : "提交失败"); }
+    finally { setPending(false); }
   };
 
-  const updateFillDraft = (question: MathGeneratedQuestion, value: string) => {
+  const updateFillDraft = (question: PublicGeneratedQuestion, value: string) => {
     if (answers[question.id]) {
       return;
     }
@@ -586,14 +589,14 @@ export default function GeneratedMathPracticePage() {
     setDrafts((prev) => ({ ...prev, [question.id]: value }));
   };
 
-  const submitFillAnswer = (question: MathGeneratedQuestion) => {
+  const submitFillAnswer = (question: PublicGeneratedQuestion) => {
     if (answers[question.id]) {
       return;
     }
 
     const value = drafts[question.id]?.trim() ?? "";
     if (!value) return;
-    recordAnswer(question, value);
+    void recordAnswer(question, value);
   };
 
   const stopGeneratedAudio = useCallback(() => {
@@ -764,8 +767,8 @@ export default function GeneratedMathPracticePage() {
   const feedbackReason = useMemo(() => {
     if (!currentQuestion || !currentAnswer || currentAnswer.isCorrect) return "";
     return (
-      currentQuestion.wrongReasons?.[currentAnswer.value] ??
-      `这个答案没有满足题干条件。正确答案是 ${currentQuestion.answer}。`
+      currentAnswer.feedback.wrongReason ??
+      `这个答案没有满足题干条件。正确答案是 ${currentAnswer.feedback.answer}。`
     );
   }, [currentAnswer, currentQuestion]);
 
@@ -895,6 +898,7 @@ export default function GeneratedMathPracticePage() {
       </main>
     );
   }
+  if (!currentQuestion) return <main className="min-h-screen bg-[#fff8ef] p-8 text-center"><p role="status">{notice || "正在读取学习记录…"}</p><button onClick={() => setStarted(false)}>返回单元选择</button></main>;
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] px-4 py-5 text-neutral-950 sm:px-6">
@@ -1010,21 +1014,22 @@ export default function GeneratedMathPracticePage() {
             <p className="rounded-2xl border border-amber-100 bg-amber-50 px-5 py-6 text-2xl font-bold leading-relaxed tracking-tight text-neutral-950">
               <MathText text={currentQuestion.prompt} />
             </p>
+            {notice && <p role="alert" className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">{notice}</p>}
 
             {currentQuestion.type === "choice" ? (
               <div className="mt-6 grid gap-3">
                 {currentQuestion.options?.map((option, optionIndex) => {
                   const selected = currentAnswer?.value === option;
-                  const correct = currentAnswer && option === currentQuestion.answer;
+                  const correct = currentAnswer && option === currentAnswer.feedback.answer;
                   const wrongSelected = selected && currentAnswer && !currentAnswer.isCorrect;
                   const answered = Boolean(currentAnswer);
                   return (
                     <button
                       key={option}
                       type="button"
-                      disabled={answered}
+                      disabled={answered || pending}
                       aria-pressed={selected}
-                      onClick={() => recordAnswer(currentQuestion, option)}
+                      onClick={() => void recordAnswer(currentQuestion, option)}
                       className={`flex items-center gap-4 rounded-2xl border px-5 py-4 text-left text-lg font-semibold transition ${
                         correct
                           ? "border-emerald-400 bg-emerald-50 text-emerald-800"
@@ -1059,7 +1064,7 @@ export default function GeneratedMathPracticePage() {
                     if (currentAnswer) goNext();
                     else submitFillAnswer(currentQuestion);
                   }}
-                  disabled={Boolean(currentAnswer)}
+                  disabled={Boolean(currentAnswer) || pending}
                   placeholder="输入答案后点击提交"
                   className={`mt-2 w-full rounded-2xl border px-5 py-4 text-2xl font-bold outline-none transition disabled:cursor-not-allowed disabled:opacity-100 ${
                     currentAnswer?.isCorrect
@@ -1073,10 +1078,10 @@ export default function GeneratedMathPracticePage() {
                   <button
                     type="button"
                     onClick={() => submitFillAnswer(currentQuestion)}
-                    disabled={Boolean(currentAnswer) || !drafts[currentQuestion.id]?.trim()}
+                    disabled={Boolean(currentAnswer) || pending || !drafts[currentQuestion.id]?.trim()}
                     className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    {currentAnswer ? "已提交" : "提交答案"}
+                    {currentAnswer ? "已提交 · 已锁定" : pending ? "正在提交…" : "提交答案"}
                   </button>
                   <span className="text-sm text-neutral-500">填完后提交，或按 Enter。</span>
                 </div>
@@ -1108,7 +1113,7 @@ export default function GeneratedMathPracticePage() {
                       <div className="rounded-2xl border border-emerald-200 bg-white p-4 text-emerald-800">
                         <p className="text-xs font-semibold text-emerald-600">正确答案</p>
                         <p className="mt-1 text-lg font-bold">
-                          <MathText text={currentQuestion.answer} />
+                          <MathText text={currentAnswer.feedback.answer} />
                         </p>
                       </div>
                     </div>
@@ -1118,7 +1123,7 @@ export default function GeneratedMathPracticePage() {
                       </p>
                     )}
                     <p className="mt-4 text-base leading-7 text-neutral-700">
-                      <MathText text={currentQuestion.explanation} />
+                      <MathText text={currentAnswer.feedback.explanation} />
                     </p>
                   </div>
                   <button

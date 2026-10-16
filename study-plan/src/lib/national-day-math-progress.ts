@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { loadCloudState } from "@/lib/cloud-progress";
 
 export type NationalDayMathAttempt = {
   value: string;
@@ -138,7 +137,11 @@ export function useNationalDayMathProgress(subjectId: string, sectionId?: string
     session.current = current;
     // Chapter navigation unmounts the previous reader. Finish its queued save
     // before fetching, so a just-submitted result cannot be replaced by stale cloud state.
-    void flushNationalDayMathProgress(scope).then(() => loadCloudState<NationalDayMathProgress>(scope, storageKey, current.value)).then((loaded) => {
+    void flushNationalDayMathProgress(scope).then(async () => {
+      const response = await fetch(`/api/math/national-day/progress?subject_id=${encodeURIComponent(subjectId)}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("学习记录暂不可用");
+      return response.json();
+    }).then((loaded) => {
       if (!active) return;
       let next = normalizeNationalDayMathProgress(loaded);
       for (const mutation of current.pending) next = mutation(next);
@@ -148,7 +151,7 @@ export function useNationalDayMathProgress(subjectId: string, sectionId?: string
       current.ready = true;
       setSnapshot({ scope, progress: next, ready: true });
       if (editedWhileLoading) saveNationalDayMathProgressState(scope, storageKey, next);
-    });
+    }).catch(() => { /* Stay read-only until authoritative records can load. */ });
     const flush = () => { void flushNationalDayMathProgress(scope); };
     const onVisibility = () => { if (document.visibilityState === "hidden") flush(); };
     window.addEventListener("pagehide", flush);
@@ -159,7 +162,7 @@ export function useNationalDayMathProgress(subjectId: string, sectionId?: string
       document.removeEventListener("visibilitychange", onVisibility);
       flush();
     };
-  }, [scope, storageKey]);
+  }, [scope, storageKey, subjectId]);
 
   const mutate = useCallback((mutation: Mutation) => {
     const current = session.current;
@@ -176,7 +179,7 @@ export function useNationalDayMathProgress(subjectId: string, sectionId?: string
     if (!validId(questionId)) return;
     const normalized = normalizeNationalDayMathProgress({ attempts: { [questionId]: attempt } }).attempts[questionId];
     if (!normalized) return;
-    mutate((current) => ({
+    mutate((current) => current.attempts[questionId]?.checked ? current : ({
       ...current,
       attempts: { ...current.attempts, [questionId]: normalized },
       ...(validId(id) ? { lastSection: id } : {}),
@@ -185,7 +188,7 @@ export function useNationalDayMathProgress(subjectId: string, sectionId?: string
 
   const saveDraft = useCallback((questionId: string, value: string, id?: string) => {
     if (!validId(questionId)) return;
-    mutate((current) => ({
+    mutate((current) => current.attempts[questionId]?.checked ? current : ({
       ...current,
       attempts: {
         ...current.attempts,

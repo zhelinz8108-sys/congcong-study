@@ -100,10 +100,11 @@ for (const q of [...auto, ...[review, missing].filter(Boolean)]) {
     const wrong = Object.fromEntries(q.inputs.map((i) => [i.id, i.kind === "choice" ? i.choices.find((x) => !a.rules.find((k) => k.id === i.id).expected.includes(x)) : "故意错误"]));
     if (Object.values(wrong).every(Boolean)) {
       const r = await request("/api/math/grade6-bank/submit", { ...body, base_revision: revisions.get(q.id), answers: wrong }, "POST");
-      assert.equal(r.status, 200); assert.equal(r.json.feedback.outcome, "incorrect"); revisions.set(q.id, r.json.response.revision);
+      assert.equal(r.status, 409); assert.equal(r.json.response.outcome, "correct"); assert.equal(r.json.response.revision, revisions.get(q.id));
     }
   }
-  const draft = await request("/api/math/grade6-bank/draft", { ...body, base_revision: revisions.get(q.id) }, "PUT"); assert.equal(draft.status, 200); assert.equal(draft.json.submitted, false); revisions.set(q.id, draft.json.revision);
+  const draft = await request("/api/math/grade6-bank/draft", { ...body, base_revision: revisions.get(q.id) }, "PUT"); assert.equal(draft.status, 409); assert.equal(draft.json.response.submitted, true); assert.equal(draft.json.response.revision, revisions.get(q.id));
+  const savedFeedback = await request(`/api/math/grade6-bank/feedback?subject_id=${subject}&question_id=${encodeURIComponent(q.id)}`); assert.equal(savedFeedback.status, 200); assert.equal(savedFeedback.json.feedback.outcome, r.json.feedback.outcome);
 }
 const concurrentQuestion = questions.find((q) => !revisions.has(q.id));
 const concurrentBody = { subject_id: subject, question_id: concurrentQuestion.id, answers: Object.fromEntries(concurrentQuestion.inputs.map((i) => [i.id, i.kind === "choice" ? i.choices[0] : "并发草稿测试"])), base_revision: 0 };

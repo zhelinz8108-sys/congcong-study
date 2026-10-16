@@ -6,6 +6,7 @@ import { useGrade6BankProgress } from "@/lib/grade6-bank-progress";
 import { BANK_DIFFICULTIES, bankStats, type BankAnswers, type BankCollection, type BankFeedback, type BankManifest, type BankQuestion, type BankResponse } from "@/lib/grade6-bank-types";
 import { bankCurrentAnswers, bankLegacyAnswerEntries } from "@/lib/grade6-bank-input-schema";
 import { bankDrawingCompleted, Grade6BankNative } from "./grade6-bank-native";
+import { Grade6BankSolution } from "./grade6-bank-solution";
 import styles from "./grade6-bank.module.css";
 
 // Remaining legacy crops and post-submit private images must bypass the public
@@ -71,6 +72,8 @@ export function Grade6BankDirectory({ subjectId, manifest }: { subjectId: string
 type ProgressHook = ReturnType<typeof useGrade6BankProgress>;
 function QuestionSession({ question, collection, position, count, progress, go }: { question: BankQuestion; collection: BankCollection; position: number; count: number; progress: ProgressHook; go: (offset: number) => void }) {
   const existing = progress.progress.responses[question.id];
+  const locked = existing?.submitted || (existing?.submissions ?? 0) > 0;
+  const controlsDisabled = !progress.ready || locked;
   // One authoritative input state: the hook already preserves dirty drafts.
   // A clean cloud refresh must update every control before a partial edit can
   // spread old values from other blanks back into a newly based draft.
@@ -97,11 +100,19 @@ function QuestionSession({ question, collection, position, count, progress, go }
   }, [currentHistoric]);
   const historicAnswers = [...new Map([...retainedHistoric, ...currentHistoric])];
   const [feedbackState, setFeedback] = useState<{ revision: number; value: BankFeedback } | null>(null), [busy, setBusy] = useState(false), [error, setError] = useState("");
-  const feedback = existing?.submitted && existing.revision === feedbackState?.revision ? feedbackState.value : null;
+  const feedback = locked && existing?.revision === feedbackState?.revision ? feedbackState.value : null;
+  const readFeedback = progress.feedback;
+  const getResponse = progress.getResponse;
+  useEffect(() => {
+    if (!locked || !readFeedback) return;
+    let active = true;
+    void readFeedback(question.id).then(value => { if (active) setFeedback({ revision: getResponse(question.id)?.revision ?? -1, value }); }).catch(e => { if (active) setError(e instanceof Error ? e.message : "解析读取失败"); });
+    return () => { active = false; };
+  }, [locked, question.id, readFeedback, getResponse]);
   const canSubmit = question.inputs.every((field) => field.kind === "drawing" ? bankDrawingCompleted(answers[field.id] ?? "", drawingBox(field.id)) : (answers[field.id] ?? "").trim());
-  const change = (id: string, value: string) => { observeQuestion?.(question); const next = { ...pickAnswers(progress.getResponse(question.id)), [id]: value }; setFeedback(null); setError(""); progress.draft(question.id, next); };
+  const change = (id: string, value: string) => { if (locked || !progress.ready) return; observeQuestion?.(question); const next = { ...pickAnswers(progress.getResponse(question.id)), [id]: value }; setFeedback(null); setError(""); progress.draft(question.id, next); };
   const submit = async () => {
-    if (!canSubmit || busy) return;
+    if (!canSubmit || busy || locked || !progress.ready) return;
     setBusy(true); setError("");
     try {
       const value = await progress.submit(question.id, answers);
@@ -110,21 +121,21 @@ function QuestionSession({ question, collection, position, count, progress, go }
   };
   const resultTitle = feedback?.outcome === "correct" ? "答对了" : feedback?.outcome === "incorrect" ? "需要订正" : "待核验";
   return <article className={styles.question} style={palette(collection.palette)}>
-    <header className={styles.questionTop}><h2>第 {String(question.number).padStart(3, "0")} 题 <small style={{ fontSize: 12, fontWeight: 500 }}>／{collection.questionCount}</small></h2><span className={styles.badge}>{BANK_DIFFICULTIES.find((d) => d.value === question.difficulty)?.label}</span></header>
+    <header className={styles.questionTop}><h2>第 {String(question.number).padStart(3, "0")} 题</h2><span className={styles.badge}>{BANK_DIFFICULTIES.find((d) => d.value === question.difficulty)?.label}</span></header>
     <div className={styles.questionBody}>
-      {question.native ? <Grade6BankNative content={question.native} inputs={question.inputs} answers={answers} disabled={busy} onChange={change} results={feedback?.fields} /> : <>
+      {question.native ? <Grade6BankNative content={question.native} inputs={question.inputs} answers={answers} disabled={busy || controlsDisabled} onChange={change} results={feedback?.fields} /> : <>
       {question.questionImages.length ? question.questionImages.map((src, index) => <SourceImage key={src} src={src} alt={`第${question.number}题，第${index + 1}部分`} />) : <p className={styles.prompt}>{question.prompt}</p>}
       <div className={styles.inputArea}>
         {question.inputs.map((field) => <div key={field.id} className={styles.field}>
           {question.inputs.length > 1 && <span>{field.label}</span>}
-          {field.kind === "choice" && field.choices?.length ? <div className={styles.choices} role="group" aria-label={field.label}>{field.choices.map((value) => <button key={value} type="button" className={styles.choice} aria-pressed={answers[field.id] === value} disabled={busy} onClick={() => change(field.id, value)}><b>{value}</b></button>)}</div> : /^第\s*\d+\s*空|算式的结果/.test(field.label) ? <input type="text" aria-label={field.label} value={answers[field.id] ?? ""} onChange={(e) => change(field.id, e.target.value)} disabled={busy} placeholder="答案" /> : <textarea aria-label={field.label} value={answers[field.id] ?? ""} onChange={(e) => change(field.id, e.target.value)} disabled={busy} rows={question.inputs.length > 1 ? 2 : 3} placeholder="作答" />}
+          {field.kind === "choice" && field.choices?.length ? <div className={styles.choices} role="group" aria-label={field.label}>{field.choices.map((value) => <button key={value} type="button" className={styles.choice} aria-pressed={answers[field.id] === value} disabled={busy || controlsDisabled} onClick={() => change(field.id, value)}><b>{value}</b></button>)}</div> : /^第\s*\d+\s*空|算式的结果/.test(field.label) ? <input type="text" aria-label={field.label} value={answers[field.id] ?? ""} onChange={(e) => change(field.id, e.target.value)} disabled={busy || controlsDisabled} placeholder="答案" /> : <textarea aria-label={field.label} value={answers[field.id] ?? ""} onChange={(e) => change(field.id, e.target.value)} disabled={busy || controlsDisabled} rows={question.inputs.length > 1 ? 2 : 3} placeholder="作答" />}
         </div>)}
       </div></>}
       {historicAnswers.length > 0 && <details className={styles.history}><summary>原作答记录</summary>{historicAnswers.map(([id, value]) => <p key={id}>{value}</p>)}</details>}
       {error && <p role="alert" className={styles.error}>{error}</p>}
-      {feedback && <section className={styles.feedback} data-outcome={feedback.outcome} aria-live="polite"><h3>{resultTitle}</h3><p>{feedback.message}</p>{feedback.score !== null && <p>本题得分：{feedback.score} / {feedback.maxScore}</p>}{feedback.fields.length > 1 && <p>{feedback.fields.map((f, i) => `第 ${i + 1} 项${f.correct ? " ✓" : " 待订正"}`).join(" · ")}</p>}{feedback.answerText && <p style={{ marginTop: 12 }}>{feedback.answerText}</p>}{feedback.answerImages.map((src, index) => <SourceImage key={index} src={src} alt={`提交后显示的配套答案与解析，第${index + 1}部分`} />)}</section>}
+      {feedback && <section className={styles.feedback} data-outcome={feedback.outcome} aria-live="polite"><h3>{resultTitle}</h3>{feedback.message && <p>{feedback.message}</p>}{feedback.score !== null && <p>本题得分：{feedback.score} / {feedback.maxScore}</p>}{feedback.fields.length > 1 && <p>{feedback.fields.map((f, i) => `第 ${i + 1} 项${f.correct ? " ✓" : " 待订正"}`).join(" · ")}</p>}{feedback.detailedSolution ? <Grade6BankSolution solution={feedback.detailedSolution} /> : feedback.answerText && <p style={{ marginTop: 12 }}>{feedback.answerText}</p>}{feedback.answerImages.map((src, index) => <SourceImage key={index} src={src} alt={`提交后显示的配套答案与解析，第${index + 1}部分`} />)}</section>}
     </div>
-    <footer className={styles.actions}><div className={styles.buttonRow}><button className={styles.button} disabled={busy || position === 0} onClick={() => go(-1)}>← 上一题</button><button className={`${styles.button} ${styles.primary}`} disabled={busy || !canSubmit} onClick={() => void submit()}>{busy ? "正在提交…" : feedback ? "重新提交" : "提交答案"}</button><button className={styles.button} disabled={busy || position >= count - 1 || !existing?.submitted} onClick={() => go(1)}>下一题 →</button></div>{position < count - 1 && <div className={styles.subActions}><button disabled={busy} onClick={() => go(1)}>跳过 →</button></div>}{position === count - 1 && <p className={styles.summary}>本组最后一题</p>}</footer>
+    <footer className={styles.actions}><div className={styles.buttonRow}><button className={styles.button} disabled={busy || position === 0} onClick={() => go(-1)}>← 上一题</button><button className={`${styles.button} ${styles.primary}`} disabled={busy || !canSubmit || controlsDisabled} onClick={() => void submit()}>{busy ? "正在提交…" : locked ? "已提交 · 已锁定" : "提交答案"}</button><button className={styles.button} disabled={busy || position >= count - 1 || !locked} onClick={() => go(1)}>下一题 →</button></div>{position < count - 1 && <div className={styles.subActions}><button disabled={busy} onClick={() => go(1)}>跳过 →</button></div>}{position === count - 1 && <p className={styles.summary}>本组最后一题</p>}</footer>
   </article>;
 }
 

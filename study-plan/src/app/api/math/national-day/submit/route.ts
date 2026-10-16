@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { FAMILY_ACCESS_COOKIE, verifyFamilyAccessToken } from "@/lib/family-access";
-import { hasNationalDayMathQuestion, submitNationalDayMath } from "@/lib/national-day-math-submission";
+import { hasNationalDayMathQuestion } from "@/lib/national-day-math-submission";
+import { readNationalFeedback, submitNationalOnce } from "@/server/math-first-attempts";
+import { bankProfile } from "@/server/grade6-bank/http";
+import { holidayAccess } from "@/server/holiday-math-700/http";
 
 export const dynamic = "force-dynamic";
 const MAX_BODY_BYTES = 16 * 1024;
@@ -28,8 +31,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "这道自测题不存在" }, { status: 404, headers });
   }
   try {
-    return NextResponse.json(submitNationalDayMath(body.questionId, body.answers), { headers });
+    const saved = await submitNationalOnce(bankProfile(request).id, body.questionId, body.answers);
+    return NextResponse.json({ ...saved.feedback, answers: saved.answer, locked: true }, { headers });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "请填写所有小问后再提交" }, { status: 400, headers });
+    const message = error instanceof Error ? error.message : "";
+    const safe = /^(请|答题字段|每个答案|这道自测)/.test(message);
+    return NextResponse.json({ error: safe ? message : "判题服务暂不可用，请稍后重试" }, { status: safe ? 400 : 503, headers });
   }
+}
+export async function GET(request: NextRequest) {
+  const denied = holidayAccess(request); if (denied) return denied;
+  const id = request.nextUrl.searchParams.get("questionId") ?? "";
+  if (!hasNationalDayMathQuestion(id)) return NextResponse.json({ error: "题目不存在" }, { status: 404, headers });
+  try {
+    const saved = await readNationalFeedback(bankProfile(request).id, id);
+    if (!saved) return NextResponse.json({ error: "请先提交本题" }, { status: 403, headers });
+    return NextResponse.json({ ...saved.feedback, answers: saved.answer, locked: true }, { headers });
+  } catch { return NextResponse.json({ error: "学习记录暂不可用" }, { status: 503, headers }); }
 }

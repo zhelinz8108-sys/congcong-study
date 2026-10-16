@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.STUDY_PLAN_BUILD_DIR || ".next",
+  experimental: process.env.STUDY_PLAN_LOW_MEMORY_BUILD === "1" ? {
+    cpus: 1,
+    webpackBuildWorker: true,
+    webpackMemoryOptimizations: true,
+    parallelServerCompiles: false,
+    parallelServerBuildTraces: false,
+  } : undefined,
   outputFileTracingIncludes: {
     "/api/chinese/six/**": ["./content/chinese-six/sealed/**/*"],
     "/subjects/*/chinese/six/**": ["./content/chinese-six/sealed/bank.encrypted.json"],
@@ -24,6 +32,7 @@ const nextConfig: NextConfig = {
     ],
   },
   outputFileTracingExcludes: {
+    "/api/english/six/**": ["./content/english-six/assets/**/*", "./content/english-six/ocr-work/**/*"],
     "/*": [
       "./content/chinese-six/*.private.json",
       "./content/chinese-six/pages/**/*",

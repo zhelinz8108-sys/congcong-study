@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useEnglishLocked } from "@/lib/use-english-locked";
 import {
   CHECKLIST,
   CONFUSIONS,
@@ -70,7 +71,9 @@ export default function GrammarGuidePage() {
   const [roadmapIndex, setRoadmapIndex] = useState(0);
   const [motherIndex, setMotherIndex] = useState(0);
   const [quizIndex, setQuizIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const locked = useEnglishLocked("grammar-guide", id);
+  const savedQuiz = locked.records[`gg-${quizIndex + 1}`];
+  const selectedAnswer = savedQuiz ? Number(savedQuiz.response) : null;
 
   const activeModule = useMemo(
     () => GRAMMAR_MODULES.find((module) => module.id === activeModuleId) ?? GRAMMAR_MODULES[0],
@@ -88,7 +91,6 @@ export default function GrammarGuidePage() {
   };
 
   const nextQuiz = () => {
-    setSelectedAnswer(null);
     setQuizIndex((index) => (index + 1) % GRAMMAR_QUIZ.length);
   };
 
@@ -402,13 +404,14 @@ export default function GrammarGuidePage() {
               <div className="mt-4 space-y-2">
                 {quiz.choices.map((choice, index) => {
                   const answered = selectedAnswer !== null;
-                  const correct = index === quiz.answer;
+                  const correct = Boolean(savedQuiz && savedQuiz.feedback.answer.startsWith(`${String.fromCharCode(65 + index)}.`));
                   const selected = index === selectedAnswer;
                   const state = !answered ? "border-white/20 bg-white/10 hover:bg-white/20" : correct ? "border-emerald-300 bg-emerald-400/25" : selected ? "border-rose-300 bg-rose-400/25" : "border-white/10 bg-white/5 opacity-55";
-                  return <button key={choice} type="button" disabled={answered} onClick={() => setSelectedAnswer(index)} className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-sm font-bold transition ${state}`}><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/15 text-xs font-black">{String.fromCharCode(65 + index)}</span>{choice}</button>;
+                  return <button key={choice} type="button" disabled={answered || !locked.ready || locked.busy} onClick={() => { void locked.submit(`gg-${quizIndex + 1}`, String(index)).catch(() => undefined); }} className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-sm font-bold transition ${state}`}><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/15 text-xs font-black">{String.fromCharCode(65 + index)}</span>{choice}</button>;
                 })}
               </div>
-              {selectedAnswer !== null && <div aria-live="polite" className="mt-4 rounded-2xl bg-white p-4 text-slate-900"><p className={`text-sm font-black ${selectedAnswer === quiz.answer ? "text-emerald-700" : "text-rose-700"}`}>{selectedAnswer === quiz.answer ? "答对了！规则已经连起来了。" : `正确答案是 ${String.fromCharCode(65 + quiz.answer)}。`}</p><p className="mt-2 text-xs font-bold leading-6 text-slate-600">{quiz.explanation}</p><button type="button" onClick={nextQuiz} className="mt-3 rounded-xl bg-violet-600 px-4 py-2 text-xs font-black text-white">下一题 →</button></div>}
+              <p className="mt-3 text-xs">{locked.error || (locked.busy ? "正在提交…" : "点击选项即提交，提交后不能修改。")}</p>
+              {savedQuiz && <div aria-live="polite" className="mt-4 rounded-2xl bg-white p-4 text-slate-900"><p className={`text-sm font-black ${savedQuiz.feedback.correct ? "text-emerald-700" : "text-rose-700"}`}>{savedQuiz.feedback.correct ? "答对了 · 已锁定" : `正确答案是 ${savedQuiz.feedback.answer} · 已锁定`}</p><p className="mt-2 text-xs font-bold leading-6 text-slate-600">{savedQuiz.feedback.explanation}</p><button type="button" onClick={nextQuiz} className="mt-3 rounded-xl bg-violet-600 px-4 py-2 text-xs font-black text-white">下一题 →</button></div>}
             </div>
           </section>
 

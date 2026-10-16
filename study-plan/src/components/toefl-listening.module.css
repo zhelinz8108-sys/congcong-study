@@ -1,0 +1,53 @@
+.page { max-width: 860px; margin: 0 auto; padding: 28px 24px 48px; color: #202724; }
+.back { color: #547066; font-size: 14px; text-decoration: none; }
+.heading { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; margin: 20px 0 24px; }
+.heading h1 { font-size: 28px; font-weight: 700; margin: 0; }
+.heading span { font-size: 13px; color: #68736f; }
+.tabs, .mode { display: flex; gap: 4px; }
+.tabs { border-bottom: 1px solid #d3ded8; margin-bottom: 16px; }
+.tabs button { font-size: 14px; font-weight: 600; padding: 11px 18px; border-bottom: 3px solid transparent; color: #5b6d65; cursor: pointer; }
+.tabs button[aria-pressed=true] { color: #17644d; border-color: #23876b; }
+.numbers { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 24px; }
+.numbers button { width: 40px; height: 40px; border: 1px solid #cedbd3; border-radius: 5px; background: #fff; font-size: 14px; color: #384c42; cursor: pointer; }
+.numbers button[data-shared=true] { background: #eaf3ed; border-color: #8cb4a2; }
+.numbers button[aria-current=true] { background: #17644d; border-color: #17644d; color: white; font-weight: 700; }
+.player { border-top: 1px solid #cad9d0; border-bottom: 1px solid #cad9d0; padding: 22px 0; }
+.clipHeading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; justify-content: space-between; margin-bottom: 18px; }
+.clipHeading h2 { margin: 0; font-size: 20px; font-weight: 700; }
+.clipHeading span { color: #697870; font-size: 13px; }
+.controls { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.mode { padding: 3px; background: #e5ebe7; border-radius: 6px; }
+.mode button { min-width: 54px; height: 32px; font-size: 13px; border-radius: 4px; color: #51645a; cursor: pointer; }
+.mode button[aria-pressed=true] { background: #fff; color: #1c624c; font-weight: 700; box-shadow: 0 1px 3px #20382919; }
+.speed { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #55665d; margin-left: auto; }
+.speed select { border: 1px solid #becdc3; border-radius: 5px; padding: 7px 9px; background: white; color: #263b30; }
+.download { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #bdcdc3; border-radius: 5px; background: white; font-size: 22px; color: #416351; text-decoration: none; }
+.player audio { width: 100%; display: block; height: 44px; }
+.transport { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.transport button { width: 42px; height: 38px; border: 1px solid #c9d4cc; border-radius: 5px; background: #fff; color: #375c48; font-size: 15px; cursor: pointer; }
+.transport .play { background: #17644d; color: white; border-color: #17644d; }
+.transport button:disabled { opacity: .35; cursor: default; }
+.time { color: #68776e; font-size: 12px; margin-left: auto; font-variant-numeric: tabular-nums; }
+.error { margin: 12px 0 0; color: #a73637; font-size: 13px; }
+.error button { text-decoration: underline; cursor: pointer; }
+.complete { margin: 12px 0 0; color: #27644b; font-size: 13px; }
+.question { padding-top: 26px; }
+.question h2 { margin: 0 0 15px; font-size: 17px; font-weight: 700; color: #456555; }
+.stem { font-size: 19px; line-height: 1.7; white-space: pre-line; margin: 0 0 20px; overflow-wrap: anywhere; }
+.options { padding: 0; margin: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.options li { display: flex; align-items: baseline; gap: 12px; font-size: 17px; line-height: 1.6; }
+.options li > span { width: 22px; flex-shrink: 0; color: #526b5d; }
+.options p { margin: 0; overflow-wrap: anywhere; }
+.original { margin-top: 24px; border-top: 1px solid #d5ddd7; padding-top: 16px; }
+.original summary { color: #637268; font-size: 13px; cursor: pointer; }
+.original img { display: block; width: 100%; height: auto; margin-top: 15px; }
+.page button:focus-visible, .page a:focus-visible, .page select:focus-visible, .original summary:focus-visible { outline: 3px solid #359889; outline-offset: 3px; }
+@media (max-width: 480px) {
+  .page { padding: 22px 16px 36px; }
+  .heading h1 { font-size: 24px; }
+  .numbers { gap: 6px; }
+  .numbers button { width: 36px; height: 36px; }
+  .time { flex-basis: 100%; margin: 3px 0 0; }
+  .stem { font-size: 18px; }
+  .options li { font-size: 16px; }
+}

@@ -333,7 +333,21 @@ function QuestionCard({
       progress.progress.drafts[question.id] ?? emptyHolidayAnswer(question),
     attempt: HolidayAttempt | undefined =
       progress.progress.attempts[question.id];
+  const locked = !!attempt || !!feedback;
+  const submitted = !!attempt;
+  const accept = progress.accept;
+  useEffect(() => {
+    if (!submitted) return;
+    let active = true;
+    void fetch(`/api/math/holiday-700/check?question_id=${encodeURIComponent(question.id)}`, { cache: "no-store" }).then(async response => {
+      const result = await response.json(); if (!response.ok) throw new Error(result.error || "解析读取失败");
+      if (active) { setFeedback(result); accept(result, result.student_answer); }
+    }).catch(reason => { if (active) setError(reason instanceof Error ? reason.message : "解析读取失败"); });
+    return () => { active = false; };
+  }, [question.id, submitted, accept]);
   async function request(kind: "check" | "hint", level?: number) {
+    if (!progress.ready) return;
+    if (kind === "check" && locked) return;
     if (kind === "check" && !completeHolidayAnswer(question, draft)) {
       setError("请先完成全部选项、空格和小题，再提交。");
       return;
@@ -362,7 +376,7 @@ function QuestionCard({
         });
       else {
         setFeedback(result);
-        progress.record(result, hints.length > 0);
+        progress.accept(result, result.student_answer);
       }
     } catch (reason) {
       setError(
@@ -373,6 +387,7 @@ function QuestionCard({
     }
   }
   function edit(value: HolidayStudentAnswer) {
+    if (locked) return;
     setFeedback(null);
     setError("");
     progress.draft(question.id, value);
@@ -431,10 +446,10 @@ function QuestionCard({
           value={draft}
           onChange={edit}
           name={question.id}
-          disabled={pending}
+          disabled={pending || locked || !progress.ready}
         />
-        <button className={s.submit} type="submit" disabled={pending}>
-          {pending ? "正在处理…" : "提交答案 · 查看判题与解析"}
+        <button className={s.submit} type="submit" disabled={pending || locked || !progress.ready}>
+          {pending ? "正在处理…" : locked ? "已提交 · 已锁定" : "提交答案 · 查看判题与解析"}
         </button>
       </form>
       <button

@@ -26,8 +26,8 @@ assert.deepEqual(stats.englishPracticeStats(progress), { answered: 1, correct: 0
 assert.equal(progress.attempts["CH01-Q001"].submissions, 1);
 assert.equal(progress.attempts["CH01-Q001"].wrongCount, 1);
 progress = applyEnglishPracticeFeedback(progress, feedback("CH01-B001", [result("CH01-Q001")]), nextAt);
-assert.deepEqual(stats.englishPracticeStats(progress), { answered: 1, correct: 1, accuracy: 100 });
-assert.equal(progress.attempts["CH01-Q001"].submissions, 2);
+assert.deepEqual(stats.englishPracticeStats(progress), { answered: 1, correct: 0, accuracy: 0 });
+assert.equal(progress.attempts["CH01-Q001"].submissions, 1);
 assert.equal(progress.attempts["CH01-Q001"].wrongCount, 1);
 assert.equal(JSON.stringify(progress).includes("PRIVATE_"), false);
 assert.equal(JSON.stringify(progress).includes("correctOption"), false);
@@ -41,7 +41,7 @@ assert.equal(applyEnglishPracticeFeedback(progress, feedback("CH01-B026", cloze.
 assert.equal(applyEnglishPracticeFeedback(progress, feedback("CH01-B069", cloze), nextAt), progress);
 assert.equal(applyEnglishPracticeFeedback(progress, feedback("CH01-B026", cloze), "bad date"), progress);
 progress = applyEnglishPracticeFeedback(progress, feedback("CH01-B026", cloze), nextAt);
-assert.deepEqual(stats.englishPracticeStats(progress), { answered: 6, correct: 4, accuracy: 66.7 });
+assert.deepEqual(stats.englishPracticeStats(progress), { answered: 6, correct: 3, accuracy: 50 });
 assert.deepEqual(stats.englishPracticeStats(progress, "CH02"), { answered: 0, correct: 0, accuracy: null });
 assert.equal(progress.location.chapter, "CH01");
 assert.equal(progress.location.page, 3);
@@ -52,11 +52,11 @@ assert.equal(applyEnglishPracticeFeedback(changedDraft, feedback("CH01-B026", cl
 // One-screen mode grades one numbered cloze blank without modifying its siblings or legacy attempts.
 const single = singleFeedback("CH01-B026", "CH01-Q029");
 const singleProgress = applyEnglishPracticeFeedback(progress, single, nextAt);
-assert.notEqual(singleProgress, progress);
-assert.deepEqual(stats.englishPracticeStats(singleProgress), { answered: 6, correct: 5, accuracy: 83.3 });
-assert.equal(singleProgress.attempts["CH01-Q029"].submissions, 2);
+assert.equal(singleProgress, progress);
+assert.deepEqual(stats.englishPracticeStats(singleProgress), { answered: 6, correct: 3, accuracy: 50 });
+assert.equal(singleProgress.attempts["CH01-Q029"].submissions, 1);
 assert.equal(singleProgress.attempts["CH01-Q029"].wrongCount, 1);
-assert.deepEqual(singleProgress.location, { chapter: "CH01", page: 3, id: "CH01-Q029" });
+assert.deepEqual(singleProgress.location, { chapter: "CH01", page: 3, id: "CH01-Q026" });
 for (const id of ["CH01-Q001", "CH01-Q026", "CH01-Q027", "CH01-Q028", "CH01-Q030"]) {
   assert.deepEqual(singleProgress.attempts[id], progress.attempts[id]);
 }
@@ -147,9 +147,9 @@ for (let chapter = 1; chapter <= 24; chapter++) {
       assert.equal(wrong.attempts[id].correct, false);
       individual = { ...wrong, drafts: { ...wrong.drafts, [id]: "B" } };
       const right = applyEnglishPracticeFeedback(individual, singleFeedback(blockId, id, true, "B"), nextAt);
-      assert.notEqual(right, individual);
-      assert.equal(right.attempts[id].correct, true);
-      assert.equal(right.attempts[id].submissions, 2);
+      assert.equal(right, individual);
+      assert.equal(right.attempts[id].correct, false);
+      assert.equal(right.attempts[id].submissions, 1);
       assert.equal(right.attempts[id].wrongCount, 1);
       assert.deepEqual(right.location, { chapter: prefix, page: Math.ceil(Number(id.slice(-3)) / 10), id });
       individual = right;
@@ -157,14 +157,14 @@ for (let chapter = 1; chapter <= 24; chapter++) {
     }
   }
   assert.equal(number, 101);
-  assert.deepEqual(stats.englishPracticeStats(individual, prefix), { answered: 100, correct: 100, accuracy: 100 });
+  assert.deepEqual(stats.englishPracticeStats(individual, prefix), { answered: 100, correct: 0, accuracy: 0 });
 }
 assert.equal(individualCount, 2400);
-assert.deepEqual(stats.englishPracticeStats(individual), { answered: 2400, correct: 2400, accuracy: 100 });
+assert.deepEqual(stats.englishPracticeStats(individual), { answered: 2400, correct: 0, accuracy: 0 });
 assert.equal(JSON.stringify(individual).includes("PRIVATE_"), false);
 assert.equal(JSON.stringify(individual).includes("correctOption"), false);
 assert.equal(JSON.stringify(individual).includes("explanation"), false);
 assert.deepEqual(normalizeEnglishPracticeProgress(individual), individual);
 // The old v1 scope / state still reads identically after enabling individual grading.
 assert.deepEqual(normalizeEnglishPracticeProgress(full), full);
-console.log("PASS: 2400 individual items with wrong-to-right retries / exact resume locations; 1632 legacy blocks; malformed single feedback atomicity; unique latest stats; no persisted answer key; unchanged v1 scope. No network or database writes.");
+console.log("PASS: 2400 individual items preserve wrong first answers after correct resubmissions; 1632 legacy blocks; malformed single feedback atomicity; first-submission stats; no persisted answer key; unchanged v1 scope. No network or database writes.");

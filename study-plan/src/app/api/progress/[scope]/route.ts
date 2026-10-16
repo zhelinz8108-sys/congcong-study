@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 import { ensureCloudProgressSchema } from "@/lib/cloud-progress-schema";
 import { STUDENT_PROFILE_COOKIE, parseStudentProfileCookie } from "@/lib/family-access";
+import { dedicatedProgressScope, mergeProgressWithoutChangingScores } from "@/lib/immutable-progress-policy";
+import { unsafeSubmissionOrigin } from "@/server/submission-request";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +39,7 @@ export async function GET(
   return NextResponse.json({
     payload: row?.payload ?? null,
     updatedAt: row?.updated_at ?? null,
-  });
+  }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function PUT(
@@ -45,8 +47,8 @@ export async function PUT(
   context: RouteContext<"/api/progress/[scope]">,
 ) {
   const { scope } = await context.params;
-  if (scope === "chinese:six:v1") {
-    return NextResponse.json({ error: "六上答题记录只能通过单次提交接口保存" }, { status: 403 });
+  if (dedicatedProgressScope(scope) || unsafeSubmissionOrigin(request)) {
+    return NextResponse.json({ error: "答题记录只能通过首次提交接口保存" }, { status: 403 });
   }
   if (!validScope(scope)) {
     return NextResponse.json({ error: "无效的进度类型" }, { status: 400 });
@@ -63,22 +65,30 @@ export async function PUT(
   } catch {
     return NextResponse.json({ error: "请求格式错误" }, { status: 400 });
   }
-  if (!("payload" in body)) {
+  if (!body || typeof body !== "object" || Array.isArray(body) || !("payload" in body)) {
     return NextResponse.json({ error: "缺少进度数据" }, { status: 400 });
   }
 
   await ensureCloudProgressSchema();
   const profile = getProfile(request);
-  const result = await pool.query(
-    `INSERT INTO student_cloud_state (student_id, scope, payload, updated_at)
-     VALUES ($1, $2, $3::jsonb, NOW())
-     ON CONFLICT (student_id, scope)
-     DO UPDATE SET payload = EXCLUDED.payload, updated_at = NOW()
-     RETURNING updated_at`,
-    [profile.id, scope, JSON.stringify(body.payload)],
-  );
-
-  return NextResponse.json({ ok: true, updatedAt: result.rows[0]?.updated_at ?? null });
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [JSON.stringify(["progress", profile.id, scope])]);
+    const prior = await client.query("SELECT payload FROM student_cloud_state WHERE student_id=$1 AND scope=$2 FOR UPDATE", [profile.id, scope]);
+    const payload = mergeProgressWithoutChangingScores(scope, prior.rows[0]?.payload ?? null, body.payload);
+    const result = await client.query(
+      `INSERT INTO student_cloud_state (student_id, scope, payload, updated_at)
+       VALUES ($1, $2, $3::jsonb, NOW())
+       ON CONFLICT (student_id, scope)
+       DO UPDATE SET payload = EXCLUDED.payload, updated_at = NOW()
+      RETURNING updated_at, payload`,
+      [profile.id, scope, JSON.stringify(payload)],
+    );
+    await client.query("COMMIT");
+    return NextResponse.json({ ok: true, payload: result.rows[0]?.payload ?? payload, updatedAt: result.rows[0]?.updated_at ?? null });
+  } catch (error) { await client.query("ROLLBACK"); throw error; }
+  finally { client.release(); }
 }
 
 export async function DELETE(
@@ -86,18 +96,9 @@ export async function DELETE(
   context: RouteContext<"/api/progress/[scope]">,
 ) {
   const { scope } = await context.params;
-  if (scope === "chinese:six:v1") {
-    return NextResponse.json({ error: "六上答题记录不能直接清除，请开始新的练习" }, { status: 403 });
-  }
   if (!validScope(scope)) {
     return NextResponse.json({ error: "无效的进度类型" }, { status: 400 });
   }
 
-  await ensureCloudProgressSchema();
-  const profile = getProfile(request);
-  await pool.query(
-    "DELETE FROM student_cloud_state WHERE student_id = $1 AND scope = $2",
-    [profile.id, scope],
-  );
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ error: "首次答题记录不能清除" }, { status: 403 });
 }

@@ -25,6 +25,6 @@ const TENSE_GRAMMAR_BANK: GrammarPracticeBank = {
   questionLabel: "文档原题",
 };
 
-export function GrammarTense500Practice() {
-  return <GrammarOriginal500Practice bank={TENSE_GRAMMAR_BANK} />;
+export function GrammarTense500Practice({ subjectId }: { subjectId: string }) {
+  return <GrammarOriginal500Practice bank={TENSE_GRAMMAR_BANK} subjectId={subjectId} />;
 }

@@ -166,33 +166,33 @@ export function useHolidayMathProgress(subjectId: string) {
       /* Empty local mirror. */
     }
     void (async () => {
-      let loaded = local,
+      let loaded = empty(),
         status: "saved" | "offline" = "offline";
       let restoreLocal = false;
       try {
         await queues.get(scope)?.catch(() => undefined);
         const response = await fetch(
-          `/api/progress/${encodeURIComponent(scope)}`,
+          `/api/math/holiday-700/progress?subject_id=${encodeURIComponent(subjectId)}`,
           { cache: "no-store", signal: AbortSignal.timeout(15000) },
         );
         if (response.ok) {
           const result = await response.json();
-          const remote = result.payload
-            ? normalizeHolidayProgress(result.payload)
-            : empty();
-          restoreLocal =
-            (Date.parse(local.updatedAt) || 0) >
-            (Date.parse(remote.updatedAt) || 0);
-          loaded = restoreLocal ? local : remote;
+          const remote = normalizeHolidayProgress(result);
+          // Server submissions always win over newer local clocks/cache edits.
+          loaded = { ...remote, drafts: { ...local.drafts, ...remote.drafts } };
+          for (const [id, draft] of Object.entries(local.drafts)) if (!remote.attempts[id]) loaded.drafts[id] = draft;
+          restoreLocal = Object.keys(local.drafts).some(id => !remote.attempts[id]);
           status = "saved";
         }
       } catch {
-        /* Keep existing local drafts when offline. */
+        // Local grades are not an authority. Keep input drafts, but do not
+        // enable submission until the student's server records are known.
+        loaded = { ...empty(), drafts: local.drafts };
       }
       if (!alive) return;
       current.current = loaded;
       setProgress(loaded);
-      setReady(true);
+      setReady(status === "saved");
       setSync(status);
       try {
         localStorage.setItem(key, JSON.stringify(loaded));
@@ -221,10 +221,10 @@ export function useHolidayMathProgress(subjectId: string) {
       window.removeEventListener("pagehide", flush);
       document.removeEventListener("visibilitychange", hidden);
     };
-  }, [key, scope, push]);
+  }, [key, scope, push, subjectId]);
   const draft = useCallback(
     (id: string, value: HolidayStudentAnswer) =>
-      mutate((p) => ({
+      mutate((p) => p.attempts[id] ? p : ({
         ...p,
         drafts: { ...p.drafts, [id]: value },
         location: { ...p.location, id },
@@ -235,6 +235,7 @@ export function useHolidayMathProgress(subjectId: string) {
     (result: HolidayFeedback, hinted: boolean) =>
       mutate((p) => {
         const old = p.attempts[result.question_id];
+        if (old) return p;
         return {
           ...p,
           attempts: {
@@ -243,8 +244,8 @@ export function useHolidayMathProgress(subjectId: string) {
               correct: result.correct,
               score: result.score,
               maxScore: result.maxScore,
-              submissions: (old?.submissions ?? 0) + 1,
-              wrongCount: (old?.wrongCount ?? 0) + (result.correct ? 0 : 1),
+              submissions: 1,
+              wrongCount: result.correct ? 0 : 1,
               hinted,
               updatedAt: new Date().toISOString(),
             },
@@ -258,12 +259,18 @@ export function useHolidayMathProgress(subjectId: string) {
       mutate((p) => ({ ...p, location })),
     [mutate],
   );
+  const accept = useCallback((result: HolidayFeedback, answer: HolidayStudentAnswer) => {
+    const next = { ...current.current, drafts: { ...current.current.drafts, [result.question_id]: answer }, attempts: { ...current.current.attempts, [result.question_id]: { correct: result.correct, score: result.score, maxScore: result.maxScore, submissions: 1, wrongCount: result.correct ? 0 : 1, hinted: false, updatedAt: new Date().toISOString() } } };
+    current.current = next; setProgress(next);
+    try { localStorage.setItem(key, JSON.stringify(next)); } catch { /* Read-only mirror. */ }
+  }, [key]);
   return {
     progress,
     ready,
     sync,
     draft,
     record,
+    accept,
     locate,
     retry: () => void push(current.current).catch(() => undefined),
   };

@@ -21,6 +21,21 @@ export type SixAttempt = {
 export type SixProgress = { attempts: Record<string, SixAttempt>; current: Record<string, string>; reviewed: string[] };
 export const emptySixProgress = (): SixProgress => ({ attempts: {}, current: {}, reviewed: [] });
 
+// Read-only projection: historical attempts remain untouched. For each question,
+// always show the earliest retained submission, including when an old restart
+// left the current attempt empty. This is not a recovery of overwritten history.
+export function sixFirstAttempt(state: SixProgress, itemId: string): SixAttempt | undefined {
+  const attempts = Object.values(state.attempts).filter(a => a.itemId === itemId)
+    .sort((a, b) => a.startedAt.localeCompare(b.startedAt) || a.id.localeCompare(b.id));
+  const selected = attempts.find(a => a.id === state.current[itemId]) ?? attempts[0];
+  if (!selected) return undefined;
+  const responses: Record<string, SixResponse> = {};
+  for (const attempt of attempts) for (const [id, response] of Object.entries(attempt.responses)) {
+    if (!responses[id] || response.submittedAt < responses[id].submittedAt) responses[id] = response;
+  }
+  return { ...selected, responses };
+}
+
 export const SIX_MODULES: { key: SixModule; name: string; sub: string; color: string }[] = [
   { key: "lessons", name: "课内复习", sub: "课文与语文园地", color: "#be123c" },
   { key: "sentences", name: "句子专项", sub: "13 类语言运用训练", color: "#0369a1" },
@@ -35,16 +50,16 @@ export function scoreSixResponse(response: SixResponse) {
 
 export function sixAttemptStats(attempt: SixAttempt, questionCount: number) {
   const responses = Object.values(attempt.responses);
-  const evaluated = responses.filter(r => r.correct !== null || r.selfScore !== undefined);
+  const evaluated = responses.filter(r => r.correct !== null);
   const score = evaluated.reduce((sum, r) => sum + scoreSixResponse(r), 0);
   return { answered: responses.length, evaluated: evaluated.length, score,
-    complete: evaluated.length === questionCount,
+    complete: responses.length === questionCount,
     mastery: evaluated.length ? Math.round(score / evaluated.length * 100) : 0 };
 }
 
 // The same immutable transition is used by the API and verified in the tests.
 export function recordSixResponse(attempt: SixAttempt, question: SixQuestion, value: string, answer: string, now: string): SixAttempt {
-  if (attempt.responses[question.id]) throw new Error("本题已提交，不能修改。重新练习请开始新的一次。");
+  if (attempt.responses[question.id]) throw new Error("本题已提交，答案已永久锁定。");
   if (!value.trim() || value.length > 8000) throw new Error("请填写答案（最多 8000 字）。");
   if (question.kind === "choice" && !question.options.some(o => o.value === value)) throw new Error("请选择一个有效选项。");
   return { ...attempt, responses: { ...attempt.responses, [question.id]: {

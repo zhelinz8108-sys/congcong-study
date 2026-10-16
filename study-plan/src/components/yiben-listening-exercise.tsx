@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useEnglishLocked } from "@/lib/use-english-locked";
 import {
   exerciseStorageKey,
   loadListeningProgress,
@@ -30,37 +31,6 @@ function formatTime(seconds: number) {
   return `${minutes}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 }
 
-function normalized(value: string) {
-  return value
-    .normalize("NFKC")
-    .toUpperCase()
-    .replace(/[\s.,，。;；:：、'"“”‘’()（）\-_]/g, "");
-}
-
-function acceptableAnswers(answer: string) {
-  const candidates = answer.split(/\s*(?:\||；|;|或)\s*/);
-  const expanded = candidates.flatMap((candidate) => {
-    if (!candidate.includes("/")) return [candidate];
-    const [left, right] = candidate.split("/", 2);
-    const suffix = right.match(/^\S+\s+(.+)$/)?.[1];
-    return suffix ? [candidate, `${left} ${suffix}`, right] : [candidate, left, right];
-  });
-  const values = expanded.map((value) => normalized(value)).filter(Boolean);
-  return values.length ? values : [normalized(answer)];
-}
-
-function isAnswerCorrect(item: ListeningAnswerItem, value: ListeningStoredAnswer | undefined) {
-  if (value === undefined) return false;
-  if (Array.isArray(value)) {
-    const expected = Array.from(item.answer.toUpperCase().matchAll(/[A-F]/g), (match) => match[0]);
-    return [...value].sort().join("") === [...new Set(expected)].sort().join("");
-  }
-  const entered = normalized(value);
-  return acceptableAnswers(item.answer).some(
-    (expected) => expected === entered || (entered.length >= 2 && expected.includes(entered)),
-  );
-}
-
 function hasAnswer(value: ListeningStoredAnswer | undefined) {
   return Array.isArray(value) ? value.length > 0 : Boolean(value?.trim());
 }
@@ -69,16 +39,20 @@ function AnswerControl({
   item,
   value,
   submitted,
+  disabled,
+  result,
   letters,
   onChange,
 }: {
   item: ListeningAnswerItem;
   value: ListeningStoredAnswer | undefined;
   submitted: boolean;
+  disabled?: boolean;
+  result?: { correct: boolean; answer: string };
   letters: string[];
   onChange: (value: ListeningStoredAnswer) => void;
 }) {
-  const correct = submitted && isAnswerCorrect(item, value);
+  const correct = submitted && result?.correct === true;
   const options = item.type === "true_false" ? ["T", "F"] : letters;
 
   return (
@@ -113,7 +87,7 @@ function AnswerControl({
                 key={option}
                 type="button"
                 data-testid={`${item.id}-${option}`}
-                disabled={submitted}
+                disabled={submitted || disabled}
                 onClick={() => onChange(option)}
                 className={`min-h-11 rounded-xl border text-sm font-black transition ${
                   selected
@@ -137,7 +111,7 @@ function AnswerControl({
                 key={option}
                 type="button"
                 data-testid={`${item.id}-${option}`}
-                disabled={submitted}
+                disabled={submitted || disabled}
                 onClick={() => {
                   const current = Array.isArray(value) ? value : [];
                   onChange(
@@ -161,7 +135,7 @@ function AnswerControl({
         <input
           value={typeof value === "string" ? value : ""}
           data-testid={item.id}
-          disabled={submitted}
+          disabled={submitted || disabled}
           onChange={(event) => onChange(event.target.value)}
           placeholder={item.type === "order" ? "输入顺序，如 3, 1, 4, 2" : "输入答案"}
           className="mt-3 min-h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-base font-semibold outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 disabled:text-neutral-700"
@@ -170,7 +144,7 @@ function AnswerControl({
 
       {submitted && (
         <p className="mt-3 border-t border-black/5 pt-3 text-sm leading-6 text-neutral-700">
-          标准答案：<span className="font-black text-neutral-950">{item.answer}</span>
+          标准答案：<span className="font-black text-neutral-950">{result?.answer ?? "未记录逐项反馈"}</span>
         </p>
       )}
     </div>
@@ -178,12 +152,10 @@ function AnswerControl({
 }
 
 export default function YibenListeningExercise({ subjectId, exercise, exerciseCount }: Props) {
+  const locked = useEnglishLocked("listening", subjectId);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [answers, setAnswers] = useState<Record<string, ListeningStoredAnswer>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [draftAnswers, setAnswers] = useState<Record<string, ListeningStoredAnswer>>({});
   const [loaded, setLoaded] = useState(false);
-  const [bestScore, setBestScore] = useState(0);
-  const [attempts, setAttempts] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -195,11 +167,14 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
     () => exercise.sections.flatMap((section) => section.items),
     [exercise.sections],
   );
+  const storageKey = exerciseStorageKey(exercise.number);
+  const serverRecord = locked.records[storageKey];
+  const answers = serverRecord && typeof serverRecord.response === "object" && !Array.isArray(serverRecord.response) ? serverRecord.response : draftAnswers;
+  const submitted = !!serverRecord;
+  const bestScore = serverRecord?.feedback.score ?? 0;
   const answeredCount = items.filter((item) => hasAnswer(answers[item.id])).length;
   const allAnswered = items.length > 0 && answeredCount === items.length;
-  const score = items.filter((item) => isAnswerCorrect(item, answers[item.id])).length;
-  const percent = items.length ? Math.round((score / items.length) * 100) : 0;
-  const storageKey = exerciseStorageKey(exercise.number);
+  const score = serverRecord?.feedback.score ?? 0;
   const activeSection =
     exercise.sections[activeSectionIndex] ?? exercise.sections[0];
 
@@ -219,9 +194,6 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
         const saved = store.exercises[storageKey] ?? readListeningProgress().exercises[storageKey];
         if (saved) {
           setAnswers(saved.answers ?? {});
-          setSubmitted(Boolean(saved.submitted));
-          setBestScore(saved.bestScore ?? 0);
-          setAttempts(saved.attempts ?? 0);
         }
         setLoaded(true);
       });
@@ -248,20 +220,17 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
     };
   }, []);
 
-  function persist(nextAnswers: Record<string, ListeningStoredAnswer>, nextSubmitted = submitted) {
-    if (!loaded) return;
+  function persist(nextAnswers: Record<string, ListeningStoredAnswer>) {
+    if (!loaded || !locked.ready || serverRecord) return;
     const store = readListeningProgress();
     const previous = store.exercises[storageKey];
-    const nextScore = nextSubmitted
-      ? items.filter((item) => isAnswerCorrect(item, nextAnswers[item.id])).length
-      : previous?.score ?? 0;
     const record: ListeningExerciseProgress = {
       answers: nextAnswers,
-      submitted: nextSubmitted,
-      score: nextScore,
+      submitted: previous?.submitted ?? false,
+      score: previous?.score ?? 0,
       total: items.length,
-      bestScore: Math.max(previous?.bestScore ?? 0, nextSubmitted ? nextScore : 0),
-      attempts: previous?.attempts ?? attempts,
+      bestScore: previous?.bestScore ?? 0,
+      attempts: previous?.attempts ?? 0,
       updatedAt: new Date().toISOString(),
     };
     store.exercises[storageKey] = record;
@@ -269,47 +238,22 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
   }
 
   function updateAnswer(itemId: string, value: ListeningStoredAnswer) {
+    if (submitted || serverRecord || locked.busy || !locked.ready) return;
     const next = { ...answers, [itemId]: value };
     setAnswers(next);
-    persist(next, false);
+    persist(next);
   }
 
-  function submitExercise() {
-    if (!allAnswered) return;
-    const nextAttempts = attempts + 1;
-    const nextBest = Math.max(bestScore, score);
-    setSubmitted(true);
-    setAttempts(nextAttempts);
-    setBestScore(nextBest);
-    const store = readListeningProgress();
-    store.exercises[storageKey] = {
-      answers,
-      submitted: true,
-      score,
-      total: items.length,
-      bestScore: nextBest,
-      attempts: nextAttempts,
-      updatedAt: new Date().toISOString(),
-    };
-    writeListeningProgress(store);
-    window.setTimeout(() => document.getElementById("exercise-result")?.scrollIntoView({ behavior: "smooth" }), 50);
+  async function submitExercise() {
+    if (!allAnswered || submitted || serverRecord || locked.busy || !locked.ready) return;
+    try {
+      await locked.submit(storageKey, answers);
+      window.setTimeout(() => document.getElementById("exercise-result")?.scrollIntoView({ behavior: "smooth" }), 50);
+    } catch { /* The hook keeps the answer locked only after a successful server commit. */ }
   }
 
   function restartExercise() {
-    setAnswers({});
-    setSubmitted(false);
-    const store = readListeningProgress();
-    store.exercises[storageKey] = {
-      answers: {},
-      submitted: false,
-      score: 0,
-      total: items.length,
-      bestScore,
-      attempts,
-      updatedAt: new Date().toISOString(),
-    };
-    writeListeningProgress(store);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    document.getElementById("exercise-result")?.scrollIntoView({ behavior: "smooth" });
   }
 
   function toggleAudio() {
@@ -328,6 +272,7 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
     <main className="min-h-screen bg-[#f6f8f7] px-3 py-5 text-neutral-950 sm:px-6 sm:py-8">
       <audio ref={audioRef} src={exercise.audioSrc} preload="metadata" />
       <div className="mx-auto max-w-7xl">
+        {locked.error && <p role="alert" className="mb-4 rounded-xl bg-rose-50 p-4 text-rose-700">{locked.error}</p>}
         <header className="flex flex-col gap-5 border-b border-neutral-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <Link
@@ -350,7 +295,7 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
             </span>
             {bestScore > 0 && (
               <span className="rounded-full bg-blue-50 px-4 py-2 text-blue-700 ring-1 ring-blue-200">
-                最佳 {Math.round((bestScore / items.length) * 100)}%
+                首次 {Math.round((bestScore / items.length) * 100)}%
               </span>
             )}
           </div>
@@ -519,6 +464,8 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
                       item={item}
                       value={answers[item.id]}
                       submitted={submitted}
+                      result={serverRecord?.feedback.itemResults?.[item.id]}
+                      disabled={locked.busy || !locked.ready}
                       letters={lettersForSection(activeSection.items)}
                       onChange={(value) => updateAnswer(item.id, value)}
                     />
@@ -556,11 +503,11 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
                   <button
                     type="button"
                     data-testid="submit-exercise"
-                    disabled={!allAnswered}
+                    disabled={!allAnswered || locked.busy || !locked.ready}
                     onClick={submitExercise}
                     className="min-h-12 w-full rounded-xl bg-emerald-600 px-5 font-black text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-neutral-500"
                   >
-                    {allAnswered ? "提交整篇" : `还需完成 ${items.length - answeredCount} 项`}
+                    {locked.busy ? "提交中…" : allAnswered ? "提交整篇 · 提交后锁定" : `还需完成 ${items.length - answeredCount} 项`}
                   </button>
                   <p className="mt-3 text-center text-xs leading-5 text-neutral-500">
                     提交前不显示答案；请先完成全部必答项。
@@ -573,7 +520,7 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
                     onClick={restartExercise}
                     className="min-h-12 rounded-xl border border-neutral-200 font-black text-neutral-700 hover:border-emerald-300 hover:bg-emerald-50"
                   >
-                    重新练习
+                    回看首次成绩
                   </button>
                   {exercise.number < exerciseCount ? (
                     <Link
@@ -606,11 +553,11 @@ export default function YibenListeningExercise({ subjectId, exercise, exerciseCo
                 <div>
                   <h2 className="text-3xl font-black">本篇完成</h2>
                   <p className="mt-2 text-sm text-emerald-900/70">
-                    第 {attempts} 次提交 · 历史最佳 {bestScore}/{items.length}
+                    首次作答已锁定 · {serverRecord?.feedback.score ?? bestScore}/{items.length}
                   </p>
                 </div>
                 <div className="flex items-end gap-3">
-                  <p className="text-5xl font-black text-emerald-700">{percent}%</p>
+                  <p className="text-5xl font-black text-emerald-700">{Math.round(score / items.length * 100)}%</p>
                   <p className="pb-1 text-sm font-bold text-emerald-900">{score}/{items.length} 正确</p>
                 </div>
               </div>

@@ -29,3 +29,11 @@ export function submitNationalDayMath(questionId: string, answers: unknown): Nat
     ...(question.pitfall ? { pitfall: question.pitfall } : {}),
   };
 }
+/** Read historic work without allowing an answer replacement or re-grading. */
+export function legacyNationalDayMathFeedback(questionId: string, answers: unknown, correct: boolean): NationalDayMathSubmissionResult {
+  const question = quizzes.get(questionId); if (!question) throw new Error("这道自测题不存在。");
+  let result;
+  try { result = gradeNationalDayMathFields(rubrics[questionId].fields, answers); }
+  catch { result = { fields: rubrics[questionId].fields.map(field => ({ id: field.id, label: field.label, correct: false, expected: field.accepted[0] })) }; }
+  return { questionId, correct, fields: result.fields, answer: question.answer, steps: question.steps, ...(question.pitfall ? { pitfall: question.pitfall } : {}) };
+}

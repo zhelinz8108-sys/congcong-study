@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import Link from "next/link";
 import {
   ENGLISH_PRACTICE_DIFFICULTY_LABELS,
@@ -135,7 +135,7 @@ function FocusQuestion({ block, question, progressState, navigate }: {
   progressState: PracticeProgressState;
   navigate: (number: number) => void;
 }) {
-  const { progress, draft, record, locate } = progressState;
+  const { progress, draft, locate, locked } = progressState;
   const [feedback, setFeedback] = useState<EnglishPracticeFeedback | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -145,7 +145,8 @@ function FocusQuestion({ block, question, progressState, navigate }: {
   const selected = progress.drafts[question.id];
   const latestSelection = useRef(selected);
   const attempt = progress.attempts[question.id];
-  const result = feedback?.results.find((item) => item.questionId === question.id && item.selected === selected);
+  const saved = locked.records[question.id];
+  const result = useMemo(() => saved && typeof saved.response === "string" ? { questionId: question.id, selected: saved.response as EnglishPracticeLetter, correct: saved.feedback.correct === true, correctOption: saved.feedback.answer.slice(0, 1) as EnglishPracticeLetter, correctText: saved.feedback.answer.slice(3), explanation: saved.feedback.explanation } : feedback?.results.find((item) => item.questionId === question.id && item.selected === selected), [saved, feedback, selected, question.id]);
   const submitted = !!result || (!!attempt && !!selected && attempt.selected === selected);
   const cloze = block.kind === "cloze";
   const blankIndex = block.questions.findIndex((item) => item.id === question.id) + 1;
@@ -178,7 +179,7 @@ function FocusQuestion({ block, question, progressState, navigate }: {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy) return;
+    if (busy || submitted || !locked.ready) return;
     if (!selected) {
       setError("请先选择一个选项，再提交答案。");
       form.current?.querySelector<HTMLInputElement>(`input[name="${question.id}"]`)?.focus();
@@ -192,21 +193,9 @@ function FocusQuestion({ block, question, progressState, navigate }: {
     setBusy(true);
     setError("");
     try {
-      const response = await fetch("/api/english/holiday-2400/check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ block_id: block.id, question_id: question.id, answers: { [question.id]: submittedLetter } }),
-        cache: "no-store",
-        signal: controller.signal,
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error ?? "暂时无法判题，请稍后重试。");
-      if (body.blockId !== block.id || body.questionId !== question.id || body.maxScore !== 1 || !Array.isArray(body.results) || body.results.length !== 1 || body.results[0].questionId !== question.id || body.results[0].selected !== submittedLetter)
-        throw new Error("判题结果不完整，请重试。");
-      if (request.current !== controller || controller.signal.aborted || latestSelection.current !== submittedLetter) return;
-      record(body as EnglishPracticeFeedback);
+      await locked.submit(question.id, submittedLetter);
+      if (request.current !== controller || controller.signal.aborted) return;
       locate({ chapter: question.id.slice(0, 4), page: Math.ceil(question.number / 10), id: question.id });
-      setFeedback(body as EnglishPracticeFeedback);
       // Submitting never navigates or scrolls the document. The student decides when to move on.
     } catch (cause) {
       if (request.current === controller)
@@ -221,6 +210,7 @@ function FocusQuestion({ block, question, progressState, navigate }: {
   }
 
   function change(letter: EnglishPracticeLetter) {
+    if (submitted || busy || !locked.ready) return;
     setFeedback(null);
     setError("");
     latestSelection.current = letter;
@@ -252,19 +242,19 @@ function FocusQuestion({ block, question, progressState, navigate }: {
               <ClozePassage block={block} activeQuestion={question.id} />
             </>
           ) : <QuestionStem text={block.stem ?? ""} />}
-          <QuestionOptions question={question} selected={selected} result={result} busy={busy} onChange={change} />
+          <QuestionOptions question={question} selected={selected} result={result} busy={busy || submitted} onChange={change} />
           {error && <p className={s.error} role="alert">{error}</p>}
           {result && <Result result={result} />}
         </div>
         <footer className={s.questionFooter}>
-          <p className={s.manualNote} role="status">{result ? "已判题，请看解析。准备好了，再手动点下一题。" : submitted ? "这题已有提交记录。可重新提交查看解析，也可手动继续。" : "先选答案，再点提交。不会自动跳题。"}</p>
+          <p className={s.manualNote} role="status">{submitted ? "首次答案已锁定，可回看解析，再手动点下一题。" : "先选答案，再点提交。提交后不能修改。"}</p>
           <div className={s.actions}>
             <button type="button" className={s.previous} data-nav="previous" disabled={busy || question.number === 1} onClick={() => navigate(question.number - 1)}>← 上一题</button>
-            <button className={s.submit} type="submit" disabled={busy}>{busy ? "判题中…" : result ? "重新提交" : "提交答案"}</button>
+            <button className={s.submit} type="submit" disabled={busy || submitted}>{busy ? "判题中…" : submitted ? "已提交 · 已锁定" : "提交答案"}</button>
             <button type="button" className={s.next} data-nav="next" disabled={busy || !submitted || question.number === 100} onClick={() => navigate(question.number + 1)}>下一题 →</button>
           </div>
           <div className={s.footerDetail}>
-            <span>{attempt ? `已提交 ${attempt.submissions} 次` : "答案与解析在提交后显示"}</span>
+            <span>{attempt ? "成绩按首次作答统计" : "答案与解析在提交后显示"}</span>
             <button type="button" className={s.skip} data-nav="skip" disabled={busy || question.number === 100} onClick={() => navigate(question.number + 1)}>先跳过这题 →</button>
           </div>
         </footer>
@@ -377,7 +367,7 @@ export default function NationalDayEnglishPractice({ subjectId, chapters, chapte
             <progress className={s.progress} max={total} value={stats.answered} aria-label="全部已答题数" />
           </> : <p className={s.note} role="status">正在读取学习进度…</p>}
           <SyncStatus sync={sync} retry={retry} />
-          <p className={s.note}>按每题最近一次提交统计，重复提交不增加已答题数。完形填空每个空计 1 题。</p>
+          <p className={s.note}>提交后永久锁定，成绩按首次作答统计。完形填空每个空计 1 题。</p>
           {ready && resumeChapter && <Link className={s.continue} href={`${baseUrl}/${resumeChapter.id}`} prefetch={false}>继续上次练习 · {pad(resumeChapter.number, 2)} {resumeChapter.title} · 第 {pad(savedQuestionNumber(progress, resumeChapter.id))} 题 →</Link>}
         </section>
         <section className={s.panel} aria-label="选择章节">

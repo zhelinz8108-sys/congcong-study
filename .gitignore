@@ -1,6 +1,7 @@
 # Dependencies and build output
 node_modules/
 .next/
+.next-*/
 out/
 build/
 dist/
@@ -12,6 +13,7 @@ coverage/
 !study-plan/.env.example
 *.pem
 .deploy-keys/
+output/english-six-deploy/
 
 # Logs and local runtime files
 *.log
@@ -64,5 +66,15 @@ study-plan/content/grade6-bank/import-audit.private.json
 study-plan/content/grade6-bank/private/
 
 # Chinese learning sources and reference answers are served behind family access.
+六上/英语/
+六上/语文/
+study-plan/content/toefl-listening/
+
+# Private question-authoring sources contain real answers and explanations.
+study-plan/scripts/english_six_bank_*.py
+study-plan/scripts/import-english-six.py
+study-plan/scripts/import-english-six-bank.py
+study-plan/scripts/review-english-six-quality.mjs
+study-plan/.next-six-qa/
 study-plan/content/chinese-six/*.private.json
 study-plan/content/chinese-six/pages/

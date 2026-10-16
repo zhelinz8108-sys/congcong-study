@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadCloudState, saveCloudState } from "@/lib/cloud-progress";
+import { useEnglishLocked } from "./use-english-locked";
 
 export type NationalDayAttempt = {
   values: string[];
@@ -33,6 +34,7 @@ function normalizeProgress(value: Partial<NationalDayProgress> | null): National
 }
 
 export function useNationalDayProgress(subjectId: string, sectionId?: string) {
+  const locked = useEnglishLocked("national-day", subjectId);
   const scope = `english:national-day:${subjectId}:v1`;
   const storageKey = `study-plan-${scope}`;
   const [progress, setProgress] = useState(EMPTY_PROGRESS);
@@ -63,12 +65,14 @@ export function useNationalDayProgress(subjectId: string, sectionId?: string) {
   }, [scope, storageKey]);
 
   const recordAttempt = useCallback((questionId: string, attempt: NationalDayAttempt, id?: string) => {
+    if (locked.records[questionId] || !locked.ready) return;
     update({ attempts: { ...current.current.attempts, [questionId]: attempt }, ...(id ? { lastSection: id } : {}) });
-  }, [update]);
+  }, [update, locked.records, locked.ready]);
 
   const saveDraft = useCallback((id: string, text: string) => {
+    if (locked.records[`writing:${id}`]) return;
     update({ drafts: { ...current.current.drafts, [id]: text }, lastSection: id });
-  }, [update]);
+  }, [update, locked.records]);
 
   const toggleWritingCheck = useCallback((id: string, label: string) => {
     const existing = current.current.writingChecks[id] ?? [];
@@ -80,5 +84,10 @@ export function useNationalDayProgress(subjectId: string, sectionId?: string) {
     update({ completedSections: [...new Set([...current.current.completedSections, id])], lastSection: id });
   }, [update]);
 
-  return { progress, ready, recordAttempt, saveDraft, toggleWritingCheck, completeSection };
+  const authoritative = { ...progress, attempts: {} as Record<string, NationalDayAttempt>, drafts: { ...progress.drafts } };
+  for (const [id, record] of Object.entries(locked.records)) {
+    if (id.startsWith("writing:")) { if (typeof record.response === "string") authoritative.drafts[id.slice(8)] = record.response; continue; }
+    if (Array.isArray(record.response)) authoritative.attempts[id] = { values: record.response, checked: true, correct: record.feedback.correct };
+  }
+  return { progress: authoritative, ready: ready && locked.ready, recordAttempt, saveDraft, toggleWritingCheck, completeSection, locked };
 }

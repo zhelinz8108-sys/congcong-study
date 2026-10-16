@@ -173,6 +173,7 @@ export async function GET(
 ) {
   const { setId, index } = await params;
   const kind = request.nextUrl.searchParams.get("kind") === "answer" ? "answer" : "source";
+  if (kind === "answer") return NextResponse.json({ error: "答案仅在对应题目首次提交后显示" }, { status: 403 });
   const file = await getLocalQuestionSourceFile(setId, kind, Number(index));
 
   if (!file) {
@@ -181,7 +182,7 @@ export async function GET(
 
   const ext = path.extname(file.filename).toLowerCase();
   if (ext === ".docx") {
-    const html = await renderDocxPreview(file.fullPath, file.filename, kind === "answer");
+    const html = await renderDocxPreview(file.fullPath, file.filename, false);
     return new NextResponse(html, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",

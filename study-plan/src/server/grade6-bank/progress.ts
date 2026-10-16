@@ -1,6 +1,9 @@
 import "server-only";
 import { pool } from "@/lib/db";
 import type { BankAnswers, BankProgress, BankResponse, BankFeedback } from "@/lib/grade6-bank-types";
+import { firstSubmission, firstSubmissions, withFirstSubmissionLock } from "@/server/first-submission";
+const FIRST_SCOPE = "math:grade6-bank:v1";
+type SavedAttempt = { feedback: BankFeedback; response: BankResponse };
 
 let schema: Promise<void> | null = null;
 const testMemory = () => process.env.NODE_ENV !== "production" && process.env.GRADE6_BANK_TEST_MEMORY === "1";
@@ -40,17 +43,40 @@ export class BankRevisionConflict extends Error {
     this.name = "BankRevisionConflict";
   }
 }
-export async function bankProgress(studentId: string, subjectId: string): Promise<BankProgress> {
-  if (testMemory()) return memory.get(`${studentId}:${subjectId}`) ?? blank();
+export class BankSubmittedConflict extends BankRevisionConflict {
+  constructor(response: BankResponse) {
+    super(response);
+    this.message = "这道题已提交并锁定，不能修改或重新提交。";
+    this.name = "BankSubmittedConflict";
+  }
+}
+export async function bankResponse(studentId: string, subjectId: string, questionId: string): Promise<BankResponse | undefined> {
+  if (testMemory()) {
+    for (const [key, progress] of memory) if (key.startsWith(`${studentId}:`)) { const r = progress.responses[questionId]; if (r?.submitted || (r?.submissions ?? 0) > 0) return r; }
+    return memory.get(`${studentId}:${subjectId}`)?.responses[questionId];
+  }
   await ensureSchema();
-  const result = await pool.query("SELECT question_id, answers, submitted, outcome, score, max_score, submissions, updated_at, revision FROM grade6_bank_responses WHERE student_id=$1 AND subject_id=$2 ORDER BY updated_at ASC", [studentId, subjectId]);
+  const locked = await firstSubmission<BankAnswers, SavedAttempt>(studentId, FIRST_SCOPE, questionId);
+  if (locked) return locked.feedback.response;
+  const result = await pool.query("SELECT answers, submitted, outcome, score, max_score, submissions, updated_at, revision FROM grade6_bank_responses WHERE student_id=$1 AND question_id=$3 AND (subject_id=$2 OR submitted=TRUE OR submissions>0) ORDER BY (submitted OR submissions>0) DESC, updated_at ASC LIMIT 1", [studentId, subjectId, questionId]);
+  return result.rows[0] ? responseFromRow(result.rows[0]) : undefined;
+}
+export async function bankProgress(studentId: string, subjectId: string): Promise<BankProgress> {
+  if (testMemory()) {
+    const progress = memory.get(`${studentId}:${subjectId}`) ?? blank();
+    const responses = { ...progress.responses };
+    for (const [key, p] of memory) if (key.startsWith(`${studentId}:`)) for (const [id, r] of Object.entries(p.responses)) if (r.submitted || r.submissions > 0) responses[id] = r;
+    return { ...progress, responses };
+  }
+  await ensureSchema();
+  const result = await pool.query("SELECT question_id, answers, submitted, outcome, score, max_score, submissions, updated_at, revision FROM grade6_bank_responses WHERE student_id=$1 AND (subject_id=$2 OR submitted=TRUE OR submissions>0) ORDER BY (submitted OR submissions>0) ASC, updated_at DESC", [studentId, subjectId]);
   const progress = blank();
   for (const row of result.rows) {
     const updatedAt = new Date(row.updated_at).toISOString();
     progress.responses[row.question_id] = responseFromRow(row);
-    progress.lastQuestionId = row.question_id;
-    progress.updatedAt = updatedAt;
+    if (!progress.updatedAt || updatedAt > progress.updatedAt) { progress.lastQuestionId = row.question_id; progress.updatedAt = updatedAt; }
   }
+  for (const [id, r] of Object.entries(await firstSubmissions<BankAnswers, SavedAttempt>(studentId, FIRST_SCOPE))) progress.responses[id] = r.feedback.response;
   return progress;
 }
 export async function saveBankResponse(studentId: string, subjectId: string, questionId: string, answers: BankAnswers, baseRevision: number, feedback?: BankFeedback): Promise<BankResponse> {
@@ -58,25 +84,41 @@ export async function saveBankResponse(studentId: string, subjectId: string, que
   const updatedAt = new Date().toISOString();
   if (testMemory()) {
     const key = `${studentId}:${subjectId}`, progress = memory.get(key) ?? blank(), old = progress.responses[questionId];
+    for (const [savedKey, p] of memory) if (savedKey.startsWith(`${studentId}:`)) {
+      const first = p.responses[questionId]; if (first?.submitted || (first?.submissions ?? 0) > 0) throw new BankSubmittedConflict(first!);
+    }
+    if (old?.submitted || (old?.submissions ?? 0) > 0) throw new BankSubmittedConflict(old!);
     if ((old?.revision ?? 0) !== baseRevision) throw new BankRevisionConflict(old ?? emptyResponse());
     const value: BankResponse = { answers, submitted: !!feedback, outcome: feedback?.outcome ?? null, score: feedback?.score ?? null, maxScore: feedback?.maxScore ?? 0, submissions: (old?.submissions ?? 0) + (feedback ? 1 : 0), updatedAt, revision: baseRevision + 1 };
     memory.set(key, { responses: { ...progress.responses, [questionId]: value }, lastQuestionId: questionId, updatedAt });
     return value;
   }
   await ensureSchema();
+  return withFirstSubmissionLock(studentId, FIRST_SCOPE, questionId, async (client, first) => {
+  if (first) throw new BankSubmittedConflict((first.feedback as SavedAttempt).response);
+  const legacy = await client.query("SELECT answers, submitted, outcome, score, max_score, submissions, updated_at, revision FROM grade6_bank_responses WHERE student_id=$1 AND question_id=$2 AND (submitted=TRUE OR submissions>0) ORDER BY updated_at ASC LIMIT 1", [studentId, questionId]);
+  if (legacy.rows[0]) throw new BankSubmittedConflict(responseFromRow(legacy.rows[0]));
   const parameters = [studentId, subjectId, questionId, JSON.stringify(answers), !!feedback, feedback?.outcome ?? null, feedback?.score ?? null, feedback?.maxScore ?? 0, feedback ? 1 : 0];
   const returning = "RETURNING answers, submitted, outcome, score, max_score, submissions, updated_at, revision";
   // The unique key serializes simultaneous first writes; subsequent writes use
   // one atomic revision-qualified UPDATE. A stale draft cannot demote a newer
   // submission, and a stale submission cannot replace a newer edit either.
   const result = baseRevision === 0
-    ? await pool.query(`INSERT INTO grade6_bank_responses (student_id, subject_id, question_id, answers, submitted, outcome, score, max_score, submissions, updated_at, revision)
+    ? await client.query(`INSERT INTO grade6_bank_responses (student_id, subject_id, question_id, answers, submitted, outcome, score, max_score, submissions, updated_at, revision)
         VALUES ($1,$2,$3,$4::jsonb,$5,$6,$7,$8,$9,NOW(),1)
         ON CONFLICT (student_id,subject_id,question_id) DO NOTHING ${returning}`, parameters)
-    : await pool.query(`UPDATE grade6_bank_responses SET answers=$4::jsonb, submitted=$5, outcome=$6,
+    : await client.query(`UPDATE grade6_bank_responses SET answers=$4::jsonb, submitted=$5, outcome=$6,
         score=$7, max_score=$8, submissions=submissions+$9, updated_at=NOW(), revision=revision+1
-        WHERE student_id=$1 AND subject_id=$2 AND question_id=$3 AND revision=$10 ${returning}`, [...parameters, baseRevision]);
-  if (result.rows[0]) return responseFromRow(result.rows[0]);
-  const current = await pool.query("SELECT answers, submitted, outcome, score, max_score, submissions, updated_at, revision FROM grade6_bank_responses WHERE student_id=$1 AND subject_id=$2 AND question_id=$3", [studentId, subjectId, questionId]);
-  throw new BankRevisionConflict(current.rows[0] ? responseFromRow(current.rows[0]) : emptyResponse());
+        WHERE student_id=$1 AND subject_id=$2 AND question_id=$3 AND revision=$10
+          AND submitted=FALSE AND submissions=0 ${returning}`, [...parameters, baseRevision]);
+  if (result.rows[0]) {
+    const response = responseFromRow(result.rows[0]);
+    if (feedback) await client.query("INSERT INTO student_first_submissions (student_id,scope,question_id,answer,feedback,submitted_at) VALUES ($1,$2,$3,$4::jsonb,$5::jsonb,$6::timestamptz)", [studentId, FIRST_SCOPE, questionId, JSON.stringify(answers), JSON.stringify({ feedback, response }), response.updatedAt]);
+    return response;
+  }
+  const current = await client.query("SELECT answers, submitted, outcome, score, max_score, submissions, updated_at, revision FROM grade6_bank_responses WHERE student_id=$1 AND subject_id=$2 AND question_id=$3", [studentId, subjectId, questionId]);
+  const existing = current.rows[0] ? responseFromRow(current.rows[0]) : emptyResponse();
+  if (existing.submitted || existing.submissions > 0) throw new BankSubmittedConflict(existing);
+  throw new BankRevisionConflict(existing);
+  });
 }

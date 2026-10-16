@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { holidayQuestion } from "@/server/holiday-math-700/public-bank";
-import { checkHolidayAnswer } from "@/server/holiday-math-700/service";
+import { readHolidayFeedback, submitHolidayOnce } from "@/server/math-first-attempts";
+import { bankProfile } from "@/server/grade6-bank/http";
 import {
   holidayAccess,
   holidayBody,
@@ -26,8 +27,9 @@ export async function POST(request: NextRequest) {
         { error: "题目不存在" },
         { status: 404, headers: holidayHeaders },
       );
+    const saved = await submitHolidayOnce(bankProfile(request).id, body.question_id, body.student_answer);
     return NextResponse.json(
-      checkHolidayAnswer(body.question_id, body.student_answer),
+      { ...saved.feedback, student_answer: saved.answer, locked: true },
       { headers: holidayHeaders },
     );
   } catch (error) {
@@ -41,4 +43,14 @@ export async function POST(request: NextRequest) {
       { status: safe ? 400 : 503, headers: holidayHeaders },
     );
   }
+}
+export async function GET(request: NextRequest) {
+  const access = holidayAccess(request); if (access) return access;
+  const id = request.nextUrl.searchParams.get("question_id") ?? "";
+  if (!holidayQuestion(id)) return NextResponse.json({ error: "题目不存在" }, { status: 404, headers: holidayHeaders });
+  try {
+    const saved = await readHolidayFeedback(bankProfile(request).id, id);
+    if (!saved) return NextResponse.json({ error: "请先提交本题" }, { status: 403, headers: holidayHeaders });
+    return NextResponse.json({ ...saved.feedback, student_answer: saved.answer, locked: true }, { headers: holidayHeaders });
+  } catch { return NextResponse.json({ error: "判题服务暂不可用" }, { status: 503, headers: holidayHeaders }); }
 }

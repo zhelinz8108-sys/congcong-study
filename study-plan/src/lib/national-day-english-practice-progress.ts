@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useEnglishLocked } from "./use-english-locked";
 import type { EnglishPracticeFeedback, EnglishPracticeLetter } from "./national-day-english-practice-types";
 import {
   emptyEnglishPracticeProgress,
@@ -22,6 +23,7 @@ export type EnglishPracticeSync = "loading" | "synced" | "saving" | "offline";
 const queues = new Map<string, Promise<void>>();
 
 export function useEnglishPracticeProgress(subjectId: string) {
+  const locked = useEnglishLocked("holiday2400", subjectId);
   const scope = englishPracticeScope(subjectId);
   const storageKey = `study-plan-${scope}`;
   const [progress, setProgress] = useState<EnglishPracticeProgress>(emptyEnglishPracticeProgress);
@@ -155,12 +157,12 @@ export function useEnglishPracticeProgress(subjectId: string) {
   }, [mirror, push]);
 
   const draft = useCallback((id: string, letter: EnglishPracticeLetter) => {
-    if (!validEnglishPracticeId(id) || !validEnglishPracticeLetter(letter)) return;
+    if (!validEnglishPracticeId(id) || !validEnglishPracticeLetter(letter) || locked.records[id] || !locked.ready) return;
     mutate((value) => value.drafts[id] === letter ? value : {
       ...value, drafts: { ...value.drafts, [id]: letter },
       location: { chapter: id.slice(0, 4), page: Math.ceil(Number(id.slice(-3)) / 10), id },
     });
-  }, [mutate]);
+  }, [mutate, locked.records, locked.ready]);
   const record = useCallback((feedback: EnglishPracticeFeedback) => {
     mutate((value, at) => recordEnglishPracticeFeedback(value, feedback, at));
   }, [mutate]);
@@ -174,5 +176,11 @@ export function useEnglishPracticeProgress(subjectId: string) {
     if (timer.current) { clearTimeout(timer.current); timer.current = null; }
     void refresh();
   }, [refresh]);
-  return { progress, ready, sync, draft, record, locate, retry };
+  const authoritative = { ...progress, attempts: {} as EnglishPracticeProgress["attempts"], drafts: { ...progress.drafts } };
+  for (const [id, saved] of Object.entries(locked.records)) {
+    if (!validEnglishPracticeId(id) || !validEnglishPracticeLetter(saved.response) || typeof saved.feedback.correct !== "boolean") continue;
+    authoritative.drafts[id] = saved.response;
+    authoritative.attempts[id] = { selected: saved.response, correct: saved.feedback.correct, submissions: 1, wrongCount: saved.feedback.correct ? 0 : 1, at: saved.submittedAt };
+  }
+  return { progress: authoritative, ready: ready && locked.ready, sync: locked.error ? "offline" as const : sync, draft, record, locate, retry, locked };
 }

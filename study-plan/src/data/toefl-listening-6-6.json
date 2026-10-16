@@ -1,0 +1,937 @@
+{
+  "version": 1,
+  "title": "6.6",
+  "clips": [
+    {
+      "id": 1,
+      "module": 1,
+      "first": 1,
+      "last": 1,
+      "type": "response",
+      "duration": 3.349333,
+      "offset": 0,
+      "title": "摄影比赛"
+    },
+    {
+      "id": 2,
+      "module": 1,
+      "first": 2,
+      "last": 2,
+      "type": "response",
+      "duration": 2.154667,
+      "offset": 3.349333,
+      "title": "会议改期"
+    },
+    {
+      "id": 3,
+      "module": 1,
+      "first": 3,
+      "last": 3,
+      "type": "response",
+      "duration": 2.666667,
+      "offset": 5.504,
+      "title": "线上会议时间"
+    },
+    {
+      "id": 4,
+      "module": 1,
+      "first": 4,
+      "last": 4,
+      "type": "response",
+      "duration": 2.538667,
+      "offset": 8.170667,
+      "title": "音乐节"
+    },
+    {
+      "id": 5,
+      "module": 1,
+      "first": 5,
+      "last": 5,
+      "type": "response",
+      "duration": 2.56,
+      "offset": 10.709334,
+      "title": "参加讨论"
+    },
+    {
+      "id": 6,
+      "module": 1,
+      "first": 6,
+      "last": 6,
+      "type": "response",
+      "duration": 3.328,
+      "offset": 13.269334,
+      "title": "研究资助申请"
+    },
+    {
+      "id": 7,
+      "module": 1,
+      "first": 7,
+      "last": 7,
+      "type": "response",
+      "duration": 2.005333,
+      "offset": 16.597334,
+      "title": "艺术展"
+    },
+    {
+      "id": 8,
+      "module": 1,
+      "first": 8,
+      "last": 8,
+      "type": "response",
+      "duration": 2.368,
+      "offset": 18.602667,
+      "title": "健身课"
+    },
+    {
+      "id": 9,
+      "module": 1,
+      "first": 9,
+      "last": 9,
+      "type": "response",
+      "duration": 2.112,
+      "offset": 20.970667,
+      "title": "数学作业"
+    },
+    {
+      "id": 10,
+      "module": 1,
+      "first": 10,
+      "last": 10,
+      "type": "response",
+      "duration": 2.709333,
+      "offset": 23.082667,
+      "title": "舞蹈教室"
+    },
+    {
+      "id": 11,
+      "module": 1,
+      "first": 11,
+      "last": 11,
+      "type": "response",
+      "duration": 3.669333,
+      "offset": 25.792,
+      "title": "图书馆网络"
+    },
+    {
+      "id": 12,
+      "module": 1,
+      "first": 12,
+      "last": 12,
+      "type": "response",
+      "duration": 2.752,
+      "offset": 29.461333000000003,
+      "title": "发现音乐"
+    },
+    {
+      "id": 13,
+      "module": 1,
+      "first": 13,
+      "last": 14,
+      "type": "conversation",
+      "duration": 34.858667,
+      "offset": 32.213333000000006,
+      "title": "薯片工厂兼职"
+    },
+    {
+      "id": 14,
+      "module": 1,
+      "first": 15,
+      "last": 16,
+      "type": "conversation",
+      "duration": 26.922667,
+      "offset": 67.072,
+      "title": "天文社准备"
+    },
+    {
+      "id": 15,
+      "module": 1,
+      "first": 17,
+      "last": 18,
+      "type": "conversation",
+      "duration": 29.674667,
+      "offset": 93.994667,
+      "title": "系统升级"
+    },
+    {
+      "id": 16,
+      "module": 1,
+      "first": 19,
+      "last": 20,
+      "type": "announcement",
+      "duration": 40.96,
+      "offset": 123.669334,
+      "title": "宿舍厨房"
+    },
+    {
+      "id": 17,
+      "module": 1,
+      "first": 21,
+      "last": 22,
+      "type": "announcement",
+      "duration": 41.685333,
+      "offset": 164.629334,
+      "title": "停车与活动场地"
+    },
+    {
+      "id": 18,
+      "module": 1,
+      "first": 23,
+      "last": 24,
+      "type": "announcement",
+      "duration": 31.125333,
+      "offset": 206.314667,
+      "title": "写作中心"
+    },
+    {
+      "id": 19,
+      "module": 1,
+      "first": 25,
+      "last": 28,
+      "type": "lecture",
+      "duration": 119.893333,
+      "offset": 237.44,
+      "title": "彩色玻璃"
+    },
+    {
+      "id": 20,
+      "module": 1,
+      "first": 29,
+      "last": 32,
+      "type": "lecture",
+      "duration": 114.368,
+      "offset": 357.333333,
+      "title": "故事骰子"
+    },
+    {
+      "id": 21,
+      "module": 2,
+      "first": 1,
+      "last": 1,
+      "type": "response",
+      "duration": 2.346667,
+      "offset": 471.701333,
+      "title": "研讨会报名"
+    },
+    {
+      "id": 22,
+      "module": 2,
+      "first": 2,
+      "last": 2,
+      "type": "response",
+      "duration": 2.965333,
+      "offset": 474.048,
+      "title": "校园花园"
+    },
+    {
+      "id": 23,
+      "module": 2,
+      "first": 3,
+      "last": 3,
+      "type": "response",
+      "duration": 2.090667,
+      "offset": 477.013333,
+      "title": "食堂关闭"
+    },
+    {
+      "id": 24,
+      "module": 2,
+      "first": 4,
+      "last": 5,
+      "type": "conversation",
+      "duration": 38.805333,
+      "offset": 479.104,
+      "title": "甜点与面包店"
+    },
+    {
+      "id": 25,
+      "module": 2,
+      "first": 6,
+      "last": 7,
+      "type": "conversation",
+      "duration": 32.490667,
+      "offset": 517.909333,
+      "title": "学校网站"
+    },
+    {
+      "id": 26,
+      "module": 2,
+      "first": 8,
+      "last": 11,
+      "type": "lecture",
+      "duration": 83.648,
+      "offset": 550.4,
+      "title": "机会成本"
+    },
+    {
+      "id": 27,
+      "module": 2,
+      "first": 12,
+      "last": 15,
+      "type": "lecture",
+      "duration": 87.488,
+      "offset": 634.048,
+      "title": "认知失调"
+    }
+  ],
+  "questions": [
+    {
+      "id": "m1-q01",
+      "module": 1,
+      "number": 1,
+      "clip": 1,
+      "type": "response",
+      "stem": "When is the campus photography contest?",
+      "options": {
+        "A": "Contests are competitive.",
+        "B": "I need to check the date.",
+        "C": "Photography is an art.",
+        "D": "It's held at the museum."
+      }
+    },
+    {
+      "id": "m1-q02",
+      "module": 1,
+      "number": 2,
+      "clip": 2,
+      "type": "response",
+      "stem": "I think we should reschedule our meeting.",
+      "options": {
+        "A": "Yesterday's class was interesting.",
+        "B": "Tomorrow works for me.",
+        "C": "I will be in the library.",
+        "D": "I can't find my keys."
+      }
+    },
+    {
+      "id": "m1-q03",
+      "module": 1,
+      "number": 3,
+      "clip": 3,
+      "type": "response",
+      "stem": "What time is the next online sales meeting?",
+      "options": {
+        "A": "It was a very informative session.",
+        "B": "It'll start promptly at noon.",
+        "C": "She was late for class.",
+        "D": "Yes, I'm on the student business council."
+      }
+    },
+    {
+      "id": "m1-q04",
+      "module": 1,
+      "number": 4,
+      "clip": 4,
+      "type": "response",
+      "stem": "The music festival last weekend was great.",
+      "options": {
+        "A": "Check if you're on the list of attendees.",
+        "B": "I will be on vacation at that time.",
+        "C": "Ask Pete for some help.",
+        "D": "Yes, it featured the most talented students at the university."
+      }
+    },
+    {
+      "id": "m1-q05",
+      "module": 1,
+      "number": 5,
+      "clip": 5,
+      "type": "response",
+      "stem": "Are you free to join the discussion?",
+      "options": {
+        "A": "They offered free health checks.",
+        "B": "Yes, I can join.",
+        "C": "I didn't know that about you.",
+        "D": "Did you like his new shirt?"
+      }
+    },
+    {
+      "id": "m1-q06",
+      "module": 1,
+      "number": 6,
+      "clip": 6,
+      "type": "response",
+      "stem": "When is the next research grant application due?",
+      "options": {
+        "A": "I'll have to check the deadline.",
+        "B": "I enjoy cooking with him.",
+        "C": "The researcher arrived at 9 a.m.",
+        "D": "We went last Thursday."
+      }
+    },
+    {
+      "id": "m1-q07",
+      "module": 1,
+      "number": 7,
+      "clip": 7,
+      "type": "response",
+      "stem": "What did you think of the art exhibit?",
+      "options": {
+        "A": "Sure, let's look at some sculpture.",
+        "B": "I wish there were more pieces to see.",
+        "C": "It's the last week of the art exhibit.",
+        "D": "It will feature mostly French paintings."
+      }
+    },
+    {
+      "id": "m1-q08",
+      "module": 1,
+      "number": 8,
+      "clip": 8,
+      "type": "response",
+      "stem": "I didn't see you at the free fitness class.",
+      "options": {
+        "A": "I didn't save enough money.",
+        "B": "Yes, I studied biology in college.",
+        "C": "My final class ran late.",
+        "D": "Fitness classes are beneficial."
+      }
+    },
+    {
+      "id": "m1-q09",
+      "module": 1,
+      "number": 9,
+      "clip": 9,
+      "type": "response",
+      "stem": "Why haven't you finished your math homework?",
+      "options": {
+        "A": "I need help.",
+        "B": "Please clean your desk.",
+        "C": "No, I have other plans.",
+        "D": "Yes, I got the invite."
+      }
+    },
+    {
+      "id": "m1-q10",
+      "module": 1,
+      "number": 10,
+      "clip": 10,
+      "type": "response",
+      "stem": "What time does the dance studio open?",
+      "options": {
+        "A": "His art class is very popular.",
+        "B": "Have you tried calling them to find out?",
+        "C": "My sister took ballet there.",
+        "D": "Do they offer private lessons?"
+      }
+    },
+    {
+      "id": "m1-q11",
+      "module": 1,
+      "number": 11,
+      "clip": 11,
+      "type": "response",
+      "stem": "The library offers free wireless Internet access.",
+      "options": {
+        "A": "That's great for studying.",
+        "B": "No, I've not read that one.",
+        "C": "I had to change my school password yesterday.",
+        "D": "Do you have overdue books too?"
+      }
+    },
+    {
+      "id": "m1-q12",
+      "module": 1,
+      "number": 12,
+      "clip": 12,
+      "type": "response",
+      "stem": "How did you discover all this great music?",
+      "options": {
+        "A": "My friend runs the university radio station.",
+        "B": "I'm not sure I'll have enough time.",
+        "C": "There are many online games to choose from.",
+        "D": "I have a grasp of the basic idea."
+      }
+    },
+    {
+      "id": "m1-q13",
+      "module": 1,
+      "number": 13,
+      "clip": 13,
+      "type": "conversation",
+      "stem": "What are the speakers mainly discussing?",
+      "options": {
+        "A": "Balancing time between a job and classes",
+        "B": "A new way of making potato chips",
+        "C": "A box design that interests the man",
+        "D": "The man's work at a factory"
+      }
+    },
+    {
+      "id": "m1-q14",
+      "module": 1,
+      "number": 14,
+      "clip": 13,
+      "type": "conversation",
+      "stem": "What problem does the man describe?",
+      "options": {
+        "A": "He arrived late to work.",
+        "B": "A machine was not working properly.",
+        "C": "The potato chips did not taste good.",
+        "D": "Some shipping boxes were missing."
+      }
+    },
+    {
+      "id": "m1-q15",
+      "module": 1,
+      "number": 15,
+      "clip": 14,
+      "type": "conversation",
+      "stem": "What has the man been doing?",
+      "options": {
+        "A": "Tending to the student garden",
+        "B": "Putting up posters in the student center",
+        "C": "Preparing for a club meeting",
+        "D": "Putting groceries away"
+      }
+    },
+    {
+      "id": "m1-q16",
+      "module": 1,
+      "number": 16,
+      "clip": 14,
+      "type": "conversation",
+      "stem": "What will the man most likely do next?",
+      "options": {
+        "A": "Help the woman prepare some snacks",
+        "B": "Call the student center",
+        "C": "Contact some club members",
+        "D": "Go shopping for food"
+      }
+    },
+    {
+      "id": "m1-q17",
+      "module": 1,
+      "number": 17,
+      "clip": 15,
+      "type": "conversation",
+      "stem": "When will the system upgrade take place?",
+      "options": {
+        "A": "Over the weekend",
+        "B": "During lunch",
+        "C": "On Friday",
+        "D": "The next morning"
+      }
+    },
+    {
+      "id": "m1-q18",
+      "module": 1,
+      "number": 18,
+      "clip": 15,
+      "type": "conversation",
+      "stem": "What did IT recommend that people do?",
+      "options": {
+        "A": "Update their passwords",
+        "B": "Back up their files",
+        "C": "Install a software upgrade",
+        "D": "Contact the help desk"
+      }
+    },
+    {
+      "id": "m1-q19",
+      "module": 1,
+      "number": 19,
+      "clip": 16,
+      "type": "announcement",
+      "stem": "What will happen in the kitchen starting this week?",
+      "options": {
+        "A": "Food that is past its expiration date will be removed.",
+        "B": "Sponges and dish soap will be provided for residents.",
+        "C": "Dirty dishes in the sink will be thrown away.",
+        "D": "The custodial staff will clean the refrigerator."
+      }
+    },
+    {
+      "id": "m1-q20",
+      "module": 1,
+      "number": 20,
+      "clip": 16,
+      "type": "announcement",
+      "stem": "What does the speaker suggest about unlabeled items in the kitchen?",
+      "options": {
+        "A": "They are considered the speaker's property.",
+        "B": "They are replenished on a daily basis.",
+        "C": "Everyone shares responsibility for them.",
+        "D": "Everyone is welcome to use them."
+      }
+    },
+    {
+      "id": "m1-q21",
+      "module": 1,
+      "number": 21,
+      "clip": 17,
+      "type": "announcement",
+      "stem": "Why does the speaker ask students if they have a car on campus?",
+      "options": {
+        "A": "To warn against breaking certain rules",
+        "B": "To announce the opening of additional parking spaces",
+        "C": "To encourage the use of alternative forms of transportation",
+        "D": "To request transportation to an event"
+      }
+    },
+    {
+      "id": "m1-q22",
+      "module": 1,
+      "number": 22,
+      "clip": 17,
+      "type": "announcement",
+      "stem": "Why should students call the student activities office?",
+      "options": {
+        "A": "To ask about parking regulations",
+        "B": "To register a student club or organization",
+        "C": "To provide comments about a new policy",
+        "D": "To reserve an outdoor space for a group event"
+      }
+    },
+    {
+      "id": "m1-q23",
+      "module": 1,
+      "number": 23,
+      "clip": 18,
+      "type": "announcement",
+      "stem": "What is the main purpose of the information session?",
+      "options": {
+        "A": "To survey graduating students about their experiences",
+        "B": "To improve awareness of a campus service",
+        "C": "To invite writing tutors on stage",
+        "D": "To outline the process for reserving the auditorium"
+      }
+    },
+    {
+      "id": "m1-q24",
+      "module": 1,
+      "number": 24,
+      "clip": 18,
+      "type": "announcement",
+      "stem": "What does the speaker imply about the writing center's current location?",
+      "options": {
+        "A": "It is too small for the center's needs.",
+        "B": "It is housed within the library.",
+        "C": "It is difficult to locate.",
+        "D": "It opens at seven p.m."
+      }
+    },
+    {
+      "id": "m1-q25",
+      "module": 1,
+      "number": 25,
+      "clip": 19,
+      "type": "lecture",
+      "stem": "Why does the speaker mention churches?",
+      "options": {
+        "A": "To explain how a traditional technique of making stained glass was developed",
+        "B": "To emphasize the religious significance of stained glass",
+        "C": "To illustrate an effect of stained glass on large spaces",
+        "D": "To point out a use of stained glass that he expects listeners to be familiar with"
+      }
+    },
+    {
+      "id": "m1-q26",
+      "module": 1,
+      "number": 26,
+      "clip": 19,
+      "type": "lecture",
+      "stem": "Why does the speaker mention the Arts and Crafts movement?",
+      "options": {
+        "A": "To identify the inspiration for Louis Comfort Tiffany's stained glass designs",
+        "B": "To emphasize the natural beauty of stained glass",
+        "C": "To describe the origins of the copper foil technique for making stained glass",
+        "D": "To explain how stained glass became popular in homes"
+      }
+    },
+    {
+      "id": "m1-q27",
+      "module": 1,
+      "number": 27,
+      "clip": 19,
+      "type": "lecture",
+      "stem": "According to the professor, what was a disadvantage of using stained glass in homes?",
+      "options": {
+        "A": "It required frequent maintenance.",
+        "B": "It was expensive to produce.",
+        "C": "It resulted in a loss of heat.",
+        "D": "It could break easily during transportation."
+      }
+    },
+    {
+      "id": "m1-q28",
+      "module": 1,
+      "number": 28,
+      "clip": 19,
+      "type": "lecture",
+      "stem": "What does the speaker indicate about the methods of creating stained glass?",
+      "options": {
+        "A": "They have changed greatly over time.",
+        "B": "They tend to yield consistent results.",
+        "C": "They depend on the desired color.",
+        "D": "They have often included both lead and copper."
+      }
+    },
+    {
+      "id": "m1-q29",
+      "module": 1,
+      "number": 29,
+      "clip": 20,
+      "type": "lecture",
+      "stem": "What does the speaker mainly discuss?",
+      "options": {
+        "A": "A textbook with many pictures",
+        "B": "A guide to understanding common symbols",
+        "C": "A tool for generating ideas",
+        "D": "A collection of mystery stories"
+      }
+    },
+    {
+      "id": "m1-q30",
+      "module": 1,
+      "number": 30,
+      "clip": 20,
+      "type": "lecture",
+      "stem": "What is different about the dice that the speaker discusses compared to traditional dice?",
+      "options": {
+        "A": "They have more sides than traditional dice.",
+        "B": "They have pictures instead of numbers.",
+        "C": "They are made of glass instead of plastic.",
+        "D": "They can be adapted to individual needs."
+      }
+    },
+    {
+      "id": "m1-q31",
+      "module": 1,
+      "number": 31,
+      "clip": 20,
+      "type": "lecture",
+      "stem": "The speaker considers the story about the dragon at the imagined social gathering to be",
+      "options": {
+        "A": "sad",
+        "B": "traditional",
+        "C": "scary",
+        "D": "funny"
+      }
+    },
+    {
+      "id": "m1-q32",
+      "module": 1,
+      "number": 32,
+      "clip": 20,
+      "type": "lecture",
+      "stem": "What will the class discuss next?",
+      "options": {
+        "A": "An assignment for the end of the semester",
+        "B": "A social gathering that the students will attend",
+        "C": "A famous author of short stories",
+        "D": "A story that a student wrote"
+      }
+    },
+    {
+      "id": "m2-q01",
+      "module": 2,
+      "number": 1,
+      "clip": 21,
+      "type": "response",
+      "stem": "How can I register for this seminar?",
+      "options": {
+        "A": "It would be wise to check the school website for details.",
+        "B": "Be sure to renew your vehicle registration by tomorrow.",
+        "C": "I received a link to the new gaming website in my email.",
+        "D": "All of the cash in the register has been moved to the safe."
+      }
+    },
+    {
+      "id": "m2-q02",
+      "module": 2,
+      "number": 2,
+      "clip": 22,
+      "type": "response",
+      "stem": "The campus garden includes a wildlife habitat.",
+      "options": {
+        "A": "Sure, we can do that.",
+        "B": "I've always wanted to take up gardening.",
+        "C": "I think they live in the forest.",
+        "D": "That's wonderful for local birds."
+      }
+    },
+    {
+      "id": "m2-q03",
+      "module": 2,
+      "number": 3,
+      "clip": 23,
+      "type": "response",
+      "stem": "Why is the cafeteria closed today?",
+      "options": {
+        "A": "The water fountain is by the office.",
+        "B": "The cafeteria staff received new uniforms this week.",
+        "C": "The new seasonal menu begins next Monday.",
+        "D": "Some repairs are being done in the seating area."
+      }
+    },
+    {
+      "id": "m2-q04",
+      "module": 2,
+      "number": 4,
+      "clip": 24,
+      "type": "conversation",
+      "stem": "What does the man say about the chocolate mousse cake?",
+      "options": {
+        "A": "It was sold out.",
+        "B": "It was created by a new chef.",
+        "C": "Its price went up recently.",
+        "D": "It was a popular item."
+      }
+    },
+    {
+      "id": "m2-q05",
+      "module": 2,
+      "number": 5,
+      "clip": 24,
+      "type": "conversation",
+      "stem": "Why does the woman mention her guests?",
+      "options": {
+        "A": "To suggest that one of them is bringing dessert",
+        "B": "To show why she is careful about choosing desserts",
+        "C": "To note that she received a cake recipe from one of them",
+        "D": "To explain where she heard about a bakery"
+      }
+    },
+    {
+      "id": "m2-q06",
+      "module": 2,
+      "number": 6,
+      "clip": 25,
+      "type": "conversation",
+      "stem": "What does the woman most likely think of the current university website?",
+      "options": {
+        "A": "It provides a lot of useful information.",
+        "B": "It is easy to use.",
+        "C": "It is not frequently used by students.",
+        "D": "It is not at the quality level it should be."
+      }
+    },
+    {
+      "id": "m2-q07",
+      "module": 2,
+      "number": 7,
+      "clip": 25,
+      "type": "conversation",
+      "stem": "What will the woman most likely do?",
+      "options": {
+        "A": "Provide some feedback",
+        "B": "Contact some other students",
+        "C": "Take a test on web design",
+        "D": "Learn web design from the man"
+      }
+    },
+    {
+      "id": "m2-q08",
+      "module": 2,
+      "number": 8,
+      "clip": 26,
+      "type": "lecture",
+      "stem": "Why does the speaker ask listeners to imagine a situation at the start of the talk?",
+      "options": {
+        "A": "To help explain a potentially unfamiliar concept",
+        "B": "To encourage listeners to take her perspective",
+        "C": "To describe a situation she has experienced",
+        "D": "To compare two different methods for making a decision"
+      }
+    },
+    {
+      "id": "m2-q09",
+      "module": 2,
+      "number": 9,
+      "clip": 26,
+      "type": "lecture",
+      "stem": "Why does the speaker talk about investing in new equipment?",
+      "options": {
+        "A": "To suggest that not all business decisions include an opportunity cost",
+        "B": "To provide an example of a decision made by most businesses",
+        "C": "To illustrate how businesses take opportunity cost into consideration",
+        "D": "To highlight the importance of weighing all options before investing"
+      }
+    },
+    {
+      "id": "m2-q10",
+      "module": 2,
+      "number": 10,
+      "clip": 26,
+      "type": "lecture",
+      "stem": "What does the speaker identify as a challenge related to identifying opportunity costs?",
+      "options": {
+        "A": "Calculating non-monetary costs",
+        "B": "Comparing unrelated activities",
+        "C": "Choosing which factors to consider in making a decision",
+        "D": "Deciding whether to borrow money to cover the costs"
+      }
+    },
+    {
+      "id": "m2-q11",
+      "module": 2,
+      "number": 11,
+      "clip": 26,
+      "type": "lecture",
+      "stem": "What does the speaker ask listeners to do at the end of the talk?",
+      "options": {
+        "A": "Create their own definition of opportunity cost",
+        "B": "Reflect on their own decision-making experiences",
+        "C": "Break up into small groups for discussion",
+        "D": "Share any experiences they have had making investments"
+      }
+    },
+    {
+      "id": "m2-q12",
+      "module": 2,
+      "number": 12,
+      "clip": 27,
+      "type": "lecture",
+      "stem": "What does the speaker say about Leon Festinger?",
+      "options": {
+        "A": "He introduced well-known psychological concepts to marketing campaigns.",
+        "B": "He experienced cognitive dissonance at a young age.",
+        "C": "He was the first to describe how mental conflict can affect human beliefs or behaviors.",
+        "D": "He focused on educating people about how to avoid cognitive dissonance."
+      }
+    },
+    {
+      "id": "m2-q13",
+      "module": 2,
+      "number": 13,
+      "clip": 27,
+      "type": "lecture",
+      "stem": "Why does the speaker discuss gasoline and electric cars?",
+      "options": {
+        "A": "To highlight cooperation between psychologists and environmental scientists",
+        "B": "To show that a clean environment can support mental health",
+        "C": "To identify a problem with the concept of cognitive dissonance",
+        "D": "To explain how cognitive dissonance can be useful for advertising products"
+      }
+    },
+    {
+      "id": "m2-q14",
+      "module": 2,
+      "number": 14,
+      "clip": 27,
+      "type": "lecture",
+      "stem": "Why does the author discuss a historical event from the 1700s?",
+      "options": {
+        "A": "To provide details about the development of the cognitive dissonance theory in the United States",
+        "B": "To support the idea that cognitive dissonance can have economic consequences",
+        "C": "To show how cognitive dissonance can lead to major historical events",
+        "D": "To illustrate how cognitive dissonance can encourage learning"
+      }
+    },
+    {
+      "id": "m2-q15",
+      "module": 2,
+      "number": 15,
+      "clip": 27,
+      "type": "lecture",
+      "stem": "What is the speaker's attitude toward cognitive dissonance?",
+      "options": {
+        "A": "She thinks that it can sometimes be beneficial.",
+        "B": "She is concerned about the mental discomfort it can cause.",
+        "C": "She is afraid that it might be misunderstood by some people.",
+        "D": "She thinks that cases of it might become more common in the future."
+      }
+    }
+  ],
+  "continuousDuration": 721.5360000000001
+}

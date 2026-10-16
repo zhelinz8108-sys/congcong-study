@@ -2,8 +2,8 @@
 
 import { memo, useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
 import type { NationalDayBlock, NationalDayQuestion, NationalDaySection } from "@/lib/national-day-english";
-import { checkNationalDayAnswer } from "@/lib/national-day-english-answer";
 import type { useNationalDayProgress, NationalDayAttempt } from "@/lib/national-day-english-progress";
+import type { useEnglishLocked } from "@/lib/use-english-locked";
 
 const ACTION = "w-full rounded-2xl border border-orange-200 bg-orange-100 px-5 py-3 text-sm font-bold text-orange-900 transition hover:bg-orange-200 focus-visible:outline-2 focus-visible:outline-orange-400";
 const SECONDARY = "w-full rounded-2xl border border-stone-200 bg-white px-5 py-3 text-sm font-semibold text-stone-600 transition hover:bg-stone-50";
@@ -34,29 +34,34 @@ const SourceContent = memo(function SourceContent({ blocks }: { blocks: National
   ))}</div>;
 });
 
-const QuestionCard = memo(function QuestionCard({ question, index, saved, onRecord }: {
+const QuestionCard = memo(function QuestionCard({ question, index, saved, onRecord, locked }: {
   question: NationalDayQuestion;
   index: number;
   saved?: NationalDayAttempt;
   onRecord: (id: string, attempt: NationalDayAttempt) => void;
+  locked: ReturnType<typeof useEnglishLocked>;
 }) {
   const fieldCount = question.mode === "auto" ? question.accepted.length : 1;
   const [values, setValues] = useState<string[]>(saved?.values.length === fieldCount ? saved.values : Array.from({ length: fieldCount }, () => ""));
   const [revealed, setRevealed] = useState(saved?.checked ?? false);
   const [empty, setEmpty] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const record = locked.records[question.id];
+  const isLocked = !!record;
+  useEffect(() => { if (record && Array.isArray(record.response)) { setValues(record.response); setRevealed(true); } }, [record]);
   const isSentence = /改|连词|翻译|写一句|用.*表达|连接|Where|When|Why|What|How|Name/.test(question.prompt) || question.accepted.some((parts) => parts.some((part) => part.split(" ").length > 4));
-  const submit = (answers = values) => {
+  const submit = async (answers = values) => {
+    if (isLocked || busy || !locked.ready) return;
     if (answers.some((value) => !value.trim())) { setEmpty(true); return; }
     setEmpty(false);
-    setRevealed(true);
-    onRecord(question.id, { values: answers, checked: question.mode === "auto", correct: question.mode === "auto" ? checkNationalDayAnswer(answers, question.accepted) : null });
+    setBusy(true); setError("");
+    try { await locked.submit(question.id, answers); setRevealed(true); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "提交失败，请重试"); }
+    finally { setBusy(false); }
   };
   const saveUnchecked = () => {
-    if (!revealed && (saved || values.some((value) => value.trim()))) onRecord(question.id, { values, checked: false, correct: null });
-  };
-  const rate = (correct: boolean) => {
-    setRevealed(true);
-    onRecord(question.id, { values, checked: true, correct, selfRated: true });
+    if (!isLocked && !revealed && (saved || values.some((value) => value.trim()))) onRecord(question.id, { values, checked: false, correct: null });
   };
 
   return (
@@ -65,7 +70,7 @@ const QuestionCard = memo(function QuestionCard({ question, index, saved, onReco
       <h4 className="mt-3 break-words text-lg font-semibold leading-8 text-stone-800">{question.prompt}</h4>
       {question.options ? (
         <div className="mt-5 space-y-3">{question.options.map((option) => (
-          <button key={option} type="button" aria-pressed={values[0] === option} onClick={() => { setValues([option]); submit([option]); }} className={`block w-full rounded-2xl border px-4 py-3 text-left text-base font-semibold transition ${values[0] === option ? "border-orange-300 bg-orange-50 text-orange-900" : "border-stone-200 bg-white text-stone-700 hover:bg-orange-50"}`}>{option === "/" ? "不填冠词" : option}</button>
+          <button key={option} type="button" disabled={isLocked || busy || !locked.ready} aria-pressed={values[0] === option} onClick={() => { if (!isLocked) setValues([option]); }} className={`block w-full rounded-2xl border px-4 py-3 text-left text-base font-semibold transition ${values[0] === option ? "border-orange-300 bg-orange-50 text-orange-900" : "border-stone-200 bg-white text-stone-700 hover:bg-orange-50"}`}>{option === "/" ? "不填冠词" : option}</button>
         ))}</div>
       ) : (
         <form onSubmit={(event) => { event.preventDefault(); submit(); }} className="mt-5 space-y-3">
@@ -77,6 +82,7 @@ const QuestionCard = memo(function QuestionCard({ question, index, saved, onReco
               value,
               autoComplete: "off",
               spellCheck: false,
+              disabled: isLocked || busy || !locked.ready,
               onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                 const nextValues = values.map((item, position) => position === fieldIndex ? event.target.value : item);
                 setValues(nextValues);
@@ -92,44 +98,48 @@ const QuestionCard = memo(function QuestionCard({ question, index, saved, onReco
             return <div key={fieldIndex}><label htmlFor={fieldId} className="text-xs font-semibold text-stone-500">{label}</label>{question.mode === "self" || isSentence ? <textarea {...fieldProps} rows={2} placeholder="先自己想一想，再写下来……" /> : <input {...fieldProps} type="text" placeholder="输入答案" />}</div>;
           })}
           {empty && <p role="alert" className="text-sm text-rose-700">先写好每一项答案，再核对。</p>}
-          <button type="submit" className={ACTION}>{question.mode === "self" ? "对照参考答案" : "核对答案"}</button>
+          <button type="submit" disabled={isLocked || busy || !locked.ready} className={ACTION}>{isLocked ? "已提交 · 已锁定" : busy ? "提交中…" : "提交答案"}</button>
         </form>
       )}
-      {!revealed && <button type="button" onClick={() => { setRevealed(true); setEmpty(false); }} className="mt-4 block text-sm font-semibold text-stone-500 underline decoration-stone-300 underline-offset-4">先看看答案与解析</button>}
+      {question.options && <button type="button" disabled={isLocked || busy || !locked.ready || values.some(value => !value.trim())} onClick={() => void submit()} className={`${ACTION} mt-4`}>{isLocked ? "已提交 · 已锁定" : busy ? "提交中…" : "提交答案"}</button>}
+      {error && <p className="mt-3 text-sm text-rose-700" role="alert">{error}</p>}
       {revealed && (
         <div aria-live="polite" className={`mt-5 rounded-2xl border p-4 ${saved?.checked && saved.correct === true ? "border-emerald-200 bg-emerald-50" : saved?.checked && saved.correct === false ? "border-rose-200 bg-rose-50/60" : "border-sky-200 bg-sky-50/60"}`}>
           <p className="text-sm font-bold text-stone-800">{saved?.checked ? saved.correct ? saved.selfRated ? "已按参考答案自评为掌握 ✓" : "答对了 ✓" : "再检查一下" : "参考答案与解析"}</p>
-          <p className="mt-3 break-words text-sm leading-7 text-stone-700">{question.reference}</p>
-          {saved?.checked && saved.correct === false && question.mode === "auto" && <p className="mt-3 text-xs leading-6 text-stone-500">当前回答尚未匹配参考答案。根据解析修改后，可以再次核对。</p>}
-          {question.mode === "self" && <div className="mt-4 space-y-3"><p className="text-xs leading-6 text-stone-500">对照意思和理由判断，不要求每个字都与参考答案相同。</p><button type="button" onClick={() => rate(true)} className="w-full rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-800">意思和理由都对，我掌握了</button><button type="button" onClick={() => rate(false)} className="w-full rounded-xl border border-amber-200 bg-white px-4 py-3 text-sm font-semibold text-amber-800">还要再想一想，加入待巩固</button></div>}
-          {question.mode === "auto" && isSentence && saved?.checked && saved.correct === false && <button type="button" onClick={() => rate(true)} className="mt-4 w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-xs font-semibold leading-6 text-stone-600">我的表达不同，但意思正确（对照解析自评）</button>}
+          <p className="mt-3 break-words text-sm leading-7 text-stone-700">{record?.feedback.answer}</p>
+          <p className="mt-3 text-xs leading-6 text-stone-500">{record?.feedback.explanation} 首次作答已锁定，不能修改成绩。</p>
         </div>
       )}
     </article>
   );
 });
 
-const WritingPractice = memo(function WritingPractice({ section, draft: initialDraft, checks, onSave, onCheck }: {
+const WritingPractice = memo(function WritingPractice({ section, draft: initialDraft, checks, onSave, onCheck, locked }: {
   section: NationalDaySection;
   draft: string;
   checks: string[];
   onSave: (id: string, value: string) => void;
   onCheck: (id: string, label: string) => void;
+  locked: ReturnType<typeof useEnglishLocked>;
 }) {
-  const [draft, setDraft] = useState(initialDraft);
+  const [draftText, setDraft] = useState(initialDraft);
   const [saved, setSaved] = useState(false);
   const writing = section.writing!;
+  const record = locked.records[`writing:${section.id}`];
+  const isLocked = !!record;
+  const draft = record && typeof record.response === "string" ? record.response : draftText;
   const words = draft.match(/[A-Za-z]+(?:['’-][A-Za-z]+)*/g)?.length ?? 0;
   const save = () => { onSave(section.id, draft); setSaved(true); };
   return <section className="rounded-3xl border border-sky-200 bg-sky-50/50 p-5 sm:p-6">
     <h3 className="text-xl font-bold">{writing.label}</h3>
     <p className="mt-3 text-sm leading-7 text-stone-600">{writing.prompt}</p>
     <label htmlFor={`national-day-writing-${section.id}`} className="mt-5 block text-xs font-semibold text-stone-500">写下自己的真实表达</label>
-    <textarea id={`national-day-writing-${section.id}`} value={draft} onChange={(event) => { setDraft(event.target.value); setSaved(false); }} onBlur={save} rows={8} className="mt-2 w-full resize-y rounded-2xl border border-sky-200 bg-white p-4 text-base leading-8 text-stone-800 outline-none focus:ring-2 focus:ring-sky-100" placeholder="从一句完整的英文开始……" />
+    <textarea id={`national-day-writing-${section.id}`} value={draft} disabled={isLocked || locked.busy || !locked.ready} onChange={(event) => { setDraft(event.target.value); setSaved(false); }} onBlur={save} rows={8} className="mt-2 w-full resize-y rounded-2xl border border-sky-200 bg-white p-4 text-base leading-8 text-stone-800 outline-none focus:ring-2 focus:ring-sky-100" placeholder="从一句完整的英文开始……" />
     <p className="mt-2 text-xs text-stone-500">{words} 个英文词{writing.minWords > 0 ? ` · 建议 ${writing.minWords}–80 词` : ""}{saved ? " · 草稿已保存" : ""}</p>
-    <button type="button" onClick={save} className={`${SECONDARY} mt-4`}>保存我的草稿</button>
+    <button type="button" disabled={isLocked || locked.busy || !draft.trim() || !locked.ready} onClick={() => void locked.submit(`writing:${section.id}`, draft).catch(() => undefined)} className={`${SECONDARY} mt-4`}>{isLocked ? "已提交 · 已锁定" : locked.busy ? "提交中…" : "提交作文"}</button>
+    {locked.error && <p role="alert" className="mt-3 text-sm text-rose-700">{locked.error}</p>}
     <fieldset className="mt-5 rounded-2xl bg-white p-4"><legend className="px-1 text-sm font-bold text-sky-800">写完后，自己检查一遍</legend>{["信息说清：时间、地点、活动和感受", "动词正确：be、时态、主谓一致", "词组正确：介词、搭配、单复数", "句子完整：顺序、大小写和标点"].map((label) => <label key={label} className="mt-3 flex cursor-pointer items-start gap-3 text-sm leading-6 text-stone-600"><input type="checkbox" checked={checks.includes(label)} onChange={() => onCheck(section.id, label)} className="mt-1 h-4 w-4 shrink-0 accent-orange-400" /><span>{label}</span></label>)}</fieldset>
-    {writing.referenceBlocks && <div className="mt-5"><h4 className="text-sm font-bold text-sky-800">参考范例与检查方法</h4><p className="mt-3 text-xs leading-6 text-stone-500">范例只是其中一种写法，请保留自己的真实经历。</p><div className="mt-4"><SourceContent blocks={writing.referenceBlocks} /></div></div>}
+    {isLocked && writing.referenceBlocks && <div className="mt-5"><h4 className="text-sm font-bold text-sky-800">参考范例与检查方法</h4><p className="mt-3 text-xs leading-6 text-stone-500">原作文已锁定，保留待教师评价。</p><div className="mt-4"><SourceContent blocks={writing.referenceBlocks} /></div></div>}
   </section>;
 });
 
@@ -141,7 +151,7 @@ export default function NationalDayEnglishSection({ section, index, pdfUrl, lear
   pdfUrl: string;
   learning: ReturnType<typeof useNationalDayProgress>;
 }) {
-  const { progress, ready, recordAttempt, saveDraft, toggleWritingCheck, completeSection } = learning;
+  const { progress, ready, recordAttempt, saveDraft, toggleWritingCheck, completeSection, locked } = learning;
   const [audioMessage, setAudioMessage] = useState("");
   const questions = useMemo(() => [...section.questions, ...(section.oralQuestions ?? [])], [section]);
   const checked = questions.filter((question) => progress.attempts[question.id]?.checked).length;
@@ -186,18 +196,18 @@ export default function NationalDayEnglishSection({ section, index, pdfUrl, lear
 
     {questions.length > 0 && <section id={`national-day-exercises-${section.id}`} className="mt-8">
       <h3 className="text-2xl font-bold">自己试一试</h3>
-      <p className="mt-3 text-sm leading-7 text-stone-500">选项点击即反馈；填空、改写和阅读题写好后核对。解释题与真实表达对照参考答案自评。</p>
-      <p className="mt-4 rounded-2xl border border-stone-200 p-4 text-sm font-semibold">已核对 {ready ? checked : "--"} / {questions.length} 题 · 已掌握 {ready ? correct : "--"} 题</p>
+      <p className="mt-3 text-sm leading-7 text-stone-500">提交后查看答案；首次作答永久锁定。开放表达保留待评价。</p>
+      <p className="mt-4 rounded-2xl border border-stone-200 p-4 text-sm font-semibold">已提交 {ready ? checked : "--"} / {questions.length} 题 · 首次答对 {ready ? correct : "--"} 题</p>
       {!ready ? <p className="mt-6 text-sm text-stone-500">正在读取学习进度……</p> : <div className="mt-5 space-y-5">
-        {questions.map((question, questionIndex) => <QuestionCard key={question.id} question={question} index={questionIndex} saved={progress.attempts[question.id]} onRecord={onRecord} />)}
+        {questions.map((question, questionIndex) => <QuestionCard key={question.id} question={question} index={questionIndex} saved={progress.attempts[question.id]} onRecord={onRecord} locked={locked} />)}
       </div>}
     </section>}
 
-    {section.writing && ready && <div className="mt-8"><WritingPractice section={section} draft={progress.drafts[section.id] ?? ""} checks={progress.writingChecks[section.id] ?? EMPTY_CHECKS} onSave={saveDraft} onCheck={toggleWritingCheck} /></div>}
+    {section.writing && ready && <div className="mt-8"><WritingPractice section={section} draft={progress.drafts[section.id] ?? ""} checks={progress.writingChecks[section.id] ?? EMPTY_CHECKS} onSave={saveDraft} onCheck={toggleWritingCheck} locked={locked} /></div>}
 
     <section className="mt-8 rounded-3xl border border-emerald-100 bg-emerald-50/50 p-5 sm:p-6">
       <h3 className="text-lg font-bold">{completed ? "本节已学完 ✓" : "给这一节打个勾"}</h3>
-      <p className="mt-3 text-sm leading-7 text-stone-600">{questions.length > 0 && checked < questions.length ? `还剩 ${questions.length - checked} 题未核对。看完答案后，也要说清为什么。` : "把不确定的地方留在待巩固里，下次再练一遍。"}</p>
+      <p className="mt-3 text-sm leading-7 text-stone-600">{questions.length > 0 && checked < questions.length ? `还剩 ${questions.length - checked} 题未提交。` : "本节作答已锁定，可以回看答案与解析复习。"}</p>
       {!completed && <button type="button" disabled={!ready || checked < questions.length} onClick={() => completeSection(section.id)} className="mt-4 w-full rounded-2xl border border-emerald-200 bg-white px-5 py-3 text-sm font-bold text-emerald-800 transition enabled:hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50">本节学完了，保存进度</button>}
     </section>
   </section>;

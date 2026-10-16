@@ -93,11 +93,11 @@ export function verifySix() {
   assert.equal(state.attempts[attemptId].responses[questionId].value, answer.value);
   assert.deepEqual(Object.keys(server.sixSubmittedFeedback(state)[attemptId]), [questionId]);
   const rate = { action: "rate", itemId: short.id, attemptId, questionId, score: "partial" };
-  state = server.transitionSixProgress(state, rate);
-  assert.throws(() => server.transitionSixProgress(state, { ...rate, score: "full" }));
-  assert.equal(lib.sixAttemptStats(state.attempts[attemptId], short.questions.length).mastery, 50);
+  assert.throws(() => server.transitionSixProgress(state, rate), /成绩不可/);
+  assert.throws(() => server.transitionSixProgress(state, { ...rate, score: "full" }), /成绩不可/);
+  assert.equal(lib.sixAttemptStats(state.attempts[attemptId], short.questions.length).evaluated, 0);
   state = server.transitionSixProgress(state, { action: "start", itemId: short.id });
-  assert.notEqual(state.current[short.id], attemptId);
+  assert.equal(state.current[short.id], attemptId);
   assert.equal(state.attempts[attemptId].responses[questionId].value, answer.value);
   assert.throws(() => server.transitionSixProgress(state, answer));
   const choiceItem = bank.items.find(i => i.questions.some(q => q.kind === "choice"));
@@ -108,7 +108,7 @@ export function verifySix() {
   state = server.transitionSixProgress(state, choiceInput);
   assert.equal(state.attempts[choiceInput.attemptId].responses[choice.id].correct, true);
   assert.throws(() => server.transitionSixProgress(state, choiceInput));
-  const report = { counts, methods: bank.methods.length, questions, choices, sourceImages: images, checks: "content, provenance, private answers, single submission, single self-rating, restart history" };
+  const report = { counts, methods: bank.methods.length, questions, choices, sourceImages: images, checks: "content, provenance, private answers, permanent first submission, no self-scoring, no restart bypass" };
   console.log(JSON.stringify(report, null, 2));
   return { lib, server, bankModule };
 }

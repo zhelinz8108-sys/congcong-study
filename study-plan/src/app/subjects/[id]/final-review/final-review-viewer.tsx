@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import finalReviewAnswers from "@/data/english-final-review-answers.json";
+import { useEnglishLocked } from "@/lib/use-english-locked";
 
 export type ReviewSection = "知识整理" | "过关+语法" | "专项练习" | "其他资料";
 
@@ -22,8 +22,11 @@ export type ReviewDocument = {
 };
 
 type FinalReviewViewerProps = {
+  subjectId: string;
   documents: ReviewDocument[];
   sectionOrder: readonly ReviewSection[];
+  questionIds: string[];
+  fieldCounts: Record<string, number>;
 };
 
 type ParsedEntry = {
@@ -44,15 +47,6 @@ type DisplayTitle = {
   detail: string;
   full: string;
 };
-
-type AnswerMap = Record<string, Record<string, string | string[]>>;
-
-type FinalReviewAnswers = {
-  choices: AnswerMap;
-  fills: AnswerMap;
-};
-
-const ANSWERS = finalReviewAnswers as FinalReviewAnswers;
 
 const UNIT_TOPICS: Record<number, string> = {
   1: "Cinderella",
@@ -1130,9 +1124,9 @@ function splitLineIntoEntries(line: string) {
 }
 
 function getEntryParts(text: string) {
-  const match = text.match(/^(\(?\s*\)?\s*\d+[.、．]|[A-D][.．])\s*(.*)$/);
+  const match = text.match(/^([（(]?\s*[）)]?\s*\d+[.、．—-]|[A-D][.．])\s*(.*)$/);
   if (!match) return { marker: "·", body: text };
-  return { marker: match[1].replace(/\s+/g, ""), body: match[2] || text };
+  return { marker: match[1].replace(/\s+/g, "").replace(/（/g, "(").replace(/）/g, ")").replace(/[—-]$/, "."), body: match[2] || text };
 }
 
 function stripExtractedPhonetic(text: string) {
@@ -1303,30 +1297,34 @@ function makeAnswerLookupKey(sectionIndex: number, marker: string) {
   return number ? `${sectionIndex}:${number}` : "";
 }
 
-function normalizeAnswer(answer: string | string[] | undefined): string[] {
-  if (!answer) return [];
-  return Array.isArray(answer) ? answer : [answer];
+function questionId(kind: "choice" | "fill", document: string, section: number, marker: string) {
+  return `${kind}:${document}:${makeAnswerLookupKey(section, marker)}`;
 }
 
-function getChoiceAnswer(
-  documentId: string,
-  sectionIndex: number,
-  marker: string
-) {
-  const key = makeAnswerLookupKey(sectionIndex, marker);
-  if (!key) return "";
-  const answer = ANSWERS.choices[documentId]?.[key];
-  return typeof answer === "string" ? answer : answer?.[0] ?? "";
-}
-
-function getFillAnswer(
-  documentId: string,
-  sectionIndex: number,
-  marker: string
-) {
-  const key = makeAnswerLookupKey(sectionIndex, marker);
-  if (!key) return [];
-  return normalizeAnswer(ANSWERS.fills[documentId]?.[key]);
+function sectionEntries(section: ReviewDocumentSection, documentId: string, sectionIndex: number, answerable: Set<string>) {
+  if (![...answerable].some(id => id.startsWith(`fill:${documentId}:${sectionIndex}:`))) {
+    return section.lines.flatMap(splitLineIntoEntries);
+  }
+  const joined: string[] = [];
+  let currentFill = -1;
+  for (const line of section.lines) {
+    const spaced = line.replace(/([^\s\d])(\d+[.、．]\s*)/g, "$1 $2");
+    const parts = splitByMarkers(spaced, /(?:^|\s)(\d+[.、．]\s*)/g);
+    for (const part of parts) {
+      const { marker } = getEntryParts(part);
+      const fill = answerable.has(questionId("fill", documentId, sectionIndex, marker));
+      if (fill) {
+        currentFill = joined.length;
+        joined.push(part);
+      } else if (currentFill >= 0 && marker === "·") {
+        joined[currentFill] += ` ${part}`;
+      } else {
+        currentFill = -1;
+        joined.push(...splitLineIntoEntries(part));
+      }
+    }
+  }
+  return joined;
 }
 
 function formatAnswer(answer: string[]) {
@@ -1386,21 +1384,27 @@ function TextWithFillInputs({
   text,
   values,
   onChange,
+  disabled,
+  fieldCount,
 }: {
   text: string;
   values: string[];
   onChange: (index: number, value: string) => void;
+  disabled: boolean;
+  fieldCount: number;
 }) {
   const parts = text.split(BLANK_PATTERN);
   const blanks = text.match(BLANK_PATTERN) ?? [];
+  const inline = blanks.length <= fieldCount;
 
   return (
     <>
       {parts.map((part, index) => (
         <span key={`${part}-${index}`}>
           {part}
-          {blanks[index] && (
+          {blanks[index] && (!inline ? <span className="mx-1 inline-block min-w-20 border-b border-stone-500" /> : index < fieldCount && (
             <input
+              disabled={disabled}
               value={values[index] ?? ""}
               onChange={(event) => onChange(index, event.target.value)}
               className="mx-1 inline-flex h-8 min-w-28 max-w-48 rounded-xl border border-emerald-200 bg-white px-3 text-center text-base font-bold text-emerald-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
@@ -1409,9 +1413,18 @@ function TextWithFillInputs({
               }}
               aria-label={`填空 ${index + 1}`}
             />
-          )}
+          ))}
         </span>
       ))}
+      {Array.from({ length: Math.max(0, fieldCount - (inline ? blanks.length : 0)) }, (_, extra) => {
+        const index = (inline ? blanks.length : 0) + extra;
+        return <label key={`extra-${index}`} className="ml-2 inline-flex items-center gap-1 text-sm text-stone-500">
+          答案{index + 1}
+          <input disabled={disabled} aria-label={`填空 ${index + 1}`} value={values[index] ?? ""}
+            onChange={event => onChange(index, event.target.value)}
+            className="h-8 min-w-28 max-w-60 rounded-xl border border-emerald-200 bg-white px-3 text-base font-bold text-emerald-800 disabled:bg-stone-50" />
+        </label>;
+      })}
     </>
   );
 }
@@ -1473,9 +1486,14 @@ function speechText(text: string) {
 }
 
 export default function FinalReviewViewer({
+  subjectId,
   documents,
   sectionOrder,
+  questionIds,
+  fieldCounts,
 }: FinalReviewViewerProps) {
+  const locked = useEnglishLocked("final-review", subjectId);
+  const answerable = useMemo(() => new Set(questionIds), [questionIds]);
   const [selectedId, setSelectedId] = useState(documents[0]?.id ?? "");
   const [query, setQuery] = useState("");
   const [playingSpeechKey, setPlayingSpeechKey] = useState<string | null>(null);
@@ -1505,44 +1523,25 @@ export default function FinalReviewViewer({
   const selectedDocumentQuestionCount = useMemo(
     () =>
       selectedDocument?.sections.reduce((sum, section, sectionIndex) => {
-        const entries = section.lines.flatMap(splitLineIntoEntries);
+        const entries = sectionEntries(section, selectedDocument.id, sectionIndex, answerable);
         return (
           sum +
           buildRenderBlocks(entries).filter((block) => {
             if (block.type === "question") {
-              return Boolean(
-                getChoiceAnswer(
-                  selectedDocument.id,
-                  sectionIndex,
-                  block.question.marker
-                )
-              );
+              return answerable.has(questionId("choice", selectedDocument.id, sectionIndex, block.question.marker));
             }
             return (
-              BLANK_TEST_PATTERN.test(block.entry.raw) &&
-              getFillAnswer(
-                selectedDocument.id,
-                sectionIndex,
-                block.entry.marker
-              ).length > 0
+              answerable.has(questionId("fill", selectedDocument.id, sectionIndex, block.entry.marker))
             );
           }).length
         );
       }, 0) ?? 0,
-    [selectedDocument]
+    [selectedDocument, answerable]
   );
   const selectedAnswerCount = useMemo(() => {
     if (!selectedDocument) return 0;
-    const prefix = `${selectedDocument.id}:`;
-    const choiceCount = Object.keys(selectedAnswers).filter((key) =>
-      key.startsWith(prefix)
-    ).length;
-    const fillCount = Object.entries(fillResponses).filter(
-      ([key, values]) =>
-        key.startsWith(prefix) && values.some((value) => value.trim())
-    ).length;
-    return choiceCount + fillCount;
-  }, [fillResponses, selectedAnswers, selectedDocument]);
+    return Object.keys(locked.records).filter(key => key.startsWith(`choice:${selectedDocument.id}:`) || key.startsWith(`fill:${selectedDocument.id}:`)).length;
+  }, [locked.records, selectedDocument]);
 
   const toggleSection = (key: string) => {
     setCollapsedSectionKeys((current) => {
@@ -1581,6 +1580,7 @@ export default function FinalReviewViewer({
   };
 
   const chooseAnswer = (questionKey: string, optionMarker: string) => {
+    if (!locked.ready || locked.busy || locked.records[questionKey]) return;
     setSelectedAnswers((current) => {
       const next = { ...current };
       if (next[questionKey] === optionMarker) {
@@ -1597,6 +1597,7 @@ export default function FinalReviewViewer({
     blankIndex: number,
     value: string
   ) => {
+    if (!locked.ready || locked.busy || locked.records[fillKey]) return;
     setFillResponses((current) => {
       const nextValues = [...(current[fillKey] ?? [])];
       nextValues[blankIndex] = value;
@@ -1722,7 +1723,7 @@ export default function FinalReviewViewer({
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             {selectedDocumentQuestionCount > 0 && (
               <span className="rounded-full border border-emerald-200 bg-white px-3 py-2 text-xs font-black text-emerald-800 shadow-sm">
-                已选 {selectedAnswerCount}/{selectedDocumentQuestionCount} 题
+                已提交 {selectedAnswerCount}/{selectedDocumentQuestionCount} 题
               </span>
             )}
             <span className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-xs font-bold text-stone-500">
@@ -1731,10 +1732,11 @@ export default function FinalReviewViewer({
           </div>
         </div>
         <div className="space-y-4 p-4">
+          {locked.error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-rose-700">{locked.error}</p>}
           {selectedDocument.sections.map((section, sectionIndex) => {
             const sectionKey = `${selectedDocument.id}-${sectionIndex}-${section.title}`;
             const expanded = !collapsedSectionKeys.has(sectionKey);
-            const entries = section.lines.flatMap(splitLineIntoEntries);
+            const entries = sectionEntries(section, selectedDocument.id, sectionIndex, answerable);
             const blocks = buildRenderBlocks(entries);
             const questionCount = blocks.filter(
               (block) => block.type === "question"
@@ -1781,7 +1783,8 @@ export default function FinalReviewViewer({
                     <div className="space-y-4">
                       {blocks.map((block, blockIndex) => {
                         if (block.type === "question") {
-                          const questionKey = `${selectedDocument.id}:${sectionIndex}:${blockIndex}:${block.question.marker}`;
+                          const questionKey = questionId("choice", selectedDocument.id, sectionIndex, block.question.marker);
+                          const record = locked.records[questionKey];
                           const questionNumber = cleanMarkerNumber(
                             block.question.marker
                           );
@@ -1791,15 +1794,9 @@ export default function FinalReviewViewer({
                           const questionText =
                             block.question.english || block.question.raw;
                           const selectedAnswer =
-                            selectedAnswers[questionKey] ?? "";
-                          const correctAnswer = getChoiceAnswer(
-                            selectedDocument.id,
-                            sectionIndex,
-                            block.question.marker
-                          ).toUpperCase();
-                          const answerVisible = Boolean(
-                            selectedAnswer && correctAnswer
-                          );
+                            typeof record?.response === "string" ? record.response : selectedAnswers[questionKey] ?? "";
+                          const correctAnswer = record?.feedback.answer ?? "";
+                          const answerVisible = Boolean(record);
 
                           return (
                             <div
@@ -1875,6 +1872,7 @@ export default function FinalReviewViewer({
                                     >
                                       <button
                                         type="button"
+                                        disabled={!!record || !locked.ready || locked.busy}
                                         onClick={() =>
                                           chooseAnswer(questionKey, optionMarker)
                                         }
@@ -1945,6 +1943,8 @@ export default function FinalReviewViewer({
                                 })}
                               </div>
                               <div className="bg-white px-3 pb-3">
+                                {answerable.has(questionKey) && <button type="button" disabled={!!record || !locked.ready || locked.busy || !selectedAnswer}
+                                  onClick={() => void locked.submit(questionKey, selectedAnswer).catch(() => undefined)} className="mt-3 rounded-xl bg-amber-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">{record ? "已提交 · 已锁定" : locked.busy ? "提交中…" : "提交答案"}</button>}
                                 <AnswerReveal
                                   answer={correctAnswer ? [correctAnswer] : []}
                                   visible={answerVisible}
@@ -1959,20 +1959,15 @@ export default function FinalReviewViewer({
                         const parsed = block.entry;
                         const speechKey = `${sectionKey}-${blockIndex}`;
                         const isPlaying = playingSpeechKey === speechKey;
-                        const fillKey = `${selectedDocument.id}:${sectionIndex}:${blockIndex}:${parsed.marker}`;
-                        const fillAnswer = getFillAnswer(
-                          selectedDocument.id,
-                          sectionIndex,
-                          parsed.marker
-                        );
-                        const displayText = parsed.english || parsed.raw;
+                        const fillKey = questionId("fill", selectedDocument.id, sectionIndex, parsed.marker);
+                        const record = locked.records[fillKey];
+                        const fillAnswer = record ? [record.feedback.answer] : [];
+                        const displayText = parsed.raw;
                         const hasAnswerableBlank =
-                          fillAnswer.length > 0 &&
-                          BLANK_TEST_PATTERN.test(displayText);
-                        const fillValues = fillResponses[fillKey] ?? [];
-                        const fillAnswerVisible =
-                          hasAnswerableBlank &&
-                          fillValues.some((value) => value.trim());
+                          answerable.has(fillKey);
+                        const fieldCount = fieldCounts[fillKey] ?? 1;
+                        const fillValues = Array.isArray(record?.response) ? record.response : fillResponses[fillKey] ?? [];
+                        const fillAnswerVisible = !!record;
 
                         return (
                           <div
@@ -1984,11 +1979,19 @@ export default function FinalReviewViewer({
                             <span className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 px-2 text-[11px] font-black text-emerald-700">
                               {parsed.marker}
                             </span>
-                            {parsed.english ? (
+                            {hasAnswerableBlank ? (
+                              <p className="min-w-0 flex-1 whitespace-pre-wrap text-base leading-8 text-slate-900">
+                                <TextWithFillInputs text={displayText} fieldCount={fieldCount} values={fillValues}
+                                  disabled={!!record || !locked.ready || locked.busy}
+                                  onChange={(blankIndex, value) => changeFillResponse(fillKey, blankIndex, value)} />
+                              </p>
+                            ) : parsed.english ? (
                               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
                                 <span className="break-words text-base font-semibold leading-7 text-slate-950">
                                   {hasAnswerableBlank ? (
                                     <TextWithFillInputs
+                                      fieldCount={fieldCount}
+                                      disabled={!!record || !locked.ready || locked.busy}
                                       text={parsed.english}
                                       values={fillValues}
                                       onChange={(blankIndex, value) =>
@@ -2037,6 +2040,8 @@ export default function FinalReviewViewer({
                               <p className="min-w-0 flex-1 whitespace-pre-wrap text-base leading-7 text-slate-900">
                                 {hasAnswerableBlank ? (
                                   <TextWithFillInputs
+                                    fieldCount={fieldCount}
+                                    disabled={!!record || !locked.ready || locked.busy}
                                     text={parsed.raw}
                                     values={fillValues}
                                     onChange={(blankIndex, value) =>
@@ -2050,6 +2055,8 @@ export default function FinalReviewViewer({
                             )}
                             {hasAnswerableBlank && (
                               <div className="basis-full pl-10">
+                                <button type="button" disabled={!!record || !locked.ready || locked.busy || fillValues.length !== fieldCount || fillValues.filter(value => value.trim()).length !== fieldCount}
+                                  onClick={() => void locked.submit(fillKey, fillValues).catch(() => undefined)} className="mt-3 rounded-xl bg-amber-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">{record ? "已提交 · 已锁定" : locked.busy ? "提交中…" : "提交答案"}</button>
                                 <AnswerReveal
                                   answer={fillAnswer}
                                   visible={fillAnswerVisible}

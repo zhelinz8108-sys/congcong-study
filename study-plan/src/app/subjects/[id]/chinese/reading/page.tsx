@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import {
   CHINESE_READING_PASSAGES,
   CHINESE_READING_TOPICS,
@@ -14,8 +11,8 @@ const levelStyle = {
   挑战: "border-rose-200 bg-rose-50 text-rose-700",
 } as const;
 
-export default function ChineseReadingPage() {
-  const { id: subjectId } = useParams<{ id: string }>();
+export default async function ChineseReadingPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: subjectId } = await params;
   const totalQuestions = CHINESE_READING_PASSAGES.reduce(
     (sum, passage) => sum + passage.questions.length,
     0

@@ -22,6 +22,8 @@
     "chinese:seal:six": "node scripts/seal-chinese-six.mjs",
     "test:chinese-six:sealed": "node scripts/seal-chinese-six.mjs --verify",
     "test:chinese-six:browser": "node scripts/test-chinese-six-browser.mjs",
+    "test:english-six": "node scripts/test-english-six.mjs",
+    "test:english-six:browser": "node scripts/test-english-six-browser.mjs",
     "atlantic:download-pdfs": "node scripts/download_atlantic_library_pdfs.mjs",
     "atlantic:audit-pdfs": "node scripts/audit_atlantic_library_pdfs.mjs",
     "lint": "eslint",

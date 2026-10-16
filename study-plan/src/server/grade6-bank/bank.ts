@@ -1,13 +1,16 @@
 import "server-only";
-import { createDecipheriv, scryptSync } from "node:crypto";
+import { createDecipheriv, createHash, scryptSync } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { BankManifest, BankQuestion } from "@/lib/grade6-bank-types";
 import type { BankPrivateAnswer } from "@/lib/grade6-bank-grader";
 import { nativeBankQuestion, nativeBankAnswer } from "./native-release";
+import { activeBankManifest, isRetiredBankQuestion, RAW_BANK_MANIFEST_SHA256 } from "./retired-duplicates";
+export { isRetiredBankQuestion } from "./retired-duplicates";
 
 const root = path.join(process.cwd(), "content", "grade6-bank");
 let manifestPromise: Promise<BankManifest> | null = null;
+let activeManifestPromise: Promise<BankManifest> | null = null;
 let questionsPromise: Promise<Map<string, BankQuestion>> | null = null;
 let answersPromise: Promise<Map<string, BankPrivateAnswer>> | null = null;
 let privateKeyPromise: Promise<Buffer> | null = null;
@@ -38,11 +41,24 @@ async function decrypt(ciphertext: Buffer, iv: Buffer, tag: Buffer, aad: string)
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
 }
 
-export function getBankManifest() {
-  manifestPromise ??= readFile(path.join(root, "manifest.json"), "utf8").then((raw) => JSON.parse(raw) as BankManifest);
+function rawBankManifest() {
+  manifestPromise ??= readFile(path.join(root, "manifest.json"), "utf8").then((raw) => {
+    if (createHash("sha256").update(raw).digest("hex") !== RAW_BANK_MANIFEST_SHA256) throw new Error("Bank retirement source changed");
+    return JSON.parse(raw) as BankManifest;
+  });
   return manifestPromise;
 }
+export function getBankManifest() {
+  activeManifestPromise ??= rawBankManifest().then(activeBankManifest);
+  return activeManifestPromise;
+}
 export async function getBankQuestion(id: string) {
+  if (isRetiredBankQuestion(id)) return undefined;
+  return getArchivedBankQuestion(id);
+}
+/** Server-only archive lookup for an authenticated learner's already-submitted
+ * feedback. Public practice and every writing route must use getBankQuestion. */
+export async function getArchivedBankQuestion(id: string) {
   questionsPromise ??= readFile(path.join(root, "questions.public.json"), "utf8").then((raw) => new Map((JSON.parse(raw) as BankQuestion[]).map((q) => [q.id, q])));
   const question = (await questionsPromise).get(id);
   return question ? nativeBankQuestion(question) : undefined;
@@ -53,7 +69,7 @@ export async function getPrivateBankAnswer(id: string) {
   answersPromise ??= sealedAnswers().then(async (data) => {
     const bytes = await decrypt(Buffer.from(data.ciphertext, "base64"), Buffer.from(data.iv, "base64"), Buffer.from(data.tag, "base64"), "grade6-bank-v1:answers");
     const rows = JSON.parse(bytes.toString("utf8")) as BankPrivateAnswer[];
-    const manifest = await getBankManifest();
+    const manifest = await rawBankManifest();
     if (rows.length !== manifest.total || new Set(rows.map((row) => row.id)).size !== rows.length) throw new Error("判题数据不完整");
     return new Map(rows.map((row) => [row.id, row]));
   });

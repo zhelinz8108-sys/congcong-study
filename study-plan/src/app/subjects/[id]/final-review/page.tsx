@@ -2,6 +2,7 @@ import Link from "next/link";
 import finalReviewContent from "@/data/english-final-review-content.json";
 import FinalReviewViewer from "./final-review-viewer";
 import type { ReviewDocument } from "./final-review-viewer";
+import { finalReviewFieldCounts, finalReviewQuestionIds } from "@/server/english-final-review-lock";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -88,7 +89,7 @@ export default async function FinalReviewPage({ params }: PageProps) {
           </div>
         </div>
 
-        <FinalReviewViewer documents={documents} sectionOrder={SECTION_ORDER} />
+        <FinalReviewViewer subjectId={id} documents={documents} sectionOrder={SECTION_ORDER} questionIds={finalReviewQuestionIds()} fieldCounts={finalReviewFieldCounts()} />
       </div>
     </main>
   );

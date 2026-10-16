@@ -75,6 +75,7 @@ const httpContext = { module: { exports: {} }, exports: {}, Error, require: (nam
   if (name === "server-only") return {};
   if (name === "next/server") return { NextResponse: { json: (body, options) => ({ body, ...options }) } };
   if (name.endsWith("family-access")) return {};
+    if (name === "./bank") return { isRetiredBankQuestion: () => false };
   if (name.endsWith("holiday-math-700/http")) return { holidayHeaders: {} };
   if (name.endsWith("grade6-bank-native-validation")) return { assertBankDrawing };
   if (name.endsWith("grade6-bank-input-schema")) return schemaContext.module.exports;

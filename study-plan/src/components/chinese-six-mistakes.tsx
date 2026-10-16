@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import index from "@/data/chinese-six-index.json";
-import { scoreSixResponse, SIX_MODULES, type SixProgress, type SixFeedback } from "@/lib/chinese-six";
+import { sixFirstAttempt, SIX_MODULES, type SixProgress, type SixFeedback } from "@/lib/chinese-six";
 import styles from "./chinese-six.module.css";
 
 export default function ChineseSixMistakes({ subjectId }: { subjectId: string }) {
@@ -24,13 +24,13 @@ export default function ChineseSixMistakes({ subjectId }: { subjectId: string })
     const history = attempts.filter(a => a.itemId === item.id).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
     const latest = new Map<string, { id: string; value: string; result: string; date: string; reference?: SixFeedback }>();
     let errors = 0;
-    for (const attempt of [...history].reverse()) for (const [id, response] of Object.entries(attempt.responses)) {
-      if (response.correct === null && response.selfScore === undefined) continue;
-      const wrong = scoreSixResponse(response) < 1;
+    const first = progress && sixFirstAttempt(progress, item.id);
+    if (first) for (const [id, response] of Object.entries(first.responses)) {
+      const wrong = response.correct !== true;
       if (wrong) errors++;
-      latest.set(id, { id, value: response.value, result: wrong ? "wrong" : "full", date: response.submittedAt, reference: feedback[attempt.id]?.[id] });
+      latest.set(id, { id, value: response.value, result: response.correct === null ? "review" : wrong ? "wrong" : "full", date: response.submittedAt, reference: Object.values(feedback).find(group => group[id])?.[id] });
     }
-    const wrong = [...latest.values()].filter(r => r.result === "wrong");
+    const wrong = [...latest.values()].filter(r => r.result !== "full");
     return wrong.length ? [{ item, wrong, errors, attempts: history.length }] : [];
   });
   return <main className={styles.shell}><div className={styles.inner}>
@@ -41,8 +41,8 @@ export default function ChineseSixMistakes({ subjectId }: { subjectId: string })
     {progress === null && !error ? <p className={styles.empty}>正在读取学习记录…</p> : records.length === 0 && !error ? <p className={styles.empty}>暂时没有待巩固题目。</p> : records.filter(r => !module || r.item.module === module).map(record => <section className={styles.band} key={record.item.id}>
       <p className={styles.eyebrow}>{SIX_MODULES.find(m => m.key === record.item.module)?.name} · {record.item.group}</p>
       <h2>{record.item.title}</h2><p className={styles.muted}>待巩固 {record.wrong.length} 题 · 累计未达成 {record.errors} 次 · 已练习 {record.attempts} 次</p>
-      <p className={styles.muted}>复习建议：先回看对应知识与方法，核对原文依据或句式要求，再开始新的一次练习。</p>
-      <details style={{ margin: "12px 0" }}><summary>查看最近未达成的答案</summary>{record.wrong.map(r => <div key={r.id} className={styles.band}><h3>{r.reference?.topic}</h3><p className={styles.muted}>{r.reference?.prompt}</p><p className={styles.muted}>{new Date(r.date).toLocaleString("zh-CN")}</p><p className={styles.prose}>{r.value}</p><Link className={styles.back} href={`${base}/study/${record.item.id}?question=${encodeURIComponent(r.id)}`}>核对此题 →</Link></div>)}</details>
+      <p className={styles.muted}>首次答案保留且不可修改；简答题等待复核。</p>
+      <details style={{ margin: "12px 0" }}><summary>查看锁定的答案</summary>{record.wrong.map(r => <div key={r.id} className={styles.band}><h3>{r.reference?.topic}</h3><p className={styles.muted}>{r.reference?.prompt}</p><p className={styles.muted}>{new Date(r.date).toLocaleString("zh-CN")} · {r.result === "review" ? "待复核" : "回答有误"}</p><p className={styles.prose}>{r.value}</p><Link className={styles.back} href={`${base}/study/${record.item.id}?question=${encodeURIComponent(r.id)}`}>核对此题 →</Link></div>)}</details>
       <Link className={styles.back} href={`${base}/study/${record.item.id}`}>回到原题与参考答案 →</Link>
     </section>)}
   </div></main>;

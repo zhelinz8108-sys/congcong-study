@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { loadCloudState, saveCloudState } from "@/lib/cloud-progress";
+import { useEffect, useMemo, useState } from "react";
+import { loadCloudState } from "@/lib/cloud-progress";
+import { useEnglishLocked } from "@/lib/use-english-locked";
 import { getSentenceText } from "@/lib/sentences";
 import type { Unit, Word } from "@/lib/types";
 
@@ -60,7 +61,6 @@ type SessionHistoryRecord = {
 };
 
 const SESSION_SIZE_OPTIONS: Exclude<SessionSize, "all">[] = [100, 200, 300, 500, 800, 1000];
-const AUTO_NEXT_DELAY_MS = 850;
 
 const POS_TAGS = [
   "限定词",
@@ -179,11 +179,6 @@ function readIdSet(key: string) {
   }
 }
 
-function writeIdSet(key: string, value: Set<string>) {
-  if (typeof window === "undefined") return;
-  saveCloudState("vocab:interactive:mistakes:v1", key, [...value]);
-}
-
 function readHistory(key: string) {
   if (typeof window === "undefined") return [] as SessionHistoryRecord[];
   try {
@@ -192,11 +187,6 @@ function readHistory(key: string) {
   } catch {
     return [];
   }
-}
-
-function writeHistory(key: string, value: SessionHistoryRecord[]) {
-  if (typeof window === "undefined") return;
-  saveCloudState("vocab:interactive:history:v1", key, value.slice(0, 30));
 }
 
 function formatSessionDate(value: string) {
@@ -267,17 +257,15 @@ function selectedSentenceLabel(selectedUnitIds: Set<string>, activeBook: Interac
   return `已选 ${selectedUnitIds.size} 句`;
 }
 
-function makeSessionId() {
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
 export function InteractiveMemorizeMode({
+  subjectId,
   subjectName,
   books,
   words,
   onFinish,
   onReview,
 }: {
+  subjectId: string;
   subjectName: string;
   books: InteractiveWordBook[];
   words: Word[];
@@ -286,7 +274,7 @@ export function InteractiveMemorizeMode({
 }) {
   const mistakeKey = `study-plan-interactive-vocab-mistakes:${subjectName}`;
   const historyKey = `study-plan-interactive-vocab-history:${subjectName}`;
-  const autoNextKey = "study-plan-interactive-vocab-auto-next";
+  const locked = useEnglishLocked("vocab", subjectId);
 
   const [activeBook, setActiveBook] = useState<InteractiveWordBook | null>(null);
   const [mode, setMode] = useState<PracticeMode>("en-zh");
@@ -294,25 +282,16 @@ export function InteractiveMemorizeMode({
   const [selectedUnitIds, setSelectedUnitIds] = useState<Set<string>>(new Set());
   const [shuffle, setShuffle] = useState(true);
   const [sessionSize, setSessionSize] = useState<SessionSize>(100);
-  const [autoNext, setAutoNext] = useState(() =>
-    typeof window !== "undefined" ? window.localStorage.getItem(autoNextKey) === "1" : false
-  );
   const [sessionEntries, setSessionEntries] = useState<PracticeEntry[]>([]);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [answered, setAnswered] = useState(false);
-  const [answers, setAnswers] = useState<AnswerRecord[]>([]);
+  const [draftSelectedId, setSelectedId] = useState<string | null>(null);
   const [streak, setStreak] = useState(0);
-  const [mistakeIds, setMistakeIds] = useState<Set<string>>(() => readIdSet(mistakeKey));
+  const [legacyMistakeIds, setMistakeIds] = useState<Set<string>>(() => readIdSet(mistakeKey));
   const [history, setHistory] = useState<SessionHistoryRecord[]>(() => readHistory(historyKey));
   const [search, setSearch] = useState("");
   const [saveError, setSaveError] = useState("");
   const [pendingSaves, setPendingSaves] = useState(0);
-  const [sessionStartedAt, setSessionStartedAt] = useState("");
-  const [sessionId, setSessionId] = useState("");
-  const [sessionSaved, setSessionSaved] = useState(false);
-  const autoNextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -329,12 +308,13 @@ export function InteractiveMemorizeMode({
     };
   }, [historyKey, mistakeKey]);
 
-  const clearAutoNextTimer = () => {
-    if (autoNextTimer.current) {
-      clearTimeout(autoNextTimer.current);
-      autoNextTimer.current = null;
+  const mistakeIds = useMemo(() => {
+    const result = new Set(legacyMistakeIds);
+    for (const record of Object.values(locked.records)) {
+      if (record.feedback.correct === false) result.add(record.id.replace(/^(?:en-zh|zh-en):/, ""));
     }
-  };
+    return result;
+  }, [legacyMistakeIds, locked.records]);
 
   const entriesByBook = useMemo(() => {
     const result = new Map<string, PracticeEntry[]>();
@@ -382,10 +362,32 @@ export function InteractiveMemorizeMode({
   }, [activeEntries, mistakeIds, scope, selectedUnitIds]);
 
   const current = sessionEntries[currentIdx] ?? null;
+  const currentRecord = current ? locked.records[`${mode}:${current.word.id}`] : undefined;
+  const answered = !!currentRecord;
+  const answers = useMemo<AnswerRecord[]>(() => sessionEntries.flatMap(entry => {
+    const record = locked.records[`${mode}:${entry.word.id}`];
+    if (!record) return [];
+    return [{ entry, selectedId: null, selectedText: String(record.response), answerText: record.feedback.answer,
+      correct: record.feedback.correct === true, skipped: false }];
+  }), [sessionEntries, mode, locked.records]);
   const currentOptions = useMemo(
-    () => (current ? buildOptions(current, activeEntries, mode) : []),
-    [activeEntries, current, mode]
+    () => {
+      if (!current) return [];
+      const options = buildOptions(current, activeEntries, mode);
+      // Restore the originally selected distractor as well as the immutable response.
+      const saved = typeof currentRecord?.response === "string" ? currentRecord.response : "";
+      const selected = activeEntries.find(entry => answerText(entry, mode) === saved);
+      if (selected && !options.some(entry => answerText(entry, mode) === saved)) {
+        const replace = options.findIndex(entry => entry.word.id !== current.word.id);
+        if (replace >= 0) options[replace] = selected;
+      }
+      return options;
+    },
+    [activeEntries, current, mode, currentRecord?.response]
   );
+  const selectedId = currentRecord
+    ? currentOptions.find(entry => answerText(entry, mode) === currentRecord.response)?.word.id ?? null
+    : draftSelectedId;
 
   const correctCount = answers.filter((answer) => answer.correct).length;
   const wrongCount = answers.length - correctCount;
@@ -420,7 +422,6 @@ export function InteractiveMemorizeMode({
       sessionSize?: SessionSize;
     } = {}
   ) {
-    clearAutoNextTimer();
     const sourceBook = overrides.book ?? activeBook;
     const sourceEntries = sourceBook ? entriesByBook.get(sourceBook.groupName) ?? [] : activeEntries;
     const nextScope = overrides.scope ?? scope;
@@ -447,40 +448,19 @@ export function InteractiveMemorizeMode({
     setSessionStarted(true);
     setCurrentIdx(0);
     setSelectedId(null);
-    setAnswered(false);
-    setAnswers([]);
     setStreak(0);
     setSaveError("");
     setPendingSaves(0);
-    setSessionStartedAt(new Date().toISOString());
-    setSessionId(makeSessionId());
-    setSessionSaved(false);
   }
 
   function finalizeSession(completed: boolean, answerList = answers) {
-    if (sessionSaved || !sessionStartedAt || answerList.length === 0 || !activeBook) return;
-
-    const record: SessionHistoryRecord = {
-      id: sessionId || makeSessionId(),
-      date: sessionStartedAt,
-      bookName: activeBook.groupName,
-      mode,
-      filter: `${scopeLabel(scope)} · ${selectedSentenceLabel(selectedUnitIds, activeBook)}`,
-      target: sessionEntries.length,
-      asked: answerList.length,
-      correct: answerList.filter((answer) => answer.correct).length,
-      wrong: answerList.filter((answer) => !answer.correct).length,
-      accuracy: accuracy(answerList),
-      completed: completed && answerList.length >= sessionEntries.length,
-    };
-    const nextHistory = [record, ...history].slice(0, 30);
-    setHistory(nextHistory);
-    writeHistory(historyKey, nextHistory);
-    setSessionSaved(true);
+    // Session selection is presentation only. Grades come exclusively from immutable
+    // server records; the older browser-made history is preserved, never overwritten.
+    void completed;
+    void answerList;
   }
 
   function openBook(book: InteractiveWordBook) {
-    clearAutoNextTimer();
     const emptySelection = new Set<string>();
     setActiveBook(book);
     setSelectedUnitIds(emptySelection);
@@ -491,7 +471,6 @@ export function InteractiveMemorizeMode({
 
   function backToBooks() {
     finalizeSession(false);
-    clearAutoNextTimer();
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -500,14 +479,11 @@ export function InteractiveMemorizeMode({
     setSessionStarted(false);
     setCurrentIdx(0);
     setSelectedId(null);
-    setAnswered(false);
-    setAnswers([]);
     setSaveError("");
   }
 
   function exitPractice() {
     finalizeSession(false);
-    clearAutoNextTimer();
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -516,7 +492,6 @@ export function InteractiveMemorizeMode({
 
   function prepareForHome() {
     finalizeSession(false);
-    clearAutoNextTimer();
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -566,14 +541,6 @@ export function InteractiveMemorizeMode({
     startSession({ sessionSize: nextSessionSize });
   }
 
-  function toggleAutoNext(nextValue: boolean) {
-    setAutoNext(nextValue);
-    if (!nextValue) clearAutoNextTimer();
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(autoNextKey, nextValue ? "1" : "0");
-    }
-  }
-
   function speakWord(entry = current) {
     if (!entry || typeof window === "undefined" || !("speechSynthesis" in window)) return;
     const utterance = new SpeechSynthesisUtterance(entry.word.word);
@@ -586,58 +553,28 @@ export function InteractiveMemorizeMode({
   }
 
   function goToNextQuestion() {
-    clearAutoNextTimer();
     setCurrentIdx((index) => index + 1);
     setSelectedId(null);
-    setAnswered(false);
     setSaveError("");
   }
 
-  function recordAnswer(optionId: string | null, skipped = false) {
-    if (!current || answered) return;
-
-    const correct = !skipped && optionId === current.word.id;
-    const selectedEntry = optionId
-      ? currentOptions.find((entry) => entry.word.id === optionId) ?? null
-      : null;
-    const nextAnswer: AnswerRecord = {
-      entry: current,
-      selectedId: optionId,
-      selectedText: selectedEntry ? answerText(selectedEntry, mode) : "跳过",
-      answerText: answerText(current, mode),
-      correct,
-      skipped,
-    };
-    const nextAnswers = [...answers, nextAnswer];
-
-    setSelectedId(optionId);
-    setAnswered(true);
-    setAnswers(nextAnswers);
-    setStreak((value) => (correct ? value + 1 : 0));
+  async function submitAnswer() {
+    if (!current || answered || !locked.ready || locked.busy || pendingSaves || !draftSelectedId) return;
+    const selected = currentOptions.find(entry => entry.word.id === draftSelectedId);
+    if (!selected) return;
     setSaveError("");
-
-    const nextMistakes = new Set(mistakeIds);
-    if (correct) nextMistakes.delete(current.word.id);
-    else nextMistakes.add(current.word.id);
-    setMistakeIds(nextMistakes);
-    writeIdSet(mistakeKey, nextMistakes);
-
-    setPendingSaves((value) => value + 1);
-    onReview(current.word.id, correct ? 2 : 0)
-      .catch(() => {
-        setSaveError("复习记录保存失败，可继续答题，稍后刷新再试。");
-      })
-      .finally(() => {
-        setPendingSaves((value) => Math.max(0, value - 1));
+    setPendingSaves(1);
+    try {
+      const record = await locked.submit(`${mode}:${current.word.id}`, answerText(selected, mode));
+      setStreak(value => record.feedback.correct === true ? value + 1 : 0);
+      // Spaced-repetition scheduling is not the student's objective score.
+      await onReview(current.word.id, record.feedback.correct === true ? 2 : 0).catch(() => {
+        setSaveError("答案已锁定；复习日程暂未更新。");
       });
-
-    if (nextAnswers.length >= sessionEntries.length) {
-      finalizeSession(true, nextAnswers);
-      return;
-    }
-
-    if (correct && autoNext) {
-      autoNextTimer.current = setTimeout(goToNextQuestion, AUTO_NEXT_DELAY_MS);
+    } catch {
+      setSaveError("提交未确认，请重试；不会在本地判分或显示答案。");
+    } finally {
+      setPendingSaves(0);
     }
   }
 
@@ -647,28 +584,14 @@ export function InteractiveMemorizeMode({
       return;
     }
     if (!answered) {
-      recordAnswer(null, true);
+      void submitAnswer();
       return;
     }
     goToNextQuestion();
   }
 
-  function resetLocalPractice() {
-    if (!window.confirm("确定清空错题和最近成绩吗？这个操作只影响当前浏览器。")) return;
-    const emptyMistakes = new Set<string>();
-    setMistakeIds(emptyMistakes);
-    setHistory([]);
-    writeIdSet(mistakeKey, emptyMistakes);
-    writeHistory(historyKey, []);
-    startSession();
-  }
-
   useEffect(() => {
     return () => {
-      if (autoNextTimer.current) {
-        clearTimeout(autoNextTimer.current);
-        autoNextTimer.current = null;
-      }
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
@@ -852,11 +775,9 @@ export function InteractiveMemorizeMode({
     );
   }
 
-  const feedbackText = !current
-    ? ""
-    : selectedId === current.word.id
-      ? `答对了：${current.word.word} ${current.word.phonetic || ""}，${cleanMeaning(current.word.meaning)}`
-      : `正确答案：${current.word.word} ${current.word.phonetic || ""}，${answerText(current, mode)}`;
+  const feedbackText = currentRecord
+    ? `${currentRecord.feedback.correct ? "答对了" : "答错了"} · 你选：${String(currentRecord.response)} · 正确答案：${currentRecord.feedback.answer}（首次答案已锁定）`
+    : "";
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[#f6f7f2] text-slate-900">
@@ -900,7 +821,7 @@ export function InteractiveMemorizeMode({
           </div>
         </header>
 
-        <main className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <main className="mt-5 grid gap-4">
           <section className="rounded-lg border border-stone-200 bg-white p-5 shadow-[0_18px_42px_rgba(42,57,51,0.10)]">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -967,10 +888,10 @@ export function InteractiveMemorizeMode({
 
             <div className="mt-4 grid min-h-[250px] gap-3 sm:grid-cols-2">
               {currentOptions.map((option, index) => {
-                const isCorrectOption = current ? option.word.id === current.word.id : false;
+                const isCorrectOption = currentRecord?.feedback.answer === answerText(option, mode);
                 const isSelectedOption = option.word.id === selectedId;
                 const stateClass = !answered
-                  ? "border-stone-200 bg-white hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50"
+                  ? isSelectedOption ? "border-emerald-500 bg-emerald-50 text-emerald-900" : "border-stone-200 bg-white hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50"
                   : isCorrectOption
                     ? "border-emerald-600 bg-emerald-50 text-emerald-900"
                     : isSelectedOption
@@ -980,8 +901,8 @@ export function InteractiveMemorizeMode({
                 return (
                   <button
                     key={`${option.word.id}-${index}`}
-                    onClick={() => recordAnswer(option.word.id)}
-                    disabled={answered}
+                    onClick={() => { if (!answered && locked.ready && !locked.busy) setSelectedId(option.word.id); }}
+                    disabled={answered || !locked.ready || locked.busy || pendingSaves > 0}
                     className={`min-h-[104px] rounded-lg border px-4 py-3 text-left font-bold leading-6 transition ${stateClass}`}
                   >
                     <span className="mb-2 inline-grid h-7 w-7 place-items-center rounded-full bg-white text-xs font-black text-stone-500 ring-1 ring-stone-200">
@@ -1002,25 +923,28 @@ export function InteractiveMemorizeMode({
               })}
             </div>
 
-            <div className={`mt-4 min-h-[58px] rounded-lg border px-4 py-3 text-sm font-semibold leading-6 ${answered ? (selectedId === current?.word.id ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-rose-200 bg-rose-50 text-rose-800") : "border-transparent text-stone-500"}`}>
+            <div className={`mt-4 min-h-[58px] rounded-lg border px-4 py-3 text-sm font-semibold leading-6 ${answered ? (currentRecord?.feedback.correct ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-rose-200 bg-rose-50 text-rose-800") : "border-transparent text-stone-500"}`}>
               {answered ? feedbackText : " "}
               {pendingSaves > 0 && <span className="ml-2 text-xs text-stone-500">保存中...</span>}
               {saveError && <p className="mt-1 text-xs text-rose-700">{saveError}</p>}
+              {locked.error && <p className="mt-1 text-xs text-rose-700">{locked.error}</p>}
+              {!locked.ready && <p className="text-xs text-stone-500">正在读取首次答题记录…</p>}
             </div>
 
             <div className="mt-4 flex justify-end gap-2">
               <button
-                onClick={() => recordAnswer(null, true)}
-                disabled={answered}
+                onClick={goToNextQuestion}
+                disabled={locked.busy || pendingSaves > 0}
                 className="min-h-10 rounded-lg border border-stone-200 bg-white px-4 text-sm font-bold text-stone-700 transition hover:border-stone-300 disabled:opacity-50"
               >
                 跳过
               </button>
               <button
                 onClick={handleNext}
-                className="min-h-10 rounded-lg bg-emerald-700 px-5 text-sm font-bold text-white transition hover:bg-emerald-800"
+                disabled={!locked.ready || locked.busy || pendingSaves > 0 || (!answered && !!current && !draftSelectedId)}
+                className="min-h-10 rounded-lg bg-emerald-700 px-5 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-50"
               >
-                {!current ? "开始新训练" : !answered ? "显示答案" : currentIdx + 1 >= sessionEntries.length ? "查看成绩" : "下一题"}
+                {!current ? "回看练习" : !answered ? "提交答案" : currentIdx + 1 >= sessionEntries.length ? "查看成绩" : "下一题"}
               </button>
             </div>
           </section>
@@ -1108,7 +1032,7 @@ export function InteractiveMemorizeMode({
               onClick={() => startSession()}
               className="mt-4 min-h-10 w-full rounded-lg bg-emerald-700 px-4 text-sm font-bold text-white transition hover:bg-emerald-800"
             >
-              开始新训练
+              调整练习范围
             </button>
 
             <div className="mt-4 grid gap-2 text-sm font-semibold text-stone-700">
@@ -1126,19 +1050,11 @@ export function InteractiveMemorizeMode({
                 />
                 随机出题
               </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={autoNext}
-                  onChange={(event) => toggleAutoNext(event.target.checked)}
-                  className="h-4 w-4 accent-emerald-700"
-                />
-                答对后自动下一题
-              </label>
             </div>
 
             <div className="mt-4 rounded-lg border border-stone-200 bg-[#fbfcfa] p-3">
-              <strong className="text-sm text-slate-900">最近成绩</strong>
+              <strong className="text-sm text-slate-900">历史练习汇总（旧记录）</strong>
+              <p className="mt-1 text-xs text-stone-500">旧汇总不作为首次提交成绩；当前正确率以云端锁定答案为准。</p>
               <div className="mt-2 grid gap-2 text-xs text-stone-600">
                 {history.length === 0 ? (
                   <span>还没有完成过训练。</span>
@@ -1196,23 +1112,16 @@ export function InteractiveMemorizeMode({
                     if (index >= 0) {
                       setCurrentIdx(index);
                       setSelectedId(null);
-                      setAnswered(false);
                     }
                   }}
                   className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-left"
                 >
                   <strong className="block break-words text-sm text-emerald-900">{entry.word.word}</strong>
-                  <span className="mt-1 block break-words text-xs leading-5 text-stone-600">{cleanMeaning(entry.word.meaning)}</span>
+                  {locked.records[`${mode}:${entry.word.id}`] && <span className="mt-1 block break-words text-xs leading-5 text-stone-600">{cleanMeaning(entry.word.meaning)}</span>}
                 </button>
               ))}
             </div>
 
-            <button
-              onClick={resetLocalPractice}
-              className="mt-4 min-h-10 w-full rounded-lg border border-rose-200 bg-rose-50 px-4 text-sm font-bold text-rose-800 transition hover:bg-rose-100"
-            >
-              清空错题和成绩
-            </button>
           </aside>
         </main>
       </div>

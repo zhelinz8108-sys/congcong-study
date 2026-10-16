@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import {
   CHINESE_READING_PASSAGES,
   CHINESE_READING_TOPICS,
@@ -80,8 +77,8 @@ const toneClasses: Record<string, { card: string; badge: string; button: string 
   },
 };
 
-export default function ChineseHomePage() {
-  const { id: subjectId } = useParams<{ id: string }>();
+export default async function ChineseHomePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: subjectId } = await params;
   const questionCount = CHINESE_READING_PASSAGES.reduce(
     (sum, passage) => sum + passage.questions.length,
     0

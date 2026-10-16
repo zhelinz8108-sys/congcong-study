@@ -1,62 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { v4 as uuid } from "uuid";
-import { pool } from "@/lib/db";
-import { ensureMathQuestionBankSchema } from "@/lib/math-question-bank";
-import { saveLocalResponse } from "@/lib/math-local-store";
-
+import { STUDENT_PROFILE_COOKIE, parseStudentProfileCookie } from "@/lib/family-access";
+import { submitLegacyMathQuestion } from "@/server/legacy-math-first";
+import { unsafeSubmissionOrigin } from "@/server/submission-request";
 export const dynamic = "force-dynamic";
-
-type Params = { params: Promise<{ id: string }> };
-
-function parseSelfRating(value: unknown) {
-  return value === "correct" || value === "partial" || value === "incorrect"
-    ? value
-    : null;
-}
-
-export async function POST(request: NextRequest, { params }: Params) {
-  const { id: attemptId } = await params;
-  const body = await request.json();
-  const questionId = String(body.question_id ?? "");
-  const responseText = String(body.response_text ?? "");
-  const selfRating = parseSelfRating(body.self_rating);
-
-  if (!questionId) return NextResponse.json({ error: "缺少题目ID" }, { status: 400 });
-
-  try {
-    await ensureMathQuestionBankSchema();
-
-    const attemptResult = await pool.query("SELECT status FROM math_attempts WHERE id = $1", [
-      attemptId,
-    ]);
-    if (attemptResult.rowCount === 0) {
-      const local = await saveLocalResponse(attemptId, questionId, responseText, selfRating);
-      if ("response" in local) return NextResponse.json(local.response);
-      return NextResponse.json({ error: local.error }, { status: local.status });
-    }
-    if (attemptResult.rows[0].status === "submitted") {
-      return NextResponse.json({ error: "已提交的练习不能修改" }, { status: 409 });
-    }
-
-    const result = await pool.query(
-      `
-        INSERT INTO math_responses (
-          id, attempt_id, question_id, response_text, self_rating, updated_at
-        )
-        VALUES ($1, $2, $3, $4, $5, NOW())
-        ON CONFLICT (attempt_id, question_id) DO UPDATE SET
-          response_text = EXCLUDED.response_text,
-          self_rating = EXCLUDED.self_rating,
-          updated_at = NOW()
-        RETURNING *
-      `,
-      [uuid(), attemptId, questionId, responseText, selfRating]
-    );
-
-    return NextResponse.json(result.rows[0]);
-  } catch {
-    const local = await saveLocalResponse(attemptId, questionId, responseText, selfRating);
-    if ("response" in local) return NextResponse.json(local.response);
-    return NextResponse.json({ error: local.error }, { status: local.status });
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (unsafeSubmissionOrigin(request)) return NextResponse.json({ error: "请求来源不正确" }, { status: 403 });
+  const raw = await request.text();
+  if (Buffer.byteLength(raw) > 256 * 1024) return NextResponse.json({ error: "答案过长" }, { status: 413 });
+  let body: Record<string, unknown>;
+  try { body = JSON.parse(raw); } catch { return NextResponse.json({ error: "请求格式错误" }, { status: 400 }); }
+  if (typeof body?.question_id !== "string" || typeof body.response_text !== "string") return NextResponse.json({ error: "缺少题目或答案" }, { status: 400 });
+  const { id } = await params;
+  const profile = parseStudentProfileCookie(request.cookies.get(STUDENT_PROFILE_COOKIE)?.value);
+  try { return NextResponse.json(await submitLegacyMathQuestion(profile.id, id, body.question_id, body.response_text)); }
+  catch (error) {
+    const message = error instanceof Error && /^(练习记录不存在|题目不属于本练习|已提交的练习不能修改|请先填写答案)$/u.test(error.message) ? error.message : "保存失败，答案未提交，请稍后重试";
+    return NextResponse.json({ error: message }, { status: message.startsWith("保存失败") ? 503 : 409 });
   }
 }

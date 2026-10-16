@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { appRoot } from "./holiday-math-test-utils.mjs";
+
+const name = process.argv[2];
+assert.match(name ?? "", /^english-layout-[a-z0-9-]{1,48}$/);
+const folder = path.join(appRoot, "tmp", name), remote = `/www/study-plan-data/${name}`;
+const manifest = JSON.parse(readFileSync(path.join(appRoot, "content/english-six/quality-review.private.json"), "utf8"));
+const files = [...new Set(manifest.changes.map(change => `content/english-six/${change.file}`))];
+assert.deepEqual(files, readFileSync(path.join(folder, "quality-existing"), "utf8").trim().split("\n"));
+files.push("content/english-six/quality-review.private.json");
+writeFileSync(path.join(folder, "quality-after.sha256"), files.map(file => `${createHash("sha256").update(readFileSync(path.join(appRoot, file))).digest("hex")}  ${file}\n`).join(""));
+execFileSync("tar", ["-czf", path.join(folder, "quality.tar.gz"), "-C", appRoot, ...files]);
+const args = ["-i", path.join(path.dirname(appRoot), ".deploy-keys/english-six-20261011"), "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ConnectTimeout=12"];
+execFileSync("ssh", [...args, "ubuntu@124.223.31.175", `set -e; cd /www/study-plan; test ! -e content/english-six/quality-review.private.json; sha256sum --status -c '${remote}/quality-before.sha256'`], { stdio: "inherit", timeout: 30000 });
+execFileSync("scp", [...args, path.join(folder, "quality.tar.gz"), path.join(folder, "quality-after.sha256"), `ubuntu@124.223.31.175:${remote}/`], { stdio: "inherit", timeout: 120000 });
+console.log(JSON.stringify({ stagedQuestions: manifest.changes.length, files: files.length, liveDataChanged: false }));

@@ -22,7 +22,7 @@ export function holidayAccess(request: NextRequest, mutation = false) {
         : new URL(
             `${new URL(request.url).protocol}//${request.headers.get("host") || new URL(request.url).host}`,
           ).origin;
-    if (origin && origin !== expected)
+    if ((origin && origin !== expected) || request.headers.get("sec-fetch-site") === "cross-site")
       return NextResponse.json(
         { error: "请求来源不正确" },
         { status: 403, headers: holidayHeaders },

@@ -1,4 +1,5 @@
 import type { BankNativeContent } from "./grade6-bank-native-types";
+import type { BankDetailedSolution } from "./grade6-bank-solution";
 
 export type BankDifficulty = 1 | 2 | 3 | 4;
 export const BANK_DIFFICULTIES = [
@@ -49,6 +50,7 @@ export type BankFeedback = {
   answerText: string;
   answerImages: string[];
   fields: { id: string; correct: boolean | null }[];
+  detailedSolution?: BankDetailedSolution;
 };
 export type BankResponse = {
   answers: BankAnswers;
@@ -67,7 +69,7 @@ export type BankResponse = {
 export type BankProgress = { responses: Record<string, BankResponse>; lastQuestionId: string; updatedAt: string };
 
 export function bankStats(ids: string[], responses: BankProgress["responses"]) {
-  const submitted = ids.map((id) => responses[id]).filter((r) => r?.submitted);
+  const submitted = ids.map((id) => responses[id]).filter((r) => r?.submitted || (r?.submissions ?? 0) > 0);
   const graded = submitted.filter((r) => r.outcome === "correct" || r.outcome === "incorrect");
   const correct = graded.filter((r) => r.outcome === "correct").length;
   return {

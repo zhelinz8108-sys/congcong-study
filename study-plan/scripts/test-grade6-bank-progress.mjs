@@ -22,17 +22,19 @@ async function testProgressHook() {
   const compiled=ts.transpileModule(text,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
   const storage=new Map(); const response=(answers={},revision=0,submitted=false)=>({answers,revision,submitted,outcome:submitted?"correct":null,score:submitted?1:null,maxScore:submitted?1:0,submissions:submitted?1:0,updatedAt:revision?"2026-10-11T01:00:00.000Z":""});
   let canonicalize=false;let remote={},failDraft=false,holdDraft=null,holdResolve=null,forcePostConflict=false; const calls=[],questionSchemas=new Map();
+  const retiredQuestions=new Set(),retiredDrafts=new Set(),retiredSubmits=new Set();
   const fetchMock=async(url,options={})=>{
    const body=options.body?JSON.parse(options.body):null; calls.push({url,method:options.method??"GET",body});
-   if(!options.method&&url.startsWith("/api/math/grade6-bank/questions/")){const id=decodeURIComponent(url.split("/").at(-1));return {ok:true,status:200,json:async()=>structuredClone(questionSchemas.get(id)??{id,inputs:[{id:"a",label:"答案",kind:"text"},{id:"b",label:"第二空",kind:"text"}]})};}
+   if(!options.method&&url.startsWith("/api/math/grade6-bank/questions/")){const id=decodeURIComponent(url.split("/").at(-1));if(retiredQuestions.has(id))return {ok:false,status:410,json:async()=>({error:"重复题已移出题库"})};return {ok:true,status:200,json:async()=>structuredClone(questionSchemas.get(id)??{id,inputs:[{id:"a",label:"答案",kind:"text"},{id:"b",label:"第二空",kind:"text"}]})};}
    if(!options.method)return {ok:true,status:200,json:async()=>structuredClone({responses:remote,lastQuestionId:"q",updatedAt:""})};
+   if(options.method==="PUT"&&retiredDrafts.has(body.question_id)||options.method==="POST"&&retiredSubmits.has(body.question_id))return {ok:false,status:410,json:async()=>({error:"重复题已移出题库"})};
    const schema=questionSchemas.get(body.question_id);
    if(schema?.native)assert.equal(body.input_schema,schemaContext.module.exports.bankNativeInputSchema(schema),"every native PUT/POST carries the exact public schema token");
    if(options.method==="PUT"&&failDraft)throw new Error("offline");
    if(options.method==="PUT"&&holdDraft){const gate=holdDraft;holdDraft=null;await gate;}
    if(options.method==="POST"&&forcePostConflict){forcePostConflict=false;remote.q=response({a:"new-cloud"},remote.q.revision+1,true);}
    const old=remote[body.question_id]??response();
-   if(body.base_revision!==old.revision)return {ok:false,status:409,json:async()=>({error:"conflict",response:structuredClone(old)})};
+   if(old.submitted||old.submissions>0||body.base_revision!==old.revision)return {ok:false,status:409,json:async()=>({error:"conflict",response:structuredClone(old)})};
    const canonicalFields=questionSchemas.get(body.question_id)?.inputs.map(field=>field.id)??["b"];
    const canonical=canonicalize?Object.fromEntries([...new Set([...Object.keys(body.answers),...canonicalFields])].map(id=>[id,(body.answers[id]??"").trim()])):body.answers;const saved=response(canonical,old.revision+1,options.method==="POST");remote[body.question_id]=saved;
    return {ok:true,status:200,json:async()=>options.method==="POST"?{response:structuredClone(saved),feedback:{questionId:body.question_id,outcome:"correct",score:1,maxScore:1,fields:[],message:"ok",answerText:"private",answerImages:[]}}:structuredClone(saved)};
@@ -58,20 +60,19 @@ async function testProgressHook() {
   assert.equal(h.states[0].responses.q.answers.a,"C","in-flight response must not replace later input");assert.equal(h.states[0].responses.q.baseRevision,2);
   await h.hook.flush();assert.equal(remote.q.answers.a,"C");assert.equal(h.states[0].responses.q.revision,3);
   h.hook.draft("q",{a:"D"});failDraft=true;await h.hook.flush();failDraft=false;remote.q=response({a:"E-cloud"},4,true);
-  const before=calls.filter(c=>c.method==="PUT").length;h.events.get("online")();await settle();assert.equal(h.states[2],"conflict");assert.equal(remote.q.answers.a,"E-cloud");assert.equal(h.states[0].responses.q.answers.a,"D");assert.equal(calls.filter(c=>c.method==="PUT").length,before,"conflicted drafts must not retry automatically");
-  await assert.rejects(h.hook.submit("q",{a:"D"}),/没有覆盖/);assert.equal(remote.q.revision,4);assert.equal(JSON.parse(storage.get(key)).responses.q.baseRevision,4);
-  await h.hook.submit("q",{a:"D"});assert.equal(remote.q.revision,5);assert.equal(remote.q.answers.a,"D");assert.equal(h.states[2],"saved");
-  h.hook.draft("q",{a:"F"});await h.hook.flush();forcePostConflict=true;
-  await assert.rejects(h.hook.submit("q",{a:"F"}),/没有覆盖/);assert.equal(remote.q.answers.a,"new-cloud");assert.equal(h.states[0].responses.q.answers.a,"F");assert.equal(h.states[2],"conflict");
-  await h.hook.submit("q",{a:"F"});assert.equal(remote.q.answers.a,"F");assert.equal(h.states[2],"saved");h.cleanup();
+  const before=calls.filter(c=>c.method==="PUT").length;h.events.get("online")();await settle();assert.equal(h.states[2],"saved");assert.equal(remote.q.answers.a,"E-cloud");assert.equal(h.states[0].responses.q.answers.a,"E-cloud");assert.equal(calls.filter(c=>c.method==="PUT").length,before,"submitted cloud records discard conflicting local drafts without writes");
+  await assert.rejects(h.hook.submit("q",{a:"D"}),/已提交.*锁定/);assert.equal(remote.q.revision,4);h.hook.draft("q",{a:"F"});await h.hook.flush();assert.equal(remote.q.answers.a,"E-cloud");h.cleanup();
+  storage.clear();remote={q:response({a:"F"},0)};h=mount();await settle();forcePostConflict=true;
+  await assert.rejects(h.hook.submit("q",{a:"F"}),/已提交.*锁定/);assert.equal(remote.q.answers.a,"new-cloud");assert.equal(h.states[0].responses.q.answers.a,"new-cloud");assert.equal(h.states[2],"saved");
+  await assert.rejects(h.hook.submit("q",{a:"F"}),/已提交.*锁定/);assert.equal(remote.q.answers.a,"new-cloud");h.cleanup();
   storage.set(key,JSON.stringify({responses:{q:{...response({a:"future-clock-stale"},2),baseRevision:2,updatedAt:"9999-01-01T00:00:00Z"}},lastQuestionId:"q",updatedAt:"",dirtyQuestionIds:["q"]}));
-  h=mount();await settle();assert.equal(h.states[2],"conflict");assert.equal(h.states[0].responses.q.answers.a,"future-clock-stale");assert.equal(h.states[0].responses.q.submitted,false);assert.equal(remote.q.answers.a,"F");h.cleanup();
+  h=mount();await settle();assert.equal(h.states[2],"saved");assert.equal(h.states[0].responses.q.answers.a,"new-cloud");assert.equal(h.states[0].responses.q.submitted,true);assert.equal(remote.q.answers.a,"new-cloud");h.cleanup();
   storage.set(key,JSON.stringify({responses:remote,lastQuestionId:"q",updatedAt:"",dirtyQuestionIds:[]}));
   h=mount();await settle();const displayed=remote.q.answers.a;remote.q=response({a:"other-device-latest"},remote.q.revision+1,true);
   h.events.get("online")();await settle();const oldUiWrites=calls.filter(c=>c.method!=="GET").length;
-  await assert.rejects(h.hook.submit("q",{a:displayed}),/没有覆盖/);assert.equal(remote.q.answers.a,"other-device-latest");assert.equal(calls.filter(c=>c.method!=="GET").length,oldUiWrites);
-  await h.hook.submit("q",{a:displayed});assert.equal(remote.q.answers.a,displayed);h.cleanup();
-  storage.clear();remote={};canonicalize=true;h=mount();await settle();h.hook.draft("q",{a:"3/4 "});await h.hook.flush();assert.equal(h.states[2],"saved");assert.deepEqual(JSON.parse(storage.get(key)).dirtyQuestionIds,[]);assert.equal(h.states[0].responses.q.answers.a,"3/4");assert.equal(h.states[0].responses.q.answers.b,"");await h.hook.submit("q",{a:"3/4 "});assert.equal(h.states[2],"saved");assert.equal(remote.q.submitted,true);await h.hook.submit("q",{a:"3/4"+String.fromCharCode(10)});assert.equal(h.states[2],"saved");h.cleanup();canonicalize=false;
+  await assert.rejects(h.hook.submit("q",{a:displayed}),/已提交.*锁定/);assert.equal(remote.q.answers.a,"other-device-latest");assert.equal(calls.filter(c=>c.method!=="GET").length,oldUiWrites);
+  await assert.rejects(h.hook.submit("q",{a:displayed}),/已提交.*锁定/);assert.equal(remote.q.answers.a,"other-device-latest");h.cleanup();
+  storage.clear();remote={};canonicalize=true;h=mount();await settle();h.hook.draft("q",{a:"3/4 "});await h.hook.flush();assert.equal(h.states[2],"saved");assert.deepEqual(JSON.parse(storage.get(key)).dirtyQuestionIds,[]);assert.equal(h.states[0].responses.q.answers.a,"3/4");assert.equal(h.states[0].responses.q.answers.b,"");await h.hook.submit("q",{a:"3/4 "});assert.equal(h.states[2],"saved");assert.equal(remote.q.submitted,true);await assert.rejects(h.hook.submit("q",{a:"3/4"+String.fromCharCode(10)}),/已提交.*锁定/);assert.equal(h.states[2],"saved");h.cleanup();canonicalize=false;
 
   storage.clear();remote={};h=mount();await settle();
   holdDraft=new Promise(resolve=>{holdResolve=resolve;});
@@ -133,7 +134,7 @@ async function testProgressHook() {
   remote={q:response({"blank-1":"cloud","blank-2":"latest"},11,true)};storage.set(key,JSON.stringify({responses:{q:{...response({"old-aggregate":"old-local"},10),baseRevision:10}},dirtyQuestionIds:["q"],pausedLegacyQuestionIds:["q"],legacyHistory:{q:{"old-aggregate":"old-local"}}}));
   const revisionWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();h.hook.observeQuestion(nativeQuestion);h.hook.draft("q",{"blank-1":"student","blank-2":"new"});await h.hook.flush();
   assert.equal(calls.filter(c=>c.method!=="GET").length,revisionWrites);assert.equal(remote.q.answers["blank-1"],"cloud");
-  await assert.rejects(h.hook.submit("q",{"blank-1":"student","blank-2":"new"}),/没有覆盖/);assert.equal(remote.q.revision,11);h.cleanup();
+  await assert.rejects(h.hook.submit("q",{"blank-1":"student","blank-2":"new"}),/已提交.*锁定/);assert.equal(remote.q.revision,11);h.cleanup();
 
   // Reused text IDs are the dangerous case: old answer-1 contained the whole
   // response, while the native question reuses it for only the first blank.
@@ -162,7 +163,7 @@ async function testProgressHook() {
   remote={q:response({"answer-1":"cloud","blank-2":"latest"},19,true)};
   storage.set(key,JSON.stringify({responses:{q:{...response({"answer-1":"partial-native"},18),baseRevision:18,nativeInputSchema:nativeSchema}},dirtyQuestionIds:["q"],legacyHistory:{q:{"answer-1":"完整的旧聚合作答"}}}));
   const partialConflictWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();
-  assert.equal(h.states[2],"conflict");assert.equal(calls.filter(c=>c.method!=="GET").length,partialConflictWrites,"a native schema marker cannot grant revision overwrite rights");
+  assert.equal(h.states[2],"saved");assert.equal(calls.filter(c=>c.method!=="GET").length,partialConflictWrites,"a native schema marker cannot grant submitted-record overwrite rights");
   assert.equal(h.hook.getLegacyAnswers("q")["answer-1"],"完整的旧聚合作答");h.cleanup();canonicalize=false;
 
   const choiceQuestion={id:"q",inputs:[{id:"answer-1",label:"选择",kind:"choice",choices:["A","B","C","D"]}],native:{version:1,blocks:[{type:"paragraph",content:[{type:"blank",fieldId:"answer-1"}]}]}};
@@ -177,7 +178,66 @@ async function testProgressHook() {
   storage.clear();remote={q:response({},13)};storage.set(key,JSON.stringify({responses:{q:{...response({"answer-1":"C"},13),baseRevision:13}},dirtyQuestionIds:["q"]}));
   const validChoiceWrites=calls.length;h=mount();await settle();assert.equal(calls.slice(validChoiceWrites).filter(c=>c.method==="PUT").length,1,"valid native choice still saves normally");assert.equal(remote.q.answers["answer-1"],"C");h.cleanup();
 
-  console.log(JSON.stringify({passed:true,scenarios:["no local grade promotion","failed dirty/base persistence","online retry","preserve later edits with server revision","GET stale conflict blocks auto retry","first manual conflict no overwrite","second explicit submit","POST conflict then explicit retry","future client clock cannot override","server trim / empty field equivalence","pagehide save before accept then reload","equal other-device submission keeps server grade","clean late GET legacy remains read-only","old v1 legacy cache pauses before PUT","dirty legacy pauses before PUT and survives reload","other questions continue saving","explicit native input resumes sync without deleting history","native dirty fields resume normally","legacy pause preserves cloud revision conflict barrier","same-name aggregate clean GET stays historic","same-name dirty aggregate pauses across reload","explicit partial native schema persists and resumes","complete empty native fields remain valid","native schema does not bypass revision conflict","same-name invalid choice GET remains read-only","dirty invalid choice pauses and survives reload","explicit choice resumes and preserves historic text","valid native choice still saves"],mockWrites:calls.filter(c=>c.method!=="GET").length,studentWrites:0}));
+  // Removed duplicates are not network failures. A cached unsaved answer must
+  // stay readable, but may never be replayed or copied into a retained question.
+  questionSchemas.clear();storage.clear();remote={other:response({},0)};retiredQuestions.add("retired");
+  const retiredOriginal={...response({a:"local-retired-answer",b:"second-blank"},8),baseRevision:8};
+  storage.set(key,JSON.stringify({responses:{retired:retiredOriginal,other:response({a:"active-answer"},0)},lastQuestionId:"retired",updatedAt:"",dirtyQuestionIds:["retired","other"]}));
+  const retiredStart=calls.length;h=mount();await settle();
+  assert.equal(calls.slice(retiredStart).filter(c=>c.method!=="GET"&&c.body.question_id==="retired").length,0,"GET 410 prevents every retired draft write");
+  assert.equal(remote.other.answers.a,"active-answer","retiring one ID does not block active drafts");
+  assert.equal(h.states[2],"saved","retired drafts do not cause perpetual saving/offline messages");
+  const retiredPreserved={...retiredOriginal,revision:0};
+  assert.deepEqual(JSON.parse(JSON.stringify(h.hook.getResponse("retired"))),retiredPreserved,"retirement retains the original local answer/base revision; refresh only reads the current cloud revision");
+  assert.deepEqual(JSON.parse(storage.get(key)).dirtyQuestionIds,["retired"]);
+  assert.deepEqual(JSON.parse(storage.get(key)).pausedRetiredQuestionIds,["retired"]);
+  const retiredReadCount=calls.filter(c=>c.url.endsWith("/questions/retired")).length;
+  const retiredWriteCount=calls.filter(c=>c.method!=="GET"&&c.body.question_id==="retired").length;
+  await h.hook.flush();h.events.get("online")();await settle();h.cleanup();h=mount();await settle();await h.hook.flush();
+  assert.equal(calls.filter(c=>c.url.endsWith("/questions/retired")).length,retiredReadCount,"retired schema GET is not retried on online or reload");
+  assert.deepEqual(JSON.parse(JSON.stringify(h.hook.getResponse("retired"))),retiredPreserved,"retired local draft survives cloud refresh and reload");
+  h.hook.draft("retired",{a:"forbidden-new-input"});await assert.rejects(h.hook.submit("retired",{a:"forbidden-new-input"}),/重复题.*移出.*不能再提交/);await h.hook.flush();
+  assert.equal(calls.filter(c=>c.method!=="GET"&&c.body.question_id==="retired").length,retiredWriteCount);
+  assert.equal(h.hook.getResponse("retired").answers.a,"local-retired-answer");
+  remote.retired=response({a:"first-cloud-answer",b:"cloud-second"},9,true);h.events.get("online")();await settle();
+  assert.equal(h.hook.getResponse("retired").score,1);assert.equal(h.hook.getResponse("retired").revision,9,"real submitted history remains authoritative");
+  assert.equal(h.hook.getLegacyAnswers("retired").a,"local-retired-answer","archived unsaved answer is not erased by late submitted history");
+  assert.equal(remote.retired.answers.a,"first-cloud-answer");h.cleanup();
+
+  storage.clear();remote={legacyRetired:response({},6)};retiredQuestions.add("legacyRetired");
+  storage.set(key,JSON.stringify({responses:{legacyRetired:{...response({"old-aggregate":"old-retired-aggregate"},5),baseRevision:5}},dirtyQuestionIds:["legacyRetired"],pausedLegacyQuestionIds:["legacyRetired"],conflicts:{legacyRetired:{revision:6,acknowledged:false}},legacyHistory:{legacyRetired:{"old-aggregate":"even-older-aggregate"}}}));
+  const blockedRetiredStart=calls.length;h=mount();await settle();
+  assert.equal(calls.slice(blockedRetiredStart).filter(c=>c.url.endsWith("/questions/legacyRetired")).length,1,"blocked legacy/conflict caches still receive one read-only retirement probe");
+  assert.equal(calls.slice(blockedRetiredStart).filter(c=>c.method!=="GET").length,0);
+  assert.equal(h.states[2],"saved");assert.deepEqual(JSON.parse(storage.get(key)).conflicts,{});assert.deepEqual(JSON.parse(storage.get(key)).pausedLegacyQuestionIds,[]);
+  assert.deepEqual(JSON.parse(storage.get(key)).pausedRetiredQuestionIds,["legacyRetired"]);assert.equal(h.hook.getResponse("legacyRetired").answers["old-aggregate"],"old-retired-aggregate");
+  assert.equal(h.hook.getLegacyAnswers("legacyRetired")["old-aggregate"],"even-older-aggregate");assert.equal(h.hook.getLegacyAnswers("legacyRetired")["retired-draft:old-aggregate"],"old-retired-aggregate","retirement does not overwrite an older reused-ID history entry");h.cleanup();
+
+  // A component mounted before release can already hold its public schema.
+  // Its first PUT may receive 410, after which no automatic or manual retry is
+  // permitted. No successful server save or grade is invented locally.
+  storage.clear();remote={q:response({},2)};retiredDrafts.add("q");h=mount();await settle();
+  h.hook.observeQuestion({id:"q",inputs:[{id:"a",label:"答案",kind:"text"}]});h.hook.draft("q",{a:"retired-put-answer"});await h.hook.flush();
+  assert.deepEqual(JSON.parse(storage.get(key)).pausedRetiredQuestionIds,["q"]);assert.equal(h.states[2],"saved");
+  const retiredPutWrites=calls.filter(c=>c.method!=="GET"&&c.body.question_id==="q").length;
+  h.events.get("pagehide")();h.events.get("online")();await settle();await h.hook.flush();
+  assert.equal(calls.filter(c=>c.method!=="GET"&&c.body.question_id==="q").length,retiredPutWrites);
+  assert.equal(h.hook.getResponse("q").answers.a,"retired-put-answer");assert.equal(remote.q.revision,2);
+  h.cleanup();h=mount();await settle();await h.hook.flush();assert.equal(calls.filter(c=>c.method!=="GET"&&c.body.question_id==="q").length,retiredPutWrites);h.cleanup();retiredDrafts.clear();
+
+  // A release between draft acknowledgement and explicit submit can produce
+  // POST 410. Preserve that acknowledged draft and do not mark it submitted.
+  storage.clear();remote={q:response({a:"retired-post-answer"},4)};retiredSubmits.add("q");h=mount();await settle();
+  h.hook.observeQuestion({id:"q",inputs:[{id:"a",label:"答案",kind:"text"}]});
+  await assert.rejects(h.hook.submit("q",{a:"retired-post-answer"}),/重复题.*移出.*不能再提交/);
+  assert.equal(h.states[2],"saved");assert.equal(h.hook.getResponse("q").submitted,false);assert.equal(h.hook.getResponse("q").revision,4);assert.equal(h.hook.getResponse("q").answers.a,"retired-post-answer");
+  assert.deepEqual(JSON.parse(storage.get(key)).pausedRetiredQuestionIds,["q"]);assert.deepEqual(JSON.parse(storage.get(key)).dirtyQuestionIds,["q"]);
+  const retiredPostWrites=calls.filter(c=>c.method!=="GET"&&c.body.question_id==="q").length;
+  await assert.rejects(h.hook.submit("q",{a:"retired-post-answer"}),/重复题.*移出.*不能再提交/);h.events.get("online")();await settle();await h.hook.flush();h.cleanup();
+  h=mount();await settle();await h.hook.flush();assert.equal(calls.filter(c=>c.method!=="GET"&&c.body.question_id==="q").length,retiredPostWrites);assert.equal(h.hook.getResponse("q").answers.a,"retired-post-answer");assert.equal(remote.q.submitted,false);h.cleanup();
+  retiredQuestions.clear();retiredSubmits.clear();
+
+  console.log(JSON.stringify({passed:true,scenarios:["no local grade promotion","failed dirty/base persistence","online retry","preserve later edits with server revision","submitted GET drops stale drafts","submitted records reject every manual retry","POST conflict locks authoritative record","future client clock cannot override","server trim / empty field equivalence","pagehide save before accept then reload","equal other-device submission keeps server grade","clean late GET legacy remains read-only","old v1 legacy cache pauses before PUT","dirty legacy pauses before PUT and survives reload","other questions continue saving","explicit native input resumes sync without deleting history","native dirty fields resume normally","legacy pause cannot override submitted cloud answer","same-name aggregate clean GET stays historic","same-name dirty aggregate pauses across reload","explicit partial native schema persists and resumes","complete empty native fields remain valid","native schema does not bypass submission lock","same-name invalid choice GET remains read-only","dirty invalid choice pauses and survives reload","explicit choice resumes and preserves historic text","valid native choice still saves","retired GET pauses before writes and retains draft","retired pause survives online and reload without retries","retired IDs reject local edits and manual submit","retired history accepts authoritative submitted record without writes","blocked legacy/conflict cache probes retirement without writes","PUT 410 pauses mounted question and preserves local draft","POST 410 preserves acknowledged draft without local grade promotion"],mockWrites:calls.filter(c=>c.method!=="GET").length,studentWrites:0}));
 
 }
 
@@ -186,10 +246,10 @@ async function testQuestionControls() {
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;
   const states=[];let index=0,lastDraft=null;
   const jsx=(type,props)=>({type,props});const react={useState:init=>{const i=index++;if(!(i in states))states[i]=typeof init==="function"?init():init;return[states[i],value=>{states[i]=typeof value==="function"?value(states[i]):value;}];},useRef:v=>({current:v}),useEffect:()=>{},useMemo:f=>f()};
-  const context={module:{exports:{}},exports:{},require:name=>{if(name==="react")return react;if(name==="react/jsx-runtime")return{jsx,jsxs:jsx,Fragment:"fragment"};if(name==="next/link")return{default:"link"};if(name==="./grade6-bank.module.css")return{default:new Proxy({},{get:(_,key)=>String(key)})};if(name==="./grade6-bank-native")return{Grade6BankNative:()=>null};if(name.endsWith("grade6-bank-progress"))return{};if(name.endsWith("grade6-bank-input-schema"))return schemaContext.module.exports;if(name.endsWith("grade6-bank-types"))return{BANK_DIFFICULTIES:[{value:1,label:"基础"}],bankStats:()=>({})};throw new Error(name);},console};
+  const context={module:{exports:{}},exports:{},require:name=>{if(name==="react")return react;if(name==="react/jsx-runtime")return{jsx,jsxs:jsx,Fragment:"fragment"};if(name==="next/link")return{default:"link"};if(name==="./grade6-bank.module.css")return{default:new Proxy({},{get:(_,key)=>String(key)})};if(name==="./grade6-bank-native")return{Grade6BankNative:()=>null};if(name==="./grade6-bank-solution")return{Grade6BankSolution:()=>null};if(name.endsWith("grade6-bank-progress"))return{};if(name.endsWith("grade6-bank-input-schema"))return schemaContext.module.exports;if(name.endsWith("grade6-bank-types"))return{BANK_DIFFICULTIES:[{value:1,label:"基础"}],bankStats:()=>({})};throw new Error(name);},console};
   context.exports=context.module.exports;vm.runInNewContext(code,context);
   const record=(a,b,revision,submitted=false)=>({answers:{a,b},revision,submitted,outcome:submitted?"correct":null,score:submitted?2:null,maxScore:2,submissions:0,updatedAt:""});
-  const progress={progress:{responses:{q:record("old-a","old-b",1)}},getResponse:id=>progress.progress.responses[id],draft:(id,answers)=>{lastDraft=structuredClone(answers);progress.progress.responses[id]={...progress.progress.responses[id],answers,baseRevision:progress.progress.responses[id].revision,submitted:false};},submit:async(id,answers)=>{progress.progress.responses[id]={...progress.progress.responses[id],answers,revision:progress.progress.responses[id].revision+1,submitted:true};return{questionId:id,outcome:"correct",score:2,maxScore:2,fields:[],message:"ok",answerText:"private-analysis",answerImages:[]};}};
+  const progress={ready:true,progress:{responses:{q:record("old-a","old-b",1)}},getResponse:id=>progress.progress.responses[id],draft:(id,answers)=>{lastDraft=structuredClone(answers);progress.progress.responses[id]={...progress.progress.responses[id],answers,baseRevision:progress.progress.responses[id].revision,submitted:false};},submit:async(id,answers)=>{progress.progress.responses[id]={...progress.progress.responses[id],answers,revision:progress.progress.responses[id].revision+1,submitted:true};return{questionId:id,outcome:"correct",score:2,maxScore:2,fields:[],message:"ok",answerText:"private-analysis",answerImages:[]};}};
   const props={question:{id:"q",number:1,difficulty:1,kind:"multi_blank",prompt:"problem",sourceName:"source",sourcePage:1,originalNumber:"1",questionImages:[],inputs:[{id:"a",label:"空1",kind:"text"},{id:"b",label:"空2",kind:"text"}]},collection:{palette:1,questionCount:2},position:0,count:2,progress,go:()=>{}};
   const render=()=>{index=0;return context.module.exports.__QuestionSession(props);};
   const nodes=node=>Array.isArray(node)?node.flatMap(nodes):!node||typeof node!=="object"?[]:[node,...(Array.isArray(node.props?.children)?node.props.children:[node.props?.children]).flatMap(nodes)];
@@ -207,9 +267,10 @@ async function testQuestionControls() {
   tree=render();assert.equal(lastDraft,null);assert(nodes(tree).some(n=>n.type==="details"));
   assert.deepEqual(nodes(tree).filter(n=>n.type==="textarea").map(n=>n.props.value),["",""]);
   nodes(tree).find(n=>n.type==="textarea").props.onChange({target:{value:"3/4"}});
-  assert.deepEqual(lastDraft,{a:"3/4"},"explicit edit must not send unknown old keys");
-  assert(nodes(render()).some(n=>n.type==="details"),"historic aggregate remains visible after editing");
-  console.log(JSON.stringify({passed:true,componentScenarios:["clean multi-input refresh","partial edit preserves other latest blanks","external revision invalidates feedback","legacy answers read without writes","never comma-split old fields","explicit edit drops unknown payload keys"]}));
+  assert.equal(lastDraft,null,"submitted historic records cannot be edited or regraded after native migration");
+  assert(nodes(tree).filter(n=>n.type==="textarea").every(n=>n.props.disabled));
+  assert(nodes(render()).some(n=>n.type==="details"),"historic aggregate remains visible while locked");
+  console.log(JSON.stringify({passed:true,componentScenarios:["clean multi-input refresh","partial edit preserves other latest blanks","external revision invalidates feedback","legacy answers read without writes","never comma-split old fields","submitted legacy controls disabled and edit guarded"]}));
 
 }
 

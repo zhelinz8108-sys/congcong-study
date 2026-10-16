@@ -2,20 +2,16 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  GRADE_SIX_DIFFICULTY_META,
-  MATH_GRADE_SIX_UNITS,
-  getQuestionAnswerLabel,
   type GradeSixDifficulty,
   type GradeSixQuestion,
 } from "@/lib/math-grade-six";
-import {
-  MATH_GRADE_SIX_ALL_QUESTIONS,
-  MATH_GRADE_SIX_QUESTIONS_BY_UNIT,
-  MATH_GRADE_SIX_TOTAL_QUESTIONS,
-  getGradeSixUnitQuestionCounts,
-} from "@/lib/math-grade-six-question-bank";
+import publicMeta from "@/data/math-grade-six-meta.public.json";
+const MATH_GRADE_SIX_UNITS = publicMeta.units;
+const GRADE_SIX_DIFFICULTY_META = publicMeta.difficulties;
+type PublicQuestion = Omit<GradeSixQuestion, "answerIndex" | "explanation">;
+type AnswerRecord = { value: number; feedback: { answerIndex: number; explanation: string; isCorrect: boolean } };
 
 const optionLetters = ["A", "B", "C", "D"];
 type DifficultyFilter = GradeSixDifficulty | "all";
@@ -30,14 +26,18 @@ const difficultyFilters: Array<{ key: DifficultyFilter; label: string }> = [
 function QuestionCard({
   question,
   selected,
+  feedback,
+  pending,
   onSelect,
 }: {
-  question: GradeSixQuestion;
+  question: PublicQuestion;
   selected?: number;
+  feedback?: AnswerRecord["feedback"];
+  pending: boolean;
   onSelect: (index: number) => void;
 }) {
   const answered = selected !== undefined;
-  const selectedCorrect = selected === question.answerIndex;
+  const selectedCorrect = feedback?.isCorrect;
   const meta = GRADE_SIX_DIFFICULTY_META[question.difficulty];
 
   return (
@@ -76,7 +76,7 @@ function QuestionCard({
 
       <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
         {question.options.map((option, index) => {
-          const isCorrect = index === question.answerIndex;
+          const isCorrect = index === feedback?.answerIndex;
           const isSelected = selected === index;
           const tone = !answered
             ? "border-neutral-200 bg-white hover:border-blue-300 hover:bg-blue-50"
@@ -90,6 +90,7 @@ function QuestionCard({
             <button
               key={`${question.id}-${option}`}
               type="button"
+              disabled={answered || pending}
               onClick={() => onSelect(index)}
               className={`flex min-h-14 items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition ${tone}`}
             >
@@ -105,9 +106,9 @@ function QuestionCard({
       {answered && (
         <div className="border-t border-neutral-100 bg-blue-50/40 px-4 py-4 sm:px-5">
           <p className="text-sm font-black text-neutral-950">
-            正确答案：{getQuestionAnswerLabel(question)}
+            正确答案：{feedback ? `${optionLetters[feedback.answerIndex]}. ${question.options[feedback.answerIndex]}` : ""}
           </p>
-          <p className="mt-2 text-sm leading-7 text-neutral-700">{question.explanation}</p>
+          <p className="mt-2 text-sm leading-7 text-neutral-700">{feedback?.explanation}</p>
         </div>
       )}
     </article>
@@ -119,15 +120,37 @@ export default function MathGradeSixPage() {
   const [activeUnitKey, setActiveUnitKey] = useState("unit-1");
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("all");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, AnswerRecord>>({});
+  const [bank, setBank] = useState<Record<string, PublicQuestion[]>>({});
+  const [pending, setPending] = useState(false), [notice, setNotice] = useState("");
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/math/grade-six", { cache: "no-store" }).then(async response => {
+      const result = await response.json(); if (!response.ok) throw new Error(result.error || "学习记录暂不可用");
+      if (active) { setBank(result.units); setAnswers(result.attempts); }
+    }).catch(error => { if (active) setNotice(error instanceof Error ? error.message : "学习记录暂不可用"); });
+    return () => { active = false; };
+  }, [id]);
+  const selectAnswer = async (question: PublicQuestion, index: number) => {
+    if (pending || answers[question.id]) return;
+    setPending(true); setNotice("");
+    try {
+      const response = await fetch("/api/math/grade-six", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question_id: question.id, value: index }), cache: "no-store" });
+      const result = await response.json(); if (!response.ok) throw new Error(result.error || "提交失败");
+      setAnswers(previous => ({ ...previous, [question.id]: result }));
+    } catch (error) { setNotice(error instanceof Error ? error.message : "提交失败"); } finally { setPending(false); }
+  };
+  const MATH_GRADE_SIX_ALL_QUESTIONS = Object.values(bank).flat();
+  const MATH_GRADE_SIX_TOTAL_QUESTIONS = MATH_GRADE_SIX_ALL_QUESTIONS.length;
   const activeUnit = MATH_GRADE_SIX_UNITS.find((unit) => unit.key === activeUnitKey) ?? MATH_GRADE_SIX_UNITS[0];
-  const activeUnitQuestions = MATH_GRADE_SIX_QUESTIONS_BY_UNIT[activeUnit.key] ?? [];
+  const activeUnitQuestions = useMemo(() => bank[activeUnit.key] ?? [], [bank, activeUnit.key]);
+  const getGradeSixUnitQuestionCounts = (unit: string) => { const rows = bank[unit] ?? []; return { total: rows.length, medium: rows.filter(q => q.difficulty === "medium").length, hard: rows.filter(q => q.difficulty === "hard").length, super: rows.filter(q => q.difficulty === "super").length }; };
   const counts = getGradeSixUnitQuestionCounts(activeUnit.key);
   const answeredCount = MATH_GRADE_SIX_ALL_QUESTIONS.filter(
     (question) => answers[question.id] !== undefined
   ).length;
   const correctCount = MATH_GRADE_SIX_ALL_QUESTIONS.filter(
-    (question) => answers[question.id] === question.answerIndex
+    (question) => answers[question.id]?.feedback.isCorrect
   ).length;
 
   const questions = useMemo(
@@ -141,26 +164,20 @@ export default function MathGradeSixPage() {
   const currentQuestion = questions[currentQuestionIndex];
   const answeredQuestions = questions.filter((question) => answers[question.id] !== undefined);
   const filteredCorrectCount = answeredQuestions.filter(
-    (question) => answers[question.id] === question.answerIndex
+    (question) => answers[question.id]?.feedback.isCorrect
   ).length;
   const accuracyPercent =
     answeredQuestions.length === 0 ? 0 : Math.round((filteredCorrectCount / answeredQuestions.length) * 100);
   const progressPercent = questions.length === 0 ? 0 : ((currentQuestionIndex + 1) / questions.length) * 100;
 
   const resetCurrentQuestionSet = () => {
-    setAnswers((prev) => {
-      const next = { ...prev };
-      questions.forEach((question) => {
-        delete next[question.id];
-      });
-      return next;
-    });
     setCurrentIndex(0);
   };
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] px-4 py-6 text-neutral-950 sm:px-6">
       <div className="mx-auto max-w-6xl">
+        {notice && <p role="alert" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">{notice}</p>}
         <header className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <Link
@@ -347,13 +364,10 @@ export default function MathGradeSixPage() {
               <QuestionCard
                 key={currentQuestion.id}
                 question={currentQuestion}
-                selected={answers[currentQuestion.id]}
-                onSelect={(index) =>
-                  setAnswers((prev) => ({
-                    ...prev,
-                    [currentQuestion.id]: index,
-                  }))
-                }
+                selected={answers[currentQuestion.id]?.value}
+                feedback={answers[currentQuestion.id]?.feedback}
+                pending={pending}
+                onSelect={index => void selectAnswer(currentQuestion, index)}
               />
 
               <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -370,7 +384,7 @@ export default function MathGradeSixPage() {
                   onClick={resetCurrentQuestionSet}
                   className="rounded-xl border border-neutral-200 px-5 py-3 text-sm font-bold text-neutral-600 transition hover:border-amber-300 hover:bg-amber-50"
                 >
-                  重做本组
+                  回到第一题
                 </button>
                 <button
                   type="button"

@@ -17,6 +17,7 @@ export async function GET(
 ) {
   const { setId, index } = await params;
   const kind = request.nextUrl.searchParams.get("kind") === "answer" ? "answer" : "source";
+  if (kind === "answer") return NextResponse.json({ error: "答案仅在对应题目首次提交后显示" }, { status: 403 });
   const file = await getLocalQuestionSourceFile(setId, kind, Number(index));
 
   if (!file) {

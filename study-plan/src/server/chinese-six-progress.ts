@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import { pool } from "@/lib/db";
 import { ensureCloudProgressSchema } from "@/lib/cloud-progress-schema";
 import { localDataFallbackAllowed } from "@/lib/local-fallback";
-import { emptySixProgress, rateSixResponse, recordSixResponse, sixAttemptStats, type SixProgress, type SixFeedback, type SixResponse } from "@/lib/chinese-six";
+import { emptySixProgress, recordSixResponse, sixFirstAttempt, sixAttemptStats, type SixProgress, type SixFeedback, type SixResponse } from "@/lib/chinese-six";
 import { sixFeedback, sixPrivateItem } from "./chinese-six-bank";
 
 const scope = "chinese:six:v1";
@@ -19,6 +19,8 @@ export function transitionSixProgress(state: SixProgress, input: SixAction): Six
   const now = new Date().toISOString();
   if (input.action === "review") return { ...state, reviewed: [...new Set([...state.reviewed, item.id])] };
   if (input.action === "start") {
+    const existing = sixFirstAttempt(state, item.id);
+    if (existing) return state.current[item.id] === existing.id ? state : { ...state, current: { ...state.current, [item.id]: existing.id } };
     if (Object.keys(state.attempts).length >= 1000) throw new Error("练习记录已达上限，请先联系家长导出。");
     const id = randomUUID();
     return { ...state, current: { ...state.current, [item.id]: id }, attempts: { ...state.attempts,
@@ -28,9 +30,10 @@ export function transitionSixProgress(state: SixProgress, input: SixAction): Six
   if (!attempt || attempt.itemId !== item.id || state.current[item.id] !== attempt.id) throw new Error("练习记录已变化，请刷新页面。");
   const question = item.questions.find(q => q.id === input.questionId);
   if (!question) throw new Error("没有找到这道题。");
+  if (input.action === "rate") throw new Error("本题已提交，成绩不可由学生自行修改；简答题等待复核。");
+  if (sixFirstAttempt(state, item.id)?.responses[question.id]) throw new Error("本题已提交，答案已永久锁定。");
   const updated = input.action === "answer"
     ? recordSixResponse(attempt, question, input.value ?? "", question.answer, now)
-    : input.action === "rate" ? rateSixResponse(attempt, question.id, input.score)
     : (() => { throw new Error("无效操作。"); })();
   if (sixAttemptStats(updated, item.questions.length).complete) updated.finishedAt ??= now;
   return { ...state, attempts: { ...state.attempts, [updated.id]: updated } };
@@ -55,10 +58,11 @@ async function localState(studentId: string, action?: SixAction): Promise<SixPro
 }
 
 export async function sixStudentProgress(studentId: string, action?: SixAction) {
-  // Fallback is restricted to development or an explicitly configured local host.
+  // Production answers must never switch to an independent filesystem record.
+  // A cloud outage cannot make already-submitted questions appear unanswered.
   try { await ensureCloudProgressSchema(); }
   catch (error) {
-    if (!localDataFallbackAllowed()) throw error;
+    if (process.env.NODE_ENV === "production" || !localDataFallbackAllowed()) throw error;
     return { progress: await localState(studentId, action), storage: "local" as const };
   }
   const client = await pool.connect();

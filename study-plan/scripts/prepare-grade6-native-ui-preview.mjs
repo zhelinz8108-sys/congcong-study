@@ -18,7 +18,7 @@ const collections=manifest.collections.filter(c=>c.questions.some(q=>native.has(
 });
 if(!collections.length || selected.some(q=>!q.native || q.questionImages.length)) throw new Error("Invalid public-only preview fixture");
 await fs.writeFile(path.join(dest,"fixture.public.json"),JSON.stringify({collections,questions:selected}));
-for(const file of ["components/grade6-bank.tsx","components/grade6-bank.module.css","components/grade6-bank-native.tsx","components/grade6-bank-native.module.css","lib/grade6-bank-types.ts","lib/grade6-bank-native-types.ts","lib/grade6-bank-native-validation.ts","lib/grade6-bank-input-schema.ts"]){
+for(const file of ["components/grade6-bank.tsx","components/grade6-bank.module.css","components/grade6-bank-native.tsx","components/grade6-bank-native.module.css","components/grade6-bank-solution.tsx","components/math-text.tsx","lib/grade6-bank-solution.ts","lib/grade6-bank-types.ts","lib/grade6-bank-native-types.ts","lib/grade6-bank-native-validation.ts","lib/grade6-bank-input-schema.ts"]){
   await fs.mkdir(path.dirname(path.join(dest,"src",file)),{recursive:true}); await fs.copyFile(path.join("src",file),path.join(dest,"src",file));
 }
 console.log(JSON.stringify({publicPreviewQuestions:selected.length,collections:collections.map(c=>({id:c.id,previewCount:c.questions.length,originalCount:c.questionCount})),realStudentWrites:0}));

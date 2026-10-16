@@ -8,6 +8,7 @@ import {
   type ListeningProgressStore,
 } from "@/lib/listening-yiben-storage";
 import type { ListeningExerciseSummary } from "@/lib/listening-yiben-types";
+import { useEnglishLocked } from "@/lib/use-english-locked";
 
 type Props = {
   subjectId: string;
@@ -34,6 +35,7 @@ const partMeta: Record<string, { range: string; description: string; tone: strin
 };
 
 export default function YibenListeningIndex({ subjectId, title, exercises }: Props) {
+  const locked = useEnglishLocked("listening", subjectId);
   const [progress, setProgress] = useState<ListeningProgressStore>({ exercises: {} });
 
   useEffect(() => {
@@ -49,6 +51,11 @@ export default function YibenListeningIndex({ subjectId, title, exercises }: Pro
       window.clearTimeout(timer);
     };
   }, []);
+  const authoritative: ListeningProgressStore = { exercises: Object.fromEntries(Object.entries(progress.exercises).filter(([, exercise]) => !exercise.submitted)) };
+  for (const [id, record] of Object.entries(locked.records)) {
+    const score = record.feedback.score ?? 0, total = record.feedback.total ?? 0;
+    authoritative.exercises[id] = { answers: typeof record.response === "object" && !Array.isArray(record.response) ? record.response : {}, submitted: true, score, bestScore: score, total, attempts: 1, updatedAt: record.submittedAt };
+  }
 
   const grouped = useMemo(() => {
     const result = new Map<string, Map<string, ListeningExerciseSummary[]>>();
@@ -62,14 +69,14 @@ export default function YibenListeningIndex({ subjectId, title, exercises }: Pro
   }, [exercises]);
 
   const completed = exercises.filter(
-    (exercise) => progress.exercises[String(exercise.number).padStart(3, "0")]?.submitted,
+    (exercise) => authoritative.exercises[String(exercise.number).padStart(3, "0")]?.submitted,
   ).length;
   const totalBest = exercises.reduce((sum, exercise) => {
-    const saved = progress.exercises[String(exercise.number).padStart(3, "0")];
+    const saved = authoritative.exercises[String(exercise.number).padStart(3, "0")];
     return sum + (saved?.submitted ? saved.bestScore : 0);
   }, 0);
   const totalPossible = exercises.reduce((sum, exercise) => {
-    const saved = progress.exercises[String(exercise.number).padStart(3, "0")];
+    const saved = authoritative.exercises[String(exercise.number).padStart(3, "0")];
     return sum + (saved?.submitted ? saved.total : 0);
   }, 0);
 
@@ -106,7 +113,7 @@ export default function YibenListeningIndex({ subjectId, title, exercises }: Pro
                 <p className="text-xl font-black">
                   {totalPossible ? Math.round((totalBest / totalPossible) * 100) : 0}%
                 </p>
-                <p className="text-xs">最佳正确率</p>
+                <p className="text-xs">首次正确率</p>
               </div>
             </div>
           </div>
@@ -147,7 +154,7 @@ export default function YibenListeningIndex({ subjectId, title, exercises }: Pro
                       </div>
                       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                         {topicExercises.map((exercise) => {
-                          const saved = progress.exercises[String(exercise.number).padStart(3, "0")];
+                          const saved = authoritative.exercises[String(exercise.number).padStart(3, "0")];
                           const complete = Boolean(saved?.submitted);
                           const hasDraft = Boolean(saved && !saved.submitted && Object.keys(saved.answers).length);
                           const bestPercent = saved?.total
@@ -182,7 +189,7 @@ export default function YibenListeningIndex({ subjectId, title, exercises }: Pro
                               </p>
                               <p className="mt-2 text-xs font-semibold text-neutral-500">
                                 {complete
-                                  ? `最佳 ${bestPercent}%`
+                                  ? `首次 ${bestPercent}% · 已锁定`
                                   : hasDraft
                                     ? "继续未完成练习"
                                     : "尚未开始"}
