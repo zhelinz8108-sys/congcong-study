@@ -10,29 +10,43 @@ import { englishSixResource } from "./english-six";
 type Source = { page: number; block: number };
 type Exercise = SixBankQuestion & { answer: string; explanation: string; accepted: string[][]; choice?: string; sources: Source[] };
 type Candidate = { number: number; prompt: string; optionText: string; instruction: string; topic: string; sources: Source[] };
-type Key = { number: number; text: string; explanation: string };
+type Key = { number: number; text: string; explanation: string; group: string };
 type Plan = { exercises: Exercise[]; hidden: Source[]; unmatched: number; groups: { questions: number[]; keys: number[]; pages: number[] }[] };
 const cache = new Map<string, Plan>();
 const numbered = /^\s*(?:[（(]\s*[）)]\s*)?(\d+)[.、．)]\s*([\s\S]*)$/;
 const answerHeading = (text: string) => /^(?:【|\[)?\s*(?:参考答案(?:[与及和](?:逐题|详细)?解析)?|答案(?:[与及和]解析)?|详细解析)\s*(?:】|\])?\s*[:：]?\s*$/.test(text);
 const taskHeading = (text: string) => /小练笔|综合训练|易错精讲|复习小贴士/.test(text);
 const source = (page: number, node: ReaderNode) => node.sources.map(block => ({ page, block }));
+const answerGroup = (text: string) => /补全对话/.test(text) ? "dialogue" : /句型转换/.test(text) ? "sentence" : /单[项选]|选择/.test(text) ? "choice" : /填空/.test(text) ? "fill" : "";
 
 function answerEntries(nodes: ReaderNode[]): Key[] {
   const keys: Key[] = [];
+  let group = "", explaining = false;
   for (const node of nodes) {
+    if (/^详细解析\s*[:：]?$/.test(node.text)) { explaining = true; continue; }
+    if (explaining) {
+      // Only attach explicitly numbered explanations to their own question.
+      // Shared summaries can disclose other questions' answers.
+      const detail = /^[•●]?\s*(填空|单选|句型转换)第(\d+)题\s*[:：]\s*([\s\S]*)$/.exec(node.text);
+      if (detail) keys.filter(key => key.group === answerGroup(detail[1]) && key.number === Number(detail[2]))
+        .forEach(key => { key.explanation += `${key.explanation ? " " : ""}${detail[3]}`; });
+      continue;
+    }
+    if (node.kind === "subheading") group = answerGroup(node.text) || group;
     // Some PDFs place several short numbered answers in one extracted block.
-    const matches = [...node.text.matchAll(/(?:^|\s)(\d{1,3})[.、．)]\s*/g)];
-    if (matches.length && matches[0].index === 0) {
+    const matches = [...node.text.matchAll(/(?:^|[\s：:])(\d{1,3})[.、．)]\s*/g)];
+    if (matches.length) {
+      const prefix = node.text.slice(0, matches[0].index).trim();
+      if (prefix && keys.length && node.kind === "paragraph" && !/^对话/.test(prefix)) keys[keys.length - 1].text = `${keys[keys.length - 1].text} ${prefix}`.trim();
       matches.forEach((match, index) => {
-        const text = node.text.slice(match.index! + match[0].length, matches[index + 1]?.index ?? node.text.length).trim();
+        const text = node.text.slice(match.index! + match[0].length, matches[index + 1]?.index ?? node.text.length).trim().replace(/\s*对话[一二三四五六七八九十]*[:：]\s*$/, "");
         const [answer, ...explanation] = text.split(/(?:【解析】|解析\s*[:：])/);
-        keys.push({ number: Number(match[1]), text: answer.trim(), explanation: explanation.join(" ").trim() });
+        keys.push({ number: Number(match[1]), text: answer.trim(), explanation: explanation.join(" ").trim(), group });
       });
     } else if (keys.length && node.kind === "explanation") {
       keys[keys.length - 1].explanation += `${keys[keys.length - 1].explanation ? " " : ""}${node.text}`;
     } else if (keys.length && node.kind === "paragraph") {
-      keys[keys.length - 1].text += ` ${node.text}`;
+      keys[keys.length - 1].text = `${keys[keys.length - 1].text} ${node.text}`.trim();
     }
   }
   return keys;
@@ -50,8 +64,10 @@ function exercise(resourceId: string, question: Candidate, key: Key): Exercise |
   if (optionText && (options.length < 2 || new Set(options.map(o => o.id)).size !== options.length)) return;
   const choice = options.length ? /^([A-F])(?:\b|[.．、（(:：])/.exec(key.text)?.[1] : undefined;
   if (options.length && !options.some(option => option.id === choice)) return;
+  const transform = /句型转换|改为|改成|改写|提问|翻译/.test(question.instruction);
+  if (transform) prompt = prompt.replace(/\s+_{2,}\s*$/, "");
   const blanks = sixQuestionBlanks({ prompt }).length;
-  const kind = options.length ? "choice" : blanks ? "fill" : "sentence";
+  const kind = options.length ? "choice" : transform ? "sentence" : blanks ? "fill" : "sentence";
   const parts = key.text.split(/[,，;；]/).map(s => s.trim());
   const exact = kind === "choice" || kind === "fill" && (blanks === 1 || parts.length === blanks);
   const accepted = kind === "choice" ? [[choice!]] : (blanks > 1 ? parts : [key.text]).map(part => part.split(/\s*\/\s*/).filter(Boolean));
@@ -59,7 +75,7 @@ function exercise(resourceId: string, question: Candidate, key: Key): Exercise |
   const digest = createHash("sha256").update(JSON.stringify([first, question.prompt, options, question.instruction])).digest("hex").slice(0, 12);
   return { id: `sr-${resourceId}-${digest}`, topic: question.topic, kind, prompt,
     context: question.instruction, options, sourcePage: first.page, sourceBlock: first.block,
-    inputCount: options.length ? 1 : Math.max(1, blanks), grading: exact ? "exact" : "reference",
+    inputCount: options.length || kind === "sentence" ? 1 : Math.max(1, blanks), grading: exact ? "exact" : "reference",
     answer: choice ?? key.text,
     explanation: key.explanation || `请结合“${question.topic || question.instruction}”的讲解核对本题。`,
     accepted, choice, sources: question.sources };
@@ -71,7 +87,7 @@ export function buildSixReaderPractice(resourceId: string, pages: SixPage[]): Pl
   const result: Plan = { exercises: [], hidden: [], unmatched: 0, groups: [] };
   if (!readerLayout(resourceId)) return result;
   let questions: Candidate[] = [], keys: ReaderNode[] = [], current: Candidate | undefined;
-  let answering = false, instruction = "", topic: number | undefined;
+  let answering = false, instruction = "", dialogue = false, dialogueOptions = "", topic: number | undefined;
   const finish = () => {
     const answers = answerEntries(keys);
     if (answering) result.groups.push({ questions: questions.map(q => q.number), keys: answers.map(key => key.number), pages: [...new Set(questions.map(q => q.sources[0].page))] });
@@ -81,7 +97,7 @@ export function buildSixReaderPractice(resourceId: string, pages: SixPage[]): Pl
       if (item) result.exercises.push(item); else result.unmatched++;
     });
     else if (answering) result.unmatched += questions.length;
-    questions = []; keys = []; current = undefined; answering = false;
+    questions = []; keys = []; current = undefined; answering = false; dialogue = false; dialogueOptions = "";
   };
   pages.forEach((page, p) => {
     const plan = sixDocumentPlan(resourceId, p + 1, page);
@@ -89,11 +105,25 @@ export function buildSixReaderPractice(resourceId: string, pages: SixPage[]): Pl
       if (section.topic && section.topic.number !== topic) { finish(); instruction = ""; topic = section.topic.number; }
       for (const node of section.nodes) {
         if (answerHeading(node.text)) {
+          if (answering && /^详细解析/.test(node.text)) keys.push(node);
           answering = true; current = undefined; result.hidden.push(...source(p + 1, node)); continue;
         }
         if (answering && node.kind === "subheading" && taskHeading(node.text)) { finish(); instruction = ""; }
         if (answering) { keys.push(node); result.hidden.push(...source(p + 1, node)); continue; }
-        if (node.kind === "subheading") { instruction = node.text; current = undefined; continue; }
+        if (node.kind === "subheading") {
+          if (!/^对话/.test(node.text)) { instruction = node.text; dialogue = /补全对话/.test(instruction); dialogueOptions = ""; }
+          current = undefined; continue;
+        }
+        if (dialogue && node.kind === "options") {
+          dialogueOptions += `${dialogueOptions ? "\n" : ""}${node.text}`;
+          result.hidden.push(...source(p + 1, node)); continue;
+        }
+        if (dialogue) {
+          const blanks = [...node.text.matchAll(/\b(\d+)[.．、]\s*_{2,}/g)];
+          for (const blank of blanks) questions.push({ number: Number(blank[1]), prompt: `${blank[1]}. 请选择第 ${blank[1]} 空的句子。`, optionText: dialogueOptions,
+            instruction, topic: section.topic?.title ?? instruction, sources: [{ page: p + 1, block: node.sources[0] }] });
+          continue;
+        }
         const match = node.kind === "question" && numbered.exec(node.text);
         if (match) {
           current = { number: Number(match[1]), prompt: node.text, optionText: "", instruction,

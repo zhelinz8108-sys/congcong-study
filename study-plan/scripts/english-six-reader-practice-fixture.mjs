@@ -13,3 +13,16 @@ export function readerPracticeFixture() {
   const meta = { id: "c577cdad00f2", title: "Unit 1 Try your best", edition: "new", units: [1], stage: "explain", extension: ".pdf", size: 1, pageCount: pages.length, paths: ["Unit 1 易错语法精讲.pdf"], status: "ready" };
   return { id: meta.id, meta, pages, asset: null, reference: false };
 }
+
+export function readerPracticeComprehensiveFixture() {
+  const fixture = readerPracticeFixture();
+  const page = (number, lines) => ({ title: `第 ${number} 页`, blocks: lines.map(text => ({ kind: "text", text })) });
+  fixture.pages[6] = page(7, ["综合训练模块", "一、用括号内单词的适当形式填空", "1. They ________ (see).", "2. We ________ and ________ (go, come).",
+    "二、单项选择", "( ) 1. He ________ yesterday.", "A. sing B. sang", "三、句型转换", "1. She acted.（改为否定句）", "______________________",
+    "四、补全对话", "从方框中选择合适的句子填空，填序号。", "A. How are you? B. Fine, thanks.", "对话一：", "Joe: 1. ________ Ann: 2. ________", "参考答案与逐题解析"]);
+  fixture.pages[7] = page(8, ["一、填空答案：", "1. saw 2.", "went; came", "二、单选答案：1.B", "三、句型转换：", "1. She did not act.",
+    "四、补全对话：", "对话一：1. A 对话二：2. B", "详细解析：", "• 填空第2题：Use went and came.", "• 单选第1题：Use sang in the past.",
+    "• 补全对话：first A, second B.", "复习小贴士：核对动词形式。"]);
+  fixture.meta.pageCount = fixture.pages.length;
+  return fixture;
+}

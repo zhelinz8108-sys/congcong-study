@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from "nod
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { appRoot, loadHolidayTestModule } from "./holiday-math-test-utils.mjs";
-import { readerPracticeFixture } from "./english-six-reader-practice-fixture.mjs";
+import { readerPracticeFixture, readerPracticeComprehensiveFixture } from "./english-six-reader-practice-fixture.mjs";
 
 const originalCwd = process.cwd();
 const productionSources = process.argv.includes("--source");
@@ -104,6 +104,22 @@ try {
     assert.notEqual(service.buildSixReaderPractice(fixture.id, moved.pages).exercises.at(-1).id, plan.exercises.at(-1).id, "changed question cannot inherit an old locked answer");
     const withReferenceImage = { ...fixture.pages[1], blocks: [...fixture.pages[1].blocks, { kind: "image", asset: "a".repeat(32), reference: true }] };
     assert.ok(!JSON.stringify(service.englishSixReaderContent(fixture.id, 2, withReferenceImage)).includes("a".repeat(32)), "original page image cannot reveal the appended answer key");
+    const comprehensive = readerPracticeComprehensiveFixture();
+    const expanded = service.buildSixReaderPractice(fixture.id, comprehensive.pages);
+    assert.equal(expanded.unmatched, 0, "inline key headings, wrapped keys and embedded dialogue blanks all match in order");
+    const items = expanded.exercises.filter(q => q.sourcePage === 7);
+    assert.equal(items.length, 6);
+    assert.deepEqual(items.map(q => q.answer), ["saw", "went; came", "B", "She did not act.", "A", "B"]);
+    assert.match(items[1].explanation, /Use went and came/);
+    assert.match(items[2].explanation, /Use sang/);
+    assert.equal(items[3].kind, "sentence", "sentence transformation uses a reference response despite the printed answer line");
+    assert.equal(items[3].inputCount, 1);
+    assert.equal(items[4].sourceBlock, items[5].sourceBlock, "multiple dialogue questions can share one printed paragraph");
+    assert.ok(items.slice(-2).every(q => !q.explanation.includes("first A, second B")), "shared answer summaries cannot reveal another question's key");
+    writeFileSync(path.join(fixtureRoot, "content/english-six/resources", `${fixture.id}.json`), JSON.stringify(comprehensive));
+    assert.equal(service.englishSixReaderGrade(items[1].id, '["went","came"]').correct, true);
+    assert.equal(service.englishSixReaderGrade(items[4].id, "A").correct, true);
+    assert.equal(service.englishSixReaderGrade(items[5].id, "B").correct, true);
     console.log(JSON.stringify({ status: "pass", questions: plan.exercises.length, answerIsolation: true, mismatchedKeysRejected: true, sourceMutation: false, studentWrites: 0 }));
   }
 } catch (error) {

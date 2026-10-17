@@ -30,13 +30,14 @@ export default function EnglishSixReaderExercises({ subjectId, questions, conten
     finally { setPending(null); }
   }
   function renderQuestion(node: ReaderNode) {
-    const question = questions.find(q => node.kind === "question" && node.sources.includes(q.sourceBlock));
-    if (!question) return null;
+    const items = questions.filter(q => node.sources.includes(q.sourceBlock));
+    if (!items.length) return null;
+    return <>{items.map(question => {
     const record = locked.records[question.id];
     const feedback: SixFeedback | undefined = record ? { id: question.id, response: typeof record.response === "string" ? record.response : "", ...record.feedback } : undefined;
     const value = feedback?.response ?? drafts[question.id] ?? "";
     const values = sixBankInputs(question, value);
-    return <div className={styles.exercise} data-reader-exercise={question.id}>
+    return <div key={question.id} className={styles.exercise} data-reader-exercise={question.id}>
       {question.context && !content.blocks.some(block => block.kind === "text" && block.text.trim() === question.context) && <p className={styles.exerciseInstruction}>{question.context}</p>}
       <EnglishSixAnswerFields question={question} values={values} disabled={!locked.ready || !!pending || !!feedback}
         feedback={feedback} onChange={inputs => setDrafts(previous => ({ ...previous, [question.id]: sixBankResponse(question, inputs) }))} onSubmit={() => void submit(question)} />
@@ -48,6 +49,7 @@ export default function EnglishSixReaderExercises({ subjectId, questions, conten
         {pending === question.id ? "提交中…" : "提交答案"}
       </button>}
     </div>;
+    })}</>;
   }
   return <>
     <div className={styles.exerciseSummary}>

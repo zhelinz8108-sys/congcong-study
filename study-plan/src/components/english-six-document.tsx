@@ -23,8 +23,8 @@ function RuleTable({ rows }: { rows: string[][] }) {
 
 function Node({ node, renderBlock, renderQuestion }: { node: ReaderNode; renderBlock: (block: SixBlock) => ReactNode; renderQuestion?: (node: ReaderNode) => ReactNode }) {
   if (!node.text && node.kind !== "block" && node.kind !== "table") return null;
-  const exercise = node.kind === "question" && renderQuestion?.(node);
-  if (exercise) return exercise;
+  const exercise = renderQuestion?.(node);
+  if (exercise) return node.kind === "question" ? exercise : <><p className={styles.prose}><Emphasis text={node.text} /></p>{exercise}</>;
   if (node.kind === "block") return renderBlock(node.block!);
   if (node.kind === "table") return <RuleTable rows={node.rows!} />;
   if (node.kind === "subheading") return <h4 className={styles.subheading} data-warning={/易错点提示/.test(node.text)}>{node.text}</h4>;

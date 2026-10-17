@@ -1,4 +1,4 @@
-"""Preserve this task's three unused release stages on the existing data disk."""
+"""Preserve only this task's explicitly listed failed stages on the data disk."""
 import argparse
 from contextlib import contextmanager
 import fcntl
@@ -17,6 +17,7 @@ FAILED_RELEASES = (
     '0b904ef68fb8ba4eb3a4bc0d8e1c09525e0dc1c3-39028619168-1',
     '5ea125771d897dc04da0cb87b67f2240364f2068-39028897397-1',
     '20cf84affaf384a0e46830642dbe5459021389dc-39029146667-1',
+    '65fea257f62a880737c78add19283958b88d7dee-39034886777-1',
 )
 RELEASES = Path('/www/study-plan-releases')
 DATA = Path('/www/study-plan-data')
@@ -111,7 +112,7 @@ def code_bytes(manifest):
 
 
 def relocate(releases, archives, identity):
-    require(identity in FAILED_RELEASES, 'Only the three failed releases created by this task are allowed')
+    require(identity in FAILED_RELEASES, 'Only failed releases explicitly listed for this task are allowed')
     no_links(releases); no_links(archives)
     source = releases / identity
     destination = archives / identity
