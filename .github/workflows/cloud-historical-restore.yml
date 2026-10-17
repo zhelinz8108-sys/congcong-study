@@ -1,0 +1,157 @@
+name: Restore a historical cloud recovery snapshot
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: 'Existing Cloud recovery backup run ID (positive integer, 1-20 digits)'
+        type: string
+        required: true
+      source_attempt:
+        description: 'Existing backup attempt matching its Artifact (positive integer, 1-6 digits)'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+# Independent proof jobs never acquire the production deployment concurrency group.
+env:
+  RECOVERY_HELPERS: study-plan/scripts/cloud-recovery
+
+jobs:
+  guard-and-selftest:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository == 'zhelinz8108-sys/congcong-study'
+    outputs:
+      source_run_id: ${{ steps.validate.outputs.source_run_id }}
+      source_attempt: ${{ steps.validate.outputs.source_attempt }}
+      recovery_run: ${{ steps.validate.outputs.recovery_run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Require trusted main and validate the historical run identity
+        id: validate
+        shell: bash
+        env:
+          ACTUAL_REF: ${{ github.ref }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          SOURCE_ATTEMPT: ${{ inputs.source_attempt }}
+        run: |
+          set -euo pipefail
+          test "$ACTUAL_REF" = refs/heads/main
+          [[ "$SOURCE_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$SOURCE_ATTEMPT" =~ ^[1-9][0-9]{0,5}$ ]]
+          printf 'source_run_id=%s\nsource_attempt=%s\nrecovery_run=%s-%s\n' \
+            "$SOURCE_RUN_ID" "$SOURCE_ATTEMPT" "$SOURCE_RUN_ID" "$SOURCE_ATTEMPT" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exercise envelope and credential security controls
+        run: node "$RECOVERY_HELPERS/selftest.mjs"
+
+  isolated-restore:
+    needs: guard-and-selftest
+    env:
+      RECOVERY_RUN: ${{ needs.guard-and-selftest.outputs.recovery_run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cloud-recovery-${{ needs.guard-and-selftest.outputs.source_run_id }}-${{ needs.guard-and-selftest.outputs.source_attempt }}
+          run-id: ${{ needs.guard-and-selftest.outputs.source_run_id }}
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          path: ${{ runner.temp }}/cloud-recovery-download
+      - name: Verify encrypted bytes, recover credentials and restore only a new container
+        # This job deliberately receives no SERVER_* secret or production DB URL.
+        env:
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          work="$(mktemp -d "$RUNNER_TEMP/cloud-recovery-verify-$RECOVERY_RUN-XXXXXX")"
+          chmod 700 "$work"
+          cleanup() {
+            local resolved
+            resolved="$(realpath -m "$work")"
+            case "$resolved" in
+              "$RUNNER_TEMP"/cloud-recovery-verify-*) test ! -L "$work"; rm -rf -- "$resolved" ;;
+              *) return 1 ;;
+            esac
+          }
+          trap cleanup EXIT
+          node "$RECOVERY_HELPERS/artifact-check.mjs" --directory "$RUNNER_TEMP/cloud-recovery-download" --run "$RECOVERY_RUN"
+          node "$RECOVERY_HELPERS/envelope.mjs" decrypt --input "$RUNNER_TEMP/cloud-recovery-download/credentials.ccre" --output "$work/credentials.bundle.json" --kind credentials --run "$RECOVERY_RUN"
+          node "$RECOVERY_HELPERS/envelope.mjs" decrypt --input "$RUNNER_TEMP/cloud-recovery-download/database.ccre" --output "$work/database.dump" --kind database --run "$RECOVERY_RUN"
+          unset BACKUP_ENCRYPTION_PASSWORD
+          node "$RECOVERY_HELPERS/credentials.mjs" unpack --bundle "$work/credentials.bundle.json" --target "$work/restored-credentials" --run "$RECOVERY_RUN"
+          node "$RECOVERY_HELPERS/verify-db.mjs" --dump "$work/database.dump"
+
+  restored-key-access:
+    needs: guard-and-selftest
+    env:
+      RECOVERY_RUN: ${{ needs.guard-and-selftest.outputs.recovery_run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cloud-recovery-${{ needs.guard-and-selftest.outputs.source_run_id }}-${{ needs.guard-and-selftest.outputs.source_attempt }}
+          run-id: ${{ needs.guard-and-selftest.outputs.source_run_id }}
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          path: ${{ runner.temp }}/cloud-recovery-download
+      - name: Authenticate both restored keys using only the encrypted recovery bundle
+        # No deployment secret is supplied: the private keys must be recovered.
+        env:
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          work="$(mktemp -d "$RUNNER_TEMP/cloud-recovery-access-$RECOVERY_RUN-XXXXXX")"
+          chmod 700 "$work"
+          cleanup() {
+            local resolved
+            resolved="$(realpath -m "$work")"
+            case "$resolved" in
+              "$RUNNER_TEMP"/cloud-recovery-access-*) test ! -L "$work"; rm -rf -- "$resolved" ;;
+              *) return 1 ;;
+            esac
+          }
+          trap cleanup EXIT
+          node "$RECOVERY_HELPERS/artifact-check.mjs" --directory "$RUNNER_TEMP/cloud-recovery-download" --run "$RECOVERY_RUN"
+          node "$RECOVERY_HELPERS/envelope.mjs" decrypt --input "$RUNNER_TEMP/cloud-recovery-download/credentials.ccre" --output "$work/credentials.bundle.json" --kind credentials --run "$RECOVERY_RUN"
+          unset BACKUP_ENCRYPTION_PASSWORD
+          node "$RECOVERY_HELPERS/credentials.mjs" unpack --bundle "$work/credentials.bundle.json" --target "$work/restored-credentials" --run "$RECOVERY_RUN"
+          for key in actions-deployment-key bootstrap-deployment-key; do
+            if ! ssh -i "$work/restored-credentials/$key" -p 22 \
+              -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+              -o HostKeyAlgorithms=ssh-ed25519 -o ConnectTimeout=20 \
+              -o UserKnownHostsFile="$RECOVERY_HELPERS/known_hosts" \
+              ubuntu@124.223.31.175 true >"$work/ssh.stdout" 2>"$work/ssh.stderr"; then
+              printf '{"status":"failed","stage":"restored-key-access"}\n'
+              exit 1
+            fi
+            rm -f -- "$work/restored-credentials/$key"
+          done
+          printf '{"status":"verified-restored-key-access","authenticatedKeys":2,"remoteCommand":"true","sudoUsed":false}\n'
+
