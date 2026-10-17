@@ -1,0 +1,74 @@
+Restore and verify an existing cloud snapshot without making a new backup
+
+Use "Restore a historical cloud recovery snapshot" on main. This workflow needs
+only GitHub access, the existing encrypted Artifact and the unchanged
+BACKUP_ENCRYPTION_PASSWORD Actions Secret. It does not receive SERVER_* Secrets,
+read the desktop D drive, create a new backup or acquire the production-deploy
+concurrency group. The password is injected directly by Actions; an operator
+does not need to know or retrieve its value from GitHub Secrets.
+
+1. Find the existing "Cloud recovery backup and isolated restore" run and its
+   Artifact named cloud-recovery-RUN_ID-ATTEMPT. Record the numeric run ID and the
+   exact attempt associated with that Artifact. Prefer a run whose backup and
+   restore proof jobs completed successfully. No file is needed from the desktop.
+2. Dispatch this historical workflow on main. Enter source_run_id as 1-20 ASCII
+   digits and source_attempt as 1-6 ASCII digits, each a positive integer without
+   leading zeros. Spaces, signs, paths, newlines and shell syntax are rejected.
+3. The guard validates inputs before any Artifact download or secret-backed
+   work, then runs the existing synthetic security selftests. Each proof job
+   independently downloads the named Artifact from that validated source run
+   using contents:read/actions:read and a token scoped to this repository.
+4. Check isolated-restore: it verifies the exact Artifact file set and ciphertext
+   hashes, authenticates envelopes with the source run/attempt, restores the six
+   credential files into a new private runner directory, and restores the dump
+   only into a new PostgreSQL 16 container with network=none. It prints only
+   verification flags, table count and aggregate record count, never student
+   rows, secret values, credential hashes or private-key fingerprints. The
+   private temporary directory and the container are removed at the end.
+5. Check restored-key-access separately: it authenticates and unpacks the same
+   bundle, then uses each recovered private key only for the fixed command true
+   as ubuntu@124.223.31.175:22 with pinned host verification. It uses no SERVER_*
+   Secret, sudo or remote file read, and removes its private temporary files.
+   It prints a two-key success count. If the old server is unavailable this job
+   can fail while isolated-restore still succeeds; the DB proof does not depend
+   on server access or this SSH proof job.
+
+The source Artifact must contain exactly credentials.ccre, database.ccre and
+SAFE-RECEIPT.json. Each decryption is bound to the validated historical run and
+attempt, not this new workflow's run. Authentication failure stops processing;
+no unauthenticated credential bundle is parsed. This workflow uploads no new
+Artifact and does not extend the source Artifact's retention.
+
+Retention and persistent Tencent copies
+The recovery Artifact is retained for 90 days. Deleting it or waiting beyond
+retention makes this Artifact-only workflow fail; it does not silently create
+or select another backup. The independent root-private Tencent copies remain at:
+  /www/study-plan-data/cloud-recovery/RUN_ID-ATTEMPT/
+  credentials.ccre, database.ccre, legacy.ccre, SAFE-RECEIPT.json, .OWNER.json
+
+The reviewed backup/readback helpers and cloud runbook live in the repository at:
+  study-plan/scripts/cloud-recovery/
+  study-plan/scripts/cloud-recovery/RUNBOOK.txt
+They include envelope.mjs, credentials.mjs, artifact-check.mjs and verify-db.mjs.
+After Artifact expiry, an administrator must retrieve the two encrypted files
+and safe receipt from the matching Tencent run directory into an authorized
+private cloud runner and use those same validation/decryption helpers with the
+original run binding. This historical workflow deliberately has no Tencent
+fetching or server credential input; that retrieval remains a separate operation.
+The legacy ZIP is only in the Tencent encrypted copy and is outside this drill.
+
+Keep the existing BACKUP_ENCRYPTION_PASSWORD Secret until old snapshots have
+been authenticated and re-encrypted under an authorized replacement. Replacing
+or losing its value does not make old ciphertext readable with the new value.
+Perform that re-encryption inside a private cloud runner before overwriting the
+old Secret. The password is never included in its own encrypted credential
+bundle or published in a plaintext Artifact or log.
+Existing Secrets can be used inside an authorized Actions run without displaying
+them. This is not a method to recover after loss of GitHub account/Secret access.
+
+Completion means a historical Artifact was genuinely restored and validated;
+the SSH job additionally proves recovered keys can still access the fixed old
+server. This workflow does not install credentials on a replacement host,
+restore the live production database, automate new-server takeover or schedule
+future backups. A production migration requires its own target-specific action.
+Manual snapshot recovery and continuing automatic backup protection are separate.
