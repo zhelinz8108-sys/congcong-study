@@ -25,6 +25,14 @@
 .subheading[data-warning=true] { color:#a45c14; border-color:#daa758; }
 .prose,.question { font-size:16px; line-height:1.9; margin:12px 0; overflow-wrap:anywhere; white-space:pre-wrap; }
 .question { font-weight:550; padding:10px 0; border-bottom:1px solid #e1e7eb; }
+.exerciseSummary { margin-top:20px; padding:16px; background:#edf8f3; border-left:3px solid #087d69; line-height:1.8; }
+.exerciseSummary strong,.exerciseSummary span { display:block; }
+.exerciseSummary p { margin-top:6px; font-size:14px; }
+.exercise { padding:16px 0; border-bottom:1px solid #e1e7eb; }
+.exercise h2 { font-size:16px; line-height:2; margin-bottom:12px; }
+.exerciseInstruction { color:#617880; font-size:13px; line-height:1.8; margin-bottom:8px; }
+.exercise input { min-height:44px; }
+.exercise button { min-height:44px; }
 .prose strong,.question strong { color:var(--accent); font-weight:700; }
 .caption { font-size:12px; color:#72818a; line-height:1.7; margin:6px 0 14px; }
 .callout { padding:16px 18px; margin:18px 0; background:var(--wash); border-left:3px solid var(--accent); }

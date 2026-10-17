@@ -27,6 +27,7 @@ if [[ ${1:-} == --worker ]]; then
       npm run test:grade6-bank
       npm run test:chinese-six:sealed
       npm run test:chinese-six
+      node scripts/test-english-six-reader-practice.mjs --source
       npm run build -- --webpack
       ;;
     serve)

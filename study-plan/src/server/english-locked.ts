@@ -6,6 +6,7 @@ import { ensureCloudProgressSchema } from "@/lib/cloud-progress-schema";
 import { firstSubmissions, saveFirstSubmission } from "@/server/first-submission";
 import { englishSixGrade } from "@/server/english-six";
 import { englishSixBankGrade } from "@/server/english-six-bank";
+import { englishSixReaderGrade } from "@/server/english-six-reader-practice";
 import { englishSixQualityRevision, englishSixReviewedFeedback } from "@/server/english-six-quality";
 import { gradeFinalReviewLocked } from "@/server/english-final-review-lock";
 import { gradeVocabLocked } from "@/server/english-vocab-lock";
@@ -45,7 +46,7 @@ export function gradeEnglishLocked(module: EnglishLockedModule, id: string, resp
   }
   if (module === "six") {
     const unit = /^u([1-8])-q([1-9]\d*)$/.exec(id);
-    const feedback = unit ? englishSixGrade(Number(unit[1]), id, text(response)) : englishSixBankGrade(id, text(response));
+    const feedback = unit ? englishSixGrade(Number(unit[1]), id, text(response)) : id.startsWith("sr-") ? englishSixReaderGrade(id, text(response)) : englishSixBankGrade(id, text(response));
     if (!feedback) throw new Error("题目或答案格式不正确");
     return { correct: feedback.correct, answer: feedback.answer, explanation: feedback.explanation,
       ...(englishSixQualityRevision(id) ? { contentRevision: englishSixQualityRevision(id) } : {}) };

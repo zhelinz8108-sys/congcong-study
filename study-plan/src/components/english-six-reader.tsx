@@ -8,6 +8,8 @@ import EnglishSixDocument from "./english-six-document";
 import { readerLayout } from "@/lib/english-six-document";
 import EnglishSixBankPractice from "./english-six-bank-practice";
 import EnglishSixPractice from "./english-six-practice";
+import EnglishSixReaderExercises from "./english-six-reader-exercises";
+import type { SixBankQuestion } from "@/lib/english-six-bank";
 
 const media = (id: string) => `/api/english/six/media/${id}`;
 function Block({ block }: { block: SixBlock }) {
@@ -20,7 +22,7 @@ function Block({ block }: { block: SixBlock }) {
   // eslint-disable-next-line @next/next/no-img-element
   return <a href={media(block.asset)} target="_blank" rel="noreferrer"><img className={styles.figure} src={media(block.asset)} alt="原资料插图" loading="lazy" /></a>;
 }
-type Reader = { meta: SixResource; content: SixPage | null; asset: string | null; reference: boolean; practiceCount?: number };
+type Reader = { meta: SixResource; content: SixPage | null; asset: string | null; reference: boolean; practiceCount?: number; readerExercises?: SixBankQuestion[] };
 export default function EnglishSixReader({ subjectId, resourceId }: { subjectId: string; resourceId: string }) {
   const params = useSearchParams();
   const initialUnit = params.get("unit") ?? "";
@@ -85,7 +87,10 @@ export default function EnglishSixReader({ subjectId, resourceId }: { subjectId:
         <label>页码<select value={page} onChange={e => move(Number(e.target.value))}>{Array.from({ length: data.meta.pageCount }, (_, i) => <option key={i} value={i + 1}>{i + 1} / {data.meta.pageCount}</option>)}</select></label>
         <button aria-label="下一页" title="下一页" disabled={page >= data.meta.pageCount || loading} onClick={() => move(page + 1)}>→</button>
       </nav>}
-      {loading ? <p role="status">正在载入…</p> : data.content && <EnglishSixDocument resourceId={resourceId} pageNumber={page} content={data.content} focusTopic={focusTopic} onPage={move} renderBlock={block => <Block block={block} />} />}
+      {loading ? <p role="status">正在载入…</p> : data.content && (!!data.readerExercises?.length ?
+        <EnglishSixReaderExercises key={`${subjectId}:${resourceId}`} subjectId={subjectId} questions={data.readerExercises} content={data.content}>
+          {renderQuestion => <EnglishSixDocument resourceId={resourceId} pageNumber={page} content={data.content!} focusTopic={focusTopic} onPage={move} renderBlock={block => <Block block={block} />} renderQuestion={renderQuestion} />}
+        </EnglishSixReaderExercises> : <EnglishSixDocument resourceId={resourceId} pageNumber={page} content={data.content} focusTopic={focusTopic} onPage={move} renderBlock={block => <Block block={block} />} />)}
       {data.meta.pageCount > 1 && <div className={styles.bottomNav}><button className={styles.secondary} disabled={page === 1 || loading} onClick={() => move(page - 1)}>上一页</button><button className={styles.primary} disabled={page >= data.meta.pageCount || loading} onClick={() => move(page + 1)}>下一页 →</button></div>}
     </>}
   </main>;

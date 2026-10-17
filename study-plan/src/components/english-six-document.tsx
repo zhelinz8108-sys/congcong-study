@@ -21,7 +21,10 @@ function RuleTable({ rows }: { rows: string[][] }) {
   </div>;
 }
 
-function Node({ node, renderBlock }: { node: ReaderNode; renderBlock: (block: SixBlock) => ReactNode }) {
+function Node({ node, renderBlock, renderQuestion }: { node: ReaderNode; renderBlock: (block: SixBlock) => ReactNode; renderQuestion?: (node: ReaderNode) => ReactNode }) {
+  if (!node.text && node.kind !== "block" && node.kind !== "table") return null;
+  const exercise = node.kind === "question" && renderQuestion?.(node);
+  if (exercise) return exercise;
   if (node.kind === "block") return renderBlock(node.block!);
   if (node.kind === "table") return <RuleTable rows={node.rows!} />;
   if (node.kind === "subheading") return <h4 className={styles.subheading} data-warning={/易错点提示/.test(node.text)}>{node.text}</h4>;
@@ -40,8 +43,9 @@ function Node({ node, renderBlock }: { node: ReaderNode; renderBlock: (block: Si
   return <p className={node.kind === "caption" ? styles.caption : node.kind === "question" ? styles.question : styles.prose}><Emphasis text={node.text} /></p>;
 }
 
-export default function EnglishSixDocument({ resourceId, pageNumber, content, focusTopic, onPage, renderBlock }: {
+export default function EnglishSixDocument({ resourceId, pageNumber, content, focusTopic, onPage, renderBlock, renderQuestion }: {
   resourceId: string; pageNumber: number; content: SixPage; focusTopic: number | null; onPage: (page: number, topic?: number) => void; renderBlock: (block: SixBlock) => ReactNode;
+  renderQuestion?: (node: ReaderNode) => ReactNode;
 }) {
   const plan = sixDocumentPlan(resourceId, pageNumber, content);
   const current = focusTopic ?? plan.sections.find(s => s.topic && s.nodes.length)?.topic?.number;
@@ -68,7 +72,7 @@ export default function EnglishSixDocument({ resourceId, pageNumber, content, fo
         if (topic && !section.nodes.length) return <button key={i} className={styles.nextTopic} data-tone={(topic.number - 1) % 6} onClick={() => openTopic(topic.number, topic.destination)}>{title}<span aria-hidden="true">→</span></button>;
         return <section className={styles.knowledgeSection} key={i} id={topic ? `six-topic-${resourceId}-${topic.number}` : undefined} data-tone={topic ? (topic.number - 1) % 6 : 0}>
           {topic && <header className={styles.topicHeading}><p>知识点 {topic.number}{pageNumber > topic.destination ? " · 续" : ""}</p><h3>{title}</h3></header>}
-          {section.nodes.map((node, n) => <Node key={n} node={node} renderBlock={renderBlock} />)}
+          {section.nodes.map((node, n) => <Node key={n} node={node} renderBlock={renderBlock} renderQuestion={renderQuestion} />)}
         </section>;
       })}
       {!content.blocks.length && <p className={shared.empty}>此页暂无已提取内容。</p>}

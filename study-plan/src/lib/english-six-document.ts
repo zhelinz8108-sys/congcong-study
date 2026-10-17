@@ -64,7 +64,7 @@ export function sixDocumentPlan(resourceId: string, pageNumber: number, page: Si
       node(kinds[labelled[1]], labelled[2], labelled[1]); continue;
     }
     if (/^[一二三四五六七八九十]+[、．.]/.test(stripped) || /^【.+】$/.test(stripped) || /^对话[一二三四五六七八九十]+[：:]$/.test(stripped)) { node("subheading"); continue; }
-    if (/^(?:\(\s*\)\s*)?\d+[.、．)]/.test(stripped)) { node("question", text); continue; }
+    if (/^(?:[（(]\s*[）)]\s*)?\d+[.、．)]/.test(stripped)) { node("question", text); continue; }
     if (/^[A-F][.．]\s/.test(stripped)) { node("options", text); continue; }
     if (/^26译林|^Unit\s+[1-8]\s|译林版.+易错语法精讲/.test(stripped)) { node("caption", stripped); continue; }
     if (last?.kind === "mistake" && continuing(last.phase === "correct" ? last.correct ?? "" : last.phase === "explanation" ? last.explanation ?? "" : last.text)) {
