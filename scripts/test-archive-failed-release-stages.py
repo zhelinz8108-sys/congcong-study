@@ -1,9 +1,11 @@
 """Use only synthetic files to test verified relocation and rejection paths."""
 import importlib.util
 import json
+import os
 from pathlib import Path
 import tempfile
 from unittest.mock import patch
+from types import SimpleNamespace
 
 spec = importlib.util.spec_from_file_location('archive_stage', Path(__file__).with_name('archive-failed-release-stages.py'))
 helper = importlib.util.module_from_spec(spec)
@@ -23,7 +25,7 @@ def reject(name, function):
 with tempfile.TemporaryDirectory() as folder:
     root = Path(folder)
     releases = root / 'releases'; archives = root / 'archives'
-    releases.mkdir(); archives.mkdir()
+    releases.mkdir(); archives.mkdir(mode=0o700)
     identity = helper.FAILED_RELEASES[0]
     source = releases / identity
 
@@ -47,15 +49,37 @@ with tempfile.TemporaryDirectory() as folder:
     shutil.rmtree(archives / identity); (archives / (identity + '.json')).unlink()
     stage()
     (source / '.env.local').write_text('synthetic private value')
-    reject('environment-files-never-relocated', lambda: helper.relocate(releases, archives, identity))
-    assert (source / '.env.local').is_file() and not (archives / identity).exists()
-    (source / '.env.local').unlink()
+    (source / '.env.local').chmod(0o600)
     (source / '.next').mkdir()
-    reject('built-or-running-release-never-relocated', lambda: helper.relocate(releases, archives, identity))
-    (source / '.next').rmdir()
-    (source / 'external').symlink_to(root / 'outside')
-    reject('source-symlink-rejected', lambda: helper.relocate(releases, archives, identity))
+    (source / '.next/BUILD_ID').write_text('synthetic-build')
+    (source / 'node_modules/.bin').mkdir(parents=True)
+    (source / 'node_modules/tool').write_text('synthetic tool')
+    (source / 'node_modules/.bin/tool').symlink_to('../tool')
+    outside = root / 'outside'; outside.mkdir()
+    (outside / 'upload.txt').write_text('synthetic upload')
+    (source / 'external').symlink_to('../outside')
+    reject('external-relative-link-rejected', lambda: helper.relocate(releases, archives, identity))
     (source / 'external').unlink()
+    (source / 'external').symlink_to(outside)
+    complete = helper.tree(source)
+    assert not any('upload.txt' in name for name in complete), 'External uploads must not be traversed'
+    assert helper.relocate(releases, archives, identity) == 'archived-and-verified'
+    assert helper.tree(archives / identity) == complete
+    assert (source / '.env.local').read_text() == 'synthetic private value'
+    assert (source / 'node_modules/.bin/tool').read_text() == 'synthetic tool'
+    assert (outside / 'upload.txt').read_text() == 'synthetic upload'
+    checks.append('configuration-build-and-links-preserved-without-copying-linked-uploads')
+    source.unlink(); shutil.rmtree(archives / identity); (archives / (identity + '.json')).unlink()
+    stage(); before = helper.tree(source)
+    os.mkfifo(source / 'socket-fixture')
+    reject('special-file-rejected', lambda: helper.relocate(releases, archives, identity))
+    (source / 'socket-fixture').unlink()
+    reject('active-application-rejected', lambda: helper.ensure_inactive(source, identity, app=source))
+    with patch.object(helper.subprocess, 'run', return_value=SimpleNamespace(stdout='active-worker')):
+        reject('active-worker-rejected', lambda: helper.ensure_inactive(source, identity, app=root / 'active-app'))
+    with patch.object(helper.subprocess, 'run', return_value=SimpleNamespace(stdout='')):
+        helper.ensure_inactive(source, identity, app=root / 'active-app')
+    checks.append('inactive-worker-required-before-relocation')
     reject('other-releases-not-allowed', lambda: helper.relocate(releases, archives, 'previous-important'))
     original_copy = helper.shutil.copytree
 

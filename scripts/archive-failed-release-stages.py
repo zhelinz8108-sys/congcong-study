@@ -8,6 +8,7 @@ import pwd
 from pathlib import Path
 import shutil
 import stat
+import subprocess
 
 FAILED_RELEASES = (
     '0b904ef68fb8ba4eb3a4bc0d8e1c09525e0dc1c3-39028619168-1',
@@ -32,15 +33,18 @@ def tree(path):
     result = {}
     for entry in [path, *sorted(path.rglob('*'))]:
         info = entry.lstat()
-        require(stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode), 'Only regular files and directories can be archived')
+        require(stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode), 'Special files cannot be archived')
         relative = entry.relative_to(path).as_posix()
-        require(not any(part.startswith(('.env', '.next')) or part in ('.data', 'node_modules') for part in entry.relative_to(path).parts), 'Stage contains runtime or environment files; leave it untouched')
-        require(not any(relative == name or relative.startswith(name + '/') for name in ('content/english-six', 'content/toefl-listening', 'public/uploads', 'public/listening')), 'Stage contains independent runtime data; leave it untouched')
-        digest = None
+        digest = link = None
+        if stat.S_ISLNK(info.st_mode):
+            link = os.readlink(entry)
+            if not os.path.isabs(link):
+                target = os.path.normpath(entry.parent / link)
+                require(os.path.commonpath([str(path), target]) == str(path), 'External relative link needs manual review')
         if stat.S_ISREG(info.st_mode):
             with entry.open('rb') as stream:
                 digest = hashlib.file_digest(stream, 'sha256').hexdigest()
-        result[relative] = [stat.S_IMODE(info.st_mode), info.st_uid, info.st_gid, info.st_size if digest else 0, digest]
+        result[relative] = [stat.S_IMODE(info.st_mode), info.st_uid, info.st_gid, info.st_size if digest else 0, digest, link]
     return result
 
 
@@ -54,6 +58,20 @@ def sync_directory(path):
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+
+
+def ensure_inactive(source, identity, app=Path('/www/study-plan')):
+    require(not app.resolve().is_relative_to(source.resolve()), 'The active application cannot be archived')
+    process = subprocess.run(['systemctl', 'list-units', '--no-legend', '--plain', '--state=active,activating,deactivating',
+                              'study-plan-release-' + identity + '-*', 'study-plan-preflight-' + identity + '*'], capture_output=True, text=True, check=True)
+    require(not process.stdout.strip(), 'A worker still uses this stage; leave it untouched')
+
+
+def code_bytes(manifest):
+    excluded = ('content/english-six', 'content/toefl-listening', 'public/uploads', 'public/listening', 'content/chinese-six/pages', 'content/grade6-bank/private')
+    return sum(metadata[3] for name, metadata in manifest.items()
+               if not any(part.startswith(('.env', '.next')) or part in ('.data', 'node_modules') for part in name.split('/'))
+               and not name.endswith('.private.json') and not any(name == prefix or name.startswith(prefix + '/') for prefix in excluded))
 
 
 def relocate(releases, archives, identity):
@@ -89,12 +107,12 @@ def move_verified(source, destination, pending, receipt, identity, mutable=False
         shutil.copytree(source, temporary, symlinks=True)
         for name, metadata in before.items():
             target = temporary / name
-            if (target.stat().st_uid, target.stat().st_gid) != tuple(metadata[1:3]):
-                os.chown(target, metadata[1], metadata[2])
-            if target.is_file():
+            if (target.lstat().st_uid, target.lstat().st_gid) != tuple(metadata[1:3]):
+                os.chown(target, metadata[1], metadata[2], follow_symlinks=False)
+            if metadata[4] is not None:
                 with target.open('rb') as stream:
                     os.fsync(stream.fileno())
-        for target in sorted((p for p in temporary.rglob('*') if p.is_dir()), key=lambda p: len(p.parts), reverse=True):
+        for target in sorted((p for p in temporary.rglob('*') if not p.is_symlink() and p.is_dir()), key=lambda p: len(p.parts), reverse=True):
             sync_directory(target)
         sync_directory(temporary)
         require(tree(temporary) == before and tree(source) == before, 'Copied stage verification failed; retain the original')
@@ -167,10 +185,11 @@ def main():
             if candidate.is_symlink():
                 target = DATA / 'failed-release-archives' / identity
                 require(candidate.readlink() == target, 'Unexpected existing stage symlink')
-                largest = max(largest, sum(item[3] for item in tree(target).values()))
+                largest = max(largest, code_bytes(tree(target)))
             elif candidate.exists():
-                size = sum(item[3] for item in tree(candidate).values())
-                needed += size; largest = max(largest, size)
+                ensure_inactive(candidate, identity)
+                contents = tree(candidate)
+                needed += sum(item[3] for item in contents.values()); largest = max(largest, code_bytes(contents))
         print('::notice title=Release storage before archiving::' + json.dumps({'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2, 'dataFreeMiB': shutil.disk_usage(DATA).free // 1024**2, 'archiveMiB': needed // 1024**2}))
         require(shutil.disk_usage(DATA).free >= 10 * 1024**3 + needed, 'Retain 10 GiB of data-disk headroom after archiving')
         archives = DATA / 'failed-release-archives'
