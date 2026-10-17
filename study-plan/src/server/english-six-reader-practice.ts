@@ -11,7 +11,7 @@ type Source = { page: number; block: number };
 type Exercise = SixBankQuestion & { answer: string; explanation: string; accepted: string[][]; choice?: string; sources: Source[] };
 type Candidate = { number: number; prompt: string; optionText: string; instruction: string; topic: string; sources: Source[] };
 type Key = { number: number; text: string; explanation: string };
-type Plan = { exercises: Exercise[]; hidden: Source[]; unmatched: number };
+type Plan = { exercises: Exercise[]; hidden: Source[]; unmatched: number; groups: { questions: number[]; keys: number[]; pages: number[] }[] };
 const cache = new Map<string, Plan>();
 const numbered = /^\s*(?:[（(]\s*[）)]\s*)?(\d+)[.、．)]\s*([\s\S]*)$/;
 const answerHeading = (text: string) => /^(?:【|\[)?\s*(?:参考答案(?:[与及和](?:逐题|详细)?解析)?|答案(?:[与及和]解析)?|详细解析)\s*(?:】|\])?\s*[:：]?\s*$/.test(text);
@@ -62,12 +62,13 @@ function exercise(resourceId: string, question: Candidate, key: Key): Exercise |
 // Pair each exercise with its own following answer section. Repeated question
 // numbers are matched in source order, and ambiguous groups are never guessed.
 export function buildSixReaderPractice(resourceId: string, pages: SixPage[]): Plan {
-  const result: Plan = { exercises: [], hidden: [], unmatched: 0 };
+  const result: Plan = { exercises: [], hidden: [], unmatched: 0, groups: [] };
   if (!readerLayout(resourceId)) return result;
   let questions: Candidate[] = [], keys: ReaderNode[] = [], current: Candidate | undefined;
   let answering = false, instruction = "", topic: number | undefined;
   const finish = () => {
     const answers = answerEntries(keys);
+    if (answering) result.groups.push({ questions: questions.map(q => q.number), keys: answers.map(key => key.number), pages: [...new Set(questions.map(q => q.sources[0].page))] });
     const aligned = answering && answers.length === questions.length && answers.every((key, i) => key.number === questions[i].number);
     if (aligned) questions.forEach((question, i) => {
       const item = exercise(resourceId, question, answers[i]);
@@ -106,10 +107,10 @@ export function buildSixReaderPractice(resourceId: string, pages: SixPage[]): Pl
 }
 
 function practice(resourceId: string): Plan {
-  if (!readerLayout(resourceId)) return { exercises: [], hidden: [], unmatched: 0 };
+  if (!readerLayout(resourceId)) return { exercises: [], hidden: [], unmatched: 0, groups: [] };
   if (process.env.NODE_ENV === "production" && cache.has(resourceId)) return cache.get(resourceId)!;
   const resource = englishSixResource(resourceId);
-  const plan = resource ? buildSixReaderPractice(resourceId, resource.pages) : { exercises: [], hidden: [], unmatched: 0 };
+  const plan = resource ? buildSixReaderPractice(resourceId, resource.pages) : { exercises: [], hidden: [], unmatched: 0, groups: [] };
   if (process.env.NODE_ENV === "production") cache.set(resourceId, plan);
   return plan;
 }
@@ -126,7 +127,7 @@ export function englishSixReaderContent(resourceId: string, page: number, conten
   if (!content || !readerLayout(resourceId)) return content;
   const plan = practice(resourceId);
   const hidden = new Set([...plan.hidden, ...plan.exercises.flatMap(q => q.sources.slice(1))].filter(s => s.page === page).map(s => s.block));
-  return { ...content, blocks: content.blocks.map((block, i) => hidden.has(i) ? { kind: "text", text: "" } : block) };
+  return { ...content, blocks: content.blocks.map((block, i) => hidden.has(i) || block.kind === "image" && block.reference ? { kind: "text", text: "" } : block) };
 }
 
 export function englishSixReaderGrade(id: string, response: string): SixFeedback | undefined {

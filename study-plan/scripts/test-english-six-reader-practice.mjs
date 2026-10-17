@@ -8,6 +8,7 @@ import { readerPracticeFixture } from "./english-six-reader-practice-fixture.mjs
 const originalCwd = process.cwd();
 const productionSources = process.argv.includes("--source");
 const fixtureRoot = productionSources ? null : mkdtempSync(path.join(tmpdir(), "reader-practice-"));
+let diagnostic = { stage: "load-source" };
 try {
   process.chdir(fixtureRoot ?? appRoot);
   const fixture = readerPracticeFixture();
@@ -24,6 +25,7 @@ try {
     for (const id of Object.keys(layouts)) {
       const resource = JSON.parse(readFileSync(path.join(appRoot, "content/english-six/resources", `${id}.json`), "utf8"));
       const plan = service.buildSixReaderPractice(id, resource.pages);
+      diagnostic = { resource: id, questions: plan.exercises.length, unmatched: plan.unmatched, groups: plan.groups };
       assert.equal(plan.unmatched, 0, `${id}: every keyed question must match its own answer`);
       assert.ok(plan.exercises.length > 0, `${id}: lecture exercises found`);
       assert.ok(plan.hidden.length > 0, `${id}: appended answers removed`);
@@ -39,6 +41,7 @@ try {
       console.log(JSON.stringify({ resource: id, questions: plan.exercises.length, unmatched: plan.unmatched, answerBlocksHidden: plan.hidden.length }));
     }
     const first = service.englishSixReaderExercises("c577cdad00f2", 2);
+    diagnostic = { stage: "verify-screenshot-exercises" };
     assert.ok(first.some(q => /want\s*→/.test(q.prompt)), "screenshot verb fill is interactive");
     const last = service.englishSixReaderExercises("c577cdad00f2", 6);
     assert.ok(last.some(q => q.options.some(option => option.text === "sang")), "screenshot choice is interactive");
@@ -84,8 +87,15 @@ try {
     const moved = structuredClone(fixture);
     moved.pages[6].blocks[1].text = "1. come → ______";
     assert.notEqual(service.buildSixReaderPractice(fixture.id, moved.pages).exercises.at(-1).id, plan.exercises.at(-1).id, "changed question cannot inherit an old locked answer");
+    const withReferenceImage = { ...fixture.pages[1], blocks: [...fixture.pages[1].blocks, { kind: "image", asset: "a".repeat(32), reference: true }] };
+    assert.ok(!JSON.stringify(service.englishSixReaderContent(fixture.id, 2, withReferenceImage)).includes("a".repeat(32)), "original page image cannot reveal the appended answer key");
     console.log(JSON.stringify({ status: "pass", questions: plan.exercises.length, answerIsolation: true, mismatchedKeysRejected: true, sourceMutation: false, studentWrites: 0 }));
   }
+} catch (error) {
+  // Public CI annotations contain only counters and source positions, never
+  // teaching content, answers, student records, environment values or secrets.
+  if (productionSources) console.log(`::error title=Grammar lecture verification::${JSON.stringify(diagnostic)}`);
+  throw error;
 } finally {
   process.chdir(originalCwd);
   if (fixtureRoot) rmSync(fixtureRoot, { recursive: true });
