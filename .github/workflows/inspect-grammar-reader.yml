@@ -1,0 +1,32 @@
+name: Read encrypted grammar sources for repair
+on:
+  push:
+    branches: [codex/inspect-grammar-reader-source]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Read only grammar JSON and encrypt for the repair workspace
+        shell: bash
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p ~/.ssh
+          trap 'rm -f ~/.ssh/grammar-repair-key' EXIT
+          printf '%s\n' "$SERVER_SSH_KEY" > ~/.ssh/grammar-repair-key
+          printf '%s ssh-ed25519 %s\n' "$SERVER_HOST" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' > ~/.ssh/grammar-known-hosts
+          printf '[%s]:%s ssh-ed25519 %s\n' "$SERVER_HOST" "$SERVER_PORT" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' >> ~/.ssh/grammar-known-hosts
+          recipient="$(base64 -w0 scripts/grammar-reader-repair.public.pem)"
+          selection="$(node -e 'process.stdout.write(Buffer.from(JSON.stringify(Object.keys(require("./study-plan/src/data/english-six-reader-layouts.public.json")))).toString("base64"))')"
+          ssh -i ~/.ssh/grammar-repair-key -p "$SERVER_PORT" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o HostKeyAlgorithms=ssh-ed25519 -o UserKnownHostsFile=~/.ssh/grammar-known-hosts -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20 -o ServerAliveInterval=15 "$SERVER_USER@$SERVER_HOST" "node - '$recipient' '$GITHUB_RUN_ID' '$selection'" < scripts/inspect-grammar-reader-source.mjs
