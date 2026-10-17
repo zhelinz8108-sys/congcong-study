@@ -96,6 +96,8 @@ with tempfile.TemporaryDirectory() as folder:
     assert not source.is_symlink() and helper.tree(source) == before
     assert helper.tree(archives / identity) == before
     checks.append('all-source-files-retained-on-failure')
+    assert helper.relocate(releases, archives, identity) == 'archived-and-verified'
+    checks.append('verified-copy-resumes-after-pointer-failure')
     cache = root / 'download-cache'; cache.mkdir()
     (cache / 'blob').write_text('synthetic npm package bytes')
     cache_target = root / 'cache-on-data'
@@ -104,4 +106,54 @@ with tempfile.TemporaryDirectory() as folder:
     assert helper.move_verified(cache, cache_target, root / 'pending-cache', root / 'cache-receipt.json', 'ubuntu-npm-cacache', mutable=True) == 'already-on-data-disk'
     assert (cache / 'new-download').read_text() == 'legitimate later cache write'
     checks.append('download-cache-remains-writable-through-original-path')
+
+for interrupted in ('partial-copy', 'before-receipt', 'before-pointer', 'during-cleanup', 'changed-archive', 'changed-pending'):
+    with tempfile.TemporaryDirectory() as folder:
+        root = Path(folder)
+        releases = root / 'releases'; archives = root / 'archives'
+        releases.mkdir(); archives.mkdir(mode=0o700)
+        source = releases / identity; source.mkdir()
+        (source / 'package.json').write_text('{"fixture":true}')
+        (source / 'scripts').mkdir()
+        (source / 'scripts/release-production.sh').write_text('fixture')
+        (source / '.env.local').write_text('synthetic private value')
+        (source / '.env.local').chmod(0o600)
+        before = helper.tree(source)
+        destination = archives / identity
+        pending = releases / ('.archiving-' + identity)
+        if interrupted == 'partial-copy':
+            partial = archives / (identity + '.partial'); partial.mkdir()
+            (partial / 'unfinished').write_text('preserve interrupted copy')
+        else:
+            shutil.copytree(source, destination)
+        if interrupted in ('before-pointer', 'during-cleanup', 'changed-pending'):
+            source.rename(pending)
+        if interrupted in ('during-cleanup', 'changed-pending'):
+            source.symlink_to(destination)
+        if interrupted == 'during-cleanup':
+            (pending / '.env.local').unlink()
+        if interrupted == 'changed-archive':
+            (destination / 'package.json').write_text('changed archive')
+        if interrupted == 'changed-pending':
+            (pending / 'package.json').write_text('changed pending')
+        if interrupted.startswith('changed-'):
+            reject(interrupted + '-retains-both-copies', lambda: helper.relocate(releases, archives, identity))
+            assert source.exists() and destination.exists()
+            if interrupted == 'changed-pending':
+                assert (pending / 'package.json').read_text() == 'changed pending'
+            else:
+                assert helper.tree(source) == before
+        else:
+            assert helper.relocate(releases, archives, identity) in ('archived-and-verified', 'already-archived')
+            assert source.is_symlink() and helper.tree(destination) == before
+            assert not pending.exists()
+            if interrupted == 'partial-copy':
+                saved = list(archives.glob(identity + '.interrupted-*'))
+                assert len(saved) == 1 and (saved[0] / 'unfinished').read_text() == 'preserve interrupted copy'
+            checks.append(interrupted + '-resumes-with-complete-verified-copy')
+
+with patch.object(helper.fcntl, 'flock', side_effect=[BlockingIOError(), None]) as lock_call, patch.object(helper.time, 'sleep'):
+    helper.acquire_lock(object())
+    assert lock_call.call_count == 2
+    checks.append('waits-for-disconnected-worker-lock-before-any-mutation')
 print(json.dumps({'status': 'pass', 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))
