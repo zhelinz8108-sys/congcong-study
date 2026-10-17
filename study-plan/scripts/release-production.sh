@@ -23,6 +23,7 @@ if [[ ${1:-} == --worker ]]; then
       # permissions. Preserved environment files retain their original modes.
       umask 022
       npm ci --include=dev
+      npm run test:version
       npm run test:grade6-bank
       npm run test:chinese-six:sealed
       npm run test:chinese-six
@@ -34,6 +35,7 @@ if [[ ${1:-} == --worker ]]; then
       ;;
     verify)
       [[ $argument == 3001 || $argument == 3002 ]] || fail 'Invalid verification port.'
+      /usr/bin/node scripts/check-release-version.mjs "$argument"
       /usr/bin/node --input-type=module - "$argument" <<'NODE'
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
@@ -317,6 +319,8 @@ printf 'Installing dependencies, running non-database tests, and building in sta
 run_worker build "$stage" -
 [[ -s $stage/.next/BUILD_ID ]] || fail 'The staged build has no BUILD_ID.'
 new_build=$(cat "$stage/.next/BUILD_ID")
+/usr/bin/node "$stage/scripts/write-release-metadata.mjs" "$commit" "$stage"
+chmod 0644 "$stage/release-metadata.json"
 printf '%s\n' "$new_build" >"$backup/new-BUILD_ID"
 receipt built
 

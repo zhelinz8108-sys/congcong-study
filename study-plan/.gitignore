@@ -20,6 +20,8 @@
 
 # production
 /build
+/release-metadata.json
+/release-metadata.json.*.tmp
 
 # misc
 .DS_Store

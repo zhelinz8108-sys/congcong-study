@@ -1,0 +1,151 @@
+Private native fixture export and recovery
+
+Use this workflow to deliver the fixed 92 native authoring modules into a private
+Codex Cloud VM. The archive and its selection are encrypted for a key held only
+by that VM. Verify the actual workflow run and Cloud acceptance before reporting
+that materials have been delivered; installing this workflow is not delivery.
+
+The workflow runs manually on main in zhelinz8108-sys/congcong-study. It checks out
+the triggering SHA with credential persistence off. Only the export job has
+contents:write. SERVER_* exist only in the SSH read step; github.token exists only
+in the publish step. No private recipient key, backup encryption password,
+database credentials or student data is needed.
+
+FIXED CLOUD INPUTS
+Root /www/study-plan-data/private-cloud-handoff/2026-10-17/
+materials-3b2d7ca9-66e3-4677-9234-232292bd76ed
+  native-authoring-min.tar.gz : 405441 bytes
+  SHA256 88e005c10482f2178dbc998ae47328b1ea0c6fd08f822208af23d7756924ebaf
+  native-authoring-min.selection.json : 35998 bytes
+  SHA256 0c8ece619c49ca68ca31da5271eab62a8c9c4cff36ed5318e0ddedb5163c0fcd
+The tar has the 92 original relative .mjs paths only. The reader uses sudo for
+O_RDONLY/O_NOFOLLOW reads of these two fixed paths, checking root700/600,
+single-link regular files, stable fstat and the complete SHA before streaming.
+It executes no material code and writes no server file. SSH uses the existing
+trusted ssh-ed25519 host key; do not replace this pin with ssh-keyscan output.
+
+PREPARE THE RECIPIENT IN THE PRIVATE CODEX CLOUD VM
+Generate an RSA keypair of 3072 to 8192 bits inside the private Cloud VM. Keep the
+private PEM outside the Git checkout, in a mode700 directory with file mode600.
+Never paste it into chats, workflow inputs, Git, logs, GitHub Secrets or a local
+desktop file. Enter only the SPKI PUBLIC KEY PEM as recipient_public_key.
+Inspect its public fingerprint from the repository root:
+
+  node scripts/cloud-material-envelope.mjs inspect-public-key --public-key PUBLIC.pem
+
+The input is limited to 8192 bytes before normalization. The workflow accepts
+literal \n or \r\n for a single-line textbox, then applies the same SPKI, RSA and
+strength checks. Compare the workflow's recipient fingerprint with the value
+inspected inside Cloud before accepting any export.
+
+RUN AND VERIFY THE EXPORT
+1. Dispatch "Export encrypted native fixtures for Codex Cloud" on main with the
+   Cloud recipient's public PEM. Confirm the exact repository and main commit.
+2. Confirm the read step succeeds. It deletes its temporary SSH key immediately
+   after the two downloads, and also deletes it on exit if the read fails.
+3. Confirm all four offline selftest suites succeed in the separate credential-
+   free step. The downloaded selection is used only as bounded test metadata.
+   Tests use synthetic material, temporary test keys and fake API calls. On Linux
+   the link rejection cases must run; inspect any reported unavailable cases.
+4. Confirm encryption and the new-branch publish both succeed. Record the safe
+   receipt's runId, runAttempt, source commit, export branch/commit, recipient
+   fingerprint, indexSha256 and envelopeSha256. Check the final cleanup step.
+5. In Cloud, fetch that explicit export commit, authenticate and decrypt it, then
+   verify and import only the exact 92 private modules as described below. Run
+   the actual native tests before calling the Cloud material handoff complete.
+
+Only a new branch is created:
+  codex/private-material-export-<runId>-<runAttempt>
+The publisher never updates or forces an existing ref, main or a tag. An existing
+branch or race fails. If main advanced before publication, dispatch a fresh run.
+Its commit has the triggering main SHA as parent and adds these files only:
+  cloud-material-exports/native-authoring-min/<runId>-<runAttempt>/envelope.json
+  cloud-material-exports/native-authoring-min/<runId>-<runAttempt>/metadata.json
+  cloud-material-exports/native-authoring-min/<runId>-<runAttempt>/index.json
+  cloud-material-exports/native-authoring-min/<runId>-<runAttempt>/chunks/00000.bin ...
+It creates no PR and does not merge into main, so this export does not deploy.
+
+FETCH AND DECRYPT IN CLOUD
+Create a new private directory outside the working checkout. Fetch files from
+the receipt's exact branch/commit into that directory. Continue developing on
+the user's source branch; do not checkout or merge an export branch to import
+fixtures. Verify the envelope SHA against the trusted run receipt.
+
+If git/curl through the Cloud network proxy fails, use the connected GitHub MCP
+fetch_file tool with encoding:base64 and the explicit export commit. Fetch
+index.json and each listed chunk into the private directory. Every raw chunk is
+at most 16384 bytes, so its base64 response is about 22 KB. Orchestrate tool
+outputs directly into bounded file writes; do not print the full ciphertext or
+route it through model text. Verify the run receipt's indexSha256, then assemble:
+
+  node scripts/assemble-cloud-material-envelope.mjs \
+    --index /private/new/index.json --chunks /private/new/chunks \
+    --output /private/new/envelope.json --expected-index-sha256 TRUSTED_INDEX_SHA
+
+The assembler checks the index digest/schema, contiguous ordered names, each
+chunk's size/SHA and the full envelope SHA before opening a new output. The
+chunks directory contains 00000.bin etc; index names are chunks/00000.bin.
+Successful API requests alone do not prove byte integrity. With either fetch
+method, use the trusted run/attempt and the independently pinned plaintext SHAs:
+
+  node scripts/cloud-material-envelope.mjs decrypt \
+    --input /private/new/envelope.json \
+    --private-key /private/recipient-private.pem \
+    --output /private/new/native-authoring-min.tar.gz \
+    --selection-output /private/new/native-authoring-min.selection.json \
+    --expected-run-id RUN_ID --expected-run-attempt ATTEMPT \
+    --expected-selection-sha256 0c8ece619c49ca68ca31da5271eab62a8c9c4cff36ed5318e0ddedb5163c0fcd \
+    --expected-input-sha256 88e005c10482f2178dbc998ae47328b1ea0c6fd08f822208af23d7756924ebaf
+
+The CLI validates the recipient and expected context, authenticates the payload,
+and verifies both plaintext digests before writing fresh output files. Existing
+files and symlinks are rejected. Keep decrypted files private and ignored.
+
+IMPORT AND ACCEPT THE EXACT FIXTURES
+Extraction is separate from decryption. Before overlaying the checkout, validate
+exactly 92 allowlisted regular tar members against the verified selection. Reject
+absolute/traversal paths, links, duplicate or unexpected members and differing
+existing files. Overlay only the ignored private/native-*.mjs destinations.
+Do not execute arbitrary archive contents or create an empty private directory
+to bypass the authoring check. Require every selected source hash to match and
+the authoring validator to report 92 modules, 2394 rows and zero pending rows.
+Then run from the study-plan directory:
+
+  node scripts/test-grade6-bank-native-renderer.mjs
+  node scripts/test-grade6-bank-native.mjs
+
+Record these real results with the export commit and plaintext digests. A decrypt
+success alone is not fixture acceptance. This procedure removes no original
+material or production file, and imports no environment or student database.
+
+OFFLINE SELFTESTS
+Run from the repository root with the pinned private selection available:
+
+  node scripts/test-cloud-material-envelope.mjs --selection PATH_TO_PINNED_SELECTION
+  node scripts/test-publish-cloud-material-export.mjs
+  node scripts/test-assemble-cloud-material-envelope.mjs
+  node scripts/test-cloud-workflow-public-key.mjs
+
+The crypto suite covers round trips, wrong recipient/context, header/AAD and
+ciphertext tampering, altered authenticated selection, weak/non-RSA keys, input
+bounds and output collisions. The assembly suite covers bounded ordered chunks,
+digest/schema rejection and filesystem links. The publisher suite uses fake fetch
+only and checks new-ref creation, existing-ref/main-advance/race refusal and
+untrusted metadata rejection. The public-key suite exercises the actual workflow
+preparation code, including literal newlines and invalid key rejection. Report
+link cases unavailable on a restricted host rather than calling them passed.
+
+ENVELOPE AND TRUST
+Envelope JSON has exactly header/encryptedKey/nonce/tag/ciphertext. The header
+binds version, algorithm RSA-OAEP-256+A256GCM, runId, runAttempt, fixed pack name,
+selection SHA, tar SHA and recipient SPKI fingerprint. Its canonical form is both
+AES-GCM AAD and the RSA-OAEP label. A random 32-byte AES key and 12-byte nonce are
+generated per export; the tag is 16 bytes; wrapping uses RSA-OAEP-SHA256. The
+encrypted payload is uint32BE selection-byte-length + selection bytes + tar bytes.
+Public metadata/index contain identities, digests, sizes and chunk names only.
+Neither source paths nor the private selection appear as export plaintext.
+
+The envelope provides recipient confidentiality and authenticated context, not an
+independent sender signature. Preserve the independently pinned tar/selection
+digests and verify the trusted run receipt. This native-only workflow does not
+use BACKUP_ENCRYPTION_PASSWORD or provide access to other recovery packages.

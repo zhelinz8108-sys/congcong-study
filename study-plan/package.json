@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:version": "node scripts/test-version.mjs",
+    "test:version:http": "node scripts/test-version-http.mjs",
     "db:seed": "node scripts/seed-postgres.mjs",
     "db:migrate": "node scripts/migrate-postgres.mjs",
     "db:backup": "node scripts/backup-postgres.mjs",

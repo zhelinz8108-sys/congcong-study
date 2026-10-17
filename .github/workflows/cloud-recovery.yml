@@ -1,0 +1,232 @@
+name: Cloud recovery backup and isolated restore
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+# Use the established deployment group to avoid swapping the app during capture.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  RECOVERY_RUN: ${{ github.run_id }}-${{ github.run_attempt }}
+  RECOVERY_HELPERS: study-plan/scripts/cloud-recovery
+
+jobs:
+  guard-and-selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Require the trusted main branch
+        env:
+          ACTUAL_REF: ${{ github.ref }}
+        run: test "$ACTUAL_REF" = refs/heads/main
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exercise envelope and credential security controls
+        run: node "$RECOVERY_HELPERS/selftest.mjs"
+
+  backup:
+    needs: guard-and-selftest
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Capture, authenticate, encrypt and persist the fixed backup
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          node "$RECOVERY_HELPERS/client.mjs" backup \
+            --run "$RECOVERY_RUN" \
+            --artifacts "$RUNNER_TEMP/cloud-recovery-artifacts-$RECOVERY_RUN"
+      - name: Retain only the two encrypted envelopes and safe metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloud-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/cloud-recovery-artifacts-${{ github.run_id }}-${{ github.run_attempt }}/credentials.ccre
+            ${{ runner.temp }}/cloud-recovery-artifacts-${{ github.run_id }}-${{ github.run_attempt }}/database.ccre
+            ${{ runner.temp }}/cloud-recovery-artifacts-${{ github.run_id }}-${{ github.run_attempt }}/SAFE-RECEIPT.json
+          retention-days: 90
+          if-no-files-found: error
+
+  isolated-restore:
+    needs: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cloud-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/cloud-recovery-download
+      - name: Verify encrypted bytes, recover credentials and restore only a new container
+        # This job deliberately receives no SERVER_* secret or production DB URL.
+        env:
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          work="$(mktemp -d "$RUNNER_TEMP/cloud-recovery-verify-$RECOVERY_RUN-XXXXXX")"
+          chmod 700 "$work"
+          cleanup() {
+            local resolved
+            resolved="$(realpath -m "$work")"
+            case "$resolved" in
+              "$RUNNER_TEMP"/cloud-recovery-verify-*) test ! -L "$work"; rm -rf -- "$resolved" ;;
+              *) return 1 ;;
+            esac
+          }
+          trap cleanup EXIT
+          node "$RECOVERY_HELPERS/artifact-check.mjs" --directory "$RUNNER_TEMP/cloud-recovery-download" --run "$RECOVERY_RUN"
+          node "$RECOVERY_HELPERS/envelope.mjs" decrypt --input "$RUNNER_TEMP/cloud-recovery-download/credentials.ccre" --output "$work/credentials.bundle.json" --kind credentials --run "$RECOVERY_RUN"
+          node "$RECOVERY_HELPERS/envelope.mjs" decrypt --input "$RUNNER_TEMP/cloud-recovery-download/database.ccre" --output "$work/database.dump" --kind database --run "$RECOVERY_RUN"
+          unset BACKUP_ENCRYPTION_PASSWORD
+          node "$RECOVERY_HELPERS/credentials.mjs" unpack --bundle "$work/credentials.bundle.json" --target "$work/restored-credentials" --run "$RECOVERY_RUN"
+          node "$RECOVERY_HELPERS/verify-db.mjs" --dump "$work/database.dump"
+
+  persistent-cipher-readback:
+    needs: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cloud-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/cloud-recovery-download
+      - name: Independently rehash Tencent ciphertext copies
+        # No decryption password: this proves persistence, separately from restore.
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: node "$RECOVERY_HELPERS/client.mjs" verify-persistent --run "$RECOVERY_RUN" --receipt "$RUNNER_TEMP/cloud-recovery-download/SAFE-RECEIPT.json"
+
+  restored-key-access:
+    needs: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cloud-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/cloud-recovery-download
+      - name: Authenticate both restored keys using only the encrypted recovery bundle
+        # No deployment secret is supplied: the private keys must be recovered.
+        env:
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          work="$(mktemp -d "$RUNNER_TEMP/cloud-recovery-access-$RECOVERY_RUN-XXXXXX")"
+          chmod 700 "$work"
+          cleanup() {
+            local resolved
+            resolved="$(realpath -m "$work")"
+            case "$resolved" in
+              "$RUNNER_TEMP"/cloud-recovery-access-*) test ! -L "$work"; rm -rf -- "$resolved" ;;
+              *) return 1 ;;
+            esac
+          }
+          trap cleanup EXIT
+          node "$RECOVERY_HELPERS/artifact-check.mjs" --directory "$RUNNER_TEMP/cloud-recovery-download" --run "$RECOVERY_RUN"
+          node "$RECOVERY_HELPERS/envelope.mjs" decrypt --input "$RUNNER_TEMP/cloud-recovery-download/credentials.ccre" --output "$work/credentials.bundle.json" --kind credentials --run "$RECOVERY_RUN"
+          unset BACKUP_ENCRYPTION_PASSWORD
+          node "$RECOVERY_HELPERS/credentials.mjs" unpack --bundle "$work/credentials.bundle.json" --target "$work/restored-credentials" --run "$RECOVERY_RUN"
+          for key in actions-deployment-key bootstrap-deployment-key; do
+            if ! ssh -i "$work/restored-credentials/$key" -p 22 \
+              -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+              -o HostKeyAlgorithms=ssh-ed25519 -o ConnectTimeout=20 \
+              -o UserKnownHostsFile="$RECOVERY_HELPERS/known_hosts" \
+              ubuntu@124.223.31.175 true >"$work/ssh.stdout" 2>"$work/ssh.stderr"; then
+              printf '{"status":"failed","stage":"restored-key-access"}\n'
+              exit 1
+            fi
+            rm -f -- "$work/restored-credentials/$key"
+          done
+          printf '{"status":"verified-restored-key-access","authenticatedKeys":2,"remoteCommand":"true","sudoUsed":false}\n'
+
+  legacy-isolated-integrity:
+    needs: backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: cloud-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/cloud-recovery-download
+      - name: Fetch only the encrypted legacy copy and remove the temporary SSH key
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: node "$RECOVERY_HELPERS/client.mjs" fetch-legacy --run "$RECOVERY_RUN" --receipt "$RUNNER_TEMP/cloud-recovery-download/SAFE-RECEIPT.json" --directory "$RUNNER_TEMP/cloud-recovery-legacy-cipher-$RECOVERY_RUN"
+      - name: Authenticate and compare original ZIP bytes without extracting it
+        # No SERVER_* secret is provided to this step. Nothing is sent to Codex.
+        env:
+          BACKUP_ENCRYPTION_PASSWORD: ${{ secrets.BACKUP_ENCRYPTION_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          work="$(mktemp -d "$RUNNER_TEMP/cloud-recovery-legacy-verify-$RECOVERY_RUN-XXXXXX")"
+          chmod 700 "$work"
+          cleanup() {
+            local resolved
+            resolved="$(realpath -m "$work")"
+            case "$resolved" in
+              "$RUNNER_TEMP"/cloud-recovery-legacy-verify-*) test ! -L "$work"; rm -rf -- "$resolved" ;;
+              *) return 1 ;;
+            esac
+          }
+          trap cleanup EXIT
+          node "$RECOVERY_HELPERS/envelope.mjs" decrypt --input "$RUNNER_TEMP/cloud-recovery-legacy-cipher-$RECOVERY_RUN/legacy.ccre" --output "$work/legacy.zip" --kind legacy --run "$RECOVERY_RUN"
+          unset BACKUP_ENCRYPTION_PASSWORD
+          node "$RECOVERY_HELPERS/legacy-check.mjs" --input "$work/legacy.zip"
