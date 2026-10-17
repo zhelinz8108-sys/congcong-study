@@ -7,6 +7,7 @@ import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import { encryptEnvelope } from './envelope.mjs';
 import { packCredentials } from './credentials.mjs';
+import { deriveLegacySealRequest } from './legacy-seal.mjs';
 import { need, noLinks, writeNew, readRegular, parseArgs, validRun, safeFailure } from './security.mjs';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const HOST = '124.223.31.175', PUBLIC_HOST = '124.223.31.175 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka';
@@ -89,7 +90,7 @@ export async function backup({ run, artifactDirectory }) {
         connection = await sshClient(work);
         attempted = true;
         await connection.run('prepare', run, nonce);
-        const snapshot = path.join(work, 'source-snapshot.json'), dump = path.join(work, 'database.dump'), bundle = path.join(work, 'credentials.bundle.json'), legacy = path.join(work, 'legacy.zip');
+        const snapshot = path.join(work, 'source-snapshot.json'), dump = path.join(work, 'database.dump'), bundle = path.join(work, 'credentials.bundle.json');
         await connection.run('snapshot', run, nonce, {
             outputPath: snapshot
         });
@@ -101,11 +102,7 @@ export async function backup({ run, artifactDirectory }) {
         });
         await fsp.unlink(snapshot);
         const envelopes = [];
-        for (const [kind, inputPath] of [['credentials', bundle], ['database', dump], ['legacy', legacy]]) {
-            if (kind === 'legacy')
-                await connection.run('legacy', run, nonce, {
-                    outputPath: legacy
-                });
+        for (const [kind, inputPath] of [['credentials', bundle], ['database', dump]]) {
             const outputPath = path.join(work, kind + '.ccre');
             const info = await encryptEnvelope({
                 inputPath, outputPath, password: process.env.BACKUP_ENCRYPTION_PASSWORD, kind, run
@@ -124,6 +121,27 @@ export async function backup({ run, artifactDirectory }) {
             envelopes.push({
                 file: info.file, bytes: info.bytes, sha256: info.sha256, kind
             });
+        }
+        // Only this legacy package's derived AES key crosses SSH stdin. Neither
+        // the password nor credential/database package keys leave Actions.
+        const request = await deriveLegacySealRequest({
+            password: process.env.BACKUP_ENCRYPTION_PASSWORD, run, ownerNonce: nonce
+        });
+        const descriptor = Buffer.from(JSON.stringify(request));
+        need(descriptor.length <= 8192, 'LEGACY_DESCRIPTOR_TOO_LARGE');
+        try {
+            const source = (await readRegular(path.join(HERE, 'legacy-seal.mjs'), 128 * 1024)).toString('base64');
+            const info = await connection.run('legacy-seal', run, nonce, {
+                args: [source], inputBuffer: descriptor
+            });
+            const expectedCipherBytes = 158552226 + 12 + Buffer.from(request.headerBase64, 'base64').length + 16;
+            need(JSON.stringify(Object.keys(info).sort()) === JSON.stringify(['status', 'kind', 'run', 'file', 'bytes', 'sha256'].sort()) && info.status === 'sealed' && info.kind === 'legacy' && info.run === run && info.file === 'legacy.ccre' && info.bytes === expectedCipherBytes && /^[a-f0-9]{64}$/.test(info.sha256), 'LEGACY_SEAL_RESULT_REJECTED');
+            envelopes.push({
+                file: info.file, bytes: info.bytes, sha256: info.sha256, kind: 'legacy'
+            });
+        }
+        finally {
+            descriptor.fill(0);
         }
         await connection.run('cleanup', run, nonce);
         const receipt = {

@@ -41,10 +41,22 @@ can be removed, guarded by the run's owner nonce; the production DB is not
 restored or migrated.
 
 The legacy envelope contains only the already archived fixed 158,552,226-byte
-ZIP. Its known full SHA256 is checked before encryption and after isolated
-decryption. It is never unpacked or executed and never uploaded as a large
-GitHub Artifact. Existing local originals and the root-only migration copy are
-retained. The new safe receipt's legacyEncrypted=true records the later state;
+ZIP. Actions creates the ordinary legacy CCRECOV1 header and derives one package
+AES key using the unchanged scrypt parameters and a new independent salt. Only
+that package key and the exact header bytes cross the already trusted SSH stdin
+to the original Tencent server, which already holds this ZIP plaintext. The
+BACKUP_ENCRYPTION_PASSWORD and all credential/database package keys remain only
+in Actions. The key descriptor is bounded to 8 KiB, never put in argv, an env
+variable, a file, an Artifact or logs. A fixed root/owner/source/hash server Node
+entry seals the local ZIP in memory to the same standard envelope format,
+exclusive-creates root600 legacy.ccre and rehashes the source and final cipher.
+Only safe cipher size/SHA/status returns to Actions. This removes the original
+ZIP download plus encrypted ZIP return from backup; the independent legacy
+verification job still downloads the ciphertext once and uses the unchanged
+password decryptor, then verifies the original full ZIP SHA. It is never
+unpacked, executed or uploaded as a large GitHub Artifact. Existing local
+originals and the root-only migration copy are retained. The new safe receipt's
+legacyEncrypted=true records the later state;
 the earlier migration receipt is historical evidence, not the final encryption
 completion record.
 

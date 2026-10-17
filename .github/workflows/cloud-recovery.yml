@@ -33,6 +33,8 @@ jobs:
           node-version: '22'
       - name: Exercise envelope and credential security controls
         run: node "$RECOVERY_HELPERS/selftest.mjs"
+      - name: Exercise cross-implementation delegated legacy sealing controls
+        run: node "$RECOVERY_HELPERS/selftest-legacy-seal.mjs"
 
   backup:
     needs: guard-and-selftest
