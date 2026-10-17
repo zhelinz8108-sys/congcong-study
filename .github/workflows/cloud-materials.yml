@@ -1,0 +1,132 @@
+name: Export encrypted native fixtures for Codex Cloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      recipient_public_key:
+        description: 'Cloud-only recipient SPKI RSA PUBLIC KEY PEM (3072-8192 bits, max 8192 bytes); never paste a private key'
+        type: string
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: private-native-material-export
+  cancel-in-progress: false
+
+jobs:
+  export:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository == 'zhelinz8108-sys/congcong-study'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout trusted main workflow commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          lfs: false
+
+      - name: Prepare private runner workspace and validate public recipient
+        shell: bash
+        env:
+          RECIPIENT_PUBLIC_KEY: ${{ inputs.recipient_public_key }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$GITHUB_REF" = refs/heads/main
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+          work_dir="$(mktemp -d "$RUNNER_TEMP/cloud-native.XXXXXXXX")"
+          chmod 700 "$work_dir"
+          printf 'CLOUD_NATIVE_WORK=%s\n' "$work_dir" >> "$GITHUB_ENV"
+          export WORK_DIR="$work_dir"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs/promises';
+          import path from 'node:path';
+          const submitted = process.env.RECIPIENT_PUBLIC_KEY ?? '';
+          if (Buffer.byteLength(submitted, 'utf8') > 8192) throw new Error('Public key input exceeds 8192 bytes');
+          const text = submitted.replace(/\\r\\n/g, '\n').replace(/\\n/g, '\n');
+          if (!text.startsWith('-----BEGIN PUBLIC KEY-----') || text.includes('PRIVATE KEY')) throw new Error('Only a bounded SPKI public key is accepted');
+          await fs.writeFile(path.join(process.env.WORK_DIR, 'recipient.pem'), text, {flag: 'wx', mode: 0o600});
+          NODE
+          node scripts/cloud-material-envelope.mjs inspect-public-key --public-key "$work_dir/recipient.pem"
+
+      - name: Read only the fixed verified native cloud pack
+        shell: bash
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$SERVER_HOST" = 124.223.31.175
+          test "$SERVER_USER" = ubuntu
+          [[ "$SERVER_PORT" =~ ^[0-9]{1,5}$ ]]
+          test "$SERVER_PORT" -ge 1
+          test "$SERVER_PORT" -le 65535
+          test -n "$SERVER_SSH_KEY"
+          trap 'rm -f -- "$CLOUD_NATIVE_WORK/ssh-key"' EXIT
+          printf '%s\n' "$SERVER_SSH_KEY" > "$CLOUD_NATIVE_WORK/ssh-key"
+          chmod 600 "$CLOUD_NATIVE_WORK/ssh-key"
+          # This public host key comes from the existing trusted known_hosts.
+          # Never replace this trust pin by running ssh-keyscan in this workflow.
+          printf '%s ssh-ed25519 %s\n' "$SERVER_HOST" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' > "$CLOUD_NATIVE_WORK/known_hosts"
+          printf '[%s]:%s ssh-ed25519 %s\n' "$SERVER_HOST" "$SERVER_PORT" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' >> "$CLOUD_NATIVE_WORK/known_hosts"
+          options=(-i "$CLOUD_NATIVE_WORK/ssh-key" -p "$SERVER_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o PasswordAuthentication=no -o StrictHostKeyChecking=yes -o HostKeyAlgorithms=ssh-ed25519 -o "UserKnownHostsFile=$CLOUD_NATIVE_WORK/known_hosts" -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20 -o LogLevel=ERROR)
+          for name in native-authoring-min.tar.gz native-authoring-min.selection.json; do
+            ssh "${options[@]}" "$SERVER_USER@$SERVER_HOST" "sudo -n python3 - $name" \
+              < scripts/read-cloud-native.py > "$CLOUD_NATIVE_WORK/$name"
+          done
+          rm -f -- "$CLOUD_NATIVE_WORK/ssh-key"
+
+      - name: Run offline crypto and export selftests without server or token credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          unset SERVER_HOST SERVER_USER SERVER_PORT SERVER_SSH_KEY GH_TOKEN
+          test ! -e "$CLOUD_NATIVE_WORK/ssh-key"
+          node scripts/test-cloud-material-envelope.mjs --selection "$CLOUD_NATIVE_WORK/native-authoring-min.selection.json"
+          node scripts/test-publish-cloud-material-export.mjs
+          node scripts/test-assemble-cloud-material-envelope.mjs
+          node scripts/test-cloud-workflow-public-key.mjs
+
+      - name: Encrypt both archive and selection for the Cloud recipient
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          node scripts/cloud-material-envelope.mjs encrypt \
+            --input "$CLOUD_NATIVE_WORK/native-authoring-min.tar.gz" \
+            --selection "$CLOUD_NATIVE_WORK/native-authoring-min.selection.json" \
+            --expected-input-sha256 88e005c10482f2178dbc998ae47328b1ea0c6fd08f822208af23d7756924ebaf \
+            --public-key "$CLOUD_NATIVE_WORK/recipient.pem" \
+            --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --output "$CLOUD_NATIVE_WORK/envelope.json" \
+            --metadata "$CLOUD_NATIVE_WORK/envelope.metadata.json"
+
+      - name: Create a new ciphertext-only export branch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node scripts/publish-cloud-material-export.mjs \
+            --envelope "$CLOUD_NATIVE_WORK/envelope.json" \
+            --metadata "$CLOUD_NATIVE_WORK/envelope.metadata.json"
+
+      - name: Remove only this runner's temporary plaintext and SSH key
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${CLOUD_NATIVE_WORK:-}" ]]; then
+            case "$CLOUD_NATIVE_WORK" in "$RUNNER_TEMP"/cloud-native.*) ;; *) exit 1 ;; esac
+            test ! -L "$CLOUD_NATIVE_WORK"
+            test "$(realpath -m -- "$CLOUD_NATIVE_WORK")" = "$CLOUD_NATIVE_WORK"
+            rm -rf -- "$CLOUD_NATIVE_WORK"
+          fi
