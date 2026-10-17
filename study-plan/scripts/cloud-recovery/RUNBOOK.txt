@@ -1,0 +1,103 @@
+Cloud recovery implementation — prepared source, not a production completion claim
+
+Publish cloud-recovery.yml as .github/workflows/cloud-recovery.yml. Publish all
+other files in this folder as study-plan/scripts/cloud-recovery/<filename>.
+The known_hosts file contains the already trusted production ed25519 public key;
+it is public verification material, not a private credential. No npm install or
+local runtime directory is required. Node 22 and standard Ubuntu/SSH/Docker tools
+are the only runner dependencies.
+
+Prerequisites
+1. Existing SERVER_HOST=the fixed production host, SERVER_USER=ubuntu,
+   SERVER_PORT=22 and SERVER_SSH_KEY Actions secrets. sudo -n is already used by
+   the existing deployment workflow. Do not put these secrets into Codex VM.
+2. BACKUP_ENCRYPTION_PASSWORD Actions secret, at least 16 UTF-8 bytes and at most
+   4096. Use a strong independent random password. Do not publish it or include
+   it in its own encrypted bundle. GitHub account/Actions access is needed for
+   future secret-backed recovery; this does not claim recovery after loss of
+   every cloud account.
+3. Explicitly authorized bootstrap migration must already have created:
+   /www/study-plan-data/private-cloud-handoff/2026-10-17/bootstrap-credentials/
+   workspace.env.local, deployment_ssh_key, deployment_ssh_key.pub.
+   Missing bootstrap is a hard failure, never replaced with production files.
+4. Active app /www/study-plan and its existing backup-postgres.mjs, working
+   pg_dump, the established /run/study-plan-release/lock, and at least 10 GiB
+   reserved data-disk space. The workflow also serializes with production-deploy.
+
+What is preserved
+The credential envelope contains exactly six distinct provenance-labelled files:
+current server app env, current server systemd env, bootstrap local workspace
+env, bootstrap local private SSH key and its public key, plus the runner's
+Actions deployment key. They are not assumed equal. Plaintext SHA256 and both
+public-key fingerprints stay inside the authenticated encrypted bundle. No env
+file is sourced or executed during credential restore.
+
+The database envelope holds a fresh custom pg_dump produced by the active app's
+existing backup script, with service startup PG configuration and the same
+@next/env loading. Its stdout/stderr are captured and never forwarded. Temporary
+files exist only below the new root-0700 run directory or new runner-0700 temp
+directory, with 0600 files. Only that run's two plaintext temporary server files
+can be removed, guarded by the run's owner nonce; the production DB is not
+restored or migrated.
+
+The legacy envelope contains only the already archived fixed 158,552,226-byte
+ZIP. Its known full SHA256 is checked before encryption and after isolated
+decryption. It is never unpacked or executed and never uploaded as a large
+GitHub Artifact. Existing local originals and the root-only migration copy are
+retained. The new safe receipt's legacyEncrypted=true records the later state;
+the earlier migration receipt is historical evidence, not the final encryption
+completion record.
+
+Format and persistence
+Each envelope uses a new 32-byte scrypt salt (N=32768,r=8,p=1), a new 12-byte
+AES-256-GCM nonce and a 16-byte tag. AAD binds the complete format header,
+including kind and run. Wrong password, modified metadata/ciphertext/tag, wrong
+run or wrong kind fails. Unauthenticated temporary plaintext is never parsed as
+a credential bundle and is removed on authentication failure. All output files
+are exclusive-create: an existing output cannot be replaced.
+
+New persistent directory: /www/study-plan-data/cloud-recovery/RUN-ATTEMPT/
+  credentials.ccre, database.ccre, legacy.ccre, SAFE-RECEIPT.json, .OWNER.json
+Directory mode 0700/root, file mode 0600/root. No existing run is overwritten.
+The Artifact contains only credentials.ccre, database.ccre, SAFE-RECEIPT.json
+for 90 days. Tencent copies persist independently of Artifact expiration.
+The safe receipt contains only ciphertext hashes, sizes, run/location and flags.
+
+Verification and completion
+Manual dispatch is allowed only on main. First the synthetic selftests run.
+The isolated-restore job has no SERVER_* secret: it downloads the Artifact,
+checks cipher hashes, authenticates both envelopes, unpacks only the six fixed
+names and checks their hashes plus both key fingerprints. After decryption it
+unsets the password. It restores the DB with exit-on-error/no-owner/no-privileges
+only into a new network-none PostgreSQL 16 Docker container. It requires three
+known app tables and prints only total table/record counts. It never prints
+student rows. The container and only its own temp directory are cleaned.
+
+The separate persistence job uses SERVER_* secrets but no decryption password;
+it independently rehashes the three stored Tencent ciphertexts. The legacy job
+uses SERVER_* only to fetch legacy ciphertext, removes its temporary SSH key,
+then uses only BACKUP_ENCRYPTION_PASSWORD in a later step to decrypt and compare
+original ZIP bytes without extracting them. This stage is not confused with
+the credential/DB job that has no SSH secret at all.
+
+The separate restored-key-access job receives only the encrypted Artifact and
+BACKUP_ENCRYPTION_PASSWORD, never SERVER_* secrets. After authenticating and
+unpacking the bundle, it uses each recovered private key separately to run only
+the fixed command true as ubuntu@124.223.31.175:22, with BatchMode, strict pinned
+ed25519 host verification and IdentitiesOnly. No sudo or file read is requested.
+It prints only the two-key success count, removes both recovered private keys,
+and cleans its own private temporary directory. This proves actual recovered
+access, in addition to format, SHA and public-fingerprint validation.
+
+Declare cloud recovery proven only when backup, isolated-restore,
+persistent-cipher-readback, restored-key-access and legacy-isolated-integrity
+all pass. A persisted
+cipher copy or uploaded Artifact alone is not a successful restore drill.
+Failure prints a stage name, never connection strings, secret hashes or values.
+Cancellation may leave a private incomplete run; never treat it as complete.
+Rerun uses a new RUN-ATTEMPT, with no overwrite of earlier evidence.
+
+Local synthetic check: node selftest.mjs
+It uses generated fake SSH keys and fake env bytes; no real secret or server is
+read. Docker/PostgreSQL restoration is exercised by the real isolated cloud job,
+not claimed by the local unit tests.
