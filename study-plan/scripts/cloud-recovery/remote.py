@@ -125,7 +125,7 @@ def main():
     mode, run, nonce, *args = sys.argv[1:]
     if not re.fullmatch('[1-9][0-9]{0,19}-[1-9][0-9]{0,5}', run) or not re.fullmatch('[a-f0-9]{32}', nonce):
         fail('RUN_REJECTED')
-    if mode not in ('prepare', 'snapshot', 'database', 'legacy', 'legacy-cipher', 'store', 'cleanup', 'finalize', 'inspect'):
+    if mode not in ('prepare', 'snapshot', 'database', 'legacy', 'legacy-seal', 'legacy-cipher', 'store', 'cleanup', 'finalize', 'inspect'):
         fail('MODE_REJECTED')
     target = ROOT / run
     plain = target / '.plaintext'
@@ -199,6 +199,29 @@ def main():
             fail('LEGACY_SOURCE_PIN_MISMATCH')
         with os.fdopen(os.open(LEGACY, os.O_RDONLY | os.O_NOFOLLOW), 'rb') as source:
             shutil.copyfileobj(source, sys.stdout.buffer, 1024 * 1024)
+    elif mode == 'legacy-seal':
+        if len(args) != 1 or len(args[0]) > 174764:
+            fail('LEGACY_SEAL_SOURCE_REJECTED')
+        node_source = base64.b64decode(args[0], validate=True)
+        if not 0 < len(node_source) <= 128 * 1024:
+            fail('LEGACY_SEAL_SOURCE_REJECTED')
+        descriptor = sys.stdin.buffer.read(8193)
+        if not 0 < len(descriptor) <= 8192:
+            fail('LEGACY_SEAL_DESCRIPTOR_REJECTED')
+        request = json.loads(descriptor)
+        if set(request) != {'schema', 'run', 'ownerNonce', 'headerBase64', 'keyBase64'} or request['schema'] != 'cloud-recovery-legacy-seal-request/v1' or request['run'] != run or (request['ownerNonce'] != nonce):
+            fail('LEGACY_SEAL_OWNER_REJECTED')
+        sealed = subprocess.run(['node', '--input-type=module', '-e', node_source.decode('utf-8'), 'server'], input=descriptor, capture_output=True, timeout=300, cwd=target, env={'PATH': os.environ.get('PATH', '/usr/bin:/bin')})
+        if sealed.returncode != 0 or len(sealed.stdout) > 8192:
+            fail('LEGACY_SEAL_FAILED')
+        result = json.loads(sealed.stdout)
+        if set(result) != {'status', 'kind', 'run', 'file', 'bytes', 'sha256'} or result['status'] != 'sealed' or result['kind'] != 'legacy' or (result['run'] != run) or (result['file'] != 'legacy.ccre') or (not isinstance(result['bytes'], int)) or isinstance(result['bytes'], bool) or (not 158552226 < result['bytes'] <= ENVELOPES['legacy.ccre']) or (not re.fullmatch('[a-f0-9]{64}', result['sha256'])):
+            fail('LEGACY_SEAL_RESULT_REJECTED')
+        if result['bytes'] != 158552226 + 12 + len(base64.b64decode(request['headerBase64'], validate=True)) + 16:
+            fail('LEGACY_SEAL_EXACT_SIZE_MISMATCH')
+        if check(target / 'legacy.ccre').st_size != result['bytes'] or sha_file(target / 'legacy.ccre') != result['sha256']:
+            fail('LEGACY_SEAL_PERSISTENCE_MISMATCH')
+        print(json.dumps(result))
     elif mode == 'legacy-cipher':
         check(target / 'legacy.ccre')
         with os.fdopen(os.open(target / 'legacy.ccre', os.O_RDONLY | os.O_NOFOLLOW), 'rb') as source:
