@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "algorithm": "RSA-OAEP-256+A256GCM",
+  "runId": "38989764321",
+  "runAttempt": "1",
+  "pack": "native-authoring-min",
+  "selectionSha256": "0c8ece619c49ca68ca31da5271eab62a8c9c4cff36ed5318e0ddedb5163c0fcd",
+  "inputSha256": "88e005c10482f2178dbc998ae47328b1ea0c6fd08f822208af23d7756924ebaf",
+  "recipientFingerprint": "sha256:1aabf09339bf9887474d6d8843b74ca282ed70d2831a9bf1790d87a9bf892fca",
+  "rsaBits": 3072,
+  "inputBytes": 405441,
+  "selectionBytes": 35998,
+  "envelopeBytes": 589662,
+  "envelopeSha256": "4ea6e8c3f34c6b69341202cabdbc50c1f5b3274724854b64e4c09c1046c8a6e3",
+  "repository": "zhelinz8108-sys/congcong-study",
+  "sourceCommit": "d3a1e66e432f333997a68fa21af461bd5977f303",
+  "exportBranch": "codex/private-material-export-38989764321-1",
+  "envelopePath": "cloud-material-exports/native-authoring-min/38989764321-1/envelope.json",
+  "indexPath": "cloud-material-exports/native-authoring-min/38989764321-1/index.json",
+  "indexSha256": "dc0b281918e10d79f88b90ab135a560c5204c8e8ae14330aab3526eac0bfd3cd",
+  "chunkCount": 36,
+  "sourceManifestSha256": "7e8baa1455caeccb7d106c0ac440c90f4f724d80b053cd13df8e1bc72683c79b"
+}
