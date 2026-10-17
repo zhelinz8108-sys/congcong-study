@@ -22,13 +22,19 @@ if [[ ${1:-} == --worker ]]; then
       # nginx reads .next/static directly; application output needs normal read
       # permissions. Preserved environment files retain their original modes.
       umask 022
-      npm ci --include=dev
-      npm run test:version
-      npm run test:grade6-bank
-      npm run test:chinese-six:sealed
-      npm run test:chinese-six
-      node scripts/test-english-six-reader-practice.mjs --source
-      npm run build -- --webpack
+      build_check() {
+        local step=$1; shift
+        if "$@"; then return 0; fi
+        printf '::error title=Release validation stage::%s\n' "$step"
+        return 1
+      }
+      build_check dependencies npm ci --include=dev
+      build_check version npm run test:version
+      build_check mathematics npm run test:grade6-bank
+      build_check chinese-seal npm run test:chinese-six:sealed
+      build_check chinese npm run test:chinese-six
+      build_check grammar-reader node scripts/test-english-six-reader-practice.mjs --source
+      build_check next-build npm run build -- --webpack
       ;;
     serve)
       [[ $argument == 3002 ]] || fail 'Invalid preflight port.'
@@ -237,13 +243,40 @@ PY
 
 run_worker() {
   local mode=$1 work=$2 argument=$3 user=${4:-ubuntu}
-  systemd-run --quiet --wait --collect --pipe --unit="study-plan-release-$release-$mode" \
+  if ! systemd-run --quiet --wait --collect --pipe --unit="study-plan-release-$release-$mode" \
     --uid="$user" --gid="$user" --working-directory="$work" \
     --property=EnvironmentFile=-/etc/study-plan.env \
     --property=MemoryHigh=1280M --property=MemoryMax=1280M --property=MemorySwapMax=2048M \
     --property=CPUQuota=100% --property=Nice=10 --property=RuntimeMaxSec=1800 \
     /bin/bash "$control" --worker "$mode" "$work" "$argument" \
-    >>"$backup/$mode.log" 2>&1
+    >>"$backup/$mode.log" 2>&1; then
+    # Forward only bounded, allowlisted counters and stage names. Full worker
+    # logs remain private because they may contain production configuration.
+    python3 - "$backup/$mode.log" "$mode" <<'PY'
+import json, re, sys
+stages = {'dependencies', 'version', 'mathematics', 'chinese-seal', 'chinese', 'grammar-reader', 'next-build'}
+prefix = '::error title=Grammar lecture verification::'
+for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
+    line = line.strip()
+    if line.startswith('::error title=Release validation stage::') and line.rsplit('::', 1)[-1] in stages:
+        print(line)
+    if not line.startswith(prefix) or len(line) > 16000:
+        continue
+    try:
+        value = json.loads(line[len(prefix):]); safe = {}
+        for key in ('questions', 'unmatched', 'page', 'block', 'inputCount', 'answerParts'):
+            if type(value.get(key)) is int and 0 <= value[key] <= 100000: safe[key] = value[key]
+        for key, pattern in {'resource': r'[a-f0-9]{12}', 'stage': r'load-source|verify-screenshot-exercises|submit-source-answer', 'kind': r'choice|judgment|fill|sentence|writing', 'grading': r'exact|reference'}.items():
+            if isinstance(value.get(key), str) and re.fullmatch(pattern, value[key]): safe[key] = value[key]
+        if isinstance(value.get('groups'), list):
+            safe['groups'] = [{key: [n for n in group.get(key, [])[:1000] if type(n) is int and 0 <= n <= 100000] for key in ('questions', 'keys', 'pages')} for group in value['groups'][:100] if isinstance(group, dict)]
+        if safe: print(prefix + json.dumps(safe, separators=(',', ':')))
+    except (ValueError, TypeError, AttributeError):
+        pass
+print('::error title=Isolated release worker::' + sys.argv[2] + ' failed; full diagnostics remain private on the server.')
+PY
+    return 1
+  fi
 }
 
 # Only these staging destinations may be replaced; never remove live resources.
