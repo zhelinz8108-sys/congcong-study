@@ -786,16 +786,6 @@ export default function SubjectPage() {
             })}
           </div>
           <Link
-            href={`/subjects/${id}/listening/toefl`}
-            className="mt-5 flex items-center justify-between gap-3 rounded-lg border-2 border-teal-200 bg-white px-5 py-5 text-teal-900 transition-colors hover:bg-teal-50"
-          >
-            <div>
-              <h2 className="text-2xl font-bold">托福听力</h2>
-              <p className="mt-1 text-sm text-teal-700">6.6 · Module 1 / 2 · 27 段</p>
-            </div>
-            <span aria-hidden="true">→</span>
-          </Link>
-          <Link
             href={`/subjects/${id}/english/six`}
             className="mt-5 flex items-center justify-between gap-3 rounded-lg border-2 border-emerald-200 bg-white px-5 py-5 text-emerald-900 transition-colors hover:bg-emerald-50"
           >

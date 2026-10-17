@@ -52,7 +52,7 @@ try {
       await page.getByRole("heading", { name: "六上", exact: true }).waitFor();
       for (const name of ["课本同步", "听说读写", "词汇与表达", "语法学习", "专题复习"])
         assert.equal(await page.getByRole("heading", { name, exact: true }).count(), 0, "No redesign outside Six");
-      for (const route of ["english/six", "vocab", "phrases", "sentences", "sentence-structure", "grammar", "grammar-guide", "final-review", "national-day-english", "national-day-english-practice", "reading", "listening/toefl"])
+      for (const route of ["english/six", "vocab", "phrases", "sentences", "sentence-structure", "grammar", "grammar-guide", "final-review", "national-day-english", "national-day-english-practice", "reading"])
         assert.equal(await page.locator(`a[href="/subjects/${subjectId}/${route}"]`).count(), 1, `Retain ${route}`);
       const reading = await page.locator(`a[href="/subjects/${subjectId}/reading"]`).boundingBox();
       const listening = await page.getByRole("button", { name: /听力.*Listening/ }).boundingBox();

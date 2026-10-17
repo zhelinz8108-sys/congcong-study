@@ -271,16 +271,6 @@ export function EnglishListeningPanel({ subjectId, playWordAudio }: EnglishListe
       </section>
 
       <Link
-        href={`/subjects/${subjectId}/listening/toefl`}
-        className="flex items-center justify-between gap-4 rounded-lg border border-teal-200 bg-white px-6 py-5 text-teal-900 transition-colors hover:bg-teal-50"
-      >
-        <div>
-          <h3 className="text-xl font-bold">托福听力</h3>
-          <p className="mt-1 text-sm text-teal-700">6.6 · Module 1 / 2 · 27 段 · 47 题</p>
-        </div>
-        <span aria-hidden="true">→</span>
-      </Link>
-      <Link
         href={`/subjects/${subjectId}/listening/yiben-grade-6`}
         className="group block overflow-hidden rounded-[2rem] border border-emerald-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md"
       >
