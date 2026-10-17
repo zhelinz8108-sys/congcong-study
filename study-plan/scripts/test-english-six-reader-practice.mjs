@@ -8,6 +8,7 @@ import { readerPracticeFixture } from "./english-six-reader-practice-fixture.mjs
 const originalCwd = process.cwd();
 const productionSources = process.argv.includes("--source");
 const fixtureRoot = productionSources ? null : mkdtempSync(path.join(tmpdir(), "reader-practice-"));
+if (!productionSources) process.env.NODE_ENV = "test";
 let diagnostic = { stage: "load-source" };
 try {
   process.chdir(fixtureRoot ?? appRoot);
@@ -34,7 +35,9 @@ try {
         if (block.kind === "text" && /^\s*【[^】]*答案[^】]*】/.test(block.text)) assert.ok(hidden.has(`${p + 1}:${b}`), `${id}: answer heading hidden on page ${p + 1}`);
       }));
       for (const question of plan.exercises) {
-        const response = question.choice ?? (question.inputCount > 1 ? JSON.stringify(question.accepted.map(part => part[0] ?? "reference")) : question.accepted[0]?.[0] ?? "reference");
+        diagnostic = { resource: id, stage: "submit-source-answer", page: question.sourcePage, block: question.sourceBlock, kind: question.kind, grading: question.grading, inputCount: question.inputCount, answerParts: question.accepted.length };
+        const values = question.grading === "reference" ? Array(question.inputCount).fill("reference") : question.accepted.map(part => part[0]);
+        const response = question.choice ?? (question.inputCount > 1 ? JSON.stringify(values) : values[0]);
         assert.ok(service.englishSixReaderGrade(question.id, response), "source-derived answer can be submitted");
       }
       questions += plan.exercises.length;
@@ -68,6 +71,12 @@ try {
     const multiple = publicQuestions.find(q => q.inputCount === 2);
     assert.equal(service.englishSixReaderGrade(multiple.id, '["did not", ""]'), undefined);
     assert.equal(service.englishSixReaderGrade(multiple.id, '["did not", "want"]').correct, true);
+    const fullSentenceKey = structuredClone(fixture);
+    fullSentenceKey.pages[5].blocks.find(block => block.text === "2. did not, want").text = "2. He did not want to act.";
+    writeFileSync(path.join(fixtureRoot, "content/english-six/resources", `${fixture.id}.json`), JSON.stringify(fullSentenceKey));
+    assert.equal(service.englishSixReaderGrade(multiple.id, '["did not", "want"]').correct, null, "whole-sentence reference key supports every input field");
+    assert.equal(service.englishSixReaderGrade(multiple.id, '["He did not want to act."]'), undefined, "source validation must submit the actual form shape");
+    writeFileSync(path.join(fixtureRoot, "content/english-six/resources", `${fixture.id}.json`), JSON.stringify(fixture));
     const sentence = publicQuestions.find(q => q.kind === "sentence");
     assert.equal(service.englishSixReaderGrade(sentence.id, "She did not want to play Mulan.").correct, null);
     for (let p = 0; p < fixture.pages.length; p++) {
@@ -78,6 +87,12 @@ try {
     }
     assert.equal(service.englishSixReaderContent(fixture.id, 2, fixture.pages[1]).blocks[0].text, fixture.pages[1].blocks[0].text, "exercise heading retained");
     assert.equal(JSON.stringify(fixture), before, "source documents unchanged");
+    const inlineOptions = structuredClone(fixture);
+    inlineOptions.pages[5].blocks.find(block => block.text.startsWith("( ) 3.")).text += " A. sing B. sang C. sings";
+    inlineOptions.pages[5].blocks = inlineOptions.pages[5].blocks.filter(block => !/^[ABC]\. /.test(block.text));
+    const inlineChoice = service.buildSixReaderPractice(fixture.id, inlineOptions.pages).exercises.find(q => q.options.length);
+    assert.equal(inlineChoice.options.length, 3, "choices extracted from the same source line remain selectable");
+    assert.ok(!inlineChoice.prompt.includes("A. sing"));
     assert.equal(service.englishSixReaderGrade("sr-../../index-123456789abc", "B"), undefined);
     const mismatch = structuredClone(fixture);
     mismatch.pages[6].blocks.at(-1).text = "2. went";

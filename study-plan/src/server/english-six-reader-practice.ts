@@ -39,19 +39,25 @@ function answerEntries(nodes: ReaderNode[]): Key[] {
 }
 
 function exercise(resourceId: string, question: Candidate, key: Key): Exercise | undefined {
-  const options = [...question.optionText.matchAll(/(?:^|\s)([A-F])[.．、)]\s*([\s\S]*?)(?=\s+[A-F][.．、)]\s*|$)/g)]
+  let prompt = question.prompt, optionText = question.optionText;
+  const inline = /\s+A[.．、)]\s/.exec(prompt);
+  if (inline && /(?:^|\s)B[.．、)]\s/.test(`${prompt.slice(inline.index)} ${optionText}`)) {
+    optionText = `${prompt.slice(inline.index).trim()} ${optionText}`.trim();
+    prompt = prompt.slice(0, inline.index).trim();
+  }
+  const options = [...optionText.matchAll(/(?:^|\s)([A-F])[.．、)]\s*([\s\S]*?)(?=\s+[A-F][.．、)]\s*|$)/g)]
     .map(match => ({ id: match[1], text: match[2].trim() }));
-  if (question.optionText && (options.length < 2 || new Set(options.map(o => o.id)).size !== options.length)) return;
+  if (optionText && (options.length < 2 || new Set(options.map(o => o.id)).size !== options.length)) return;
   const choice = options.length ? /^([A-F])(?:\b|[.．、（(:：])/.exec(key.text)?.[1] : undefined;
   if (options.length && !options.some(option => option.id === choice)) return;
-  const blanks = sixQuestionBlanks({ prompt: question.prompt }).length;
+  const blanks = sixQuestionBlanks({ prompt }).length;
   const kind = options.length ? "choice" : blanks ? "fill" : "sentence";
   const parts = key.text.split(/[,，;；]/).map(s => s.trim());
   const exact = kind === "choice" || kind === "fill" && (blanks === 1 || parts.length === blanks);
   const accepted = kind === "choice" ? [[choice!]] : (blanks > 1 ? parts : [key.text]).map(part => part.split(/\s*\/\s*/).filter(Boolean));
   const first = question.sources[0];
   const digest = createHash("sha256").update(JSON.stringify([first, question.prompt, options, question.instruction])).digest("hex").slice(0, 12);
-  return { id: `sr-${resourceId}-${digest}`, topic: question.topic, kind, prompt: question.prompt,
+  return { id: `sr-${resourceId}-${digest}`, topic: question.topic, kind, prompt,
     context: question.instruction, options, sourcePage: first.page, sourceBlock: first.block,
     inputCount: options.length ? 1 : Math.max(1, blanks), grading: exact ? "exact" : "reference",
     answer: choice ?? key.text,
