@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     parallelServerBuildTraces: false,
   } : undefined,
   outputFileTracingIncludes: {
+    "/api/english/toefl-temp/**": ["./content/toefl-temp/audio/*.mp3"],
     "/api/chinese/six/**": ["./content/chinese-six/sealed/**/*"],
     "/subjects/*/chinese/six/**": ["./content/chinese-six/sealed/bank.encrypted.json"],
     "/api/math/grade6-bank/**": [

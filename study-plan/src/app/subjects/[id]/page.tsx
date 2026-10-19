@@ -1051,6 +1051,17 @@ export default function SubjectPage() {
               <span className="text-stone-400 text-sm">→</span>
             </Link>
           </div>
+          <div className="bg-white rounded-2xl border border-blue-200 overflow-hidden">
+            <Link
+              href={`/subjects/${id}/toefl-temp`}
+              className="px-4 py-3 bg-blue-50 flex items-center justify-between cursor-pointer hover:bg-blue-100 transition-colors block"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold text-blue-800 whitespace-nowrap">📘 托福临时</span>
+              </div>
+              <span className="text-stone-400 text-sm">→</span>
+            </Link>
+          </div>
           </div>
         </div>
       )}

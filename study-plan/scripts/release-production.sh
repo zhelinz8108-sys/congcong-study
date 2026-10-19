@@ -76,6 +76,8 @@ assert.equal(audio.status, 200, 'Existing TOEFL audio must remain available.');
 assert.ok(Number(audio.headers.get('content-length')) > 0);
 process.argv = [process.execPath, path.resolve('scripts/check-english-layout-release.mjs'), port];
 await import(pathToFileURL(process.argv[1]));
+process.argv = [process.execPath, path.resolve('scripts/check-toefl-temp-release.mjs'), port];
+await import(pathToFileURL(process.argv[1]));
 console.log('Database, storage, Chinese, mathematics, English and TOEFL GET checks passed.');
 NODE
       ;;
