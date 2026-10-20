@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import EnglishListeningPanel from "@/components/english-listening-panel";
-import { countMathCurriculumItems } from "@/lib/math-curriculum";
 import { countChineseTopics } from "@/lib/chinese-curriculum";
 import type { Subject, Unit, Material, Word } from "@/lib/types";
 
@@ -1123,38 +1122,6 @@ export default function SubjectPage() {
               <span className="text-violet-400">→</span>
             </div>
           </Link>
-          <Link
-            href={`/subjects/${id}/math`}
-            className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
-            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-stone-900">数学知识体系</h2>
-                <p className="mt-1 text-sm text-stone-400">
-                  小学 6 个年级 · 初中 3 个年级 · {countMathCurriculumItems()} 个主题
-                </p>
-              </div>
-              <span className="text-stone-400">→</span>
-            </div>
-          </Link>
-
-          <Link
-            href={`/subjects/${id}/math/grade-6`}
-            className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
-            style={{ borderLeftWidth: 4, borderLeftColor: subject.color }}
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-stone-900">六年级</h2>
-                <p className="mt-1 text-sm text-stone-400">
-                  百分数 · 比例 · 圆柱圆锥 · 小学总复习
-                </p>
-              </div>
-              <span className="text-stone-400">→</span>
-            </div>
-          </Link>
-
           <Link
             href={`/subjects/${id}/math/problem-bank`}
             className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"
