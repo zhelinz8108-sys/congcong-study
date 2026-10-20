@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: production-deploy
+  group: production-storage-inspection
   cancel-in-progress: false
 
 jobs:
@@ -41,6 +41,10 @@ jobs:
           date -u '+Measured at %Y-%m-%dT%H:%M:%SZ'
           df -B1 --output=source,size,used,avail,pcent,target / /www/study-plan-data
           systemctl show study-plan.service -p ActiveState -p SubState -p WorkingDirectory -p User
+          ps -eo pid,etime,pcpu,comm --sort=-pcpu | head -12
+          for candidate in /www/study-plan-data/retained-release-archives/previous-bc29df1082b44e9b4ae1eacd813dd542761a3fbb-38966819559-1{,.partial}; do
+            if test -d "$candidate"; then du -s -B1 "$candidate"; fi
+          done
           du -x -B1 --max-depth=1 /www/study-plan-releases /www/study-plan-data /www/study-plan /var /home/ubuntu
           python3 - <<'PY'
           import json, pathlib, shutil
