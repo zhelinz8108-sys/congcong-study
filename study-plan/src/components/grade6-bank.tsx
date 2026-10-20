@@ -43,7 +43,7 @@ function CollectionCard({ collection, subjectId, responses, ready }: { collectio
 export function Grade6BankDirectory({ subjectId, manifest }: { subjectId: string; manifest: BankManifest }) {
   const { progress, ready, sync } = useGrade6BankProgress(subjectId);
   const stats = bankStats(manifest.collections.flatMap((c) => c.questions.map((q) => q.id)), progress.responses);
-  return <main className={styles.page}><div className={styles.wrap}>
+  return <main className={`${styles.page} ${styles.directoryPage}`}><div className={`${styles.wrap} ${styles.directoryWrap}`}>
     <Link className={styles.back} href={`/subjects/${subjectId}`}>← 返回数学</Link>
     <h1 className={styles.pageTitle}>六上数学题库</h1>
     <section className={styles.overview} aria-label="题库学习进度"><div className={styles.overviewTop}><h2>我的练习进度</h2><div className={styles.stats}><span>已答<b>{ready ? stats.answered : "—"} / {manifest.total}</b></span><span>答对<b>{ready ? stats.correct : "—"}</b></span><span>正确率<b>{ready && stats.accuracy !== null ? `${stats.accuracy}%` : "—"}</b></span>{stats.review > 0 && <span>待核验<b>{stats.review}</b></span>}</div></div><div className={styles.track}><div className={styles.fill} style={{ width: `${stats.answered / Math.max(1, manifest.total) * 100}%` }} /></div>{sync !== "saved" && <p className={styles.note} role="status">{syncText[sync]}</p>}</section>
@@ -52,7 +52,7 @@ export function Grade6BankDirectory({ subjectId, manifest }: { subjectId: string
         const collections = manifest.collections.filter((c) => c.mode === mode);
         const total = collections.reduce((sum, c) => sum + c.questionCount, 0);
         const headingId = `bank-directory-${mode}`;
-        return <section key={mode} className={styles.collectionPanel} data-mode={mode} aria-labelledby={headingId}>
+        return <section key={mode} className={styles.collectionPanel} data-mode={mode} aria-labelledby={headingId} tabIndex={0}>
           <header className={styles.sectionTitle}>
             <div className={styles.panelEyebrow}><span className={styles.panelCount}>{collections.length} {mode === "chapter" ? "组" : "套"} · {total.toLocaleString()} 题</span></div>
             <div className={styles.panelHeading}>
