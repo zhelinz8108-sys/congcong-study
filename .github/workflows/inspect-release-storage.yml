@@ -46,6 +46,16 @@ jobs:
             if test -d "$candidate"; then du -s -B1 "$candidate"; fi
           done
           du -x -B1 --max-depth=1 /www/study-plan-releases /www/study-plan-data /www/study-plan /var /home/ubuntu
+          for release in /www/study-plan /www/study-plan-releases/previous-*; do
+            if test -d "$release" && ! test -L "$release"; then
+              for cache in "$release/.next/cache" "$release/.next/cache/webpack"; do
+                if test -d "$cache" && ! test -L "$cache"; then du -s -B1 "$cache"; fi
+              done
+            fi
+          done
+          for cache in /var/cache/apt/archives /root/.npm/_cacache /root/.cache; do
+            if test -d "$cache" && ! test -L "$cache"; then du -s -B1 "$cache"; fi
+          done
           python3 - <<'PY'
           import json, pathlib, shutil
           releases = pathlib.Path('/www/study-plan-releases')
