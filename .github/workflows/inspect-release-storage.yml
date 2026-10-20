@@ -1,0 +1,58 @@
+name: Inspect production release storage
+
+on:
+  push:
+    branches:
+      - codex/inspect-release-storage-20261020
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Read filesystem capacity and directory sizes without changing the server
+        shell: bash
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$SERVER_HOST" = 124.223.31.175
+          test "$SERVER_USER" = ubuntu
+          [[ "$SERVER_PORT" =~ ^[0-9]{1,5}$ ]]
+          test -n "$SERVER_SSH_KEY"
+          work="$(mktemp -d "$RUNNER_TEMP/storage-inspect.XXXXXXXX")"
+          trap 'rm -rf -- "$work"' EXIT
+          printf '%s\n' "$SERVER_SSH_KEY" > "$work/key"
+          printf '[%s]:%s ssh-ed25519 %s\n%s ssh-ed25519 %s\n' "$SERVER_HOST" "$SERVER_PORT" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' "$SERVER_HOST" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' > "$work/known_hosts"
+          ssh -i "$work/key" -p "$SERVER_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o PasswordAuthentication=no -o StrictHostKeyChecking=yes -o HostKeyAlgorithms=ssh-ed25519 -o "UserKnownHostsFile=$work/known_hosts" -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=6 "$SERVER_USER@$SERVER_HOST" 'sudo -n bash -s' <<'REMOTE'
+          set -euo pipefail
+          date -u '+Measured at %Y-%m-%dT%H:%M:%SZ'
+          df -B1 --output=source,size,used,avail,pcent,target / /www/study-plan-data
+          systemctl show study-plan.service -p ActiveState -p SubState -p WorkingDirectory -p User
+          du -x -B1 --max-depth=1 /www/study-plan-releases /www/study-plan-data /www/study-plan /var /home/ubuntu
+          python3 - <<'PY'
+          import json, pathlib, shutil
+          releases = pathlib.Path('/www/study-plan-releases')
+          print('Release entries:')
+          for entry in sorted(releases.iterdir()):
+              info = entry.lstat()
+              print(json.dumps({'name': entry.name, 'symlink': entry.is_symlink(), 'target': str(entry.readlink()) if entry.is_symlink() else None, 'mtime': info.st_mtime}))
+          backups = pathlib.Path('/www/study-plan-data/backups')
+          if backups.is_dir():
+              for receipt in sorted(backups.glob('before-main-*/receipt.json')):
+                  value = json.loads(receipt.read_text())
+                  print('Release receipt: ' + json.dumps({key: value.get(key) for key in ('status', 'release', 'commit', 'oldBuildId', 'newBuildId', 'previousDirectory')}))
+          PY
+          REMOTE
