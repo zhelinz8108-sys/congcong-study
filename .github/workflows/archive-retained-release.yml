@@ -1,0 +1,57 @@
+name: Preserve oldest rollback copy on the data disk
+
+on:
+  push:
+    branches:
+      - codex/archive-retained-release-20261020
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  preserve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          lfs: false
+      - name: Verify selection guards and interrupted-copy recovery with synthetic files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B scripts/test-archive-failed-release-stages.py
+          python3 -B scripts/test-archive-retained-release-20261020.py
+      - name: Copy and verify the selected inactive rollback copy and retain its original path
+        shell: bash
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$SERVER_HOST" = 124.223.31.175
+          test "$SERVER_USER" = ubuntu
+          [[ "$SERVER_PORT" =~ ^[0-9]{1,5}$ ]]
+          test -n "$SERVER_SSH_KEY"
+          work="$(mktemp -d "$RUNNER_TEMP/rollback-preserve.XXXXXXXX")"
+          trap 'rm -rf -- "$work"' EXIT
+          printf '%s\n' "$SERVER_SSH_KEY" > "$work/key"
+          printf '[%s]:%s ssh-ed25519 %s\n%s ssh-ed25519 %s\n' "$SERVER_HOST" "$SERVER_PORT" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' "$SERVER_HOST" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' > "$work/known_hosts"
+          python3 - <<'PY' > "$work/verified-relocation.py"
+          from pathlib import Path
+          helper = Path('scripts/archive-failed-release-stages.py').read_text()
+          driver = Path('scripts/archive-retained-release-20261020.py').read_text()
+          print('import types')
+          print('helpers = types.ModuleType("verified_archive_helpers")')
+          print('exec(compile(' + repr(helper) + ', "<verified-archive-helpers>", "exec"), helpers.__dict__)')
+          print('exec(compile(' + repr(driver) + ', "<retained-rollback-preservation>", "exec"), {"__name__": "__main__", "helpers": helpers})')
+          PY
+          ssh -i "$work/key" -p "$SERVER_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o PasswordAuthentication=no -o StrictHostKeyChecking=yes -o HostKeyAlgorithms=ssh-ed25519 -o "UserKnownHostsFile=$work/known_hosts" -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=6 "$SERVER_USER@$SERVER_HOST" 'sudo -n python3 -u -' < "$work/verified-relocation.py"
