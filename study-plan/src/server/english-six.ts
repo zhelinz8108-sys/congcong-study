@@ -13,9 +13,21 @@ type Asset = { file: string; extension: string; size: number };
 function parse<T>(raw: string): T { return JSON.parse(raw) as T; }
 let index: EnglishSixIndex | undefined;
 let assets: Record<string, Asset> | undefined;
+let activeAssets: Set<string> | undefined;
 export function englishSixIndex() {
   if (process.env.NODE_ENV === "production" && index) return index;
-  return index = parse<EnglishSixIndex>(readFileSync(path.join(englishSixRoot, "index.json"), "utf8"));
+  // Source files are maintained independently of code releases. Retire the old
+  // edition here so archived resources cannot reappear through direct links.
+  const stored = parse<EnglishSixIndex>(readFileSync(path.join(englishSixRoot, "index.json"), "utf8"));
+  const resources = stored.resources.filter(resource => resource.edition === "new");
+  return index = { ...stored, resources, summary: { ...stored.summary,
+    includedFiles: resources.reduce((count, resource) => count + resource.paths.length, 0),
+    uniqueResources: resources.length,
+    statuses: resources.reduce<Record<string, number>>((counts, resource) => {
+      counts[resource.status] = (counts[resource.status] ?? 0) + 1;
+      return counts;
+    }, {}),
+  } };
 }
 export function englishSixPaper(unit: number): PrivatePaper | undefined {
   if (!Number.isInteger(unit) || unit < 1 || unit > 8) return;
@@ -42,6 +54,18 @@ export function englishSixResource(id: string): PrivateResource | undefined {
 }
 export function englishSixAsset(id: string) {
   if (!/^[a-f0-9]{32}$/.test(id)) return;
+  if (process.env.NODE_ENV !== "production" || !activeAssets) {
+    const allowed = new Set<string>();
+    for (const meta of englishSixIndex().resources) {
+      const resource = englishSixResource(meta.id)!;
+      if (resource.asset) allowed.add(resource.asset);
+      for (const page of resource.pages) for (const block of page.blocks) {
+        if (block.kind === "image" || block.kind === "audio" || block.kind === "video") allowed.add(block.asset);
+      }
+    }
+    activeAssets = allowed;
+  }
+  if (!activeAssets.has(id)) return;
   const manifest = process.env.NODE_ENV === "production" && assets ? assets : assets = parse<Record<string, Asset>>(readFileSync(path.join(englishSixRoot, "assets.private.json"), "utf8"));
   const asset = manifest[id];
   if (!asset) return;

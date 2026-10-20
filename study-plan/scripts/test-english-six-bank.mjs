@@ -70,7 +70,8 @@ export async function verifySixBank() {
   assert.equal(service.englishSixBankGrade("sx-000000000000-000000000000", "A"), undefined);
   assert.equal(lib.normalizeSixBankAnswer("  DIDN’T   play. "), "didn't play");
   const privateLookup = JSON.parse(readFileSync(path.join(appRoot, "content/english-six/bank/lookup.private.json"), "utf8"));
-  assert.equal(Object.keys(privateLookup).length, count);
+  assert.equal(Object.values(privateLookup).filter(id => index.papers.some(p => p.id === id)).length, count);
+  assert.ok(index.papers.every(p => p.edition === "new"));
   for (const id of ["981bb9fd35b0", "d3c1da19ba51", "f5988f72cb92", "584b2e8411ff", "a8ae68b3c494", "ba8444397e34", "eeeb5340deb5", "cfc873ad019f"])
     assert.equal(index.papers.filter(p => p.sourceId === id).reduce((n, p) => n + p.questionCount, 0), 118, `${id}: all course exercises matched`);
   const phraseQuestions = index.papers.filter(p => p.sourceId === "0467910b917e")
@@ -116,32 +117,7 @@ export async function verifySixBank() {
   const audit = JSON.parse(readFileSync(path.join(appRoot, "content/english-six/bank/audit.private.json"), "utf8"));
   assert.ok(audit.problems.some(p => p.sourceId === "df0149b2b0f8" && p.reason === "key-without-source-question"));
   const legacySources = ["3f35c6b5da2b", "8955f12c65d2", "e2e3e3fcdc4f", "09ce5f89090a", "d3479e9e9b33", "e90808a8dd22", "b48de03c5d6c", "a930d1f25ab7"];
-  for (const [i, expected] of [36, 20, 37, 25, 30, 31, 29, 23].entries()) {
-    assert.equal(sourceQuestions(legacySources[i]).length, expected);
-    for (const paper of index.papers.filter(p => p.sourceId === legacySources[i]))
-      assert.equal(paper.edition, "legacy", "old checklist must not be mixed into the 2026 edition");
-  }
-  const oldUnit1 = sourceQuestions(legacySources[0]);
-  assert.equal(oldUnit1.find(q => q.prompt.includes("rice in the bowl")).answer, "Was");
-  assert.equal(oldUnit1.find(q => q.prompt.includes("students in the playground now")).answer, "aren't");
-  assert.equal(oldUnit1.find(q => q.prompt.includes("Mr. Smith")).answer, "C");
-  assert.equal(oldUnit1.find(q => q.prompt.includes("go swimming, but")).answer, "A");
-  const oldUnit2 = sourceQuestions(legacySources[1]);
-  assert.equal(oldUnit2.find(q => q.prompt.includes("there is a girl")).answer, "singing");
-  assert.equal(oldUnit2.find(q => q.prompt.includes("thirsty")).grading, "reference");
-  assert.equal(oldUnit2.find(q => q.prompt.includes("It rained all day")).options.length, 4, "multi-line C/D options must stay in the options, not the prompt");
-  const oldUnit6 = sourceQuestions(legacySources[5]);
-  const pickUp = oldUnit6.find(q => q.prompt.includes("Please ______. It"));
-  assert.equal(pickUp.options[0].text, "pick it up; is good", "original repeated for and negative environmental claim corrected");
-  const oldUnit7 = sourceQuestions(legacySources[6]);
-  assert.equal(oldUnit7.find(q => q.prompt.includes("not much oil")).answer, "is");
-  assert.equal(oldUnit7.find(q => q.prompt.includes("most of our energy")).answer, "我们的大部分能源");
-  for (const id of legacySources) for (const q of sourceQuestions(id)) {
-    assert.ok(q.options.every(o => !o.text.includes("____")), "alignment spaces are not blanks in options");
-    assert.ok(!q.prompt.includes("______  ______"), "a single OOXML blank must not split into multiple fields");
-    if (q.grading === "exact" && !q.options.length)
-      assert.equal((q.prompt.match(/[_＿]{2,}/g) || []).length, q.accepted.length, `${q.id}: visible blanks match answer slots`);
-  }
+  for (const id of legacySources) assert.equal(sourceQuestions(id).length, 0, "retired sources must not be served");
   for (const [id, expected, figures] of [["cd846e3d3d6f", 15, 7], ["370dbef9fd22", 13, 3]]) {
     const qs = sourceQuestions(id);
     assert.equal(qs.length, expected, "Every dictation sentence with a blank is interactive");

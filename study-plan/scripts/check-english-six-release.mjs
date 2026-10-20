@@ -17,7 +17,9 @@ assert.equal((await get("/api/health")).status, 200);
 const indexResponse = await get("/api/english/six/index");
 assert.equal(indexResponse.status, 200);
 const index = await indexResponse.json();
-assert.equal(index.resources.length, 1391);
+const installed = JSON.parse(readFileSync(path.join(root, "index.json"), "utf8"));
+assert.equal(index.resources.length, installed.resources.filter(r => r.edition === "new").length);
+assert.ok(index.resources.every(r => r.edition === "new"));
 assert.equal(index.summary.practiceQuestions, 528);
 for (let unit = 1; unit <= 8; unit++) {
   const response = await get(`/api/english/six/practice/${unit}`);

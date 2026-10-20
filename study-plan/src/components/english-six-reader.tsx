@@ -70,7 +70,7 @@ export default function EnglishSixReader({ subjectId, resourceId }: { subjectId:
   if (interactive) return <EnglishSixBankPractice key={`${subjectId}:source:${resourceId}`} subjectId={subjectId} paperId={`source-${resourceId}`} resourceId={resourceId} />;
   return <main className={styles.readerPage}>
     <Link href={`${base}?${params.toString()}`} className={styles.back}>← 返回六上目录</Link>
-    <header className={styles.header}><div><p className={styles.eyebrow}>{data?.meta.edition === "legacy" ? "旧版参考" : "2026 新版"}{scope ? ` · ${scope.label}` : ""}{lesson ? " · 易错语法精讲" : ""}</p><h1 className={styles.readerTitle}>{title ?? "载入资料"}</h1></div></header>
+    <header className={styles.header}><div><p className={styles.eyebrow}>2026 新版{scope ? ` · ${scope.label}` : ""}{lesson ? " · 易错语法精讲" : ""}</p><h1 className={styles.readerTitle}>{title ?? "载入资料"}</h1></div></header>
     {error && <p role="alert">{error}</p>}
     {data && <>
       {!!data.practiceCount && <div className={styles.bankEntry}><strong>原资料 · 已匹配互动题 {data.practiceCount} 题</strong><Link className={styles.primary} href={`${base}/resource/${resourceId}?mode=practice&unit=${initialUnit || "all"}`}>开始练习 →</Link></div>}

@@ -13,7 +13,7 @@ export default function EnglishSixBank({ subjectId }: { subjectId: string }) {
   const base = `/subjects/${subjectId}/english/six`;
   const source = params.get("source");
   const unit = params.get("unit") === "all" ? 0 : Number(params.get("unit")) || 1;
-  const edition = params.get("edition") === "legacy" ? "legacy" : "new";
+  const edition = "new";
   const query = params.get("q") ?? "";
   useEffect(() => {
     const controller = new AbortController();
@@ -34,6 +34,7 @@ export default function EnglishSixBank({ subjectId }: { subjectId: string }) {
   }) ?? [], [data, source, unit, edition, query, params]);
   function update(key: string, value: string) {
     const next = new URLSearchParams(params.toString());
+    next.set("edition", edition);
     if (value) next.set(key, value); else next.delete(key);
     window.history.replaceState(null, "", `${base}/bank?${next}`);
   }

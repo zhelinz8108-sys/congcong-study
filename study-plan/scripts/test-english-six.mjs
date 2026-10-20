@@ -9,10 +9,13 @@ export async function verifyEnglishSix() {
   const lib = await loadHolidayTestModule("src/lib/english-six.ts");
   const index = server.englishSixIndex();
   assert.deepEqual(index.units.map(u => u.number), [1,2,3,4,5,6,7,8]);
-  assert.equal(index.summary.sourceFiles, 1846);
-  assert.equal(index.summary.includedFiles, 1845);
+  const archived = JSON.parse(readFileSync(path.join(server.englishSixRoot, "index.json"), "utf8"));
+  const active = archived.resources.filter(r => r.edition === "new");
+  assert.ok(index.resources.every(r => r.edition === "new"));
+  assert.equal(index.resources.length, active.length);
+  assert.equal(index.summary.includedFiles, active.reduce((n, r) => n + r.paths.length, 0));
   assert.equal(new Set(index.resources.map(r => r.id)).size, index.resources.length);
-  assert.equal(index.resources.reduce((n, r) => n + r.paths.length, 0), 1845);
+  assert.equal(index.resources.reduce((n, r) => n + r.paths.length, 0), index.summary.includedFiles);
   assert.ok(index.resources.every(r => r.extension !== ".zip"));
   for (const resource of index.resources) {
     for (const [unit, start] of Object.entries(resource.unitStarts ?? {})) {
@@ -82,7 +85,7 @@ export async function verifyEnglishSix() {
   const result = { a: { correct: true }, b: { correct: false }, c: { correct: null } };
   assert.deepEqual(lib.englishSixAccuracy(result), { answered: 3, graded: 2, correct: 1, accuracy: 50 });
   const scopeOf = id => lib.englishSixResourceScope(index.resources.find(r => r.id === id));
-  for (const edition of ["new", "legacy"]) {
+  for (const edition of ["new"]) {
     const groups = lib.englishSixCollections.flatMap(c => lib.englishSixResources(index, edition, null, "all", "", c.id));
     assert.equal(groups.length, index.resources.filter(r => r.edition === edition).length);
     assert.equal(new Set(groups.map(r => r.id)).size, groups.length, "every resource has one collection");

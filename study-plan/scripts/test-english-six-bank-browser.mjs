@@ -154,35 +154,6 @@ try {
   await shot("reviewed-checklist-mobile.png");
   checks.push("corrected source double-a exclamation grades What correctly");
 
-  const legacyChoiceEntry = index.papers.find(p => p.sourceId === "e90808a8dd22" && p.title.includes("单项选择"));
-  const legacyChoice = service.englishSixBankPrivatePaper(legacyChoiceEntry.id).questions[5];
-  await page.goto(`${base}/bank/${legacyChoiceEntry.id}?unit=6`);
-  await page.getByRole("combobox", { name: "跳转题目" }).selectOption({ value: "5" });
-  await page.getByRole("button", { name: "A pick it up; is good", exact: true }).click();
-  assert.equal(await page.locator('[aria-live="polite"]').count(), 0);
-  await shot("legacy-choice-before-submit-320.png");
-  await page.getByRole("button", { name: "提交答案", exact: true }).click();
-  await page.getByText("回答正确 · 已锁定", { exact: true }).waitFor();
-  await page.getByText(legacyChoice.explanation, { exact: true }).waitFor();
-  await page.locator('[aria-live="polite"]').scrollIntoViewIfNeeded();
-  await shot("legacy-choice-feedback-320.png");
-  const legacyFillEntry = index.papers.find(p => p.sourceId === "e90808a8dd22" && p.title.includes("句型转换"));
-  const legacyFill = service.englishSixBankPrivatePaper(legacyFillEntry.id).questions[0];
-  await page.goto(`${base}/bank/${legacyFillEntry.id}?unit=6`);
-  await page.getByRole("textbox", { name: "第 4 空", exact: true }).waitFor();
-  assert.equal(await page.getByRole("textbox").count(), 4);
-  for (let i = 0; i < 3; i++)
-    await page.getByRole("textbox", { name: `第 ${i + 1} 空`, exact: true }).fill(legacyFill.accepted[i][0]);
-  assert.equal(await page.getByRole("button", { name: "提交答案", exact: true }).isDisabled(), true);
-  await page.getByRole("textbox", { name: "第 4 空", exact: true }).fill("did not");
-  await page.getByRole("button", { name: "提交答案", exact: true }).click();
-  await page.getByText("回答正确 · 已锁定", { exact: true }).waitFor();
-  await page.getByText(legacyFill.explanation, { exact: true }).waitFor();
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.locator('[aria-live="polite"]').scrollIntoViewIfNeeded();
-  await shot("legacy-four-blanks-feedback-390.png");
-  checks.push("legacy edition corrected key/options; four original blanks; did not variant; no pre-submit answer; mobile feedback");
-
   const cartoonEntry = index.papers.find(p => p.sourceId === "cd846e3d3d6f");
   const cartoon = service.englishSixBankPrivatePaper(cartoonEntry.id);
   for (const width of [390, 320, 1440]) {

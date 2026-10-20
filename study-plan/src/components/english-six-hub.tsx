@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { englishSixCollections, englishSixResources, englishSixResourceScope, englishSixResourceStage, englishSixResourceTitle, englishSixStages, type EnglishSixIndex, type SixCollection, type SixEdition, type SixStage } from "@/lib/english-six";
+import { englishSixCollections, englishSixResources, englishSixResourceScope, englishSixResourceStage, englishSixResourceTitle, englishSixStages, type EnglishSixIndex, type SixCollection, type SixStage } from "@/lib/english-six";
 import styles from "./english-six.module.css";
 import type { SixBankIndex } from "@/lib/english-six-bank";
 
@@ -12,7 +12,7 @@ export default function EnglishSixHub({ subjectId }: { subjectId: string }) {
   const [bank, setBank] = useState<SixBankIndex>();
   const [error, setError] = useState("");
   const [limit, setLimit] = useState(30);
-  const edition: SixEdition = params.get("edition") === "legacy" ? "legacy" : "new";
+  const edition = "new";
   const collection: SixCollection = params.get("view") === "exams" ? "exams" : params.get("view") === "books" || !params.get("view") && params.get("unit") === "all" ? "books" : "units";
   const startingUnit = Number(params.get("unit") === "all" ? params.get("lastUnit") : params.get("unit"));
   const unit = startingUnit >= 1 && startingUnit <= 8 ? startingUnit : 1;
@@ -24,12 +24,21 @@ export default function EnglishSixHub({ subjectId }: { subjectId: string }) {
 
   function update(values: Record<string, string | null>) {
     const next = new URLSearchParams(params.toString());
+    next.set("edition", edition);
     for (const [key, value] of Object.entries(values)) {
       if (value === null) next.delete(key); else next.set(key, value);
     }
     setLimit(30);
     window.history.replaceState(null, "", `${base}?${next.toString()}`);
   }
+
+  useEffect(() => {
+    if (params.get("edition") === "legacy") {
+      const next = new URLSearchParams(params.toString());
+      next.set("edition", edition);
+      window.history.replaceState(null, "", `${base}?${next}`);
+    }
+  }, [params, base]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,14 +54,14 @@ export default function EnglishSixHub({ subjectId }: { subjectId: string }) {
 
   const scoped = useMemo(() => index ? englishSixResources(index, edition, collection === "units" ? unit : null, "all", "", collection, collection === "exams" ? period : "all") : [], [index, edition, collection, unit, period]);
   const stageCounts = useMemo(() => Object.fromEntries(englishSixStages.map(s => [s.id, scoped.filter(r => englishSixResourceStage(r) === s.id).length])), [scoped]);
-  const stage = candidateStage !== "all" && !stageCounts[candidateStage] && !(candidateStage === "test" && edition === "new" && collection === "units") ? "all" : candidateStage;
+  const stage = candidateStage !== "all" && !stageCounts[candidateStage] && !(candidateStage === "test" && collection === "units") ? "all" : candidateStage;
   const resources = useMemo(() => index ? englishSixResources(index, edition, collection === "units" ? unit : null, stage, search, collection, collection === "exams" ? period : "all") : [], [index, edition, collection, unit, stage, search, period]);
   const collectionCounts = useMemo(() => Object.fromEntries(englishSixCollections.map(c => [c.id, index?.resources.filter(r => r.edition === edition && englishSixResourceScope(r).collection === c.id).length ?? 0])), [index, edition]);
   const selected = index?.units.find(u => u.number === unit);
   const bankPapers = bank?.papers.filter(p => p.edition === edition && scoped.some(r => r.id === p.sourceId)) ?? [];
   const bankCount = bankPapers.reduce((count, p) => count + p.questionCount, 0);
-  const heading = collection === "units" ? `Unit ${unit} · ${edition === "new" ? selected?.title : selected?.legacyTitle}` : collection === "books" ? "整册与跨单元资料" : period === "midterm" ? "期中复习与测评" : period === "final" ? "期末复习与测评" : "期中期末复习与测评";
-  const practice = edition === "new" && collection === "units" && (stage === "test" || stage === "all");
+  const heading = collection === "units" ? `Unit ${unit} · ${selected?.title}` : collection === "books" ? "整册与跨单元资料" : period === "midterm" ? "期中复习与测评" : period === "final" ? "期末复习与测评" : "期中期末复习与测评";
+  const practice = collection === "units" && (stage === "test" || stage === "all");
   const resourceQuery = new URLSearchParams(params.toString());
   resourceQuery.set("view", collection);
   resourceQuery.set("unit", collection === "units" ? String(unit) : "all");
@@ -63,7 +72,7 @@ export default function EnglishSixHub({ subjectId }: { subjectId: string }) {
     <Link className={styles.back} href={`/subjects/${subjectId}`}>← 返回英语主页</Link>
     <header className={styles.header}>
       <div><p className={styles.eyebrow}>六年级上册 · 英语</p><h1>六上</h1></div>
-      <div className={styles.editions} role="group" aria-label="教材版本">{(["new", "legacy"] as const).map(e => <button key={e} aria-pressed={edition === e} onClick={() => update({ edition: e, stage: "all", q: null })}>{e === "new" ? "2026 新版" : "旧版参考"}</button>)}</div>
+      <span className={styles.edition}>2026 新版</span>
     </header>
     {error && <p role="alert">{error}</p>}
     {!index && !error && <p role="status">正在载入资料…</p>}
@@ -74,18 +83,18 @@ export default function EnglishSixHub({ subjectId }: { subjectId: string }) {
         <strong>{c.label}</strong><span>{collectionCounts[c.id]} 份</span>
       </button>)}</nav>
 
-      {collection === "units" && <><p className={styles.controlLabel}>选择单元</p><nav className={styles.units} aria-label="单元">{index.units.map(u => <button key={u.number} aria-label={`Unit ${u.number} ${edition === "new" ? u.title : u.legacyTitle}`} title={edition === "new" ? u.title : u.legacyTitle} aria-pressed={unit === u.number} onClick={() => update({ unit: String(u.number), stage: "listen", q: null })}>
+      {collection === "units" && <><p className={styles.controlLabel}>选择单元</p><nav className={styles.units} aria-label="单元">{index.units.map(u => <button key={u.number} aria-label={`Unit ${u.number} ${u.title}`} title={u.title} aria-pressed={unit === u.number} onClick={() => update({ unit: String(u.number), stage: "listen", q: null })}>
         <span className={styles.unitNumber}>Unit {u.number}</span>
       </button>)}</nav></>}
       {collection === "exams" && <div className={styles.periods} role="group" aria-label="复习阶段">{(["all", "midterm", "final"] as const).map(p => <button key={p} aria-pressed={period === p} onClick={() => update({ period: p, stage: "all", q: null })}>{p === "all" ? "全部" : p === "midterm" ? "期中" : "期末"}</button>)}</div>}
       </section>
 
-      <div className={styles.sectionHead}><h2>{heading}</h2><span className={styles.scopeCount}>{scoped.length} 份资料{edition === "new" && collection === "units" ? " · 1 套互动测评" : ""}</span></div>
+      <div className={styles.sectionHead}><h2>{heading}</h2><span className={styles.scopeCount}>{scoped.length} 份资料{collection === "units" ? " · 1 套互动测评" : ""}</span></div>
       <div className={styles.filters}>
         <h3 className={styles.controlLabel}>学习阶段</h3>
         <nav className={styles.stages} aria-label="学习顺序">
           <button aria-pressed={stage === "all"} onClick={() => update({ stage: "all" })}>全部</button>
-          {englishSixStages.slice(0, 6).filter(s => stageCounts[s.id] > 0 || s.id === "test" && edition === "new" && collection === "units").map(s => <button key={s.id} aria-pressed={stage === s.id} onClick={() => update({ stage: s.id })}>{s.id === "test" && collection !== "units" ? "综合测评" : s.label}<span>{stageCounts[s.id] + (s.id === "test" && edition === "new" && collection === "units" ? 1 : 0)}</span></button>)}
+          {englishSixStages.slice(0, 6).filter(s => stageCounts[s.id] > 0 || s.id === "test" && collection === "units").map(s => <button key={s.id} aria-pressed={stage === s.id} onClick={() => update({ stage: s.id })}>{s.id === "test" && collection !== "units" ? "综合测评" : s.label}<span>{stageCounts[s.id] + (s.id === "test" && collection === "units" ? 1 : 0)}</span></button>)}
         </nav>
         {englishSixStages.slice(6).some(s => stageCounts[s.id] > 0) && <label className={styles.extraFilter}>补充资料<select aria-label="补充资料" value={stage === "reference" || stage === "teacher" ? stage : ""} onChange={e => update({ stage: e.target.value || "all" })}>
           <option value="">选择分类</option>{englishSixStages.slice(6).filter(s => stageCounts[s.id] > 0).map(s => <option key={s.id} value={s.id}>{s.label} · {stageCounts[s.id]}</option>)}

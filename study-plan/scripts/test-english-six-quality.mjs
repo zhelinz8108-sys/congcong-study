@@ -13,8 +13,13 @@ const original = await loadHolidayTestModule("src/server/english-six.ts");
 const quality = await loadHolidayTestModule("src/server/english-six-quality.ts");
 const answers = await loadHolidayTestModule("src/lib/english-six-answer.ts");
 const all = new Map();
+const archived = [];
+const active = bank.englishSixBankIndex();
 let auto = 0, reference = 0;
-for (const entry of read("bank/index.json").papers) {
+for (const entry of read("bank/index.json").papers.filter(entry => !active.papers.some(p => p.id === entry.id))) {
+  archived.push(...read(`bank/papers/${entry.id}.json`).questions.map(q => ({ q })));
+}
+for (const entry of active.papers) {
   const privatePaper = bank.englishSixBankPrivatePaper(entry.id), publicPaper = bank.englishSixBankPublicPaper(entry.id);
   for (const field of ["answer", "explanation", "accepted", "keySource", "before", "after", "reasons"])
     assert.ok(!JSON.stringify(publicPaper).includes(`"${field}":`), `${entry.id}: private ${field}`);
@@ -26,7 +31,7 @@ for (let unit = 1; unit <= 8; unit++) {
   for (const q of original.englishSixPaper(unit).questions) all.set(q.id, { q, public: pub.questions.find(item => item.id === q.id), file: `practice/${unit}.json` });
 }
 const get = suffix => {
-  const found = [...all.values()].filter(row => row.q.id === suffix || row.q.id.endsWith(`-${suffix}`));
+  const found = [...all.values(), ...archived].filter(row => row.q.id === suffix || row.q.id.endsWith(`-${suffix}`));
   assert.equal(found.length, 1, suffix);
   return found[0].q;
 };
@@ -36,7 +41,7 @@ const grade = (id, response) => {
   if (!value) throw new Error("Invalid response shape");
   return value;
 };
-assert.equal(all.size, 5572);
+assert.equal(all.size, active.questionCount + original.englishSixIndex().summary.practiceQuestions);
 for (const { q, public: pub } of all.values()) {
   assert.ok(q.answer.trim() && q.explanation.trim(), q.id);
   if (q.promptRuns) assert.equal(q.promptRuns.map(run => run.text).join(""), q.prompt, q.id);
@@ -56,6 +61,7 @@ for (const { q, public: pub } of all.values()) {
   if (q.grading === "reference" || !q.options.length && q.grading !== "exact") reference++; else auto++;
 }
 for (const change of review.changes) {
+  if (!all.has(change.id)) continue;
   const { q, file } = all.get(change.id);
   assert.equal(file, change.file);
   for (const [field, expected] of Object.entries(change.after)) assert.deepEqual(q[field] ?? null, expected, `${q.id}: ${field}`);
@@ -86,4 +92,4 @@ for (const id of ["u4-q9", "u3-q9", "u7-q1", "1f5d40298684", "9de275874708"]) as
 const writing = get("d12dc287b99b").answer.split("\n").slice(1).join(" ").split(/\s+/).length;
 assert.ok(writing >= 50 && writing <= 60);
 assert.ok(get("d12dc287b99b").explanation.includes(`${writing}词`));
-console.log(JSON.stringify({ questions: all.size, revised: review.changes.length, auto, reference, historicalFeedbackReadOnly: true, privateBeforeSubmit: true, checks: "passed" }));
+console.log(JSON.stringify({ questions: all.size, revised: review.changes.filter(change => all.has(change.id)).length, auto, reference, historicalFeedbackReadOnly: true, privateBeforeSubmit: true, checks: "passed" }));

@@ -34,6 +34,7 @@ if [[ ${1:-} == --worker ]]; then
       build_check chinese-seal npm run test:chinese-six:sealed
       build_check chinese npm run test:chinese-six
       build_check grammar-reader node scripts/test-english-six-reader-practice.mjs --source
+      build_check english-six-new-only node scripts/test-english-six-new-only.mjs
       build_check next-build npm run build -- --webpack
       ;;
     serve)

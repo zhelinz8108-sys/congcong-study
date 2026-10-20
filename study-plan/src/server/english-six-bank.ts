@@ -1,7 +1,7 @@
 import "server-only";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { englishSixRoot } from "./english-six";
+import { englishSixIndex, englishSixRoot } from "./english-six";
 import { normalizeSixBankAnswer, sixBankInputs, type SixBankIndex, type SixBankPaper, type SixBankQuestion } from "@/lib/english-six-bank";
 import type { SixFeedback } from "@/lib/english-six";
 import { sixQuestionInputCount } from "@/lib/english-six-answer";
@@ -18,8 +18,11 @@ const paperCache = new Map<string, PrivatePaper>();
 export function englishSixBankIndex(): SixBankIndex {
   if (process.env.NODE_ENV === "production" && cachedIndex) return cachedIndex;
   const file = path.join(root, "index.json");
-  return cachedIndex = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) as SixBankIndex :
+  const stored = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) as SixBankIndex :
     { version: 1, complete: false, auditedQuestionLowerBound: 10623, questionCount: 0, existingQuestionCount: 528, papers: [] };
+  const sources = new Set(englishSixIndex().resources.map(resource => resource.id));
+  const papers = stored.papers.filter(paper => paper.edition === "new" && sources.has(paper.sourceId));
+  return cachedIndex = { ...stored, papers, questionCount: papers.reduce((count, paper) => count + paper.questionCount, 0) };
 }
 export function englishSixBankPrivatePaper(id: string): PrivatePaper | undefined {
   if (!/^[a-f0-9]{12}-[a-f0-9]{8}$/.test(id) || !englishSixBankIndex().papers.some(p => p.id === id)) return;
