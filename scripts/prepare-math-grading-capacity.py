@@ -237,6 +237,58 @@ def reject_workers(workers, process_names):
     require(not any(re.match(r'^(?:npm|npx|pnpm|yarn|corepack|node-gyp)(?:\b|[- ])', name, re.I) for name in process_names), 'An active package manager exists')
 
 
+def readonly_wrapper_rule(name, uid, expected_uid, cwd, package, age, children, namespace=Path('/www')):
+    """Only a verified steady Next runtime is exempt; never an install/build CLI."""
+    if name not in ('npm start', 'npm run start') or uid != expected_uid or age < 300:
+        return False
+    if not cwd.is_relative_to(namespace):
+        return False
+    relative = cwd.relative_to(namespace)
+    if not relative.parts or not relative.parts[0].startswith('study-plan') or any(part in ('.', '..') for part in relative.parts):
+        return False
+    if not isinstance(package, dict) or package.get('name') != 'study-plan':
+        return False
+    scripts = package.get('scripts')
+    if not isinstance(scripts, dict) or scripts.get('start') != 'next start' or any(key in scripts for key in ('prestart', 'poststart')):
+        return False
+    return any(name.startswith('next-server') for name in children)
+
+
+def readonly_start_wrapper(pid, name):
+    """Classify internally. Never return/log any PID, cwd, uid, age or script."""
+    try:
+        process = Path('/proc') / pid
+        cwd = Path(os.readlink(process / 'cwd'))
+        if cwd.resolve() != cwd or not cwd.is_relative_to(Path('/www')):
+            return False
+        status = (process / 'status').read_text().splitlines()
+        uid = int(next(line for line in status if line.startswith('Uid:')).split()[1])
+        values = (process / 'stat').read_text().rsplit(')', 1)[1].split()
+        age = float(Path('/proc/uptime').read_text().split()[0]) - int(values[19]) / os.sysconf('SC_CLK_TCK')
+        package_path = cwd / 'package.json'
+        info = package_path.lstat()
+        if not stat.S_ISREG(info.st_mode) or info.st_size > 16384:
+            return False
+        descriptor = os.open(package_path, os.O_RDONLY | os.O_NOFOLLOW)
+        with os.fdopen(descriptor, encoding='utf-8') as source:
+            package = json.load(source)
+        processes = []
+        for item in Path('/proc').glob('[0-9]*/comm'):
+            try:
+                item_stat = (item.parent / 'stat').read_text().rsplit(')', 1)[1].split()
+                processes.append((item.parent.name, item_stat[1], item.read_text().strip()))
+            except (FileNotFoundError, PermissionError):
+                pass
+        parents, descendants = {pid}, []
+        for _ in range(4):
+            children = [(child, command) for child, parent, command in processes if parent in parents]
+            descendants.extend(command for _, command in children)
+            parents = {child for child, _ in children}
+        return readonly_wrapper_rule(name, uid, pwd.getpwnam('ubuntu').pw_uid, cwd, package, age, descendants)
+    except (OSError, ValueError, TypeError, StopIteration, KeyError, IndexError):
+        return False
+
+
 def idle():
     result = subprocess.run(['systemctl', 'list-units', '--no-legend', '--plain',
         '--state=active,activating,deactivating', 'study-plan-release-*', 'study-plan-preflight-*', 'study-plan-math-restore-*'],
@@ -244,7 +296,10 @@ def idle():
     names = []
     for path in Path('/proc').glob('[0-9]*/comm'):
         try:
-            names.append(path.read_text().strip())
+            name = path.read_text().strip()
+            if name in ('npm start', 'npm run start') and readonly_start_wrapper(path.parent.name, name):
+                continue
+            names.append(name)
         except (FileNotFoundError, PermissionError):
             pass
     reject_workers(result.stdout, names)
@@ -394,13 +449,21 @@ def self_test():
             raise AssertionError('Wrong cache pointer accepted')
         except ValueError:
             pass
-        for workers, names in [('active-worker', []), ('', ['npm ci']), ('', ['npx']), ('', ['yarn'])]:
+        for workers, names in [('active-worker', []), ('', ['npm ci']), ('', ['npm start']), ('', ['npx']), ('', ['yarn'])]:
             try:
                 reject_workers(workers, names)
                 raise AssertionError('Active worker accepted')
             except ValueError:
                 pass
         reject_workers('', ['next-server', 'sshd'])
+        wrapper = dict(name='npm start', uid=1000, expected_uid=1000, cwd=Path('/www/study-plan-preview'),
+            package={'name': 'study-plan', 'scripts': {'start': 'next start'}}, age=3600, children=['sh', 'next-server (v1)'])
+        assert readonly_wrapper_rule(**wrapper)
+        for changed in ({'name': 'npm ci'}, {'name': 'npm run build'}, {'uid': 0}, {'age': 10},
+                        {'cwd': Path('/home/other-project')}, {'children': ['node']},
+                        {'package': {'name': 'other-app', 'scripts': {'start': 'next start'}}},
+                        {'package': {'name': 'study-plan', 'scripts': {'start': 'next start', 'poststart': 'npm install'}}}):
+            assert not readonly_wrapper_rule(**{**wrapper, **changed})
         app = root / 'study-plan'; app.mkdir()
         releases = root / 'study-plan-releases'; releases.mkdir()
         held = releases / 'held'; held.mkdir()

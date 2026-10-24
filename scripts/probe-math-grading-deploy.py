@@ -117,25 +117,6 @@ def restore_pointer():
         return None
 
 
-def package_processes(held):
-    """Bounded process-role metadata only; no command lines or environment."""
-    service = subprocess.check_output(['systemctl', 'show', 'study-plan.service', '-p', 'MainPID', '--value'], text=True).strip()
-    result = []
-    allowed = {'npm run start', 'npm start', 'npm run dev', 'npm ci', 'npm install', 'npm exec', 'npm', 'npx', 'pnpm', 'yarn', 'corepack', 'node-gyp'}
-    for path in Path('/proc').glob('[0-9]*/comm'):
-        try:
-            name = path.read_text().strip()
-            if not re.match(r'^(?:npm|npx|pnpm|yarn|corepack|node-gyp)(?:\b|[- ])', name, re.I):
-                continue
-            cwd = Path(os.readlink(path.parent / 'cwd'))
-            role = 'current-application' if cwd == APP else 'latest-held-rollback' if held and str(cwd) == held else 'other'
-            uid_line = next(line for line in (path.parent / 'status').read_text().splitlines() if line.startswith('Uid:'))
-            result.append({'pid': int(path.parent.name), 'uid': int(uid_line.split()[1]), 'commandRole': name if name in allowed else 'other-package-manager', 'cwdRole': role, 'isProductionMainPID': path.parent.name == service})
-        except (FileNotFoundError, PermissionError):
-            pass
-    return result
-
-
 def probe():
     if os.geteuid() != 0:
         raise ValueError('Root is required to stat existing retained releases')
@@ -192,7 +173,6 @@ def probe():
             'data': {'freeBytes': data_space.free, 'totalBytes': data_space.total},
             'current': {'path': str(APP), 'metadata': current, 'size': allocated(APP)},
             'latestHeldRollback': held,
-            'activePackageProcesses': package_processes(held),
             'npmDownloadCache': cache_result,
             'releases': releases,
             'elapsedSeconds': round(time.monotonic() - started, 2),
