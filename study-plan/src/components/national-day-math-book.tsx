@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { memo, useEffect, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useState, type CSSProperties } from "react";
 import NationalDayMathDiagram from "@/components/national-day-math-diagram";
+import NationalDayMathAudio, { type MathListenRequest } from "@/components/national-day-math-audio";
 import { getNationalDayMathPalette } from "@/lib/national-day-math-colors";
 import styles from "./national-day-math-book.module.css";
 import { useNationalDayMathProgress } from "@/lib/national-day-math-progress";
@@ -34,7 +35,7 @@ function draftFields(value: string, question: NationalDayMathPublicQuestion): Re
   return question.fields.length === 1 ? { [question.fields[0].id]: value } : {};
 }
 
-const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, ready, attempt, saveDraft, recordAttempt }: {
+const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, ready, attempt, saveDraft, recordAttempt, listen }: {
   question: NationalDayMathPublicQuestion;
   sectionId: string;
   tone: "tint" | "white";
@@ -42,6 +43,7 @@ const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, rea
   attempt?: NationalDayMathAttempt;
   saveDraft: ReturnType<typeof useNationalDayMathProgress>["saveDraft"];
   recordAttempt: ReturnType<typeof useNationalDayMathProgress>["recordAttempt"];
+  listen: (id: string) => void;
 }) {
   const isQuiz = question.type === "quiz";
   const [notice, setNotice] = useState("");
@@ -103,6 +105,7 @@ const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, rea
   return (
     <article id={`question-${question.id}`} data-math-question={question.id} data-question-category={question.category} data-card-tone={tone} className={`my-6 scroll-mt-8 rounded-2xl border p-5 sm:p-6 ${isQuiz ? styles.quiz : styles.example}`}>
       <p className={`text-xs font-bold tracking-wide ${isQuiz ? styles.practiceAccent : styles.accent}`}>{question.label}</p>
+      <button type="button" onClick={() => listen(question.id)} className="mt-2 rounded-lg border border-sky-200 bg-white px-3 py-2 text-sm font-semibold text-sky-800">{isQuiz ? "🔊 听老师读题" : "🎧 听老师讲这道题"}</button>
       {question.title && <h4 className="mt-2 text-lg font-bold leading-8 text-slate-800"><MathText text={question.title} /></h4>}
       <p className="mt-3 whitespace-pre-wrap text-[16px] leading-8 text-slate-700"><MathText text={question.question} /></p>
       {question.type === "quiz" && <form className="mt-5" onSubmit={event => { event.preventDefault(); void submit(); }} noValidate>
@@ -156,6 +159,8 @@ export default function NationalDayMathBook({ subjectId, sections, chapter, next
   const stats = nationalDayMathChapterStats(chapter.quizIds, progress.attempts);
   const quizCount = stats.total;
   const resume = sections.find((section) => section.id === progress.lastSection);
+  const [listenRequest, setListenRequest] = useState<MathListenRequest | null>(null);
+  const listen = useCallback((id: string) => setListenRequest(previous => ({ id, sequence: (previous?.sequence ?? 0) + 1 })), []);
 
   return (
     <main className="min-h-screen bg-white text-slate-800" data-national-day-math-book data-math-chapter={chapter.id}>
@@ -169,6 +174,8 @@ export default function NationalDayMathBook({ subjectId, sections, chapter, next
           <p className="mt-3 text-sm leading-7 text-slate-500">本章知识点与教学例题完整展开，从上往下学习。自测先输入答案并提交，再看系统判分和解析。各章分开阅读，原有学习记录继续保留。</p>
           <p className="mt-3 text-sm leading-7 text-slate-500">按所提供的2026秋苏教版六上教材整理。单纯看懂答案不等于学会，用自测和最后20题检查掌握，再换数重做。</p>
         </header>
+
+        <NationalDayMathAudio sections={sections} request={listenRequest} />
 
         <section aria-label="国庆数学学习进度" className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
           <h2 className="text-base font-bold">本部分学习进度</h2>
@@ -194,8 +201,9 @@ export default function NationalDayMathBook({ subjectId, sections, chapter, next
             return <section key={section.id} id={`math-section-${section.id}`} data-math-section={section.id} data-math-theme={palette.id} style={colors} className={`scroll-mt-8 border-t pt-8 ${styles.section}`}>
             <p className={`text-xs font-bold tracking-wider ${styles.sectionLabel}`}>{section.day ? `第${section.day}天 · ` : section.kind === "review" ? "复习与速查 · " : "学习准备 · "}{String(index + 1).padStart(2, "0")}</p>
             <h2 className="mb-5 mt-3 text-2xl font-black leading-10 text-slate-800 sm:text-3xl">{section.title}</h2>
+            <button type="button" onClick={() => listen(section.id)} className="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-bold text-sky-800">🎧 从这一节开始听</button>
             {section.blocks.map((block, blockIndex) => {
-              if (block.type === "example" || block.type === "quiz") return <QuestionCard key={block.id} question={block} sectionId={section.id} tone={block.type === "example" && exampleIndex++ % 2 === 1 ? "white" : "tint"} ready={ready} attempt={progress.attempts[block.id]} saveDraft={saveDraft} recordAttempt={recordAttempt} />;
+              if (block.type === "example" || block.type === "quiz") return <QuestionCard key={block.id} question={block} sectionId={section.id} tone={block.type === "example" && exampleIndex++ % 2 === 1 ? "white" : "tint"} ready={ready} attempt={progress.attempts[block.id]} saveDraft={saveDraft} recordAttempt={recordAttempt} listen={listen} />;
               if (block.type === "diagram") return <NationalDayMathDiagram key={`${section.id}-${block.id}`} id={block.id} />;
               if (block.type === "text" || block.type === "heading" || block.type === "formula") return <TextBlock key={`${section.id}-${blockIndex}`} block={block} />;
               return null;

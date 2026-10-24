@@ -9,6 +9,7 @@
 
 .section {
   border-top-color: var(--math-border);
+  scroll-margin-top: 22rem;
 }
 
 .sectionLabel {
@@ -29,6 +30,7 @@
 .example {
   border-color: var(--math-border);
   background: var(--math-tint);
+  scroll-margin-top: 22rem;
 }
 
 .example[data-card-tone="white"] {
@@ -38,6 +40,7 @@
 .quiz {
   border-color: var(--math-practice-border);
   background: var(--math-practice-soft);
+  scroll-margin-top: 22rem;
 }
 
 .accent {
