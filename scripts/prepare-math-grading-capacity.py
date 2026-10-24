@@ -162,7 +162,7 @@ def cache_manifest(path, data_root=None):
         os.close(descriptor)
 
 
-def clear_directory_contents(path, expected=None, allow_links=False, data_root=None):
+def clear_directory_contents(path, expected=None, allow_links=False, data_root=None, before_delete=None):
     """Pin and validate every directory before deletion, including replacement races."""
     real_directory(path)
     reject_mounts(path, data_root or path.parent)
@@ -190,6 +190,10 @@ def clear_directory_contents(path, expected=None, allow_links=False, data_root=N
         _, entries = inspect_directory_fd(descriptor, allow_links)
         reject_mounts(path, data_root or path.parent)
         require(directory_identity(path.lstat()) == expected, 'Directory replaced after inspection')
+        if before_delete is not None:
+            before_delete()
+            reject_mounts(path, data_root or path.parent)
+            require(directory_identity(path.lstat()) == expected, 'Directory changed during cache-use verification')
         clear(descriptor, (), entries)
         os.fsync(descriptor)
         require(directory_identity(path.lstat()) == expected, 'Directory pointer changed during cleanup')
@@ -197,8 +201,8 @@ def clear_directory_contents(path, expected=None, allow_links=False, data_root=N
         os.close(descriptor)
 
 
-def clear_cache_contents(path, expected=None, data_root=None):
-    clear_directory_contents(path, expected, False, data_root)
+def clear_cache_contents(path, expected=None, data_root=None, before_delete=None):
+    clear_directory_contents(path, expected, False, data_root, before_delete)
 
 
 def guard_retention_deletion(retention, allowed_roots, removable):
@@ -234,75 +238,149 @@ def guard_retention_deletion(retention, allowed_roots, removable):
 
 def reject_workers(workers, process_names):
     require(not workers.strip(), 'An active release worker exists')
-    require(not any(re.match(r'^(?:npm|npx|pnpm|yarn|corepack|node-gyp)(?:\b|[- ])', name, re.I) for name in process_names), 'An active package manager exists')
+    require(not any(package_or_build_command(name) for name in process_names), 'An active package manager or build worker exists')
 
 
-def readonly_wrapper_rule(name, uid, expected_uid, cwd, package, age, children, namespace=Path('/www')):
-    """Only a verified steady Next runtime is exempt; never an install/build CLI."""
-    if name not in ('npm start', 'npm run start') or uid != expected_uid or age < 300:
-        return False
-    if not cwd.is_relative_to(namespace):
-        return False
-    relative = cwd.relative_to(namespace)
-    if not relative.parts or not relative.parts[0].startswith('study-plan') or any(part in ('.', '..') for part in relative.parts):
-        return False
-    if not isinstance(package, dict) or package.get('name') != 'study-plan':
-        return False
-    scripts = package.get('scripts')
-    if not isinstance(scripts, dict) or scripts.get('start') != 'next start' or any(key in scripts for key in ('prestart', 'poststart')):
-        return False
-    return any(name.startswith('next-server') for name in children)
+def package_or_build_command(name):
+    return re.match(r'^(?:npm|npx|pnpm|yarn|corepack|node-gyp|webpack|next-build|next build)(?:\b|[- ])', name, re.I) is not None
 
 
-def readonly_start_wrapper(pid, name):
-    """Classify internally. Never return/log any PID, cwd, uid, age or script."""
+def cache_target(target, cache_roots=(CACHE, ORIGIN)):
+    # procfs reports canonical targets, including an optional deleted suffix.
+    value = target.removesuffix(' (deleted)')
+    path = Path(value)
+    return path.is_absolute() and any(path == root or path.is_relative_to(root) for root in cache_roots)
+
+
+def process_cache_busy(process, cache_roots=(CACHE, ORIGIN)):
+    """Inspect link targets only; never read file payloads, argv or environment."""
     try:
-        process = Path('/proc') / pid
-        cwd = Path(os.readlink(process / 'cwd'))
-        if cwd.resolve() != cwd or not cwd.is_relative_to(Path('/www')):
-            return False
-        status = (process / 'status').read_text().splitlines()
-        uid = int(next(line for line in status if line.startswith('Uid:')).split()[1])
-        values = (process / 'stat').read_text().rsplit(')', 1)[1].split()
-        age = float(Path('/proc/uptime').read_text().split()[0]) - int(values[19]) / os.sysconf('SC_CLK_TCK')
-        package_path = cwd / 'package.json'
-        info = package_path.lstat()
-        if not stat.S_ISREG(info.st_mode) or info.st_size > 16384:
-            return False
-        descriptor = os.open(package_path, os.O_RDONLY | os.O_NOFOLLOW)
-        with os.fdopen(descriptor, encoding='utf-8') as source:
-            package = json.load(source)
-        processes = []
-        for item in Path('/proc').glob('[0-9]*/comm'):
-            try:
-                item_stat = (item.parent / 'stat').read_text().rsplit(')', 1)[1].split()
-                processes.append((item.parent.name, item_stat[1], item.read_text().strip()))
-            except (FileNotFoundError, PermissionError):
-                pass
-        parents, descendants = {pid}, []
-        for _ in range(4):
-            children = [(child, command) for child, parent, command in processes if parent in parents]
-            descendants.extend(command for _, command in children)
-            parents = {child for child, _ in children}
-        return readonly_wrapper_rule(name, uid, pwd.getpwnam('ubuntu').pw_uid, cwd, package, age, descendants)
-    except (OSError, ValueError, TypeError, StopIteration, KeyError, IndexError):
+        if cache_target(os.readlink(process / 'cwd'), cache_roots):
+            return True
+    except FileNotFoundError:
+        pass
+    try:
+        with os.scandir(process / 'fd') as descriptors:
+            for descriptor in descriptors:
+                try:
+                    if cache_target(os.readlink(descriptor.path), cache_roots):
+                        return True
+                except FileNotFoundError:
+                    pass
+    except FileNotFoundError:
+        pass
+    return False
+
+
+def install_or_build_tokens(tokens):
+    """Return only an activity boolean; never retain or log raw argument tokens."""
+    for index, token in enumerate(tokens):
+        name = token.replace('\\', '/').rsplit('/', 1)[-1]
+        if name in ('npm-cli.js', 'npx-cli.js', 'npm', 'npx', 'pnpm', 'pnpm.cjs', 'yarn', 'yarn.js', 'corepack', 'node-gyp', 'node-gyp.js'):
+            return True
+        if name in ('webpack', 'webpack.js', 'webpack-cli', 'webpack-cli.js', 'tsc', 'tsc.js', 'rollup', 'rollup.js'):
+            return True
+        if name == 'next' or '/next/dist/bin/next' in token.replace('\\', '/'):
+            if any(action in ('build', 'export', 'dev') for action in tokens[index + 1:]):
+                return True
+        if name in ('vite', 'vite.js') and 'build' in tokens[index + 1:]:
+            return True
+    # Node interpreter eval/print flags apply only before its script. A Next
+    # runtime's later `start -p PORT` is a port option, not Node's print flag.
+    index = 1
+    while index < len(tokens):
+        flag = tokens[index]
+        if flag in ('--eval', '--print') or flag.startswith(('-e', '-p', '--eval=', '--print=')):
+            return True
+        if flag in ('-r', '--require', '--import', '--loader', '--experimental-loader'):
+            index += 2
+        elif flag.startswith('-'):
+            index += 1
+        else:
+            break
+    return False
+
+
+def process_cli_activity(process, command):
+    if command in ('npm start', 'npm run start'):
+        return False  # Only the complete cache-use/identity proof may exempt it.
+    if package_or_build_command(command):
+        return True
+    if command not in ('node', 'nodejs', 'MainThread', 'next', 'vite', 'tsc'):
         return False
+    # This bounded in-memory read is used only for CLI classification. It is
+    # never included in any output, exception, receipt or persistent snapshot.
+    with (process / 'cmdline').open('rb') as source:
+        raw = source.read(8193)
+    if len(raw) > 8192:
+        return True
+    return install_or_build_tokens(raw.decode('utf-8', errors='replace').rstrip('\0').split('\0'))
 
 
-def idle():
+def process_basics(process):
+    values = (process / 'stat').read_text().rsplit(')', 1)[1].split()
+    uid = int(next(line for line in (process / 'status').read_text().splitlines() if line.startswith('Uid:')).split()[1])
+    command = (process / 'comm').read_text().strip()
+    return dict(pid=int(process.name), ppid=int(values[1]), startTicks=int(values[19]),
+                uid=uid, command=command, cliActivity=process_cli_activity(process, command))
+
+
+def process_snapshot(proc_root=Path('/proc'), cache_roots=(CACHE, ORIGIN), exclude_pid=None):
+    """Keep the snapshot in memory. PID/start identity is checked around fd reads."""
+    result = {}
+    for process in proc_root.glob('[0-9]*'):
+        if not process.is_dir() or (exclude_pid is not None and process.name == str(exclude_pid)):
+            continue
+        try:
+            before = process_basics(process)
+            busy = process_cache_busy(process, cache_roots)
+            after = process_basics(process)
+            result[before['pid']] = {**after, 'stable': before == after, 'cacheBusy': busy}
+        except FileNotFoundError:
+            # An exited process no longer has any open cache descriptors.
+            pass
+    return result
+
+
+def descendants(pid, processes):
+    selected, frontier = set(), {pid}
+    for _ in range(len(processes) + 1):
+        children = {entry['pid'] for entry in processes.values() if entry['ppid'] in frontier}
+        require(pid not in children and not children.intersection(selected), 'Process ancestry changed')
+        if not children:
+            return [processes[child] for child in selected]
+        selected.update(children)
+        frontier = children
+    raise ValueError('Process ancestry could not be verified')
+
+
+def readonly_wrapper_rule(record, processes, uptime, expected_uid, ticks):
+    """Exempt only an aged, stable, cache-idle start wrapper and its idle children."""
+    if record['command'] not in ('npm start', 'npm run start') or record['uid'] != expected_uid:
+        return False
+    if not record['stable'] or record['cacheBusy'] or uptime - record['startTicks'] / ticks < 300:
+        return False
+    return all(entry['stable'] and not entry['cacheBusy'] and not entry.get('cliActivity', False) and not package_or_build_command(entry['command'])
+               for entry in descendants(record['pid'], processes))
+
+
+def verify_processes_idle(workers, processes, uptime, expected_uid, ticks):
+    require(not workers.strip(), 'An active release worker exists')
+    require(all(record['stable'] for record in processes.values()), 'Process start identity changed during cache-use verification')
+    require(not any(record['cacheBusy'] for record in processes.values()), 'Download cache is in use')
+    require(not any(record.get('cliActivity', False) for record in processes.values()), 'An active install or build command exists')
+    blocked = [record['command'] for record in processes.values()
+               if package_or_build_command(record['command']) and not readonly_wrapper_rule(record, processes, uptime, expected_uid, ticks)]
+    reject_workers('', blocked)
+
+
+def idle(exclude_own_cache_pin=False):
     result = subprocess.run(['systemctl', 'list-units', '--no-legend', '--plain',
         '--state=active,activating,deactivating', 'study-plan-release-*', 'study-plan-preflight-*', 'study-plan-math-restore-*'],
         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True, text=True)
-    names = []
-    for path in Path('/proc').glob('[0-9]*/comm'):
-        try:
-            name = path.read_text().strip()
-            if name in ('npm start', 'npm run start') and readonly_start_wrapper(path.parent.name, name):
-                continue
-            names.append(name)
-        except (FileNotFoundError, PermissionError):
-            pass
-    reject_workers(result.stdout, names)
+    processes = process_snapshot(exclude_pid=os.getpid() if exclude_own_cache_pin else None)
+    uptime = float(Path('/proc/uptime').read_text().split()[0])
+    verify_processes_idle(result.stdout, processes, uptime, pwd.getpwnam('ubuntu').pw_uid, os.sysconf('SC_CLK_TCK'))
     for path in Path('/proc').glob('[0-9]*/cwd'):
         try:
             cwd = Path(os.readlink(path))
@@ -396,7 +474,10 @@ def prepare():
             require(before_data + cache_bytes >= 10 * GIB + copy_bytes + MARGIN, 'Cache reclaim cannot preserve archive-copy reserve')
             print('Evicting only reproducible npm download-cache entries; preserving the cache directory and pointer.', flush=True)
             idle()
-            clear_cache_contents(CACHE, cache_before[:5], DATA)
+            # The sole excluded process owns this transaction's validated cache
+            # directory fd. Every other process is checked immediately before
+            # the first unlink; no runtime/process metadata is emitted.
+            clear_cache_contents(CACHE, cache_before[:5], DATA, lambda: idle(exclude_own_cache_pin=True))
             require(cache_identity(ORIGIN, CACHE, pwd.getpwnam('ubuntu').pw_uid, DATA) == cache_before, 'Cache directory or pointer metadata changed')
             require(not list(CACHE.iterdir()), 'Download cache is not empty')
             require(shutil.disk_usage(DATA).free >= 10 * GIB + copy_bytes + MARGIN, 'Archive copy would violate the data reserve')
@@ -456,14 +537,77 @@ def self_test():
             except ValueError:
                 pass
         reject_workers('', ['next-server', 'sshd'])
-        wrapper = dict(name='npm start', uid=1000, expected_uid=1000, cwd=Path('/www/study-plan-preview'),
-            package={'name': 'study-plan', 'scripts': {'start': 'next start'}}, age=3600, children=['sh', 'next-server (v1)'])
-        assert readonly_wrapper_rule(**wrapper)
-        for changed in ({'name': 'npm ci'}, {'name': 'npm run build'}, {'uid': 0}, {'age': 10},
-                        {'cwd': Path('/home/other-project')}, {'children': ['node']},
-                        {'package': {'name': 'other-app', 'scripts': {'start': 'next start'}}},
-                        {'package': {'name': 'study-plan', 'scripts': {'start': 'next start', 'poststart': 'npm install'}}}):
-            assert not readonly_wrapper_rule(**{**wrapper, **changed})
+        wrapper = dict(pid=41, ppid=1, startTicks=100, uid=1000, command='npm start', stable=True, cacheBusy=False)
+        records = {41: wrapper, 42: {**wrapper, 'pid': 42, 'ppid': 41, 'command': 'sh'},
+                   43: {**wrapper, 'pid': 43, 'ppid': 42, 'command': 'next-server'}}
+        assert readonly_wrapper_rule(wrapper, records, 3600, 1000, 100)
+        verify_processes_idle('', records, 3600, 1000, 100)
+        for changed in ({'command': 'npm ci'}, {'command': 'npm run build'}, {'uid': 0},
+                        {'startTicks': 359900}, {'stable': False}, {'cacheBusy': True}):
+            altered = {**wrapper, **changed}
+            assert not readonly_wrapper_rule(altered, {**records, 41: altered}, 3600, 1000, 100)
+        for command in ('npm ci', 'npm install', 'npm run build', 'npx', 'pnpm', 'yarn', 'corepack', 'node-gyp', 'webpack'):
+            changed = {**records[43], 'command': command}
+            assert not readonly_wrapper_rule(wrapper, {**records, 43: changed}, 3600, 1000, 100)
+        assert install_or_build_tokens(['node', '/fixture/next/dist/bin/next', 'build'])
+        assert install_or_build_tokens(['node', '/fixture/npm/bin/npm-cli.js', 'ci'])
+        assert install_or_build_tokens(['node', '/fixture/npm/bin/npx-cli.js', 'next', 'build'])
+        assert not install_or_build_tokens(['node', '/fixture/next/dist/bin/next', 'start'])
+        assert not install_or_build_tokens(['node', '/fixture/next/dist/bin/next', 'start', '-p', '3003'])
+        assert install_or_build_tokens(['node', '--eval', 'synthetic-inline-code'])
+        assert install_or_build_tokens(['node', '-pe', 'synthetic-inline-code'])
+        assert not install_or_build_tokens(['node', '/fixture/server.js'])
+        hidden_build = {**records[43], 'command': 'node', 'cliActivity': True}
+        assert not readonly_wrapper_rule(wrapper, {**records, 43: hidden_build}, 3600, 1000, 100)
+        try:
+            verify_processes_idle('', {**records, 43: hidden_build}, 3600, 1000, 100)
+            raise AssertionError('Node-wrapped Next build accepted')
+        except ValueError:
+            pass
+        busy_child = {**records[43], 'cacheBusy': True}
+        assert not readonly_wrapper_rule(wrapper, {**records, 43: busy_child}, 3600, 1000, 100)
+        for changed in ({43: busy_child}, {41: {**wrapper, 'stable': False}}):
+            try:
+                verify_processes_idle('', {**records, **changed}, 3600, 1000, 100)
+                raise AssertionError('Cache user or identity race accepted')
+            except ValueError:
+                pass
+        # Process cwd outside any deployment namespace is safe only when neither
+        # it nor any fd references the exact cache; no package-script heuristic.
+        fake_proc = root / 'proc'; process = fake_proc / '41'; process.mkdir(parents=True)
+        (process / 'fd').mkdir()
+        outside_cwd = root / 'outside-deployment'; outside_cwd.mkdir()
+        (process / 'cwd').symlink_to(outside_cwd)
+        (process / 'comm').write_text('npm start\n')
+        (process / 'status').write_text('Uid:\t1000\t1000\t1000\t1000\n')
+        fields = ['S', '1'] + ['0'] * 17 + ['100']
+        (process / 'stat').write_text('41 (npm start) ' + ' '.join(fields))
+        cache_file = cache / 'blob'; cache_file.write_text('cache data not read')
+        (process / 'fd/3').symlink_to(cache_file)
+        assert process_cache_busy(process, (cache,))
+        (process / 'fd/3').unlink()
+        (process / 'cwd').unlink(); (process / 'cwd').symlink_to(cache)
+        assert process_cache_busy(process, (cache,))
+        (process / 'cwd').unlink(); (process / 'cwd').symlink_to(outside_cwd)
+        assert not process_cache_busy(process, (cache,))
+        isolated = process_snapshot(fake_proc, (cache,))
+        verify_processes_idle('', isolated, 3600, 1000, 100)
+        assert readonly_wrapper_rule(isolated[41], isolated, 3600, 1000, 100)
+        baseline = {key: wrapper[key] for key in ('pid', 'ppid', 'startTicks', 'uid', 'command')}
+        identities = iter([baseline, {**baseline, 'startTicks': 101}])
+        with patch.dict(globals(), {'process_basics': lambda _: next(identities)}):
+            raced = process_snapshot(fake_proc, (cache,))
+            assert raced[41]['stable'] is False
+            try:
+                verify_processes_idle('', raced, 3600, 1000, 100)
+                raise AssertionError('PID/start identity race accepted')
+            except ValueError:
+                pass
+        try:
+            clear_cache_contents(cache, before_delete=lambda: (_ for _ in ()).throw(ValueError('synthetic busy cache')))
+            raise AssertionError('Busy cache callback accepted')
+        except ValueError:
+            assert cache_file.read_text() == 'cache data not read'
         app = root / 'study-plan'; app.mkdir()
         releases = root / 'study-plan-releases'; releases.mkdir()
         held = releases / 'held'; held.mkdir()
@@ -527,7 +671,7 @@ def self_test():
                 raise AssertionError('Mounted retention child accepted')
             except ValueError:
                 assert (target / '.next/BUILD_ID').read_text() == 'synthetic'
-    print('Capacity preparation tests passed: cache inode/mode/pointer preservation, root-replacement race rejection, mounted cache/archive rejection, no link traversal, active-worker rejection, protected applications, corruption retention, verified archive and retry.')
+    print('Capacity preparation tests passed: cache inode/mode/pointer preservation, root-replacement race rejection, mount/link rejection, busy-cache fd/cwd rejection, PID/start identity race rejection, installer descendant rejection, cache-idle start wrapper outside deployment paths, protected applications, corruption retention, verified archive and retry.')
 
 
 if __name__ == '__main__':
