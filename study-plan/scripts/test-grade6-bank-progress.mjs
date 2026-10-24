@@ -94,6 +94,34 @@ async function testProgressHook() {
   assert.deepEqual(JSON.parse(storage.get(key)).dirtyQuestionIds,[]);assert.deepEqual(JSON.parse(storage.get(key)).conflicts,{});
   assert.equal(calls.filter(c=>c.method!=="GET").length,equalAnswerWrites,"matching submitted record must not be downgraded by PUT");h.cleanup();
 
+  // A new closed assessment has its own draft; previous work is display-only
+  // metadata and must survive a PUT response that contains only the new draft.
+  const closedQuestion={id:"q",resultAssessment:"closed-v1",resultInputIds:["result-choice"],inputs:[{id:"result-choice",label:"选择",kind:"choice",choices:["A","B","C","D"]}],native:{version:1,blocks:[{type:"response",fieldId:"result-choice"}]}};
+  const previousSubmission={answers:{"old-result":"原作答：1/2，含完整过程"},submitted:true,outcome:"review",score:null,maxScore:0,updatedAt:"2026-10-01T00:00:00.000Z"};
+  const previousJson=JSON.stringify(previousSubmission);
+  questionSchemas.set("q",closedQuestion);storage.clear();remote={q:{...response({},0),previousSubmission}};
+  h=mount();await settle();h.hook.observeQuestion(closedQuestion);
+  assert.equal(JSON.stringify(h.hook.getResponse("q").previousSubmission),previousJson);
+  h.hook.draft("q",{"result-choice":"B"});
+  assert.equal(JSON.stringify(h.hook.getResponse("q").previousSubmission),previousJson,"explicit choice editing must preserve read-only original work");
+  await h.hook.flush();
+  assert.equal(h.hook.getResponse("q").revision,1);
+  assert.equal(JSON.stringify(h.hook.getResponse("q").previousSubmission),previousJson,"successful PUT must preserve history absent from its draft-only response");
+  assert.equal(JSON.stringify(JSON.parse(storage.get(key)).responses.q.previousSubmission),previousJson,"saved cache retains old work");
+  assert.deepEqual(JSON.parse(JSON.stringify(remote.q.answers)),{"result-choice":"B"},"old work is never copied into current submitted fields");
+  const closedWrites=calls.filter(c=>c.method!=="GET"&&c.body?.question_id==="q");
+  assert.deepEqual(closedWrites.at(-1).body.answers,{"result-choice":"B"});
+  assert.equal(closedWrites.at(-1).body.base_revision,0);
+  h.cleanup();
+  // The real progress projection decorates the saved new draft with the old
+  // immutable submission again on GET; this read must not create a write.
+  remote.q={...remote.q,previousSubmission};
+  const closedReloadWrites=calls.filter(c=>c.method!=="GET").length;h=mount();await settle();
+  assert.equal(JSON.stringify(h.hook.getResponse("q").previousSubmission),previousJson);
+  assert.equal(h.hook.getResponse("q").answers["result-choice"],"B");
+  assert.equal(calls.filter(c=>c.method!=="GET").length,closedReloadWrites,"reading original work after remount does not autosave it");
+  assert.equal(JSON.stringify(previousSubmission),previousJson);h.cleanup();questionSchemas.delete("q");
+
   const nativeQuestion={id:"q",inputs:[{id:"blank-1",label:"第1空",kind:"text"},{id:"blank-2",label:"第2空",kind:"text"}],native:{version:1,blocks:[{type:"paragraph",content:[{type:"blank",fieldId:"blank-1"},{type:"blank",fieldId:"blank-2"}]}]}};
   questionSchemas.set("q",nativeQuestion);
   storage.clear();remote={q:response({"old-aggregate":"3/4，1/2"},5,true)};

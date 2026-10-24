@@ -31,6 +31,7 @@ if [[ ${1:-} == --worker ]]; then
       build_check dependencies npm ci --include=dev
       build_check version npm run test:version
       build_check mathematics npm run test:grade6-bank
+      build_check final-results node scripts/test-grade6-bank-result-release.mjs
       build_check chinese-seal npm run test:chinese-six:sealed
       build_check chinese npm run test:chinese-six
       build_check grammar-reader node scripts/test-english-six-reader-practice.mjs --source
@@ -70,6 +71,25 @@ for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chines
   assert.equal(response.status, 200, route);
   await response.arrayBuffer();
 }
+// Exercise the compiled public question route with both assessment forms.
+// These authenticated GETs never create drafts or learner submissions.
+const { loadHolidayTestModule } = await import(pathToFileURL(path.resolve('scripts/holiday-math-test-utils.mjs')));
+const { getBankManifest, getBankQuestion } = await loadHolidayTestModule('src/server/grade6-bank/bank.ts');
+const samples = new Map();
+for (const { id } of (await getBankManifest()).collections.flatMap(collection => collection.questions)) {
+  const question = await getBankQuestion(id);
+  assert.ok(question?.resultInputIds?.length);
+  const kind = question.resultAssessment === 'closed-v1' ? 'choice' : 'final';
+  if (!samples.has(kind)) samples.set(kind, question);
+  if (samples.size === 2) break;
+}
+assert.equal(samples.size, 2);
+for (const expected of samples.values()) {
+  const response = await fetch(`${base}/api/math/grade6-bank/questions/${encodeURIComponent(expected.id)}`, {headers, signal: AbortSignal.timeout(20000)});
+  assert.equal(response.status, 200);
+  assert.ok(response.headers.get('cache-control')?.includes('no-store'));
+  assert.deepEqual(await response.json(), JSON.parse(JSON.stringify(expected)));
+}
 const audio = await fetch(`${base}/api/english/toefl/media/clip-01`, {
   method: 'HEAD', headers, signal: AbortSignal.timeout(10000)
 });
@@ -79,7 +99,7 @@ process.argv = [process.execPath, path.resolve('scripts/check-english-layout-rel
 await import(pathToFileURL(process.argv[1]));
 process.argv = [process.execPath, path.resolve('scripts/check-toefl-temp-release.mjs'), port];
 await import(pathToFileURL(process.argv[1]));
-console.log('Database, storage, Chinese, mathematics, English and TOEFL GET checks passed.');
+console.log('Database, storage, Chinese, mathematics result assessments, English and TOEFL GET checks passed.');
 NODE
       ;;
     backup)
@@ -257,7 +277,7 @@ run_worker() {
     # logs remain private because they may contain production configuration.
     python3 - "$backup/$mode.log" "$mode" <<'PY'
 import json, re, sys
-stages = {'dependencies', 'version', 'mathematics', 'chinese-seal', 'chinese', 'grammar-reader', 'next-build'}
+stages = {'dependencies', 'version', 'mathematics', 'final-results', 'chinese-seal', 'chinese', 'grammar-reader', 'next-build'}
 prefix = '::error title=Grammar lecture verification::'
 for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
     line = line.strip()

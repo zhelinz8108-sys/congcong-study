@@ -77,10 +77,22 @@
 .choice[aria-pressed="true"] { background:var(--soft); border-color:var(--accent); color:var(--accent); box-shadow:inset 3px 0 var(--accent); }
 .choice b { font-weight:850; }
 .feedback { margin-top:23px; border:1px solid #f0d3ab; border-radius:17px; padding:21px; background:#fff9ed; }
-.feedback[data-outcome="correct"] { background:#f7faed; border-color:#dce5bd; }
-.feedback[data-outcome="incorrect"] { background:#fff1ec; border-color:#f1c6b5; }
-.feedback h3 { font-size:16px; font-weight:800; margin-bottom:9px; }
+.feedback[data-outcome="correct"] { background:#f0fdf4; border-color:#86cba0; }
+.feedback[data-outcome="incorrect"] { background:#fff4f4; border-color:#e9a5a5; }
+.feedbackHeading { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.feedbackHeading > div { min-width:0; }
+.feedbackIcon { display:flex; align-items:center; justify-content:center; flex:0 0 38px; height:38px; border:1px solid currentColor; border-radius:50%; color:#8d682e; font-size:25px; font-weight:800; background:#fffdf9; }
+.feedback[data-outcome="correct"] .feedbackHeading { color:#166534; }
+.feedback[data-outcome="incorrect"] .feedbackHeading { color:#b91c1c; }
+.feedback[data-outcome="correct"] .feedbackIcon { color:#166534; background:#dcfce7; }
+.feedback[data-outcome="incorrect"] .feedbackIcon { color:#b91c1c; background:#fee2e2; }
+.feedback h3 { font-size:21px; line-height:1.5; font-weight:850; margin:0; }
 .feedback p { font-size:14px; line-height:1.85; white-space:pre-wrap; }
+.feedback .feedbackRule { color:#795e4b; margin-top:3px; font-size:12px; }
+.fieldResults { list-style:none; display:flex; flex-wrap:wrap; gap:8px; padding:0; margin:12px 0; }
+.fieldResults li { display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border:1px solid #e8d5bb; border-radius:8px; background:#fffdf8; color:#8b6a3d; font-size:12px; line-height:1.7; overflow-wrap:anywhere; }
+.fieldResults li[data-result="correct"] { border-color:#9bd2ad; background:#e9f9ef; color:#166534; }
+.fieldResults li[data-result="incorrect"] { border-color:#edb0b0; background:#fff0f0; color:#b91c1c; }
 .feedback .questionImage { margin:17px 0 0; border-radius:8px; }
 .solution { margin-top:20px; color:#604532; }
 .solution h4 { font-size:14px; line-height:1.6; font-weight:750; margin-bottom:6px; color:#825028; }

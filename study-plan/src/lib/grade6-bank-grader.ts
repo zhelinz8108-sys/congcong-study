@@ -1,6 +1,6 @@
 import type { BankAnswers, BankOutcome } from "./grade6-bank-types";
 
-export type BankRule = { id: string; expected: string[]; numeric?: boolean; unit?: string };
+export type BankRule = { id: string; expected: string[]; numeric?: boolean; unit?: string; resultParts?: { expected: string; unit?: string }[] };
 export type BankPrivateAnswer = {
   id: string;
   answerText: string;
@@ -12,7 +12,7 @@ export type BankPrivateAnswer = {
 
 export function normalizeBankAnswer(value: string) {
   return value.normalize("NFKC").trim().replace(/^([+-]?\d+)\s+(\d+\s*\/\s*\d+)$/, "$1又$2").replace(/\s+/g, "").replace(/。$/, "")
-    .replace(/[−–]/g, "-").replace(/×/g, "*").replace(/÷/g, "/");
+    .replace(/[−–]/g, "-").replace(/[⁄∕]/g, "/").replace(/×/g, "*").replace(/÷/g, "/");
 }
 
 // A deliberately small parser: no eval, variables, arbitrary expressions or guesses.
@@ -97,4 +97,119 @@ export function gradeBankAnswer(privateAnswer: BankPrivateAnswer, answers: BankA
   const score = fields.filter((field) => field.correct).length;
   const correct = score === fields.length;
   return { outcome: (correct ? "correct" : "incorrect") as BankOutcome, score, maxScore: fields.length, fields, message: correct ? "" : "请订正标出的作答。" };
+}
+
+/** Read a final result without awarding or deducting marks for working.
+ * Only an explicit final-answer marker or a terminal equality is selected;
+ * an arbitrary last number in prose must never become the submitted answer. */
+export function bankFinalResult(raw: string): string {
+  let value = raw.normalize("NFKC").trim();
+  if (/^[=<>≤≥≠]$/.test(value)) return value;
+  const finalMarker = [...value.matchAll(/最终(?:答案|结果)\s*[:：=]\s*/g)].at(-1);
+  const marker = finalMarker ?? [...value.matchAll(/(?:计算结果|结果|答案|答)\s*[:：=]\s*/g)].at(-1);
+  if (marker?.index !== undefined) value = value.slice(marker.index + marker[0].length).trim().split(/[\r\n]+/, 1)[0];
+  value = value.split(/(?:验算|检验|验证|检查|回代)\s*[:：]/, 1)[0].trim();
+  const lines = value.split(/[\r\n]+/).map(line => line.trim()).filter(Boolean);
+  if (lines.length > 1) value = lines.at(-1)!;
+  if (/^[=<>≤≥≠]$/.test(value)) return value;
+  const equality = value.lastIndexOf("=");
+  if (equality >= 0) value = value.slice(equality + 1).trim();
+  // Do not silently strip precision/uncertainty markers or extra conclusions.
+  return value.replace(/[。；;]$/, "").replace(/^([+-]?\d+(?:\.\d+)?)分之([+-]?\d+(?:\.\d+)?)$/, "$2/$1");
+}
+
+/** Result plans are independently built from the authenticated private key.
+ * A nonempty rule set is mandatory; work and drawings never earn a free pass. */
+function sameExactValue(left: string, right: string) {
+  const a = bankExactNumber(left), b = bankExactNumber(right);
+  return a !== null && b !== null && a.numerator * b.denominator === b.numerator * a.denominator;
+}
+
+function stripResultUnit(raw: string, unit: string) {
+  const value = normalizeBankAnswer(raw), suffix = normalizeBankAnswer(unit);
+  if (value.endsWith(`(${suffix})`)) return value.slice(0, -suffix.length - 2);
+  return value.endsWith(suffix) ? value.slice(0, -suffix.length) : value;
+}
+
+function equivalentRatio(left: string, right: string) {
+  const parts = (raw: string) => {
+    const values = normalizeBankAnswer(raw).split(/[:∶比]/);
+    if (values.length < 2 || values.length > 6) return null;
+    const result = values.map(bankExactNumber);
+    return result.every(value => value !== null) ? result as ExactBankNumber[] : null;
+  };
+  const a = parts(left), b = parts(right);
+  if (!a || !b || a.length !== b.length) return false;
+  const pivot = b.findIndex(value => value.numerator !== BigInt(0));
+  if (pivot < 0 || a[pivot].numerator === BigInt(0)) return false;
+  return a.every((value, index) => value.numerator * a[pivot].denominator * b[pivot].numerator * b[index].denominator === b[index].numerator * b[pivot].denominator * a[pivot].numerator * value.denominator);
+}
+
+function equivalentFinalValue(raw: string, rule: BankRule): string {
+  const value = bankFinalResult(raw);
+  if (rule.expected.some(expected => normalizeBankAnswer(expected) === normalizeBankAnswer(value))) return value;
+  const units = new Set(rule.unit ? [rule.unit] : []);
+  const canonical = rule.expected.filter(expected => bankExactNumber(expected) !== null);
+  // Only authored unit aliases are recognised; a wrong or unknown unit cannot
+  // disappear merely because the numeric portion looks correct.
+  for (const alias of rule.expected) {
+    const match = /^([+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:\/[+-]?(?:\d+(?:\.\d+)?|\.\d+))?%?)([^\d\s].{0,24})$/.exec(normalizeBankAnswer(alias));
+    if (match && canonical.some(expected => sameExactValue(expected, match[1]))) units.add(match[2]);
+  }
+  const numeric = rule.numeric || canonical.some(expected => /[./%]/.test(expected)) || units.size > 0;
+  if (numeric) {
+    const candidates = [value, ...[...units].map(unit => stripResultUnit(value, unit))];
+    const expected = canonical.find(expected => candidates.some(candidate => sameExactValue(candidate, expected)));
+    if (expected !== undefined) return expected;
+  }
+  const ratio = rule.expected.find(expected => equivalentRatio(value, expected));
+  return ratio ?? value;
+}
+
+function finalResultParts(raw: string, count: number) {
+  let value = raw.normalize("NFKC").trim();
+  const final = [...value.matchAll(/最终(?:答案|结果)\s*[:：=]\s*/g)].at(-1);
+  const marker = final ?? [...value.matchAll(/(?:计算结果|结果|答案|答)\s*[:：=]\s*/g)].at(-1);
+  if (marker?.index !== undefined) value = value.slice(marker.index + marker[0].length);
+  value = value.split(/(?:验算|检验|验证|检查|回代|(?:计算|解答|解题)?过程)\s*[:：]/, 1)[0].trim().replace(/[。；;]$/, "");
+  const lines = value.split(/[\r\n]+/).map(line => line.trim()).filter(Boolean);
+  const split = (line: string) => line.split(/[；;，,、]+/).map(part => part.trim()).filter(Boolean);
+  if (marker && lines.length && split(lines[0]).length === count) return split(lines[0]);
+  if (!marker && lines.length && split(lines.at(-1)!).length === count) return split(lines.at(-1)!);
+  return value.split(/[；;，,、\r\n]+/).map(part => part.trim()).filter(Boolean);
+}
+
+export function gradeBankFinalAnswers(privateAnswer: BankPrivateAnswer, answers: BankAnswers, rules: BankRule[], fractionGroups: { numeratorId: string; denominatorId: string }[] = []) {
+  if (!rules.length) throw new Error("Missing final-result rules");
+  if (rules.some(rule => !rule.expected.length || rule.expected.some(expected => !expected.trim()) ||
+    rule.numeric && (!rule.expected.some(expected => bankExactNumber(expected) !== null) || rule.expected.some(expected => {
+      const normalized = normalizeBankAnswer(expected);
+      return /^[+\-\d./%又带]+$/.test(normalized) && bankExactNumber(normalized) === null;
+    })))) {
+    throw new Error("Invalid final-result rule");
+  }
+  const finalAnswers = Object.fromEntries(rules.map(rule => {
+    if (rule.resultParts) {
+      if (!rule.resultParts.length || rule.resultParts.some(part => bankExactNumber(part.expected) === null)) throw new Error("Invalid compound final-result rule");
+      const parts = finalResultParts(answers[rule.id] ?? "", rule.resultParts.length);
+      const correct = parts.length === rule.resultParts.length && rule.resultParts.every((part, index) => {
+        const expected: BankRule = { id: rule.id, expected: [part.expected], numeric: true, ...(part.unit ? { unit: part.unit } : {}) };
+        return equivalentFinalValue(parts[index], expected) === part.expected;
+      });
+      return [rule.id, correct ? rule.expected[0] : "__incorrect_final_parts__"];
+    }
+    return [rule.id, equivalentFinalValue(answers[rule.id] ?? "", rule)];
+  }));
+  for (const pair of fractionGroups) {
+    const numeratorRule = rules.find(rule => rule.id === pair.numeratorId), denominatorRule = rules.find(rule => rule.id === pair.denominatorId);
+    if (!numeratorRule || !denominatorRule) throw new Error("Unknown fraction result field");
+    const top = bankExactNumber(bankFinalResult(answers[pair.numeratorId] ?? "")), bottom = bankExactNumber(bankFinalResult(answers[pair.denominatorId] ?? ""));
+    const wantedTop = numeratorRule.expected.map(bankExactNumber).find(value => value !== null), wantedBottom = denominatorRule.expected.map(bankExactNumber).find(value => value !== null);
+    if (!wantedTop || !wantedBottom || !wantedBottom.numerator) throw new Error("Invalid fraction result rule");
+    const correct = top !== null && bottom !== null && bottom.numerator !== BigInt(0) && top.numerator * bottom.denominator * wantedTop.denominator * wantedBottom.numerator === wantedTop.numerator * wantedBottom.denominator * top.denominator * bottom.numerator;
+    finalAnswers[pair.numeratorId] = correct ? numeratorRule.expected[0] : "__incorrect_fraction__";
+    finalAnswers[pair.denominatorId] = correct ? denominatorRule.expected[0] : "__incorrect_fraction__";
+  }
+  const graded = gradeBankAnswer({ ...privateAnswer, answerStatus: "verified_native", reviewRequired: false, rules }, finalAnswers);
+  return { ...graded, message: graded.outcome === "correct" ? "所有最终答案正确。" : "最终答案有误，请对照完整解析订正。" };
 }

@@ -55,14 +55,16 @@ await assert.rejects(loader(seal([...solutions.slice(1), solutions[1]])).getBank
 const missingField = structuredClone(solutions); delete missingField[0].steps[0].fieldIds; delete missingField[0].steps[1].fieldIds;
 await assert.rejects(loader(seal(missingField)).getBankDetailedSolution(native.questions[0].id));
 let solutionReads = 0;
+let resultPlan = null;
 const detailed = fixture("q");
 const feedback = execute(await compile("src/server/grade6-bank/feedback.ts"), name => {
   if (name === "server-only") return {};
-  if (name === "./bank") return { getPrivateBankAnswer: async () => ({ answerText: "Original answer", answerImages: [] }), readBankImage: async () => { throw new Error("No images"); } };
-  if (name.endsWith("grade6-bank-grader")) return { gradeBankAnswer: () => ({ outcome: "correct", score: 1, maxScore: 1, fields: [] }) };
+  if (name === "./bank") return { getPrivateBankAnswer: async () => ({ answerText: "Original answer", answerImages: [] }), getBankResultPlan: async () => resultPlan, readBankImage: async () => { throw new Error("No images"); } };
+  if (name.endsWith("grade6-bank-grader")) return { gradeBankAnswer: () => ({ outcome: "correct", score: 1, maxScore: 1, fields: [] }), gradeBankFinalAnswers: (_answer, answers) => { assert.equal(answers["answer-1"], "0.75"); return { outcome: "correct", score: 1, maxScore: 1, fields: [{ id: "answer-1", correct: true }] }; } };
   if (name.endsWith("first-submission")) return { firstSubmission: async () => ({ feedback: { feedback: { outcome: "incorrect", score: 0, maxScore: 1, fields: [], answerText: "Frozen old text" } } }) };
   if (name === "./progress") return { bankIsIsolatedTestMemory: () => false };
   if (name === "./detailed-solution") return { getBankDetailedSolution: async () => { solutionReads++; return detailed; } };
+  if (name === "./result-teaching") return { bankResultTeaching: async (_id, detailedSolution, answerText) => ({ detailedSolution, answerText }) };
   throw new Error("Unexpected dependency: " + name);
 });
 const oldResponse = { submitted: true, submissions: 1, outcome: "incorrect", score: 0, maxScore: 1, answers: { "answer-1": "wrong first answer" } };
@@ -73,6 +75,13 @@ assert.equal(restored.score, 0); assert.equal(restored.outcome, "incorrect"); as
 assert.equal(oldResponse.answers["answer-1"], "wrong first answer");
 const noGrade = await feedback.savedBankFeedback("q", { ...oldResponse, outcome: "review", score: null, maxScore: 0 }, "fixture");
 assert.equal(noGrade.score, null); assert.equal(noGrade.outcome, "review");
+resultPlan = { ready: true, resultInputIds: ["answer-1"], rules: [{ id: "answer-1", expected: ["3/4"], numeric: true }] };
+const historicResult = { ...oldResponse, answers: { "answer-1": "0.75" }, revision: 17, updatedAt: "2026-10-01T03:04:05.000Z" };
+const originalResult = JSON.stringify(historicResult);
+const projectedResult = await feedback.savedBankFeedback("q", historicResult, "fixture");
+assert.equal(projectedResult.outcome, "correct"); assert.equal(projectedResult.score, 1);
+assert.equal(projectedResult.detailedSolution, detailed); assert.equal(JSON.stringify(historicResult), originalResult);
+resultPlan = null;
 assert(!/detailed-solution|DetailedSolution/.test(await fs.readFile("src/app/api/math/grade6-bank/questions/[questionId]/route.ts", "utf8")));
 assert(!/detailed-solution|DetailedSolution/.test(await fs.readFile("src/server/grade6-bank/native-release.ts", "utf8")));
 // Exercise the actual POST module with isolated dependencies: teaching content
@@ -85,9 +94,11 @@ const submission = execute(submitSource, name => {
   if (name === "next/server") return { NextResponse: { json: (body, options = {}) => ({ body, status: options.status ?? 200, headers: options.headers }) } };
   if (name.endsWith("grade6-bank/http")) return { bankAccess: () => deniedSubmit ? { status: 401, body: { error: "Authentication required" } } : null, bankRetired: () => null, bankBody: async () => ({ subject_id: "fixture-subject", question_id: "q", answers: { "answer-1": "3/4" }, base_revision: 0, input_schema: "fixture" }), bankFailure: () => { throw new Error("Unexpected route failure"); }, bankHeaders: { "Cache-Control": "no-store" }, bankInputSchema() {}, bankProfile: () => ({ id: "isolated-learner" }), bankSubject: value => value, bankStudentAnswers: value => value };
   if (name.endsWith("grade6-bank/bank")) return { getBankQuestion: async () => ({ id: "q", inputs: [{ id: "answer-1" }] }), getPrivateBankAnswer: async () => ({ answerText: "3/4", answerImages: [] }), readBankImage: () => { throw new Error("No image fixture"); } };
-  if (name.endsWith("grade6-bank/progress")) return { bankBaseRevision: value => value, BankRevisionConflict: IsolatedConflict, saveBankResponse: async (_student, _subject, _question, _answers, _revision, value) => { if (staleSubmit) throw new IsolatedConflict(oldResponse); storedFeedback = value; return { submitted: true, score: 1, outcome: "correct", answers: { "answer-1": "3/4" } }; } };
+  if (name.endsWith("grade6-bank/progress")) return { bankBaseRevision: value => value, BankRevisionConflict: IsolatedConflict, bankResponse: async () => undefined, saveBankResponse: async (_student, _subject, _question, _answers, _revision, value) => { assert.equal(_question, "q"); if (staleSubmit) throw new IsolatedConflict(oldResponse); storedFeedback = value; return { submitted: true, score: 1, outcome: "correct", answers: { "answer-1": "3/4" } }; } };
   if (name.endsWith("grade6-bank-grader")) return { gradeBankAnswer: () => ({ outcome: "correct", score: 1, maxScore: 1, fields: [] }) };
+  if (name.endsWith("grade6-bank/result-grading")) return { gradeCurrentBankAnswer: async () => ({ outcome: "correct", score: 1, maxScore: 1, fields: [] }), bankResultStorageId: q => q.id, withBankPreviousWork: response => response };
   if (name.endsWith("grade6-bank/detailed-solution")) return { getBankDetailedSolution: async () => detailed };
+  if (name.endsWith("grade6-bank/result-teaching")) return { bankResultTeaching: async (_id, detailedSolution, answerText) => ({ detailedSolution, answerText }) };
   throw new Error("Unexpected dependency: " + name);
 });
 const accepted = await submission.POST({});

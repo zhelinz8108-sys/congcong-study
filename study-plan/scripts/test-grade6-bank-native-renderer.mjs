@@ -259,6 +259,36 @@ assert.equal(choiceNodes.find(node=>node.type==="select").props.value,"");assert
 sessionRender().find(node=>node.type==="select").props.onChange({target:{value:"C"}});
 assert.deepEqual(JSON.parse(JSON.stringify(record.answers)),{"answer-1":"C"});
 assert(sessionRender().some(node=>node.type==="p"&&node.props.children==="旧作答3/4，1/2"));
+
+// Versioned objective questions retain read-only original answers even when an
+// autosave response replaces the new draft without the history decoration.
+slots.length=0;question.inputs=[{id:"result-choice",label:"选择正确答案",kind:"choice",choices:["A","B","C","D"]}];question.resultInputIds=["result-choice"];question.resultAssessment="closed-v1";question.native.blocks=[{type:"response",fieldId:"result-choice"}];
+record.answers={};record.submitted=false;record.submissions=0;record.revision=0;
+record.previousSubmission={answers:{"old-result":"原题完整作答及过程"},submitted:true,outcome:"review",score:null,maxScore:0,updatedAt:"2026-10-01T00:00:00.000Z"};
+const closedNodes=sessionRender(),closedMountDrafts=drafts;
+assert(closedNodes.some(node=>node.type==="p"&&node.props.children==="原题完整作答及过程"));
+assert(closedNodes.some(node=>node.type==="p"&&node.props.children==="请选择正确答案，提交后查看判定和完整解析。"));
+assert(!closedNodes.some(node=>node.type==="p"&&/分数与小数/.test(String(node.props.children))));
+assert.equal(drafts,closedMountDrafts,"historic objective-question work is read-only on mount");
+closedNodes.find(node=>node.type==="select").props.onChange({target:{value:"B"}});
+delete record.previousSubmission;
+assert.deepEqual(JSON.parse(JSON.stringify(record.answers)),{"result-choice":"B"});
+assert(sessionRender().some(node=>node.type==="p"&&node.props.children==="原题完整作答及过程"),"old answer stays visible after draft-only autosave");
+record.submitted=true;record.submissions=1;
+let currentFeedback={questionId:question.id,outcome:"correct",score:1,maxScore:1,fields:[{id:"result-choice",correct:true}],message:"",answerText:"提交后完整解析",answerImages:[]};
+progress.feedback=async()=>currentFeedback;
+sessionRender();await Promise.resolve();
+let verdictNodes=sessionRender();
+assert(verdictNodes.some(node=>node.type==="section"&&node.props["data-outcome"]==="correct"));
+assert(verdictNodes.some(node=>node.type==="h3"&&node.props.children==="回答正确"));
+assert(verdictNodes.some(node=>node.type==="span"&&node.props.children==="✓"));
+currentFeedback={...currentFeedback,outcome:"incorrect",score:0,fields:[{id:"result-choice",correct:false}]};
+sessionRender();await Promise.resolve();verdictNodes=sessionRender();
+assert(verdictNodes.some(node=>node.type==="section"&&node.props["data-outcome"]==="incorrect"));
+assert(verdictNodes.some(node=>node.type==="h3"&&node.props.children==="回答错误"));
+assert(verdictNodes.some(node=>node.type==="span"&&node.props.children==="✗"));
+assert(verdictNodes.find(node=>node.type==="select").props.disabled,"submitted objective answers stay locked");
+assert(verdictNodes.some(node=>node.type==="p"&&node.props.children==="提交后完整解析"));
 // Run the actual renderer against EVERY authored row, not only synthetic examples.
 // Input callbacks exercise independent fields; no network or persisted learner state.
 const { validateAuthoring } = await import("./grade6-bank-native-authoring.mjs");

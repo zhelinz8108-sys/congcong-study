@@ -25,6 +25,10 @@ export type BankQuestion = {
   questionImages: string[];
   inputs: BankInput[];
   native?: BankNativeContent;
+  /** Public field identities only. Expected results always remain server-side. */
+  resultInputIds?: string[];
+  resultPartCounts?: Record<string, number>;
+  resultAssessment?: "closed-v1";
 };
 export type BankQuestionRef = Pick<BankQuestion, "id" | "number" | "difficulty" | "topic" | "kind">;
 export type BankCollection = {
@@ -65,11 +69,12 @@ export type BankResponse = {
   baseRevision?: number;
   /** Local-only marker distinguishing a fresh partial native draft from legacy aggregate text. */
   nativeInputSchema?: string;
+  previousSubmission?: { answers: BankAnswers; submitted: boolean; outcome: BankOutcome | null; score: number | null; maxScore: number; updatedAt: string };
 };
 export type BankProgress = { responses: Record<string, BankResponse>; lastQuestionId: string; updatedAt: string };
 
 export function bankStats(ids: string[], responses: BankProgress["responses"]) {
-  const submitted = ids.map((id) => responses[id]).filter((r) => r?.submitted || (r?.submissions ?? 0) > 0);
+  const submitted = ids.map((id) => responses[id]).flatMap(r => r?.submitted || (r?.submissions ?? 0) > 0 ? [r] : r?.previousSubmission?.submitted ? [r.previousSubmission] : []);
   const graded = submitted.filter((r) => r.outcome === "correct" || r.outcome === "incorrect");
   const correct = graded.filter((r) => r.outcome === "correct").length;
   return {

@@ -6,6 +6,9 @@ import type { BankManifest, BankQuestion } from "@/lib/grade6-bank-types";
 import type { BankPrivateAnswer } from "@/lib/grade6-bank-grader";
 import { nativeBankQuestion, nativeBankAnswer } from "./native-release";
 import { activeBankManifest, isRetiredBankQuestion, RAW_BANK_MANIFEST_SHA256 } from "./retired-duplicates";
+import { buildBankResultPlan, type BankResultPlan } from "./result-plan";
+import { applyBankResultDescriptor, bankFractionGroups } from "./result-descriptor";
+import { getBankResultDescriptor, verifyBankResultDescriptors } from "./result-descriptors";
 export { isRetiredBankQuestion } from "./retired-duplicates";
 
 const root = path.join(process.cwd(), "content", "grade6-bank");
@@ -14,6 +17,8 @@ let activeManifestPromise: Promise<BankManifest> | null = null;
 let questionsPromise: Promise<Map<string, BankQuestion>> | null = null;
 let answersPromise: Promise<Map<string, BankPrivateAnswer>> | null = null;
 let privateKeyPromise: Promise<Buffer> | null = null;
+const resultPlans = new Map<string, BankResultPlan | null>();
+const resultQuestions = new Map<string, Promise<BankQuestion>>();
 
 type SealedAnswers = { version: number; salt: string; iv: string; tag: string; ciphertext: string };
 let sealedAnswersPromise: Promise<SealedAnswers> | null = null;
@@ -61,7 +66,43 @@ export async function getBankQuestion(id: string) {
 export async function getArchivedBankQuestion(id: string) {
   questionsPromise ??= readFile(path.join(root, "questions.public.json"), "utf8").then((raw) => new Map((JSON.parse(raw) as BankQuestion[]).map((q) => [q.id, q])));
   const question = (await questionsPromise).get(id);
-  return question ? nativeBankQuestion(question) : undefined;
+  if (!question) return undefined;
+  let pending = resultQuestions.get(id);
+  if (!pending) {
+    pending = prepareBankResultQuestion(question);
+    resultQuestions.set(id, pending);
+  }
+  return pending;
+}
+async function prepareBankResultQuestion(question: BankQuestion): Promise<BankQuestion> {
+  const id = question.id;
+  let native = await nativeBankQuestion(question);
+  if (!resultPlans.has(id)) {
+    const answer = await nativeBankAnswer(id);
+    let plan = answer && !isRetiredBankQuestion(id) ? buildBankResultPlan(native, answer) : null;
+    const descriptor = !isRetiredBankQuestion(id) ? await getBankResultDescriptor(id) : undefined;
+    if (answer && descriptor) {
+      await verifyBankResultDescriptors();
+      const described = applyBankResultDescriptor(native, answer, descriptor);
+      native = described.question; plan = described.plan;
+    }
+    if (plan) plan = { ...plan, fractionGroups: bankFractionGroups(native, plan) };
+    resultPlans.set(id, plan);
+  }
+  const plan = resultPlans.get(id);
+  if (!plan?.ready) return native;
+  const results = new Set(plan.resultInputIds);
+  const presented: BankQuestion = { ...native, resultInputIds: plan.resultInputIds, inputs: native.inputs.map(field => ({
+    ...field,
+    label: results.has(field.id)
+      ? field.label.replace(/过程与答案|过程与说明|过程及答案|解题过程|解答过程|计算过程|运算过程|竖式过程|过程/g, "最终结果")
+      : `${field.label}（选填，不计分）`,
+  })) };
+  return presented;
+}
+export async function getBankResultPlan(id: string): Promise<BankResultPlan | null> {
+  if (!resultPlans.has(id)) await getArchivedBankQuestion(id);
+  return resultPlans.get(id) ?? null;
 }
 export async function getPrivateBankAnswer(id: string) {
   const native = await nativeBankAnswer(id);

@@ -32,6 +32,14 @@ export function normalizeBankProgress(raw: unknown): BankProgress {
       updatedAt: typeof record.updatedAt === "string" ? record.updatedAt : "", revision: validRevision(record.revision) ? record.revision : 0,
       ...(validRevision(record.baseRevision) ? { baseRevision: record.baseRevision } : {}),
       ...(typeof record.nativeInputSchema === "string" && record.nativeInputSchema.length <= 50000 ? { nativeInputSchema: record.nativeInputSchema } : {}),
+      ...(record.previousSubmission && typeof record.previousSubmission === "object" ? { previousSubmission: {
+        answers: Object.fromEntries(Object.entries(record.previousSubmission.answers ?? {}).filter(([field, answer]) => !["__proto__", "constructor", "prototype"].includes(field) && typeof answer === "string" && answer.length <= 3000)),
+        submitted: record.previousSubmission.submitted === true,
+        outcome: ["correct", "incorrect", "review", "missing"].includes(record.previousSubmission.outcome ?? "") ? record.previousSubmission.outcome : null,
+        score: typeof record.previousSubmission.score === "number" ? record.previousSubmission.score : null,
+        maxScore: Math.max(0, Number(record.previousSubmission.maxScore) || 0),
+        updatedAt: typeof record.previousSubmission.updatedAt === "string" ? record.previousSubmission.updatedAt : "",
+      } } : {}),
     };
   }
   result.lastQuestionId = typeof value.lastQuestionId === "string" ? value.lastQuestionId : "";
@@ -57,7 +65,9 @@ export function useGrade6BankProgress(subjectId: string) {
     try { localStorage.setItem(key, JSON.stringify(cached)); } catch { /* Memory and dirty revisions remain available. */ }
   }, [key]);
   const remember = useCallback((questionId: string, response: BankResponse) => {
-    mirror({ responses: { ...state.current.responses, [questionId]: response }, lastQuestionId: questionId, updatedAt: response.updatedAt });
+    const previousSubmission = response.previousSubmission ?? state.current.responses[questionId]?.previousSubmission;
+    const next = previousSubmission ? { ...response, previousSubmission } : response;
+    mirror({ responses: { ...state.current.responses, [questionId]: next }, lastQuestionId: questionId, updatedAt: response.updatedAt });
   }, [mirror]);
   const status = useCallback(() => {
     const active = (ids: Iterable<string>) => [...ids].some(id => !pausedRetired.current.has(id));
@@ -251,7 +261,7 @@ export function useGrade6BankProgress(subjectId: string) {
           const revision = latest?.revision ?? 0, baseRevision = edit.baseRevision ?? edit.revision;
           if (baseRevision !== revision) conflicts.current.set(id, { revision, acknowledged: false });
           // Server data alone restores grades. Client dates grant no write rights.
-          responses[id] = { ...edit, revision, baseRevision, submitted: false, outcome: null, score: null, maxScore: 0, submissions: latest?.submissions ?? 0 };
+          responses[id] = { ...edit, ...(latest?.previousSubmission ? { previousSubmission: latest.previousSubmission } : {}), revision, baseRevision, submitted: false, outcome: null, score: null, maxScore: 0, submissions: latest?.submissions ?? 0 };
         }
         failed.current.clear();
         mirror({ ...remote, responses, lastQuestionId: dirty.current.has(state.current.lastQuestionId) ? state.current.lastQuestionId : remote.lastQuestionId });

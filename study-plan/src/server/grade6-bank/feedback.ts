@@ -1,6 +1,7 @@
 import "server-only";
-import { getPrivateBankAnswer, readBankImage } from "./bank";
-import { gradeBankAnswer } from "@/lib/grade6-bank-grader";
+import { getPrivateBankAnswer, readBankImage, getBankResultPlan } from "./bank";
+import { gradeBankAnswer, gradeBankFinalAnswers } from "@/lib/grade6-bank-grader";
+import { bankResultTeaching } from "./result-teaching";
 import type { BankFeedback, BankResponse } from "@/lib/grade6-bank-types";
 import { firstSubmission } from "@/server/first-submission";
 import { bankIsIsolatedTestMemory } from "./progress";
@@ -12,16 +13,24 @@ export async function savedBankFeedback(questionId: string, response: BankRespon
   const answer = await getPrivateBankAnswer(questionId);
   if (!answer) throw new Error("Missing private answer record");
   const graded = gradeBankAnswer(answer, response.answers);
-  const first = studentId && !bankIsIsolatedTestMemory() ? await firstSubmission<unknown, { feedback: BankFeedback }>(studentId, "math:grade6-bank:v1", questionId) : null;
-  const detailedSolution = response.outcome === "missing" ? null : await getBankDetailedSolution(questionId);
+  const plan = await getBankResultPlan(questionId);
+  const storedId = plan?.assessment === "closed-v1" ? questionId + "--result-v1" : questionId;
+  const first = studentId && !bankIsIsolatedTestMemory() ? await firstSubmission<unknown, { feedback: BankFeedback }>(studentId, "math:grade6-bank:v1", storedId) : null;
+  const finalResult = plan?.ready && plan.resultInputIds.every(id => Object.hasOwn(response.answers, id))
+    ? gradeBankFinalAnswers(answer, response.answers, plan.rules, plan.fractionGroups) : null;
+  const outcome = finalResult?.outcome ?? response.outcome;
+  const detailedSolution = outcome === "missing" ? null : await getBankDetailedSolution(questionId);
+  const teaching = await bankResultTeaching(questionId, detailedSolution, outcome === "missing" ? "" : answer.answerText);
+  const snapshot = { ...graded, ...(first?.feedback.feedback ?? {}),
+    outcome: response.outcome ?? "review", score: response.score, maxScore: response.maxScore };
   return {
-    questionId, ...graded, ...(first?.feedback.feedback ?? {}),
-    // Never change a historic score just because content was updated.
-    outcome: response.outcome ?? "review", score: response.score, maxScore: response.maxScore,
+    // Apply the requested result-only policy to the original work in memory.
+    // The original first-submission snapshot remains available unchanged.
+    ...(finalResult ?? snapshot), questionId,
     // Current teaching content is separate from the immutable score snapshot.
-    ...(detailedSolution ? { detailedSolution } : {}),
-    answerText: response.outcome === "missing" ? "" : answer.answerText,
-    answerImages: response.outcome === "missing" ? [] : await Promise.all(answer.answerImages.map(async relative => {
+    ...(teaching.detailedSolution ? { detailedSolution: teaching.detailedSolution } : {}),
+    answerText: teaching.answerText,
+    answerImages: outcome === "missing" ? [] : await Promise.all(answer.answerImages.map(async relative => {
       const image = await readBankImage(relative, "private");
       return `data:${image.mime};base64,${image.bytes.toString("base64")}`;
     })),

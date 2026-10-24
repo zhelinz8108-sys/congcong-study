@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { bankAccess, bankBody, bankFailure, bankHeaders, bankInputSchema, bankProfile, bankSubject, bankStudentAnswers, bankRetired } from "@/server/grade6-bank/http";
 import { getBankQuestion } from "@/server/grade6-bank/bank";
 import { bankBaseRevision, BankRevisionConflict, saveBankResponse } from "@/server/grade6-bank/progress";
+import { bankResultStorageId } from "@/server/grade6-bank/result-grading";
 export const dynamic = "force-dynamic";
 export async function PUT(request: NextRequest) {
   const denied = bankAccess(request, true); if (denied) return denied;
@@ -14,7 +15,7 @@ export async function PUT(request: NextRequest) {
     if (!q) return NextResponse.json({ error: "题目不存在" }, { status: 404, headers: bankHeaders });
     bankInputSchema(body.input_schema, q);
     const answers = bankStudentAnswers(body.answers, q, false);
-    return NextResponse.json(await saveBankResponse(bankProfile(request).id, subject, q.id, answers, baseRevision), { headers: bankHeaders });
+    return NextResponse.json(await saveBankResponse(bankProfile(request).id, subject, bankResultStorageId(q), answers, baseRevision), { headers: bankHeaders });
   } catch (error) {
     if (error instanceof BankRevisionConflict) return NextResponse.json({ error: error.message, response: error.response }, { status: 409, headers: bankHeaders });
     return bankFailure(error);

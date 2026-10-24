@@ -34,7 +34,7 @@ function CollectionCard({ collection, subjectId, responses, ready }: { collectio
   const stats = bankStats(collection.questions.map((q) => q.id), responses);
   return <Link className={`${styles.card} ${styles.directoryCard}`} style={palette(collection.palette)} href={`/subjects/${subjectId}/math/problem-bank/${collection.id}`} prefetch={false}>
     <div className={styles.cardHead}><h3>{collection.title}</h3><span className={styles.arrow} aria-hidden="true">↗</span></div>
-    <div className={styles.cardStats}><span>{collection.questionCount} 题</span><span>已答 {ready ? stats.answered : "—"}</span><span title="只统计系统能可靠判分的题；过程、画图及答案待核验题不计入">正确率 {ready && stats.accuracy !== null ? `${stats.accuracy}%` : "—"}</span>{stats.review > 0 && <span>待核验 {stats.review}</span>}</div>
+    <div className={styles.cardStats}><span>{collection.questionCount} 题</span><span>已答 {ready ? stats.answered : "—"}</span><span title="按最终答案统计；暂不能核验结果的题目不计入正确率">正确率 {ready && stats.accuracy !== null ? `${stats.accuracy}%` : "—"}</span>{stats.review > 0 && <span>待核验 {stats.review}</span>}</div>
     <div className={styles.track}><div className={styles.fill} style={{ width: `${stats.answered / Math.max(1, collection.questionCount) * 100}%` }} /></div>
     {collection.mode === "chapter" && <div className={styles.note}>{BANK_DIFFICULTIES.filter((d) => collection.difficultyCounts[d.value]).map((d) => `${d.label} ${collection.difficultyCounts[d.value]}`).join(" · ")}</div>}
   </Link>;
@@ -86,7 +86,7 @@ function QuestionSession({ question, collection, position, count, progress, go }
   const { getLegacyAnswers, observeQuestion } = progress;
   const savedHistoric = getLegacyAnswers?.(question.id);
   useEffect(() => { observeQuestion?.(question); }, [question, observeQuestion]);
-  const currentHistoric = useMemo(() => [...new Map([...Object.entries(savedHistoric ?? {}), ...bankLegacyAnswerEntries(question, existing?.answers, existing?.nativeInputSchema)])].filter(([, value]) => value.trim()), [existing?.answers, existing?.nativeInputSchema, question, savedHistoric]);
+  const currentHistoric = useMemo(() => [...new Map([...Object.entries(savedHistoric ?? {}), ...bankLegacyAnswerEntries(question, existing?.answers, existing?.nativeInputSchema), ...Object.entries(existing?.previousSubmission?.answers ?? {})])].filter(([, value]) => value.trim()), [existing?.answers, existing?.nativeInputSchema, existing?.previousSubmission?.answers, question, savedHistoric]);
   const [retainedHistoric, setRetainedHistoric] = useState(currentHistoric);
   // A late read-only GET can introduce legacy fields after this session mounts.
   // Display them immediately and retain them if an explicit new edit drops the
@@ -98,7 +98,7 @@ function QuestionSession({ question, collection, position, count, progress, go }
       return merged.length === previous.length && merged.every(([id, value], index) => previous[index]?.[0] === id && previous[index]?.[1] === value) ? previous : merged;
     });
   }, [currentHistoric]);
-  const historicAnswers = [...new Map([...retainedHistoric, ...currentHistoric])];
+  const historicAnswers = [...new Map([...retainedHistoric, ...currentHistoric, ...Object.entries(existing?.previousSubmission?.answers ?? {})])];
   const [feedbackState, setFeedback] = useState<{ revision: number; value: BankFeedback } | null>(null), [busy, setBusy] = useState(false), [error, setError] = useState("");
   const feedback = locked && existing?.revision === feedbackState?.revision ? feedbackState.value : null;
   const readFeedback = progress.feedback;
@@ -109,7 +109,9 @@ function QuestionSession({ question, collection, position, count, progress, go }
     void readFeedback(question.id).then(value => { if (active) setFeedback({ revision: getResponse(question.id)?.revision ?? -1, value }); }).catch(e => { if (active) setError(e instanceof Error ? e.message : "解析读取失败"); });
     return () => { active = false; };
   }, [locked, question.id, readFeedback, getResponse]);
-  const canSubmit = question.inputs.every((field) => field.kind === "drawing" ? bankDrawingCompleted(answers[field.id] ?? "", drawingBox(field.id)) : (answers[field.id] ?? "").trim());
+  const requiredInputs = question.resultInputIds ? question.inputs.filter(field => question.resultInputIds!.includes(field.id)) : question.inputs;
+  const choiceOnly = requiredInputs.length > 0 && requiredInputs.every(field => field.kind === "choice");
+  const canSubmit = requiredInputs.length > 0 && requiredInputs.every((field) => field.kind === "drawing" ? bankDrawingCompleted(answers[field.id] ?? "", drawingBox(field.id)) : (answers[field.id] ?? "").trim());
   const change = (id: string, value: string) => { if (locked || !progress.ready) return; observeQuestion?.(question); const next = { ...pickAnswers(progress.getResponse(question.id)), [id]: value }; setFeedback(null); setError(""); progress.draft(question.id, next); };
   const submit = async () => {
     if (!canSubmit || busy || locked || !progress.ready) return;
@@ -119,10 +121,14 @@ function QuestionSession({ question, collection, position, count, progress, go }
       setFeedback({ revision: progress.getResponse(question.id)?.revision ?? -1, value });
     } catch (e) { setError(e instanceof Error ? e.message : "提交失败，请稍后重试"); } finally { setBusy(false); }
   };
-  const resultTitle = feedback?.outcome === "correct" ? "答对了" : feedback?.outcome === "incorrect" ? "需要订正" : "待核验";
+  const resultTitle = feedback?.outcome === "correct" ? "回答正确" : feedback?.outcome === "incorrect" ? "回答错误" : feedback?.outcome === "missing" ? "答案待核对" : "结果待核验";
+  const resultIcon = feedback?.outcome === "correct" ? "✓" : feedback?.outcome === "incorrect" ? "✗" : "…";
   return <article className={styles.question} style={palette(collection.palette)}>
     <header className={styles.questionTop}><h2>第 {String(question.number).padStart(3, "0")} 题</h2><span className={styles.badge}>{BANK_DIFFICULTIES.find((d) => d.value === question.difficulty)?.label}</span></header>
     <div className={styles.questionBody}>
+      {question.resultInputIds && <p className={styles.note}>{choiceOnly ? "请选择正确答案，提交后查看判定和完整解析。" : "填写各小问的最终答案即可，分数与小数会自动按数值比较；计算过程和说明可选填，不参与判分。"}</p>}
+      {existing?.previousSubmission?.submitted && <p className={styles.note}>{locked ? "本题已调整为明确作答形式，本次答案已提交。原作答保留在下方。" : "本题已调整为明确作答形式。原作答保留在下方，请提交本次答案。"}</p>}
+      {question.resultPartCounts && <p className={styles.note}>同一栏有多个结果时，请按题目顺序填写，用分号分隔。</p>}
       {question.native ? <Grade6BankNative content={question.native} inputs={question.inputs} answers={answers} disabled={busy || controlsDisabled} onChange={change} results={feedback?.fields} /> : <>
       {question.questionImages.length ? question.questionImages.map((src, index) => <SourceImage key={src} src={src} alt={`第${question.number}题，第${index + 1}部分`} />) : <p className={styles.prompt}>{question.prompt}</p>}
       <div className={styles.inputArea}>
@@ -133,7 +139,14 @@ function QuestionSession({ question, collection, position, count, progress, go }
       </div></>}
       {historicAnswers.length > 0 && <details className={styles.history}><summary>原作答记录</summary>{historicAnswers.map(([id, value]) => <p key={id}>{value}</p>)}</details>}
       {error && <p role="alert" className={styles.error}>{error}</p>}
-      {feedback && <section className={styles.feedback} data-outcome={feedback.outcome} aria-live="polite"><h3>{resultTitle}</h3>{feedback.message && <p>{feedback.message}</p>}{feedback.score !== null && <p>本题得分：{feedback.score} / {feedback.maxScore}</p>}{feedback.fields.length > 1 && <p>{feedback.fields.map((f, i) => `第 ${i + 1} 项${f.correct ? " ✓" : " 待订正"}`).join(" · ")}</p>}{feedback.detailedSolution ? <Grade6BankSolution solution={feedback.detailedSolution} /> : feedback.answerText && <p style={{ marginTop: 12 }}>{feedback.answerText}</p>}{feedback.answerImages.map((src, index) => <SourceImage key={index} src={src} alt={`提交后显示的配套答案与解析，第${index + 1}部分`} />)}</section>}
+      {feedback && <section className={styles.feedback} data-outcome={feedback.outcome} aria-live="polite">
+        <div className={styles.feedbackHeading}><span className={styles.feedbackIcon} aria-hidden="true">{resultIcon}</span><div><h3>{resultTitle}</h3>{(feedback.outcome === "correct" || feedback.outcome === "incorrect") && <p className={styles.feedbackRule}>{choiceOnly ? "只按所选答案判分。" : "只按最终答案判分，计算过程不参与评判。"}</p>}</div></div>
+        {feedback.message && <p>{feedback.message}</p>}
+        {feedback.score !== null && <p>答对 {feedback.score} / {feedback.maxScore} 项</p>}
+        {feedback.fields.length > 1 && <ul className={styles.fieldResults} aria-label="各项答案判定">{feedback.fields.map((field, index) => <li key={field.id} data-result={field.correct === true ? "correct" : field.correct === false ? "incorrect" : "review"}><span aria-hidden="true">{field.correct === true ? "✓" : field.correct === false ? "✗" : "…"}</span>{question.inputs.find(input => input.id === field.id)?.label ?? `第 ${index + 1} 项`}：{field.correct === true ? "正确" : field.correct === false ? "错误" : "待核验"}</li>)}</ul>}
+        {feedback.detailedSolution ? <Grade6BankSolution solution={feedback.detailedSolution} /> : feedback.answerText && <p style={{ marginTop: 12 }}>{feedback.answerText}</p>}
+        {feedback.answerImages.map((src, index) => <SourceImage key={index} src={src} alt={`提交后显示的配套答案与解析，第${index + 1}部分`} />)}
+      </section>}
     </div>
     <footer className={styles.actions}><div className={styles.buttonRow}><button className={styles.button} disabled={busy || position === 0} onClick={() => go(-1)}>← 上一题</button><button className={`${styles.button} ${styles.primary}`} disabled={busy || !canSubmit || controlsDisabled} onClick={() => void submit()}>{busy ? "正在提交…" : locked ? "已提交 · 已锁定" : "提交答案"}</button><button className={styles.button} disabled={busy || position >= count - 1 || !locked} onClick={() => go(1)}>下一题 →</button></div>{position < count - 1 && <div className={styles.subActions}><button disabled={busy} onClick={() => go(1)}>跳过 →</button></div>}{position === count - 1 && <p className={styles.summary}>本组最后一题</p>}</footer>
   </article>;

@@ -39,7 +39,7 @@ export function bankStudentAnswers(value: unknown, question: BankQuestion, submi
   for (const field of question.inputs) {
     const answer = input[field.id] ?? "";
     if (typeof answer !== "string" || answer.length > 3000) throw new Error("提交内容过长或格式不正确");
-    if (submitting && !answer.trim()) throw new Error("请先完成每一项作答，再提交");
+    if (submitting && (!question.resultInputIds || question.resultInputIds.includes(field.id)) && !answer.trim()) throw new Error("请先完成每一项最终答案，再提交");
     if (field.kind === "choice" && answer && !field.choices?.includes(answer)) throw new Error("请选择题目提供的选项");
     if (field.kind === "drawing" && answer.trim()) {
       const block = question.native?.blocks.find((block) => block.type === "drawing" && block.fieldId === field.id);
