@@ -1,0 +1,55 @@
+name: Prepare verified capacity for math grading
+
+on:
+  push:
+    branches: [ops/prepare-math-grading-deploy]
+    paths:
+      - scripts/prepare-math-grading-capacity.py
+      - .github/workflows/prepare-math-grading-capacity.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'zhelinz8108-sys/congcong-study' && github.ref == 'refs/heads/ops/prepare-math-grading-deploy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test exact-path cache cleanup and verified retention with synthetic files
+        run: |
+          python3 -B scripts/prepare-math-grading-capacity.py --self-test
+          python3 -B scripts/test-archive-failed-release-stages.py
+      - name: Reclaim downloads and retain only the approved inactive build
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$SERVER_HOST" = 124.223.31.175
+          test "$SERVER_USER" = ubuntu
+          test "$SERVER_PORT" = 22
+          test -n "$SERVER_SSH_KEY"
+          work_dir="$(mktemp -d "$RUNNER_TEMP/math-grading-capacity.XXXXXXXX")"
+          trap 'rm -f -- "$work_dir/key"' EXIT
+          printf '%s\n' "$SERVER_SSH_KEY" > "$work_dir/key"
+          code="$(base64 -w0 scripts/prepare-math-grading-capacity.py)"
+          helper="$(base64 -w0 scripts/archive-failed-release-stages.py)"
+          ssh -i "$work_dir/key" -p "$SERVER_PORT" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o HostKeyAlgorithms=ssh-ed25519 \
+            -o UserKnownHostsFile=study-plan/scripts/cloud-recovery/known_hosts \
+            -o ServerAliveInterval=15 -o ServerAliveCountMax=6 -o ConnectTimeout=30 \
+            "$SERVER_USER@$SERVER_HOST" \
+            "sudo -n python3 -B -u -c 'import base64;RETENTION_SOURCE=base64.b64decode(\"$helper\");exec(compile(base64.b64decode(\"$code\"),\"<math-grading-capacity>\",\"exec\"))'"
