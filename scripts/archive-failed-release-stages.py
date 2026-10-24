@@ -123,7 +123,7 @@ def relocate(releases, archives, identity):
     return move_verified(source, destination, pending, receipt, identity)
 
 
-def move_verified(source, destination, pending, receipt, identity, mutable=False):
+def move_verified(source, destination, pending, receipt, identity, mutable=False, before_release=None):
     def verify_receipt(manifest):
         expected = {'release': identity, 'sha256': digest(manifest), 'files': len(manifest)}
         if receipt.exists():
@@ -143,6 +143,8 @@ def move_verified(source, destination, pending, receipt, identity, mutable=False
             remaining = tree(pending)
             require(all(name in manifest and metadata == manifest[name] for name, metadata in remaining.items()),
                     'Interrupted archive differs; retain both copies')
+            if before_release is not None:
+                before_release()
             PROGRESS['phase'] = 'releasing-verified-duplicate'
             shutil.rmtree(pending)
             sync_directory(pending.parent)
@@ -201,6 +203,8 @@ def move_verified(source, destination, pending, receipt, identity, mutable=False
             sync_directory(destination.parent)
         verify_receipt(before)
         require(tree(source) == before, 'Source changed before relocation; retain both copies')
+        if before_release is not None:
+            before_release()
         source.rename(pending)
         sync_directory(source.parent)
         try:
