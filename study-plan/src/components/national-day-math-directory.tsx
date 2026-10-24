@@ -67,7 +67,6 @@ export default function NationalDayMathDirectory({
           <p className="mt-4 text-[15px] leading-8 text-slate-600">
             知识点、图解、例题和自测已按教材章节整理。进入章节后，依然从上往下学习，不用打开PDF。
           </p>
-          <p className="mt-3 text-sm font-semibold leading-7 text-sky-800">🎧 每章可听知识点与例题讲解，也可单独听自测读题。边听边算，按自己的节奏暂停和重听。</p>
           <p className="mt-4 text-sm font-bold leading-7 text-sky-800">
             7个章节 · 4个配套主题活动 · 117道例题 · 89道诊断与自测
           </p>
