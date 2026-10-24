@@ -21,6 +21,19 @@ SHA = re.compile(r'[0-9a-f]{40}')
 BUILD = re.compile(r'[A-Za-z0-9_-]{1,128}')
 
 
+def log_counts(value):
+    # The configured SSH-port mask also redacts the public digits "22" in byte
+    # counters, making raw JSON numbers invalid. Space-separate only numeric
+    # counters; never encode config/credential values or file contents.
+    if type(value) in (int, float):
+        return ' '.join(str(value))
+    if isinstance(value, dict):
+        return {key: log_counts(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [log_counts(item) for item in value]
+    return value
+
+
 def read_small_regular(path):
     info = path.lstat()
     if not stat.S_ISREG(info.st_mode) or info.st_size > 16384:
@@ -154,6 +167,7 @@ def probe():
             })
         result = {
             'schema': 'math-grading-deployment-capacity/v1',
+            'counterEncoding': 'space-separated decimal digits',
             'readOnly': True,
             'root': {'freeBytes': root_space.free, 'totalBytes': root_space.total},
             'data': {'freeBytes': data_space.free, 'totalBytes': data_space.total},
@@ -163,7 +177,7 @@ def probe():
             'releases': releases,
             'elapsedSeconds': round(time.monotonic() - started, 2),
         }
-        print(json.dumps(result, separators=(',', ':')), flush=True)
+        print(json.dumps(log_counts(result), separators=(',', ':')), flush=True)
 
 
 def self_test():
@@ -183,6 +197,7 @@ def self_test():
         assert before == (root / 'private-placeholder').stat().st_size
         (app / 'release-metadata.json').write_text(json.dumps({'commit': 'a' * 40, 'buildId': 'safe-build', 'secret': 'NEVER_PRINT'}))
         assert metadata(app) is None
+        assert log_counts({'bytes': 122334, 'readOnly': True}) == {'bytes': '1 2 2 3 3 4', 'readOnly': True}
         (app / 'release-metadata.json').unlink()
         (app / 'release-metadata.json').symlink_to(root / 'private-placeholder')
         assert metadata(app) is None
