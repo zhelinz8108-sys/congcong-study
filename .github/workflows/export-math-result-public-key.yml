@@ -1,0 +1,53 @@
+name: Export public encryption key for math result assessments
+
+on:
+  push:
+    branches: [ops/export-math-result-public-key]
+    paths:
+      - scripts/export-math-result-public-key.mjs
+      - .github/workflows/export-math-result-public-key.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  public-key:
+    if: github.repository == 'zhelinz8108-sys/congcong-study' && github.ref == 'refs/heads/ops/export-math-result-public-key'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test public-only key derivation using invented keys
+        run: node scripts/export-math-result-public-key.mjs --self-test
+      - name: Emit only the purpose-separated public encryption key
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$SERVER_HOST" = 124.223.31.175
+          test "$SERVER_USER" = ubuntu
+          test "$SERVER_PORT" = 22
+          test -n "$SERVER_SSH_KEY"
+          work_dir="$(mktemp -d "$RUNNER_TEMP/math-public-key.XXXXXXXX")"
+          trap 'rm -f -- "$work_dir/key"' EXIT
+          printf '%s\n' "$SERVER_SSH_KEY" > "$work_dir/key"
+          unit="study-plan-public-encryption-key-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          ssh -i "$work_dir/key" -p "$SERVER_PORT" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o HostKeyAlgorithms=ssh-ed25519 \
+            -o UserKnownHostsFile=study-plan/scripts/cloud-recovery/known_hosts \
+            -o ServerAliveInterval=15 -o ServerAliveCountMax=6 -o ConnectTimeout=30 \
+            "$SERVER_USER@$SERVER_HOST" \
+            "sudo -n systemd-run --quiet --wait --collect --pipe --unit='$unit' --uid=ubuntu --gid=ubuntu --working-directory=/www/study-plan --property=EnvironmentFile=-/etc/study-plan.env --property=RuntimeMaxSec=60 --setenv=NODE_ENV=production /usr/bin/node --input-type=module -" \
+            < scripts/export-math-result-public-key.mjs
