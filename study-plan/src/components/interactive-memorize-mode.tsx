@@ -821,7 +821,7 @@ export function InteractiveMemorizeMode({
           </div>
         </header>
 
-        <main className="mt-5 grid gap-4">
+        <main className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
           <section className="rounded-lg border border-stone-200 bg-white p-5 shadow-[0_18px_42px_rgba(42,57,51,0.10)]">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
