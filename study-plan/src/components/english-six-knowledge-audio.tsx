@@ -132,15 +132,3 @@ export function KnowledgeAudioControls() {
     <p className={styles.audioStatus} role="status">{speech.error ?? statuses[speech.status]}</p>
   </section>;
 }
-
-export function KnowledgeAudioDock() {
-  const context = useContext(AudioContext);
-  if (!context || !context.speech.activeItemId || ["idle", "unsupported"].includes(context.speech.status)) return null;
-  const { speech, registry } = context;
-  const item = registry.items.get(speech.activeItemId!);
-  return <aside className={styles.audioDock} aria-label="当前英文朗读" data-knowledge-audio-dock>
-    <div className={styles.audioDockTop}><strong>{speech.status === "paused" ? "朗读已暂停" : speech.status === "loading" ? "正在准备语音" : speech.status === "error" ? "朗读暂时中断" : "英文朗读中"}</strong><PlaybackButtons speech={speech} /></div>
-    <div className={styles.audioCurrentText} lang="en">{item?.text}</div>
-    {speech.error && <div className={styles.audioDockError} role="status">{speech.error}</div>}
-  </aside>;
-}

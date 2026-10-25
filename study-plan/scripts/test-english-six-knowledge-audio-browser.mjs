@@ -71,7 +71,9 @@ async function newContext(mode = "english", width = 1280) {
   return { context, page };
 }
 const panel = page => page.getByRole("region", { name: "英文朗读设置", exact: true });
-const dock = page => page.locator('aside[aria-label="当前英文朗读"]');
+async function assertNoDock(page, state = "reading") {
+  assert.equal(await page.locator('[data-knowledge-audio-dock], aside[aria-label="当前英文朗读"]').count(), 0, `${state}: playback must not create a floating audio box`);
+}
 const snapshot = page => page.evaluate(() => window.__knowledgeAudioQA.snapshot());
 const finish = (page, index) => page.evaluate(index => window.__knowledgeAudioQA.end(index), index);
 const stateText = page => panel(page).getByRole("status");
@@ -81,7 +83,12 @@ async function open(page, unit = 1) {
     await page.waitForFunction(() => document.querySelector('select[aria-label="英语发音"]')?.options.length >= 1);
   }
 }
-async function stop(page) { await panel(page).getByRole("button", { name: "停止", exact: true }).click(); await dock(page).waitFor({ state: "detached" }); }
+async function stop(page) {
+  await panel(page).getByRole("button", { name: "停止", exact: true }).click();
+  await stateText(page).filter({ hasText: "点击播放，听英文发音" }).waitFor();
+  assert.equal((await snapshot(page)).active, false, "Stop must cancel the active utterance");
+  await assertNoDock(page, "stopped");
+}
 function itemsForBlock(block, id) {
   const item = (id, runs) => { const text = speechForRuns(runs).join("\n"); return text ? [{ id, text, chunks: chunkEnglishSpeech(text) }] : []; };
   if (block.kind === "heading") return [];
@@ -98,7 +105,10 @@ const wordId = sectionItems.find(item => item.text === "act")?.id;
 assert.ok(wordId, "Reviewed fixture must contain the independently checked act example");
 const wordButton = page => page.locator(`[data-speech-item="${wordId}"]`);
 const groupButton = page => page.locator(`#${quick.id} [data-knowledge-group]`).first().getByRole("button", { name: "整组播放", exact: true });
-async function expectRecordCount(page, count) { await page.waitForFunction(count => window.__knowledgeAudioQA.snapshot().records.length === count, count); }
+async function expectRecordCount(page, count) {
+  await page.waitForFunction(count => window.__knowledgeAudioQA.snapshot().records.length === count, count);
+  await assertNoDock(page, "playing");
+}
 function assertEnglish(record) {
   assert.match(record.lang, /^en(?:-|_|$)/i); assert.match(record.voiceURI, /^qa-en-/);
   assert.ok(!/[\u3400-\u9fff\u0250-\u02afːˈˌ]/u.test(record.text), "Chinese/IPA must not be spoken");
@@ -109,11 +119,13 @@ try {
   await open(page);
   await page.waitForFunction(() => document.querySelector('select[aria-label="英语发音"]')?.options.length === 3);
   assert.equal((await snapshot(page)).records.length, 0, "No autoplay after mounting or loading voices");
+  await assertNoDock(page, "idle");
   const voices = await page.getByRole("combobox", { name: "英语发音", exact: true }).locator("option").allTextContents();
   assert.ok(voices.every(text => !text.includes("Chinese")), "No Chinese voice is offered as an English fallback");
   await wordButton(page).click(); await expectRecordCount(page, 1); await stateText(page).filter({ hasText: "英文朗读中" }).waitFor();
   let record = (await snapshot(page)).records[0]; assert.equal(record.text, "act"); assert.equal(record.voiceURI, "qa-en-gb"); assertEnglish(record);
-  await finish(page); await dock(page).waitFor({ state: "detached" });
+  await finish(page); await stateText(page).filter({ hasText: "点击播放，听英文发音" }).waitFor();
+  await assertNoDock(page, "single item ended");
   checks.push("No autoplay; word playback strips IPA, POS and Chinese; English UK voice selected over Chinese default");
   for (const expected of ["try one's best", "Please look at the blackboard.", "We try our best to help old people."]) {
     const item = allItems.find(item => item.text === expected);
@@ -142,6 +154,7 @@ try {
   assert.equal((await snapshot(page)).records.at(-1).text, "poster");
   await panel(page).getByRole("button", { name: "暂停", exact: true }).click(); await stateText(page).filter({ hasText: "已暂停" }).waitFor();
   assert.equal((await snapshot(page)).paused, true);
+  await assertNoDock(page, "paused");
   await finish(page); assert.equal((await snapshot(page)).records.length, before + 2, "An end event while paused must not start the next item");
   await panel(page).getByRole("button", { name: "继续", exact: true }).click(); await expectRecordCount(page, before + 3);
   assert.equal((await snapshot(page)).records.at(-1).text, "Mulan");
@@ -150,6 +163,7 @@ try {
   checks.push("Group queue speaks one item at a time; pause/end/resume/stop preserve serial order");
 
   await page.locator(`#${quick.id}`).getByRole("button", { name: "整节播放", exact: true }).click();
+  await assertNoDock(page, "whole-section playback");
   const start = (await snapshot(page)).records.length - 1;
   const chunks = sectionItems.flatMap(item => item.chunks);
   const boundary = groupItems.flatMap(item => item.chunks).length;
@@ -171,11 +185,18 @@ try {
   await panel(page).getByRole("button", { name: "暂停", exact: true }).click(); before = (await snapshot(page)).records.length;
   await page.getByRole("combobox", { name: "英语发音", exact: true }).selectOption("qa-en-us");
   assert.equal((await snapshot(page)).records.length, before, "Changing voice while paused must not autoplay");
+  await assertNoDock(page, "paused preference change");
   await panel(page).getByRole("button", { name: "继续", exact: true }).click(); await expectRecordCount(page, before + 1);
   record = (await snapshot(page)).records.at(-1); assert.equal(record.voiceURI, "qa-en-us"); assert.equal(record.rate, .75);
+  const errorIndex = (await snapshot(page)).records.length - 1;
+  await page.evaluate(index => window.__knowledgeAudioQA.error(index), errorIndex);
+  await stateText(page).filter({ hasText: "英文朗读已中断" }).waitFor();
+  await assertNoDock(page, "speech error");
+  before = (await snapshot(page)).records.length;
+  await panel(page).getByRole("button", { name: "重试", exact: true }).click(); await expectRecordCount(page, before + 1);
   const staleIndex = (await snapshot(page)).records.length - 1, cancels = (await snapshot(page)).calls.filter(call => call.kind === "cancel").length;
   await page.getByRole("navigation", { name: "选择单元", exact: true }).getByRole("link", { name: /^Unit 2 / }).click();
-  await page.locator('[data-knowledge-reader][data-unit="2"]').waitFor(); await dock(page).waitFor({ state: "detached" });
+  await page.locator('[data-knowledge-reader][data-unit="2"]').waitFor(); await assertNoDock(page, "unit navigation");
   assert.ok((await snapshot(page)).calls.filter(call => call.kind === "cancel").length > cancels, "Unit navigation must cancel speech");
   before = (await snapshot(page)).records.length; await finish(page, staleIndex); assert.equal((await snapshot(page)).records.length, before);
   checks.push("Rate/voice changes, paused preference changes, stale-event isolation and unit navigation cancellation");
@@ -184,39 +205,41 @@ try {
     await page.setViewportSize({ width, height: width > 700 ? 1000 : 844 }); await open(page);
     for (let i = 0; i < 5; i++) await page.getByRole("button", { name: "增大字号", exact: true }).click();
     assert.equal(await page.getByLabel("当前字号", { exact: true }).innerText(), "150%");
-    await wordButton(page).click(); await dock(page).waitFor();
+    const widthBefore = (await snapshot(page)).records.length;
+    await wordButton(page).click(); await expectRecordCount(page, widthBefore + 1);
     await page.evaluate(() => { document.documentElement.style.scrollBehavior = "auto"; window.scrollTo(0, 1000); });
     const top = page.getByRole("button", { name: "回到顶部", exact: true }); await top.waitFor();
-    const a = await dock(page).boundingBox(), b = await top.boundingBox();
-    const overlap = a && b && a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
-    assert.equal(!!overlap, false, `${width}px dock must not cover global back-to-top`);
+    await assertNoDock(page, `${width}px at 150%`);
     const overflow = await page.evaluate(() => ({ page: document.documentElement.scrollWidth > innerWidth + 1,
       content: [...document.querySelectorAll('[data-knowledge-reader] p,[data-knowledge-reader] td,[data-knowledge-reader] th')].filter(element => element.clientWidth > 0 && element.getBoundingClientRect().height > 0 && element.scrollWidth > element.clientWidth + 2).length }));
     assert.deepEqual(overflow, { page: false, content: 0 }, `${width}px audio controls and 150% text must not overflow`);
-    await page.screenshot({ path: path.join(output, `active-audio-${width}.png`), fullPage: false });
+    if (width === 1280 || width === 320) await page.screenshot({ path: path.join(output, `inline-audio-${width}.png`), fullPage: false });
     await page.locator(`[data-speech-item="${tableStem}0"]`).click();
-    await page.screenshot({ path: path.join(output, `table-audio-${width}.png`), fullPage: false });
+    await assertNoDock(page, `${width}px table playback`);
     await top.click(); await page.waitForFunction(() => scrollY < 10);
     await stop(page);
   }
-  checks.push("1280/768/390/320 at 150%: paragraph/table buttons fit; active dock and global back-to-top remain usable");
+  checks.push("1280/768/390/320 at 150%: native paragraph/table controls fit; no floating box; global back-to-top remains usable");
 
   const unsupported = await newContext("unsupported");
   try {
     await open(unsupported.page); await stateText(unsupported.page).filter({ hasText: "不支持英文朗读" }).waitFor();
     assert.equal(await wordButton(unsupported.page).isDisabled(), true); assert.equal((await snapshot(unsupported.page)).records.length, 0);
+    await assertNoDock(unsupported.page, "unsupported speech");
   } finally { await unsupported.context.close(); }
   const missing = await newContext("no-english");
   try {
     await open(missing.page); await wordButton(missing.page).click();
     await stateText(missing.page).filter({ hasText: "英文语音尚未就绪" }).waitFor({ timeout: 6000 });
     assert.equal((await snapshot(missing.page)).records.length, 0, "Chinese voice must never substitute for unavailable English voice");
+    await assertNoDock(missing.page, "missing English voice error");
     await missing.page.evaluate(() => window.__knowledgeAudioQA.englishVoices());
     assert.equal((await snapshot(missing.page)).records.length, 0, "Late voices after an error need an explicit retry");
     await panel(missing.page).getByRole("button", { name: "重试", exact: true }).click(); await expectRecordCount(missing.page, 1);
     assertEnglish((await snapshot(missing.page)).records[0]);
   } finally { await missing.context.close(); }
   checks.push("Unsupported and missing-English-voice states explain the problem; late voices require explicit retry");
+  checks.push("Single/group/section playback, pause, stop and errors never render a floating audio box");
   assert.deepEqual(errors, []); assert.deepEqual(writes, []);
   const report = { status: "pass", checks, errors, studentRecordWrites: 0, osAudioPlayed: false };
   await writeFile(path.join(output, "report.json"), JSON.stringify(report, null, 2)); console.log(JSON.stringify({ ...report, output }));

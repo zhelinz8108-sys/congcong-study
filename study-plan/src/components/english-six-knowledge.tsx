@@ -10,7 +10,7 @@ import type {
   EnglishSixKnowledgeUnitSummary,
 } from "@/lib/english-six-knowledge";
 import styles from "./english-six-knowledge.module.css";
-import { KnowledgeAudioProvider, KnowledgeAudioControls, KnowledgeAudioDock, KnowledgeAudioButton, KnowledgeAudioPlaylistButton, knowledgeSpeechBlockId, useKnowledgeAudioActiveItem } from "./english-six-knowledge-audio";
+import { KnowledgeAudioProvider, KnowledgeAudioControls, KnowledgeAudioButton, KnowledgeAudioPlaylistButton, knowledgeSpeechBlockId, useKnowledgeAudioActiveItem } from "./english-six-knowledge-audio";
 
 function ReadingFrame({ children, subjectId, readerUnit }: { children: ReactNode; subjectId: string; readerUnit?: number }) {
   const [fontScale, setFontScale] = useState(100);
@@ -162,7 +162,6 @@ export function EnglishSixKnowledgeReader({ subjectId, unit, units }: { subjectI
         <a href="#" className={styles.backToDirectory}>返回页首 ↑</a>
       </section>)}
     </article>
-    <KnowledgeAudioDock />
     <nav className={styles.previousNext} aria-label="前后单元">
       {previous && <Link href={`${base}/${previous.number}`} prefetch={false} rel="prev" className={styles.neighbor}><span>← 上一单元</span><strong>Unit {previous.number} · {previous.title}</strong></Link>}
       <Link href={base} className={styles.allUnits}>全部单元</Link>
