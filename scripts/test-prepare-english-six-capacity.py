@@ -129,18 +129,7 @@ with tempfile.TemporaryDirectory() as temporary:
     f = fixture(root, 'success')
     try:
         _r, releases, source, archive, source_fd, releases_fd, archive_fd, manifest, snap, receipt, size = f
-        if os.environ.get('ENGLISH_CAPACITY_DIAGNOSE_SYNTHETIC_ATIME') == '1':
-            differences = []
-            for name, entry in manifest['entries'].items():
-                current = (source if name == '.' else source / name).lstat()
-                fields = {'mode': stat.S_IMODE(current.st_mode), 'uid': current.st_uid, 'gid': current.st_gid,
-                          'mtimeNs': str(current.st_mtime_ns), 'atimeNs': str(current.st_atime_ns)}
-                changed = [field for field, actual in fields.items() if actual != entry[field]]
-                if changed:
-                    differences.append({'syntheticRelativeName': name, 'kind': entry['kind'], 'changedFields': changed})
-            print('SYNTHETIC_ARCHIVE_METADATA_DIAGNOSTIC ' + json.dumps(differences), flush=True)
-            raise ValueError('Intentional synthetic-only diagnostic stop; production step must remain skipped')
-        P.RESTORE.verify_tree(str(source), manifest)
+        P.RESTORE.verify_source_tree(str(source), manifest)
         check(P.snapshot(source_fd, True)[1] == snap)  # No atime/identity drift.
         phases = []
         P.release_verified_source(source_fd, releases_fd, source.name, str(archive), archive_fd,

@@ -22,8 +22,6 @@ jobs:
           persist-credentials: false
           lfs: false
       - name: Test exact cleanup guards, complete archive verification and safe recovery offline
-        env:
-          ENGLISH_CAPACITY_DIAGNOSE_SYNTHETIC_ATIME: '1'
         run: |
           python3 -B scripts/probe-english-six-deployment.py --self-test
           python3 -B scripts/probe-retained-compile-cache.py --self-test

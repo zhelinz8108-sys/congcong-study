@@ -485,7 +485,7 @@ def _set_attributes(root, name, entry):
         os.close(parent)
 
 
-def verify_tree(destination, manifest, _expected_identity=None):
+def _verify_tree(destination, manifest, _expected_identity=None, *, check_atime):
     manifest = validate_manifest(manifest)
     entries = manifest['entries']
     initial = _open_directory(destination)
@@ -498,13 +498,18 @@ def verify_tree(destination, manifest, _expected_identity=None):
     seen, links = set(), {}
     device = os.fstat(root).st_dev
 
+    def matches_metadata(info, entry):
+        require((stat.S_IMODE(info.st_mode), info.st_uid, info.st_gid, info.st_mtime_ns)
+                == (entry['mode'], entry['uid'], entry['gid'], _nanoseconds(entry['mtimeNs'])))
+        if check_atime:
+            require(info.st_atime_ns == _nanoseconds(entry['atimeNs']))
+
     def verify(directory, name='.'):
         require(name in entries)
         entry = entries[name]
         info = os.fstat(directory)
         require(entry['kind'] == 'directory' and info.st_dev == device)
-        require((stat.S_IMODE(info.st_mode), info.st_uid, info.st_gid, info.st_mtime_ns, info.st_atime_ns)
-                == (entry['mode'], entry['uid'], entry['gid'], _nanoseconds(entry['mtimeNs']), _nanoseconds(entry['atimeNs'])))
+        matches_metadata(info, entry)
         require(_xattrs(directory) == _attribute_bytes(entry['xattrs']))
         seen.add(name)
         for leaf in os.listdir(directory):
@@ -512,8 +517,8 @@ def verify_tree(destination, manifest, _expected_identity=None):
             require(relative in entries)
             expected = entries[relative]
             before = os.stat(leaf, dir_fd=directory, follow_symlinks=False)
-            require(before.st_dev == device and (stat.S_IMODE(before.st_mode), before.st_uid, before.st_gid, before.st_mtime_ns, before.st_atime_ns)
-                    == (expected['mode'], expected['uid'], expected['gid'], _nanoseconds(expected['mtimeNs']), _nanoseconds(expected['atimeNs'])))
+            require(before.st_dev == device)
+            matches_metadata(before, expected)
             if expected['kind'] == 'directory':
                 require(stat.S_ISDIR(before.st_mode))
                 child = os.open(leaf, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | NOATIME, dir_fd=directory)
@@ -553,6 +558,22 @@ def verify_tree(destination, manifest, _expected_identity=None):
         return {'status': 'verified', 'entries': len(seen)}
     finally:
         os.close(root)
+
+
+def verify_tree(destination, manifest, _expected_identity=None):
+    """Strict verification of a restored tree, including every saved atime."""
+    return _verify_tree(destination, manifest, _expected_identity, check_atime=True)
+
+
+def verify_source_tree(destination, manifest, _expected_identity=None):
+    """Verify an existing source, tolerating only read-induced atime drift.
+
+    Contents, kinds, ownership, modes, mtime, raw xattrs and hardlink groups
+    remain strict. Callers separately compare their pinned inode/ctime snapshot.
+    The authoritative manifest and archive/restored-tree verification are never
+    rewritten or relaxed by this read-only source check.
+    """
+    return _verify_tree(destination, manifest, _expected_identity, check_atime=False)
 
 
 def restore_archive(archive, manifest, destination):

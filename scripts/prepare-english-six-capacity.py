@@ -208,7 +208,7 @@ def release_verified_source(source, releases, original, folder, destination, man
     require(stored == receipt and receipt['manifestSha256'] == hashlib.sha256(json.dumps(manifest, sort_keys=True, separators=(',', ':')).encode()).hexdigest())
     require(RESTORE.verify_archive(folder + '/archive.tar.gz', manifest)['archiveSha256'] == receipt['archiveSha256'])
     source_path = os.readlink('/proc/self/fd/' + str(source))
-    RESTORE.verify_tree(source_path, manifest, (os.fstat(source).st_dev, os.fstat(source).st_ino))
+    RESTORE.verify_source_tree(source_path, manifest, (os.fstat(source).st_dev, os.fstat(source).st_ino))
     require(snapshot(source, True)[1] == source_snapshot)
     final_guard()
     CACHE.no_submounts(source)
@@ -493,7 +493,7 @@ def prepare():
         try: archive_bytes = write_gzip(source, archive, MAX_ARCHIVE_BYTES, MIN_STAGING_ROOT)
         finally: os.close(archive)
         verification = RESTORE.verify_archive(folder + '/archive.tar.gz.partial', manifest)
-        RESTORE.verify_tree(source_path, manifest, (os.fstat(source).st_dev, os.fstat(source).st_ino))
+        RESTORE.verify_source_tree(source_path, manifest, (os.fstat(source).st_dev, os.fstat(source).st_ino))
         require(snapshot(source, True)[1] == source_snapshot)
         os.rename('archive.tar.gz.partial', 'archive.tar.gz', src_dir_fd=destination, dst_dir_fd=destination); os.fsync(destination)
         receipt = {'version': 1, 'status': 'verified-retained', 'sourceMetadata': {'commit': SOURCE_META[0], 'buildId': SOURCE_META[1]},

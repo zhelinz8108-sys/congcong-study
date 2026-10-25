@@ -379,6 +379,80 @@ def run():
             os.close(source_fd)
             external_hardlink.unlink()
 
+        # Reading an existing source's symlink can update only its atime on
+        # real filesystems. Only the explicitly named source verifier permits
+        # this drift; the saved manifest and restored-tree verifier stay exact.
+        atime_source = work / 'atime-source'; atime_source.mkdir(mode=0o700)
+        (atime_source / 'directory').mkdir(mode=0o700)
+        (atime_source / 'directory/file').write_bytes(b'authoritative original bytes')
+        (atime_source / 'outside-link').symlink_to(outside)
+        atime_fd = os.open(atime_source, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | getattr(os, 'O_NOATIME', 0))
+        try:
+            atime_manifest, _, _ = tool.source_manifest_fd(atime_fd)
+        finally:
+            os.close(atime_fd)
+        original_manifest = copy.deepcopy(atime_manifest)
+        atime_archive = work / 'atime-authoritative.tar.gz'; gnu_archive(atime_source, atime_archive)
+        for name, entry in atime_manifest['entries'].items():
+            filename = atime_source if name == '.' else atime_source / name
+            os.utime(filename, ns=(int(entry['atimeNs']) + 987654321, int(entry['mtimeNs'])), follow_symlinks=False)
+        tool.verify_source_tree(atime_source, atime_manifest); CHECKS += 1
+        rejects(lambda: tool.verify_tree(atime_source, atime_manifest), 'Strict restored verifier rejects source atime drift')
+        require(atime_manifest == original_manifest, 'Source verification never rewrites authoritative timestamps')
+        tool.verify_archive(atime_archive, atime_manifest)
+        atime_restored = work / 'atime-restored'
+        tool.restore_archive(atime_archive, atime_manifest, atime_restored)
+        for name, entry in atime_manifest['entries'].items():
+            filename = atime_restored if name == '.' else atime_restored / name
+            require(filename.lstat().st_atime_ns == int(entry['atimeNs']), 'Archive restoration keeps the original exact atime')
+        # Strict verification checks the initial exact metadata, then readlink
+        # can itself update a symlink atime on some filesystems.
+        tool.verify_tree(atime_restored, atime_manifest)
+        CHECKS += 1
+        changed_file = atime_source / 'directory/file'
+        saved_entry = atime_manifest['entries']['directory/file']
+        os.utime(changed_file, ns=(int(saved_entry['atimeNs']), int(saved_entry['mtimeNs']) + 1))
+        rejects(lambda: tool.verify_source_tree(atime_source, atime_manifest), 'Source verifier retains exact mtime')
+        os.utime(changed_file, ns=(int(saved_entry['atimeNs']), int(saved_entry['mtimeNs'])))
+        os.chmod(changed_file, saved_entry['mode'] ^ 0o004)
+        rejects(lambda: tool.verify_source_tree(atime_source, atime_manifest), 'Source verifier retains exact mode')
+        os.chmod(changed_file, saved_entry['mode'])
+        for field in ('uid', 'gid'):
+            wrong_owner = copy.deepcopy(atime_manifest)
+            wrong_owner['entries']['directory/file'][field] += 1
+            rejects(lambda wrong_owner=wrong_owner: tool.verify_source_tree(atime_source, wrong_owner), 'Source verifier retains exact ' + field)
+        initial_bytes = read_noatime(changed_file)
+        changed_file.write_bytes(b'X' * len(initial_bytes))
+        os.utime(changed_file, ns=(int(saved_entry['atimeNs']), int(saved_entry['mtimeNs'])))
+        rejects(lambda: tool.verify_source_tree(atime_source, atime_manifest), 'Source verifier retains exact SHA despite matching size and mtime')
+
+        # Two linear passes each visit every directory once. Check the child
+        # index on a small branching tree without timing-based benchmarks.
+        branching = work / 'branching-source'; branching.mkdir(mode=0o700)
+        for branch in range(6):
+            parent_directory = branching / ('branch-' + str(branch)); parent_directory.mkdir(mode=0o700)
+            for child in range(3):
+                child_directory = parent_directory / ('child-' + str(child)); child_directory.mkdir(mode=0o700)
+                (child_directory / 'leaf.txt').write_bytes(b'one leaf per indexed directory')
+        expected_directories = 1 + 6 + 6 * 3
+        original_listdir = tool.os.listdir
+        visits = {}
+        def counted_listdir(descriptor):
+            info = os.fstat(descriptor)
+            visits[(info.st_dev, info.st_ino)] = visits.get((info.st_dev, info.st_ino), 0) + 1
+            return original_listdir(descriptor)
+        branching_fd = os.open(branching, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | getattr(os, 'O_NOATIME', 0))
+        try:
+            with mock.patch.object(tool.os, 'listdir', side_effect=counted_listdir):
+                branching_manifest, branching_snapshot, branching_allocated = tool.source_manifest_fd(branching_fd)
+        finally:
+            os.close(branching_fd)
+        require(len(visits) == expected_directories and set(visits.values()) == {2}, 'Child indexing visits each directory exactly once per capture/stability pass')
+        require(len(branching_manifest['entries']) == expected_directories + 18
+                and set(branching_snapshot) == set(branching_manifest['entries']) and branching_allocated > 0,
+                'Indexed branching traversal returns every directory and leaf')
+        tool.verify_source_tree(branching, branching_manifest); CHECKS += 1
+
         # Private CLI failures must remain generic; no paths, payload or keys.
         manifest_file = work / 'manifest.json'; write_private(manifest_file, json.dumps(manifest).encode('utf8'))
         command = subprocess.run([sys.executable, '-B', str(SCRIPT), '--verify', str(work / 'crc.tar.gz'), '--manifest', str(manifest_file)],
