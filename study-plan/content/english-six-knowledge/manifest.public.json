@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "title": "六上知识点",
+  "edition": "2026",
+  "canonicalSha256": "13938d3956a30ffcfefdfa2fb85a9ea20ec45ac9ad6c6f9676153c3c26b85c70",
+  "unitCount": 8,
+  "sectionCount": 64,
+  "blockCount": 2388,
+  "tableCount": 139,
+  "units": [
+    {
+      "number": 1,
+      "title": "Try your best",
+      "sectionCount": 8,
+      "blockCount": 315,
+      "tableCount": 23
+    },
+    {
+      "number": 2,
+      "title": "Honesty",
+      "sectionCount": 8,
+      "blockCount": 322,
+      "tableCount": 17
+    },
+    {
+      "number": 3,
+      "title": "Great people",
+      "sectionCount": 8,
+      "blockCount": 317,
+      "tableCount": 18
+    },
+    {
+      "number": 4,
+      "title": "Getting together",
+      "sectionCount": 8,
+      "blockCount": 266,
+      "tableCount": 20
+    },
+    {
+      "number": 5,
+      "title": "Keeping our city clean",
+      "sectionCount": 8,
+      "blockCount": 288,
+      "tableCount": 17
+    },
+    {
+      "number": 6,
+      "title": "Going green",
+      "sectionCount": 8,
+      "blockCount": 288,
+      "tableCount": 15
+    },
+    {
+      "number": 7,
+      "title": "Old things, new life",
+      "sectionCount": 8,
+      "blockCount": 287,
+      "tableCount": 13
+    },
+    {
+      "number": 8,
+      "title": "Then and now",
+      "sectionCount": 8,
+      "blockCount": 305,
+      "tableCount": 16
+    }
+  ]
+}

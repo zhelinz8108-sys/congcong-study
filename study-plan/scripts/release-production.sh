@@ -35,6 +35,7 @@ if [[ ${1:-} == --worker ]]; then
       build_check chinese-seal npm run test:chinese-six:sealed
       build_check chinese npm run test:chinese-six
       build_check grammar-reader node scripts/test-english-six-reader-practice.mjs --source
+      build_check english-knowledge node scripts/test-english-six-knowledge-release.mjs
       build_check english-six-new-only node scripts/test-english-six-new-only.mjs
       build_check next-build npm run build -- --webpack
       ;;
@@ -96,6 +97,8 @@ const audio = await fetch(`${base}/api/english/toefl/media/clip-01`, {
 assert.equal(audio.status, 200, 'Existing TOEFL audio must remain available.');
 assert.ok(Number(audio.headers.get('content-length')) > 0);
 process.argv = [process.execPath, path.resolve('scripts/check-english-layout-release.mjs'), port];
+await import(pathToFileURL(process.argv[1]));
+process.argv = [process.execPath, path.resolve('scripts/check-english-six-knowledge-release.mjs'), port];
 await import(pathToFileURL(process.argv[1]));
 process.argv = [process.execPath, path.resolve('scripts/check-toefl-temp-release.mjs'), port];
 await import(pathToFileURL(process.argv[1]));
@@ -277,7 +280,7 @@ run_worker() {
     # logs remain private because they may contain production configuration.
     python3 - "$backup/$mode.log" "$mode" <<'PY'
 import json, re, sys
-stages = {'dependencies', 'version', 'mathematics', 'final-results', 'chinese-seal', 'chinese', 'grammar-reader', 'next-build'}
+stages = {'dependencies', 'version', 'mathematics', 'final-results', 'chinese-seal', 'chinese', 'grammar-reader', 'english-knowledge', 'english-six-new-only', 'next-build'}
 prefix = '::error title=Grammar lecture verification::'
 for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
     line = line.strip()

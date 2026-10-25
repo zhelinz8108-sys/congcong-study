@@ -1017,6 +1017,19 @@ export default function SubjectPage() {
             </Link>
           </div>
 
+          <div className="bg-white rounded-2xl border border-teal-200 overflow-hidden">
+            <Link
+              href={`/subjects/${id}/english/six-knowledge`}
+              className="px-4 py-3 bg-teal-50 flex items-center justify-between cursor-pointer hover:bg-teal-100 transition-colors block"
+            >
+              <div className="flex items-center gap-2">
+                <span aria-hidden="true">📘</span>
+                <span className="text-lg font-semibold text-teal-800 whitespace-nowrap">六上知识点</span>
+              </div>
+              <span className="text-stone-400 text-sm" aria-hidden="true">→</span>
+            </Link>
+          </div>
+
           </div>
         </div>
       )}

@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     parallelServerBuildTraces: false,
   } : undefined,
   outputFileTracingIncludes: {
+    "/subjects/*/english/six-knowledge*": ["./content/english-six-knowledge/manifest.public.json", "./content/english-six-knowledge/sealed/book.encrypted.json"],
+    "/subjects/*/english/six-knowledge/**": ["./content/english-six-knowledge/manifest.public.json", "./content/english-six-knowledge/sealed/book.encrypted.json"],
     "/api/english/toefl-temp/**": ["./content/toefl-temp/audio/*.mp3"],
     "/api/chinese/six/**": ["./content/chinese-six/sealed/**/*"],
     "/subjects/*/chinese/six/**": ["./content/chinese-six/sealed/bank.encrypted.json"],
@@ -35,6 +37,7 @@ const nextConfig: NextConfig = {
   outputFileTracingExcludes: {
     "/api/english/six/**": ["./content/english-six/assets/**/*", "./content/english-six/ocr-work/**/*"],
     "/*": [
+      "./content/english-six-knowledge/private/**/*",
       "./content/chinese-six/*.private.json",
       "./content/chinese-six/pages/**/*",
       "./content/grade6-bank/answers.private.json",
