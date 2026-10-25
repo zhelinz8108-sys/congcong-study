@@ -78,6 +78,9 @@
 .callout p+p { margin-top:.6em; }
 .paragraph strong,.note strong,.callout strong { font-weight:750; }
 .ipa { font-family:"DejaVu Sans","Noto Sans","Doulos SIL","Charis SIL",Arial,sans-serif; font-variant-ligatures:none; letter-spacing:normal; }
+.phoneticEntry { ruby-position:under; ruby-align:start; white-space:nowrap; overflow-wrap:normal; word-break:normal; }
+.phoneticEntry rt { color:#587065; font-size:.9em; line-height:1.5; text-align:start; white-space:nowrap; overflow-wrap:normal; word-break:normal; }
+.standaloneIpa { display:block; color:#587065; font-size:.9em; line-height:1.65; }
 .tableWrap { width:100%; max-width:100%; min-width:0; margin:1.35em 0; }
 .table { width:100%; max-width:100%; table-layout:fixed; border-collapse:collapse; font-size:.9375em; line-height:1.8; }
 .table th,.table td { padding:.8em .75em; border:1px solid var(--tone-line); text-align:left; vertical-align:top; overflow-wrap:anywhere; word-break:normal; white-space:pre-wrap; }
@@ -86,6 +89,21 @@
 .table tbody tr:nth-child(even) { background:var(--tone-wash); }
 .cellContent { display:block; min-width:0; }
 .mobileCellLabel { display:none; }
+.phoneticTable thead,.phoneticTable tbody,.phoneticHintTable thead,.phoneticHintTable tbody { display:block; width:100%; }
+.phoneticTable tr { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(3.5em,.45fr) minmax(0,1.45fr); grid-template-rows:min-content minmax(0,1fr); }
+.phoneticTable .phoneticWordCell { grid-column:1; grid-row:1; border-bottom:0; padding-bottom:0; }
+.phoneticTable .phoneticIpaCell { grid-column:1; grid-row:2; border-top:0; padding-top:.15em; }
+.phoneticTable .phoneticPosCell { grid-column:2; grid-row:1 / 3; }
+.phoneticTable .phoneticMeaningCell { grid-column:3; grid-row:1 / 3; }
+.phoneticHintTable tr { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.phoneticHintTable .phoneticHintRow { position:relative; grid-template-rows:min-content minmax(0,1fr); }
+.phoneticHintFirstCell { grid-column:1; grid-row:1 / 3; }
+.phoneticHintTable .phoneticHintWordCell { grid-column:2; grid-row:1; border-bottom:0; padding-bottom:0; }
+.phoneticHintTable .phoneticHintMeaningCell,.phoneticHintMeaningCell>.cellContent { display:contents; }
+.phoneticHintMeaningCell [data-phonetic-text] { grid-column:3; grid-row:1 / 3; min-width:0; padding:.8em 3.4rem .8em .75em; border:1px solid var(--tone-line); }
+.phoneticHintMeaningCell [data-phonetic-standalone] { grid-column:2; grid-row:2; padding:.15em .75em .8em; border:1px solid var(--tone-line); border-top:0; }
+.phoneticHintMeaningCell .speakButton { grid-column:3; grid-row:1; justify-self:end; z-index:1; margin:.5em; }
+.phoneticHintMeaningCell>.cellContent[data-speech-active=true] [data-phonetic-standalone] { outline:2px solid var(--tone-accent); }
 .audioPanel { margin-bottom:2rem; padding:1.25rem; border:1px solid #a9d8ca; border-radius:1rem; background:#f0fdfa; }
 .audioPanelHeading { display:flex; flex-wrap:wrap; align-items:baseline; gap:.5rem 1rem; }
 .audioPanelHeading h2 { font-size:1.2em; font-weight:750; color:#115e59; }
@@ -143,6 +161,18 @@
   .table td { display:block; width:100%; padding:0; border:0; }
   .table td+td { margin-top:.85em; padding-top:.85em; border-top:1px dashed var(--tone-line); }
   .mobileCellLabel { display:block; margin-bottom:.4em; padding:.2em .45em; border-radius:.3rem; background:var(--tone-soft); font-size:.75em; line-height:1.7; color:var(--tone-ink); font-weight:650; }
+  .phoneticTable thead,.phoneticHintTable thead { width:1px; }
+  .phoneticTable tbody tr,.phoneticHintTable tbody tr { display:flex; flex-direction:column; }
+  .phoneticWordCell,.phoneticHintFirstCell { order:0; }
+  .phoneticIpaCell,.phoneticHintWordCell { order:1; }
+  .phoneticPosCell { order:2; }
+  .phoneticMeaningCell { order:3; }
+  .phoneticTable .phoneticIpaCell { margin-top:.15em; padding-top:0; border-top:0; }
+  .phoneticIpaCell>.mobileCellLabel { display:none; }
+  .phoneticHintMeaningCell>.mobileCellLabel { display:none; }
+  .phoneticHintMeaningCell [data-phonetic-standalone] { order:2; padding:.15em 0 0; border:0; }
+  .phoneticHintMeaningCell [data-phonetic-text] { order:3; margin-top:.85em; padding:.85em 3rem 0 0; border:0; border-top:1px dashed var(--tone-line); }
+  .phoneticHintMeaningCell .speakButton { position:absolute; right:.4em; bottom:.4em; }
   .previousNext { display:flex; flex-direction:column; align-items:stretch; }
   .neighbor { flex:0 1 auto; }
   .allUnits { order:1; }

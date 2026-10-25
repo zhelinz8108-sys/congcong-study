@@ -4,6 +4,10 @@ import { loadHolidayTestModule } from "./holiday-math-test-utils.mjs";
 
 const { speechForText, speechForRuns, speechForBlock, chunkEnglishSpeech } = await loadHolidayTestModule("src/lib/english-six-knowledge-speech.ts");
 const cases = [
+  ["sell /sel/ v. 卖，出售", ["sell"]],
+  ["read（/red/）", ["read"]],
+  ["/sel/ /red/", []],
+  ["blue/red/green", ["blue or red or green"]],
   ["ask sb. to do sth.", ["ask somebody to do something"]],
   ["sb.'s book and sth.'s name", ["somebody's book and something's name"]],
   ["ask sb to do sth; sb's book; tell sb sth", ["ask somebody to do something; somebody's book; tell somebody something"]],

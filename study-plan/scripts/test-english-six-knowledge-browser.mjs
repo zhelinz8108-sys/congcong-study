@@ -5,6 +5,8 @@ import { pathToFileURL } from "node:url";
 import { appRoot, loadHolidayTestModule } from "./holiday-math-test-utils.mjs";
 
 const argument = name => process.argv.find(value => value.startsWith(`--${name}=`))?.slice(name.length + 3);
+const widths = (argument("widths") ?? "1280,768,390,320").split(",").map(Number);
+assert.ok(widths.length > 0 && new Set(widths).size === widths.length && widths.every(width => [1280, 768, 390, 320].includes(width)), "Select distinct reviewed viewports");
 const origin = argument("origin") ?? process.env.ENGLISH_SIX_KNOWLEDGE_QA_ORIGIN ?? "http://127.0.0.1:3038";
 assert.ok(["127.0.0.1", "localhost"].includes(new URL(origin).hostname), "Knowledge browser checks only target a local isolated app");
 const bookFile = argument("book") ?? process.env.ENGLISH_SIX_KNOWLEDGE_QA_BOOK;
@@ -24,7 +26,10 @@ const errors = [], writes = [], pdfRequests = [], checks = [];
 const normalize = value => value.replace(/\s+/gu, " ").trim();
 const inlineText = runs => runs.map(run => run.text).join("");
 const paragraphText = block => block.kind === "paragraph" ? [inlineText(block.runs)] : block.kind === "callout" ? block.paragraphs.map(inlineText) : [];
-const ipaRuns = unit => unit.sections.flatMap(section => section.blocks.flatMap(block => block.kind === "paragraph" ? block.runs : block.kind === "callout" ? block.paragraphs.flat() : block.kind === "table" ? [...(block.headers ?? []), ...block.rows.flat()].flat() : [])).filter(run => run.ipa).map(run => run.text);
+// The source audit found exactly these four ASCII IPA forms without ipa:true.
+// Ordinary alternatives (am / is / are) must never be counted as pronunciation.
+const ipaRuns = unit => unit.sections.flatMap(section => section.blocks.flatMap(block => block.kind === "paragraph" ? block.runs : block.kind === "callout" ? block.paragraphs.flat() : block.kind === "table" ? [...(block.headers ?? []), ...block.rows.flat()].flat() : [])).flatMap(run => run.ipa ? [run.text] : [...run.text.matchAll(/(?<![A-Za-z])\/(?:t|d|sel|red)\/(?![A-Za-z])/g)].map(match => match[0]));
+const ipaLayoutChecks = [];
 const expectedTotals = book.units.reduce((total, unit) => ({
   sections: total.sections + unit.sections.length,
   blocks: total.blocks + unit.sections.reduce((n, section) => n + section.blocks.length, 0),
@@ -46,6 +51,10 @@ async function noOverflow(page, label) {
   const result = await page.evaluate(() => {
     const scope = document.querySelector("[data-knowledge-reader], [data-knowledge-hub]");
     const bad = scope ? [...scope.querySelectorAll("p,h1,h2,h3,h4,th,td,dt,dd")].filter(element => {
+      // Mobile tables retain a clipped thead for assistive technology. Its
+      // internal text width does not represent visible page overflow.
+      const head = element.closest("thead"), headStyle = head && getComputedStyle(head);
+      if (headStyle?.position === "absolute" && parseFloat(headStyle.width) <= 1 && parseFloat(headStyle.height) <= 1 && headStyle.overflow === "hidden" && headStyle.clipPath === "inset(50%)") return false;
       const box = element.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && element.clientWidth > 0 && element.scrollWidth > element.clientWidth + 2;
     }).map(element => ({ tag: element.tagName, clientWidth: element.clientWidth, scrollWidth: element.scrollWidth })) : [];
@@ -67,13 +76,22 @@ async function assertNativeContent(page, unit) {
   await article.waitFor();
   assert.equal(await article.locator("iframe,embed,object,canvas,img").count(), 0, "Knowledge must use native text and tables");
   const actual = await article.locator("[data-knowledge-section]").evaluateAll(sections => sections.map(section => ({
-    id: section.id, text: section.innerText, headings: [...section.querySelectorAll("h2,h3,h4")].map(node => node.textContent),
+    id: section.id, text: section.textContent, headings: [...section.querySelectorAll("h2,h3,h4")].map(node => node.textContent),
     tables: [...section.querySelectorAll("table")].map(table => [...table.rows].map(row => [...row.cells].map(cell => (cell.querySelector("[data-knowledge-cell]") ?? cell).textContent))),
+    blocks: [...section.querySelectorAll('h3,h4,p,table,aside[role="note"]')].filter(node => !(node.tagName === "P" && node.closest('aside[role="note"],table'))).map(node => {
+      if (node.tagName === "TABLE") return { kind: "table", rows: [...node.rows].map(row => [...row.cells].map(cell => (cell.querySelector("[data-knowledge-cell]") ?? cell).textContent)) };
+      if (node.tagName === "ASIDE") return { kind: "callout", paragraphs: [...node.querySelectorAll("p")].map(paragraph => paragraph.textContent) };
+      return { kind: node.tagName === "P" ? "paragraph" : "heading", text: node.textContent };
+    }),
   })));
   assert.equal(actual.length, unit.sections.length, `Unit ${unit.number}: every section is rendered`);
   for (const [index, expected] of unit.sections.entries()) {
     const shown = actual[index];
     assert.equal(shown.id, expected.id, `Unit ${unit.number}: section order/id`);
+    const originalBlocks = expected.blocks.map(block => block.kind === "table" ? { kind: "table", rows: [...(block.headers ? [block.headers] : []), ...block.rows].map(row => row.map(inlineText)) }
+      : block.kind === "callout" ? { kind: "callout", paragraphs: block.paragraphs.map(inlineText) }
+      : { kind: block.kind, text: block.kind === "heading" ? block.text : inlineText(block.runs) });
+    assert.ok(JSON.stringify(shown.blocks) === JSON.stringify(originalBlocks), `${expected.id}: original text, table-cell order and formatting fragments must not be changed by phonetic layout`);
     assert.ok(shown.headings.map(normalize).includes(normalize(expected.title)), `${expected.id}: section title missing`);
     for (const block of expected.blocks) {
       if (block.kind === "heading") assert.ok(shown.headings.map(normalize).includes(normalize(block.text)), `${expected.id}: native heading missing`);
@@ -83,9 +101,46 @@ async function assertNativeContent(page, unit) {
     assert.ok(JSON.stringify(shown.tables.map(table => table.map(row => row.map(normalize)))) === JSON.stringify(expectedTables), `${expected.id}: native table cells must preserve full source text`);
   }
   const shownIpa = (await article.locator("[data-ipa]").allTextContents()).map(normalize);
-  for (const ipa of ipaRuns(unit)) assert.ok(shownIpa.includes(normalize(ipa)), `Unit ${unit.number}: IPA must remain native marked text`);
+  assert.ok(JSON.stringify(shownIpa.sort()) === JSON.stringify(ipaRuns(unit).map(normalize).sort()), `Unit ${unit.number}: every marked and reviewed inferred IPA must remain visible native text exactly once`);
   assert.ok(!(await article.innerText()).includes("\ufffd"), `Unit ${unit.number}: replacement glyph in rendered text`);
   await singleColumn(article.locator("[data-knowledge-section]"), `Unit ${unit.number} sections`);
+}
+async function assertPhoneticLayout(page, unit, width) {
+  const result = await page.getByRole("article", { name: `Unit ${unit.number} 知识点正文`, exact: true }).evaluate(article => {
+    const result = { ipa: 0, rubyBelow: 0, tableBelow: 0, standalone: 0, failures: [] };
+    for (const ipa of article.querySelectorAll("[data-ipa]")) {
+      const sound = ipa.getBoundingClientRect();
+      result.ipa++;
+      if (!sound.width || !sound.height) { result.failures.push({ issue: "IPA hidden", ipa: ipa.textContent }); continue; }
+      const entry = ipa.closest("[data-phonetic-entry]"), row = ipa.closest("[data-phonetic-row]");
+      const word = entry?.querySelector("[data-phonetic-word]") ?? row?.querySelector("[data-phonetic-word]");
+      if (word) {
+        const base = word.getBoundingClientRect();
+        if (entry) {
+          // Native ruby font boxes include leading/descender space. Confirm
+          // under-placement and a full second baseline without mistaking that
+          // small empty-box overlap for colliding glyphs.
+          const under = getComputedStyle(entry).rubyPosition === "under";
+          const centreGap = sound.top + sound.height / 2 - base.top - base.height / 2;
+          if (!under || centreGap < base.height * .5 || base.bottom - sound.top >= base.height * .2)
+            result.failures.push({ issue: "Ruby IPA is not on a clear line below its headword", ipa: ipa.textContent, word: word.textContent, under, centreGap, wordHeight: base.height, leadingOverlap: base.bottom - sound.top });
+          result.rubyBelow++;
+        } else {
+          if (sound.top < base.bottom - 1) result.failures.push({ issue: "Table IPA is not below its headword", ipa: ipa.textContent, word: word.textContent, soundTop: sound.top, wordBottom: base.bottom });
+          result.tableBelow++;
+        }
+      } else {
+        const standalone = ipa.closest("[data-phonetic-standalone]");
+        if (!standalone || getComputedStyle(standalone).display !== "block") result.failures.push({ issue: "Unpaired phoneme must occupy its own line", ipa: ipa.textContent });
+        result.standalone++;
+      }
+    }
+    return result;
+  });
+  assert.equal(result.ipa, ipaRuns(unit).length, `Unit ${unit.number} ${width}px: complete IPA layout coverage`);
+  assert.deepEqual(result.failures, [], `Unit ${unit.number} ${width}px at 150%: phonetic placement failure`);
+  assert.equal(await page.locator('[data-knowledge-audio-dock],aside[aria-label="当前英文朗读"]').count(), 0);
+  ipaLayoutChecks.push({ unit: unit.number, width, ...result });
 }
 function uniqueNeedle(unit) {
   const texts = unit.sections.flatMap(section => section.blocks.flatMap(paragraphText));
@@ -135,7 +190,7 @@ try {
   await entry.click();
   await page.locator("[data-knowledge-hub]").waitFor();
   checks.push("English homepage knowledge entry immediately follows Grammar Guide; existing Six retained");
-  for (const width of [1280, 390, 320]) {
+  for (const width of widths) {
     await page.setViewportSize({ width, height: width > 700 ? 1000 : 844 });
     await page.goto(base);
     const directory = page.getByRole("navigation", { name: "六上知识点单元目录", exact: true });
@@ -149,14 +204,21 @@ try {
     }
     await singleColumn(cards, `${width}px unit directory`);
     await noOverflow(page, `${width}px directory`);
-    await page.screenshot({ path: path.join(output, `directory-${width}.png`), fullPage: false });
+
     for (const unit of book.units) {
       await page.goto(`${base}/${unit.number}`);
       await page.locator(`[data-knowledge-reader][data-unit="${unit.number}"]`).waitFor();
       const selection = page.getByRole("navigation", { name: "选择单元", exact: true });
       assert.equal(await selection.getByRole("link").count(), 8);
       assert.equal(await selection.locator('[aria-current="page"]').getAttribute("href"), `/subjects/${subject}/english/six-knowledge/${unit.number}`);
+      const paragraph = page.getByRole("article", { name: `Unit ${unit.number} 知识点正文`, exact: true }).locator("p").first();
+      const initial = await paragraph.evaluate(element => parseFloat(getComputedStyle(element).fontSize));
+      const larger = page.getByRole("button", { name: "增大字号", exact: true });
+      for (let step = 0; step < 5; step++) await larger.click();
+      assert.equal(await page.getByLabel("当前字号", { exact: true }).innerText(), "150%");
+      assert.ok(Math.abs((await paragraph.evaluate(element => parseFloat(getComputedStyle(element).fontSize))) / initial - 1.5) < .02);
       await assertNativeContent(page, unit);
+      await assertPhoneticLayout(page, unit, width);
       const chapters = page.getByRole("navigation", { name: "本单元章节", exact: true });
       const navigationBox = await chapters.boundingBox(), articleBox = await page.getByRole("article", { name: `Unit ${unit.number} 知识点正文`, exact: true }).boundingBox();
       assert.ok(navigationBox && articleBox && articleBox.y >= navigationBox.y + navigationBox.height - 1, "Chapter navigation must be above the native content");
@@ -178,31 +240,20 @@ try {
       if (unit.number > 1) assert.equal(await previous.getAttribute("href"), `/subjects/${subject}/english/six-knowledge/${unit.number - 1}`);
       if (unit.number < 8) assert.equal(await next.getAttribute("href"), `/subjects/${subject}/english/six-knowledge/${unit.number + 1}`);
       await noOverflow(page, `${width}px Unit ${unit.number}`);
-      if (unit.number === 1) {
-        await page.evaluate(() => window.scrollTo(0, 0));
-        await page.screenshot({ path: path.join(output, `unit-1-${width}.png`), fullPage: false });
-        const table = page.locator("[data-knowledge-reader] table").first();
-        if (await table.count()) { await table.scrollIntoViewIfNeeded(); await page.screenshot({ path: path.join(output, `table-1-${width}.png`), fullPage: false }); }
+      if (unit.number === 1 && width === 1280) {
+        const row = page.locator('[data-phonetic-row="vocabulary"]').first();
+        await row.evaluate(element => { document.documentElement.style.scrollBehavior = "auto"; window.scrollTo({ top: scrollY + element.getBoundingClientRect().top - 130, behavior: "instant" }); });
+        await page.screenshot({ path: path.join(output, "phonetic-vocabulary-1280.png"), fullPage: false });
+      }
+      if (unit.number === 8 && width === 320) {
+        const row = page.locator('[data-phonetic-row="past-read"]').first();
+        await row.evaluate(element => { document.documentElement.style.scrollBehavior = "auto"; window.scrollTo({ top: scrollY + element.getBoundingClientRect().top - 100, behavior: "instant" }); });
+        await page.screenshot({ path: path.join(output, "phonetic-past-read-320.png"), fullPage: false });
       }
     }
-    checks.push(`${width}px: 8 complete native units, semantic tables/IPA, section anchors, previous/next, no horizontal overflow`);
+    checks.push(`${width}px: 8 complete native units, semantic tables/IPA below headwords at 150%, original source order, section anchors, previous/next, no horizontal overflow`);
   }
-  for (const width of [1280, 390, 320]) {
-    await page.setViewportSize({ width, height: width > 700 ? 1000 : 844 });
-    await page.goto(`${base}/1`);
-    const paragraph = page.getByRole("article", { name: "Unit 1 知识点正文", exact: true }).locator("p").first();
-    await paragraph.waitFor();
-    const initial = await paragraph.evaluate(element => parseFloat(getComputedStyle(element).fontSize));
-    const larger = page.getByRole("button", { name: "增大字号", exact: true });
-    for (let step = 0; step < 5; step++) await larger.click();
-    assert.equal(await page.getByLabel("当前字号", { exact: true }).innerText(), "150%");
-    assert.equal(await larger.isDisabled(), true);
-    const enlarged = await paragraph.evaluate(element => parseFloat(getComputedStyle(element).fontSize));
-    assert.ok(Math.abs(enlarged / initial - 1.5) < .02, "Native paragraphs must actually scale to 150%");
-    await noOverflow(page, `${width}px Unit 1 at 150% text size`);
-    await page.screenshot({ path: path.join(output, `large-text-${width}.png`), fullPage: false });
-  }
-  checks.push("150% native font scaling preserves desktop and 390/320 layout");
+  checks.push("All original blocks/cells remain unchanged and marked/inferred IPA are covered across every selected viewport at 150%");
   await page.goto(`${base}/1`);
   const next = page.getByRole("navigation", { name: "前后单元", exact: true }).locator('a[rel="next"]');
   await next.click(); await page.locator('[data-knowledge-reader][data-unit="2"]').waitFor();
@@ -218,7 +269,7 @@ try {
   assert.deepEqual(writes, [], "Reading must not send student-record mutations");
   assert.deepEqual(pdfRequests, [], "Native reading must not depend on PDF/Office assets");
   assert.deepEqual(errors, [], "Browser errors");
-  const report = { status: "pass", units: 8, ...expectedTotals, viewportChecks: 24, widths: [1280, 390, 320], checks, errors, blockedMutations: writes, pdfRequests, studentRecordWrites: 0 };
+  const report = { status: "pass", units: 8, ...expectedTotals, viewportChecks: widths.length * book.units.length, widths, fontScale: "150%", ipaLayoutChecks, checks, errors, blockedMutations: writes, pdfRequests, studentRecordWrites: 0 };
   await writeFile(path.join(output, "report.json"), JSON.stringify(report, null, 2));
   console.log(JSON.stringify({ ...report, output }));
 } catch (error) {

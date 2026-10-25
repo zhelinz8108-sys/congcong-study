@@ -1,4 +1,5 @@
 import type { EnglishSixKnowledgeBlock, EnglishSixKnowledgeInline } from "./english-six-knowledge";
+import { layoutKnowledgePhonetics } from "./english-six-knowledge-phonetics";
 
 export type EnglishSixKnowledgeSpeechItem = { text: string; chunks: string[] };
 const boundary = "\uE000";
@@ -29,6 +30,8 @@ function removeUnmarkedIpa(text: string) {
 /** Only English words, phrases and examples are spoken. Chinese prose is a
  * boundary, never glue joining two unrelated pieces of English. */
 export function speechForText(raw: string): string[] {
+  raw = layoutKnowledgePhonetics([{ text: raw }]).flatMap(part => part.kind === "text" ? part.runs : part.kind === "paired" ? [...part.wordRuns, ...part.ipaRuns] : part.ipaRuns)
+    .map(run => run.inferredIpa ? " " : run.text).join("");
   let text = raw.normalize("NFKC").replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, "-");
   text = removeChineseAnnotations(removeUnmarkedIpa(text));
   text = text.replace(/((?:课文原句|例句|示例|例)\s*)\d{1,2}\s+(?=[A-Za-z])/g, "$1")
