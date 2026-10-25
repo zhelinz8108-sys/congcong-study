@@ -36,6 +36,8 @@ if [[ ${1:-} == --worker ]]; then
       build_check chinese npm run test:chinese-six
       build_check grammar-reader node scripts/test-english-six-reader-practice.mjs --source
       build_check english-knowledge node scripts/test-english-six-knowledge-release.mjs
+      build_check english-knowledge node scripts/test-english-six-knowledge-speech.mjs
+      build_check english-knowledge node scripts/test-english-knowledge-speech.mjs
       build_check english-six-new-only node scripts/test-english-six-new-only.mjs
       build_check next-build npm run build -- --webpack
       ;;

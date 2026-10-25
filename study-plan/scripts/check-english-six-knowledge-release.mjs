@@ -19,18 +19,28 @@ const get = async (route, authenticated = true, rsc = false) => {
   return { response, text: await response.text() };
 };
 const { getEnglishSixKnowledgeBook } = await loadHolidayTestModule("src/server/english-six-knowledge.ts");
+const { speechForRuns } = await loadHolidayTestModule("src/lib/english-six-knowledge-speech.ts");
 const book = await getEnglishSixKnowledgeBook();
 const home = await get(hub);
 assert.equal(home.response.status, 200);
 assert.ok(home.text.includes("data-knowledge-hub"));
 for (const unit of book.units) assert.ok(home.text.includes(`${hub}/${unit.number}`));
-let nativeTables = 0;
+let nativeTables = 0, englishPlayButtons = 0;
 for (const unit of book.units) {
   const { response, text } = await get(`${hub}/${unit.number}`);
   assert.equal(response.status, 200);
   assert.match(response.headers.get("cache-control") ?? "", port === 3038 ? /private|no-store|no-cache/ : /private|no-store/);
   assert.ok(text.includes("data-knowledge-reader") && text.includes(`data-unit="${unit.number}"`));
-  for (const section of unit.sections) assert.ok(text.includes(`id="${section.id}"`));
+  assert.ok(text.includes("data-knowledge-audio-controls"));
+  const fields = block => block.kind === "paragraph" ? [block.runs] : block.kind === "callout" ? block.paragraphs : block.kind === "table" ? block.rows.flat() : [];
+  const expectedAudio = unit.sections.flatMap(section => section.blocks.flatMap(fields)).filter(runs => speechForRuns(runs).length).length;
+  assert.ok(expectedAudio > 0);
+  assert.equal([...text.matchAll(/data-speech-item=/g)].length, expectedAudio);
+  englishPlayButtons += expectedAudio;
+  for (const section of unit.sections) {
+    assert.ok(text.includes(`id="${section.id}"`));
+    assert.ok(text.includes(`data-speech-item="${section.id}-b`));
+  }
   assert.doesNotMatch(text, /<(?:iframe|embed|object)\b|application\/pdf/i);
   const count = [...text.matchAll(/<table(?:\s|>)/g)].length;
   assert.equal(count, unit.sections.flatMap(section => section.blocks).filter(block => block.kind === "table").length);
@@ -43,6 +53,7 @@ for (const unit of book.units) {
     assert.ok(!anonymous.text.includes("data-knowledge-reader"));
     assert.ok(!anonymous.text.includes(unit.sections[0].id));
     assert.ok(!anonymous.text.includes('"blocks":'));
+    assert.ok(!anonymous.text.includes("data-speech-item=") && !anonymous.text.includes("data-knowledge-audio-controls"));
   }
 }
 const anonymousHub = await get(hub, false);
@@ -50,4 +61,4 @@ assert.ok(!anonymousHub.text.includes("data-knowledge-hub"));
 for (const id of ["0", "9", "01", "1.0"]) assert.equal((await get(`${hub}/${id}`)).response.status, 404);
 assert.equal(nativeTables, 139);
 console.log(JSON.stringify({ passed: true, compiledUnitPages: 8, compiledSections: 64,
-  nativeTables, anonymousHtmlAndRscProtected: true, learnerWrites: 0 }));
+  nativeTables, englishPlayButtons, anonymousHtmlAndRscProtected: true, learnerWrites: 0 }));

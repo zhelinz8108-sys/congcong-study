@@ -10,6 +10,7 @@ import type {
   EnglishSixKnowledgeUnitSummary,
 } from "@/lib/english-six-knowledge";
 import styles from "./english-six-knowledge.module.css";
+import { KnowledgeAudioProvider, KnowledgeAudioControls, KnowledgeAudioDock, KnowledgeAudioButton, KnowledgeAudioPlaylistButton, knowledgeSpeechBlockId, useKnowledgeAudioActiveItem } from "./english-six-knowledge-audio";
 
 function ReadingFrame({ children, subjectId, readerUnit }: { children: ReactNode; subjectId: string; readerUnit?: number }) {
   const [fontScale, setFontScale] = useState(100);
@@ -44,19 +45,21 @@ function InlineText({ runs }: { runs: EnglishSixKnowledgeInline[] }) {
   });
 }
 
-function KnowledgeBlock({ block, sectionTitle }: { block: EnglishSixKnowledgeBlock; sectionTitle: string }) {
+function KnowledgeBlock({ block, sectionTitle, blockId = "" }: { block: EnglishSixKnowledgeBlock; sectionTitle: string; blockId?: string }) {
+  const activeItem = useKnowledgeAudioActiveItem();
   if (block.kind === "heading") {
     const Heading = block.level === 4 ? "h4" : "h3";
     return <Heading className={styles.subheading}>{block.text}</Heading>;
   }
-  if (block.kind === "paragraph") return <p className={block.tone === "note" ? styles.note : styles.paragraph}><InlineText runs={block.runs} /></p>;
-  if (block.kind === "callout") return <aside className={styles.callout} role="note">{block.paragraphs.map((paragraph, index) => <p key={index}><InlineText runs={paragraph} /></p>)}</aside>;
+  if (block.kind === "paragraph") return <p className={block.tone === "note" ? styles.note : styles.paragraph} data-speech-active={activeItem === `${blockId}-p` || undefined}><KnowledgeAudioButton itemId={`${blockId}-p`} /><InlineText runs={block.runs} /></p>;
+  if (block.kind === "callout") return <aside className={styles.callout} role="note">{block.paragraphs.map((paragraph, index) => <p key={index} data-speech-active={activeItem === `${blockId}-note-${index}` || undefined}><KnowledgeAudioButton itemId={`${blockId}-note-${index}`} /><InlineText runs={paragraph} /></p>)}</aside>;
   return <div className={styles.tableWrap}>
+    <div className={styles.tableAudio}><KnowledgeAudioPlaylistButton blockIds={[blockId]} label="播放本表英文" /></div>
     <table className={styles.table} aria-label={sectionTitle} role="table">
       {block.headers?.length ? <thead role="rowgroup"><tr role="row">{block.headers.map((header, index) => <th key={index} scope="col" role="columnheader"><InlineText runs={header} /></th>)}</tr></thead> : null}
       <tbody role="rowgroup">{block.rows.map((row, rowIndex) => <tr key={rowIndex} role="row">{row.map((cell, cellIndex) => <td key={cellIndex} role="cell">
         {block.headers?.[cellIndex]?.some(run => run.text.trim()) && <span className={styles.mobileCellLabel} aria-hidden="true"><InlineText runs={block.headers[cellIndex]} /></span>}
-        <span className={styles.cellContent} data-knowledge-cell><InlineText runs={cell} /></span>
+        <span className={styles.cellContent} data-knowledge-cell data-speech-active={activeItem === `${blockId}-r${rowIndex}-c${cellIndex}` || undefined}><KnowledgeAudioButton itemId={`${blockId}-r${rowIndex}-c${cellIndex}`} /><InlineText runs={cell} /></span>
       </td>)}</tr>)}</tbody>
     </table>
   </div>;
@@ -75,27 +78,27 @@ function knowledgeTone(title: string, fallback: KnowledgeTone = "teal"): Knowled
   return fallback;
 }
 
-function KnowledgeContent({ blocks, sectionTitle }: { blocks: EnglishSixKnowledgeBlock[]; sectionTitle: string }) {
+function KnowledgeContent({ blocks, sectionTitle, sectionId }: { blocks: EnglishSixKnowledgeBlock[]; sectionTitle: string; sectionId: string }) {
   type Heading = Extract<EnglishSixKnowledgeBlock, { kind: "heading" }>;
-  const groups: { heading?: Heading; blocks: EnglishSixKnowledgeBlock[]; tone: KnowledgeTone }[] = [];
+  const groups: { heading?: Heading; blocks: { block: EnglishSixKnowledgeBlock; index: number }[]; tone: KnowledgeTone }[] = [];
   const sectionTone = knowledgeTone(sectionTitle);
   let parentTone = sectionTone;
-  for (const block of blocks) {
+  for (const [blockIndex, block] of blocks.entries()) {
     if (block.kind === "heading") {
       const tone = knowledgeTone(block.text, block.level === 3 ? sectionTone : parentTone);
       if (block.level === 3) parentTone = tone;
       groups.push({ heading: block, blocks: [], tone });
     } else {
       if (!groups.length) groups.push({ blocks: [], tone: sectionTone });
-      groups[groups.length - 1].blocks.push(block);
+      groups[groups.length - 1].blocks.push({ block, index: blockIndex });
     }
   }
   return groups.map((group, index) => {
-    if (!group.heading) return <div key={index} className={styles.sectionIntro}>{group.blocks.map((block, blockIndex) => <KnowledgeBlock key={blockIndex} block={block} sectionTitle={sectionTitle} />)}</div>;
+    if (!group.heading) return <div key={index} className={styles.sectionIntro}>{group.blocks.map(({ block, index: blockIndex }) => <KnowledgeBlock key={blockIndex} block={block} sectionTitle={sectionTitle} blockId={knowledgeSpeechBlockId(sectionId, blockIndex)} />)}</div>;
     if (!group.blocks.length) return <div key={index} className={styles.topicDivider} data-knowledge-tone={group.tone}><KnowledgeBlock block={group.heading} sectionTitle={sectionTitle} /></div>;
     return <div key={index} className={styles.topicGroup} data-knowledge-group data-knowledge-tone={group.tone}>
-      <header className={styles.topicHeading}><KnowledgeBlock block={group.heading} sectionTitle={sectionTitle} /></header>
-      <div className={styles.topicBody}>{group.blocks.map((block, blockIndex) => <KnowledgeBlock key={blockIndex} block={block} sectionTitle={sectionTitle} />)}</div>
+      <header className={styles.topicHeading}><KnowledgeBlock block={group.heading} sectionTitle={sectionTitle} /><KnowledgeAudioPlaylistButton blockIds={group.blocks.map(({ index: blockIndex }) => knowledgeSpeechBlockId(sectionId, blockIndex))} /></header>
+      <div className={styles.topicBody}>{group.blocks.map(({ block, index: blockIndex }) => <KnowledgeBlock key={blockIndex} block={block} sectionTitle={sectionTitle} blockId={knowledgeSpeechBlockId(sectionId, blockIndex)} />)}</div>
     </div>;
   });
 }
@@ -129,6 +132,7 @@ export function EnglishSixKnowledgeReader({ subjectId, unit, units }: { subjectI
   const previous = currentIndex > 0 ? units[currentIndex - 1] : undefined;
   const next = currentIndex >= 0 ? units[currentIndex + 1] : undefined;
   return <ReadingFrame subjectId={subjectId} readerUnit={unit.number}>
+    <KnowledgeAudioProvider unit={unit}>
     <Link href={base} className={styles.directoryBack}>← 六上知识点目录</Link>
     <header className={styles.readerHeader}>
       <p className={styles.readerEyebrow}>六上英语 · 2026 新版</p>
@@ -150,17 +154,20 @@ export function EnglishSixKnowledgeReader({ subjectId, unit, units }: { subjectI
         <ol>{unit.sections.map((section, index) => <li key={section.id}><a href={`#${section.id}`} data-knowledge-tone={knowledgeTone(section.title)}><span className={styles.chapterNumber}>{String(index + 1).padStart(2, "0")}</span><span>{section.title}</span><span className={styles.anchorArrow} aria-hidden="true">↓</span></a></li>)}</ol>
       </details>
     </nav>
+    <KnowledgeAudioControls />
     <article className={styles.article} aria-label={`Unit ${unit.number} 知识点正文`}>
       {unit.sections.map((section, index) => <section className={styles.section} id={section.id} key={section.id} data-knowledge-section data-knowledge-tone={knowledgeTone(section.title)}>
-        <header className={styles.sectionHeading}><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><h2>{section.title}</h2></header>
-        <div className={styles.sectionContent}><KnowledgeContent blocks={section.blocks} sectionTitle={section.title} /></div>
+        <header className={styles.sectionHeading}><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><h2>{section.title}</h2><KnowledgeAudioPlaylistButton sectionId={section.id} label="整节播放" /></header>
+        <div className={styles.sectionContent}><KnowledgeContent blocks={section.blocks} sectionTitle={section.title} sectionId={section.id} /></div>
         <a href="#" className={styles.backToDirectory}>返回页首 ↑</a>
       </section>)}
     </article>
+    <KnowledgeAudioDock />
     <nav className={styles.previousNext} aria-label="前后单元">
       {previous && <Link href={`${base}/${previous.number}`} prefetch={false} rel="prev" className={styles.neighbor}><span>← 上一单元</span><strong>Unit {previous.number} · {previous.title}</strong></Link>}
       <Link href={base} className={styles.allUnits}>全部单元</Link>
       {next && <Link href={`${base}/${next.number}`} prefetch={false} rel="next" className={styles.neighbor}><span>下一单元 →</span><strong>Unit {next.number} · {next.title}</strong></Link>}
     </nav>
+    </KnowledgeAudioProvider>
   </ReadingFrame>;
 }
