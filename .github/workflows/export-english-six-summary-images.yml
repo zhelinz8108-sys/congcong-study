@@ -1,0 +1,77 @@
+name: Read-only encrypted English six summary images
+
+on:
+  push:
+    branches: [ops/export-english-six-summary-images-20261025]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  export:
+    if: github.repository == 'zhelinz8108-sys/congcong-study' && github.ref == 'refs/heads/ops/export-english-six-summary-images-20261025'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          lfs: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Test strict image whitelist and encryption using synthetic files
+        run: |
+          node scripts/test-export-english-six-knowledge.mjs
+          node scripts/test-export-english-six-summary-images.mjs
+      - name: Read only fourteen pinned summary images and encrypt in memory
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$SERVER_HOST" = 124.223.31.175
+          test "$SERVER_USER" = ubuntu
+          test "$SERVER_PORT" = 22
+          test -n "$SERVER_SSH_KEY"
+          work_dir="$(mktemp -d "$RUNNER_TEMP/english-six-images.XXXXXXXX")"
+          printf 'ENGLISH_SIX_IMAGES_WORK=%s\n' "$work_dir" >> "$GITHUB_ENV"
+          trap 'rm -f -- "$work_dir/key"' EXIT
+          printf '%s\n' "$SERVER_SSH_KEY" > "$work_dir/key"
+          recipient="$(base64 -w0 scripts/english-six-export-recipient.public.pem)"
+          ssh -i "$work_dir/key" -p "$SERVER_PORT" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o PasswordAuthentication=no \
+            -o StrictHostKeyChecking=yes -o HostKeyAlgorithms=ssh-ed25519 \
+            -o UserKnownHostsFile=study-plan/scripts/cloud-recovery/known_hosts \
+            -o GlobalKnownHostsFile=/dev/null -o LogLevel=ERROR \
+            -o ServerAliveInterval=15 -o ServerAliveCountMax=6 -o ConnectTimeout=30 \
+            "$SERVER_USER@$SERVER_HOST" \
+            "node --input-type=module - --summary-images '$recipient'" \
+            < scripts/export-english-six-knowledge.mjs > "$work_dir/summary-images.envelope.json"
+          rm -f -- "$work_dir/key"
+      - name: Publish only the encrypted summary images
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/publish-summary-images-encrypted.mjs \
+            "$ENGLISH_SIX_IMAGES_WORK/summary-images.envelope.json" \
+            scripts/english-six-export-recipient.public.pem
+      - name: Remove only this runner's transient ciphertext and SSH key
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${ENGLISH_SIX_IMAGES_WORK:-}" ]]; then
+            case "$ENGLISH_SIX_IMAGES_WORK" in "$RUNNER_TEMP"/english-six-images.*) ;; *) exit 1 ;; esac
+            test ! -L "$ENGLISH_SIX_IMAGES_WORK"
+            test "$(realpath -m -- "$ENGLISH_SIX_IMAGES_WORK")" = "$ENGLISH_SIX_IMAGES_WORK"
+            rm -rf --one-file-system -- "$ENGLISH_SIX_IMAGES_WORK"
+          fi

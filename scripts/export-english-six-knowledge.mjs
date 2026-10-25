@@ -8,6 +8,23 @@ export const PURPOSE = 'english-six-knowledge-pdf-export-v1';
 export const LIMIT = 30 * 1024 ** 2;
 const ROOT = '/www/study-plan-data/english-six';
 const APP_ROOT = '/www/study-plan/content/english-six';
+export const SUMMARY_RESOURCE = 'b7962820f014';
+export const SUMMARY_IMAGES = Object.freeze([
+  ['22cbb8bac3f3f4af571fcc4dcc10aeba', 21338],
+  ['2832d1916c5ac50fa3fd0578e3909883', 17706],
+  ['3199102deda33a0f395e061ceceaa6b4', 5708],
+  ['359253b8d55838f7feb4896ab5f237d0', 115654],
+  ['3b2b6c9fc4f96f4b53302a41856533ee', 18034],
+  ['70a87611e959feaae0fc34d7933a650d', 22716],
+  ['77349df4b3581688ff5a226adb63bad6', 19362],
+  ['8bee4f70178ee5cd481bdfb05ec08f89', 111900],
+  ['9a6da9e47f9554c53096403990772ec5', 86856],
+  ['9e0ea9033076b46ca8ef7621ff56b154', 29652],
+  ['ce71c95cbb4215072590d6e67666602e', 112470],
+  ['d0a86bd45031fff1346978c5c7a56bd8', 29454],
+  ['d83fdf449cfbc61d42da5270457a0436', 108696],
+  ['ea8a9ea26930c0eaa01bc8615f449e08', 22628],
+].map(Object.freeze));
 const ID = /^[a-f0-9]{12}$/;
 const ASSET = /^[a-f0-9]{32}$/;
 const EXTENSIONS = new Set(['.pdf', '.docx', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.tif', '.tiff', '.svg', '.emf', '.wmf']);
@@ -168,6 +185,45 @@ export async function binaryBundle(root, text) {
   } finally { for (const handle of handles.reverse()) await handle.close(); }
 }
 
+export async function collectSummaryImages(root) {
+  const handles = [];
+  const rootHandle = await openRoot(root); handles.push(rootHandle);
+  try {
+    const resources = await directory(rootHandle, 'resources'); handles.push(resources);
+    const assets = await directory(rootHandle, 'assets'); handles.push(assets);
+    const indexFile = await readPinned(rootHandle, 'index.json', 16 * 1024 ** 2);
+    const manifestFile = await readPinned(rootHandle, 'assets.private.json', 16 * 1024 ** 2);
+    const resourceFile = await readPinned(resources, `${SUMMARY_RESOURCE}.json`, 16 * 1024 ** 2);
+    const index = JSON.parse(indexFile.bytes), manifest = JSON.parse(manifestFile.bytes), resource = JSON.parse(resourceFile.bytes);
+    const meta = index.resources?.find(item => item.id === SUMMARY_RESOURCE);
+    check(meta?.edition === 'new' && selected(meta));
+    check(resource.id === SUMMARY_RESOURCE && resource.meta?.id === SUMMARY_RESOURCE && resource.meta.edition === 'new' && Array.isArray(resource.pages));
+    const references = new Map();
+    for (let page = 0; page < resource.pages.length; page++) {
+      check(Array.isArray(resource.pages[page].blocks));
+      for (const block of resource.pages[page].blocks) if (block.kind === 'image') {
+        check(ASSET.test(block.asset));
+        if (!references.has(block.asset)) references.set(block.asset, []);
+        references.get(block.asset).push({ resource: SUMMARY_RESOURCE, page: page + 1, kind: 'image' });
+      }
+    }
+    check(JSON.stringify([...references.keys()].sort()) === JSON.stringify(SUMMARY_IMAGES.map(([id]) => id)));
+    const files = [], snapshots = [];
+    for (const [id, size] of SUMMARY_IMAGES) {
+      const entry = manifest[id];
+      check(entry?.extension === '.webp' && entry.file === `assets/${id}.webp` && entry.size === size);
+      const source = await readPinned(assets, `${id}.webp`, size);
+      check(source.bytes.length === size);
+      snapshots.push(source);
+      files.push({ id, file: entry.file, extension: '.webp', size, uses: references.get(id), sha256: sha(source.bytes), base64: source.bytes.toString('base64') });
+    }
+    for (const snapshot of snapshots) await unchanged(assets, snapshot);
+    await unchanged(rootHandle, indexFile); await unchanged(rootHandle, manifestFile); await unchanged(resources, resourceFile);
+    check(files.length === 14 && files.reduce((sum, file) => sum + file.size, 0) === 722174);
+    return { version: 1, purpose: PURPOSE, sourceResource: SUMMARY_RESOURCE, files };
+  } finally { for (const handle of handles.reverse()) await handle.close(); }
+}
+
 export function encrypt(value, recipientPem, kind) {
   check(['text', 'assets'].includes(kind));
   const recipient = crypto.createPublicKey(recipientPem);
@@ -210,15 +266,20 @@ export function decrypt(envelope, recipientPrivate) {
   } finally { key.fill(0); }
 }
 
-if (process.argv[2] === '--export') {
+if (['--export', '--summary-images'].includes(process.argv[2])) {
   try {
     check(process.argv.length === 4);
     const pem = Buffer.from(process.argv[3], 'base64').toString('utf8');
     check(pem.length <= 1024 && pem.startsWith('-----BEGIN PUBLIC KEY-----') && !pem.includes('PRIVATE'));
     check(await fs.realpath(APP_ROOT) === ROOT);
-    const text = await collect(ROOT);
-    const binaries = await binaryBundle(ROOT, text);
-    const output = { text: encrypt(text, pem, 'text'), assets: encrypt(binaries, pem, 'assets') };
+    let output;
+    if (process.argv[2] === '--summary-images') {
+      output = encrypt(await collectSummaryImages(ROOT), pem, 'assets');
+    } else {
+      const text = await collect(ROOT);
+      const binaries = await binaryBundle(ROOT, text);
+      output = { text: encrypt(text, pem, 'text'), assets: encrypt(binaries, pem, 'assets') };
+    }
     const bytes = Buffer.from(JSON.stringify(output)); check(bytes.length <= 86 * 1024 ** 2);
     process.stdout.write(bytes);
   } catch { process.stderr.write('Knowledge export blocked\n'); process.exitCode = 1; }
