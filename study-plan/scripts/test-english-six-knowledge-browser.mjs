@@ -25,6 +25,13 @@ const subject = "qa-english-knowledge", home = `${origin}/subjects/${subject}`, 
 const errors = [], writes = [], pdfRequests = [], checks = [];
 const normalize = value => value.replace(/\s+/gu, " ").trim();
 const inlineText = runs => runs.map(run => run.text).join("");
+const styledRuns = runs => runs.reduce((result, run) => {
+  const next = { text: run.text, bold: !!run.bold, italic: !!run.italic, underline: !!run.underline };
+  const last = result.at(-1);
+  if (last && last.bold === next.bold && last.italic === next.italic && last.underline === next.underline) last.text += next.text;
+  else if (next.text) result.push(next);
+  return result;
+}, []);
 const paragraphText = block => block.kind === "paragraph" ? [inlineText(block.runs)] : block.kind === "callout" ? block.paragraphs.map(inlineText) : [];
 // The source audit found exactly these four ASCII IPA forms without ipa:true.
 // Ordinary alternatives (am / is / are) must never be counted as pronunciation.
@@ -75,7 +82,20 @@ async function assertNativeContent(page, unit) {
   const article = page.getByRole("article", { name: `Unit ${unit.number} 知识点正文`, exact: true });
   await article.waitFor();
   assert.equal(await article.locator("iframe,embed,object,canvas,img").count(), 0, "Knowledge must use native text and tables");
-  const actual = await article.locator("[data-knowledge-section]").evaluateAll(sections => sections.map(section => ({
+  const actual = await article.locator("[data-knowledge-section]").evaluateAll(sections => {
+    const styled = element => {
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT), result = [];
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const parent = node.parentElement;
+        if (!node.textContent || parent.closest('button,[aria-hidden="true"]')) continue;
+        const next = { text: node.textContent, bold: !!parent.closest("strong"), italic: !!parent.closest("em"), underline: !!parent.closest("u") };
+        const last = result.at(-1);
+        if (last && last.bold === next.bold && last.italic === next.italic && last.underline === next.underline) last.text += next.text;
+        else result.push(next);
+      }
+      return result;
+    };
+    return sections.map(section => ({
     id: section.id, text: section.textContent, headings: [...section.querySelectorAll("h2,h3,h4")].map(node => node.textContent),
     tables: [...section.querySelectorAll("table")].map(table => [...table.rows].map(row => [...row.cells].map(cell => (cell.querySelector("[data-knowledge-cell]") ?? cell).textContent))),
     blocks: [...section.querySelectorAll('h3,h4,p,table,aside[role="note"]')].filter(node => !(node.tagName === "P" && node.closest('aside[role="note"],table'))).map(node => {
@@ -83,7 +103,13 @@ async function assertNativeContent(page, unit) {
       if (node.tagName === "ASIDE") return { kind: "callout", paragraphs: [...node.querySelectorAll("p")].map(paragraph => paragraph.textContent) };
       return { kind: node.tagName === "P" ? "paragraph" : "heading", text: node.textContent };
     }),
-  })));
+    formats: [...section.querySelectorAll('p,table,aside[role="note"]')].filter(node => !(node.tagName === "P" && node.closest('aside[role="note"],table'))).map(node => {
+      if (node.tagName === "TABLE") return [...node.rows].map(row => [...row.cells].map(cell => styled(cell.querySelector("[data-knowledge-cell]") ?? cell)));
+      if (node.tagName === "ASIDE") return [...node.querySelectorAll("p")].map(styled);
+      return styled(node);
+    }),
+  }));
+  });
   assert.equal(actual.length, unit.sections.length, `Unit ${unit.number}: every section is rendered`);
   for (const [index, expected] of unit.sections.entries()) {
     const shown = actual[index];
@@ -92,6 +118,10 @@ async function assertNativeContent(page, unit) {
       : block.kind === "callout" ? { kind: "callout", paragraphs: block.paragraphs.map(inlineText) }
       : { kind: block.kind, text: block.kind === "heading" ? block.text : inlineText(block.runs) });
     assert.ok(JSON.stringify(shown.blocks) === JSON.stringify(originalBlocks), `${expected.id}: original text, table-cell order and formatting fragments must not be changed by phonetic layout`);
+    const originalFormats = expected.blocks.filter(block => block.kind !== "heading").map(block => block.kind === "table"
+      ? [...(block.headers ? [block.headers] : []), ...block.rows].map(row => row.map(styledRuns))
+      : block.kind === "callout" ? block.paragraphs.map(styledRuns) : styledRuns(block.runs));
+    assert.ok(JSON.stringify(shown.formats) === JSON.stringify(originalFormats), `${expected.id}: original bold, italic and underline formatting must remain on the same text`);
     assert.ok(shown.headings.map(normalize).includes(normalize(expected.title)), `${expected.id}: section title missing`);
     for (const block of expected.blocks) {
       if (block.kind === "heading") assert.ok(shown.headings.map(normalize).includes(normalize(block.text)), `${expected.id}: native heading missing`);
@@ -106,8 +136,12 @@ async function assertNativeContent(page, unit) {
   await singleColumn(article.locator("[data-knowledge-section]"), `Unit ${unit.number} sections`);
 }
 async function assertPhoneticLayout(page, unit, width) {
-  const result = await page.getByRole("article", { name: `Unit ${unit.number} 知识点正文`, exact: true }).evaluate(article => {
-    const result = { ipa: 0, rubyBelow: 0, tableBelow: 0, standalone: 0, failures: [] };
+  const result = await page.getByRole("article", { name: `Unit ${unit.number} 知识点正文`, exact: true }).evaluate((article, viewportWidth) => {
+    const result = { ipa: 0, pairedAfterMeaning: 0, tableAfterMeaning: 0, standaloneInline: 0, failures: [] };
+    // The next flex item may wrap intact to a later line. A same-line item
+    // must sit to the right of the preceding meaning, rather than below word.
+    const follows = (after, before) => after.top >= before.bottom - 1
+      || Math.abs(after.top - before.top) < Math.max(after.height, before.height) * .6 && after.left >= before.right - 1;
     for (const ipa of article.querySelectorAll("[data-ipa]")) {
       const sound = ipa.getBoundingClientRect();
       result.ipa++;
@@ -115,28 +149,30 @@ async function assertPhoneticLayout(page, unit, width) {
       const entry = ipa.closest("[data-phonetic-entry]"), row = ipa.closest("[data-phonetic-row]");
       const word = entry?.querySelector("[data-phonetic-word]") ?? row?.querySelector("[data-phonetic-word]");
       if (word) {
-        const base = word.getBoundingClientRect();
         if (entry) {
-          // Native ruby font boxes include leading/descender space. Confirm
-          // under-placement and a full second baseline without mistaking that
-          // small empty-box overlap for colliding glyphs.
-          const under = getComputedStyle(entry).rubyPosition === "under";
-          const centreGap = sound.top + sound.height / 2 - base.top - base.height / 2;
-          if (!under || centreGap < base.height * .5 || base.bottom - sound.top >= base.height * .2)
-            result.failures.push({ issue: "Ruby IPA is not on a clear line below its headword", ipa: ipa.textContent, word: word.textContent, under, centreGap, wordHeight: base.height, leadingOverlap: base.bottom - sound.top });
-          result.rubyBelow++;
+          const meaning = entry.querySelector("[data-phonetic-meaning]"), soundGroup = ipa.closest("[data-phonetic-sound]");
+          const anchor = meaning ?? word;
+          const order = [word, ...(meaning ? [meaning] : []), soundGroup].map(element => Number(getComputedStyle(element).order));
+          if (entry.tagName === "RUBY" || !soundGroup || !order.every((value, index) => !index || value > order[index - 1]) || !follows(sound, anchor.getBoundingClientRect()))
+            result.failures.push({ issue: "IPA must follow the word and its Chinese meaning in visual reading order", ipa: ipa.textContent, word: word.textContent, meaning: meaning?.textContent, order, sound: sound.toJSON(), anchor: anchor.getBoundingClientRect().toJSON() });
+          result.pairedAfterMeaning++;
         } else {
-          if (sound.top < base.bottom - 1) result.failures.push({ issue: "Table IPA is not below its headword", ipa: ipa.textContent, word: word.textContent, soundTop: sound.top, wordBottom: base.bottom });
-          result.tableBelow++;
+          const cells = row.querySelectorAll("td"), meaning = cells[3];
+          const expected = [cells[0], cells[1], cells[3], cells[2]];
+          if (cells.length !== 4 || !expected.slice(1).every((cell, index) => viewportWidth > 640
+            ? cell.getBoundingClientRect().left >= expected[index].getBoundingClientRect().right - 1
+            : follows(cell.getBoundingClientRect(), expected[index].getBoundingClientRect())))
+            result.failures.push({ issue: "Vocabulary table must read word, POS, Chinese meaning, IPA", ipa: ipa.textContent, word: word.textContent, meaning: meaning?.textContent });
+          result.tableAfterMeaning++;
         }
       } else {
         const standalone = ipa.closest("[data-phonetic-standalone]");
-        if (!standalone || getComputedStyle(standalone).display !== "block") result.failures.push({ issue: "Unpaired phoneme must occupy its own line", ipa: ipa.textContent });
-        result.standalone++;
+        if (!standalone || getComputedStyle(standalone).display !== "inline") result.failures.push({ issue: "Unpaired phoneme must remain inline", ipa: ipa.textContent });
+        result.standaloneInline++;
       }
     }
     return result;
-  });
+  }, width);
   assert.equal(result.ipa, ipaRuns(unit).length, `Unit ${unit.number} ${width}px: complete IPA layout coverage`);
   assert.deepEqual(result.failures, [], `Unit ${unit.number} ${width}px at 150%: phonetic placement failure`);
   assert.equal(await page.locator('[data-knowledge-audio-dock],aside[aria-label="当前英文朗读"]').count(), 0);
@@ -246,12 +282,12 @@ try {
         await page.screenshot({ path: path.join(output, "phonetic-vocabulary-1280.png"), fullPage: false });
       }
       if (unit.number === 8 && width === 320) {
-        const row = page.locator('[data-phonetic-row="past-read"]').first();
+        const row = page.locator('[data-speech-item="unit-8-supplement-b15-r13-c1"]').locator("xpath=ancestor::tr");
         await row.evaluate(element => { document.documentElement.style.scrollBehavior = "auto"; window.scrollTo({ top: scrollY + element.getBoundingClientRect().top - 100, behavior: "instant" }); });
-        await page.screenshot({ path: path.join(output, "phonetic-past-read-320.png"), fullPage: false });
+        await page.screenshot({ path: path.join(output, "phonetic-after-meaning-320.png"), fullPage: false });
       }
     }
-    checks.push(`${width}px: 8 complete native units, semantic tables/IPA below headwords at 150%, original source order, section anchors, previous/next, no horizontal overflow`);
+    checks.push(`${width}px: 8 complete native units, semantic tables/IPA after Chinese meanings at 150%, original source order/styles, section anchors, previous/next, no horizontal overflow`);
   }
   checks.push("All original blocks/cells remain unchanged and marked/inferred IPA are covered across every selected viewport at 150%");
   await page.goto(`${base}/1`);

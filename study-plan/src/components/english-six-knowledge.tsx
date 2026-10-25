@@ -48,19 +48,30 @@ function TextRuns({ runs }: { runs: KnowledgePhoneticRun[] }) {
 }
 
 function InlineText({ runs }: { runs: EnglishSixKnowledgeInline[] }) {
-  return layoutKnowledgePhonetics(runs).map((part, index) => part.kind === "text"
-    ? <span key={index} data-phonetic-text><TextRuns runs={part.runs} /></span>
-    : part.kind === "paired"
-      ? <ruby key={index} className={styles.phoneticEntry} data-phonetic-entry><span data-phonetic-word><TextRuns runs={part.wordRuns} /></span><rt data-phonetic-sound><TextRuns runs={part.ipaRuns} /></rt></ruby>
-      : <span key={index} className={styles.standaloneIpa} data-phonetic-standalone><TextRuns runs={part.ipaRuns} /></span>);
+  const parts = layoutKnowledgePhonetics(runs);
+  const content: ReactNode[] = [];
+  for (let index = 0; index < parts.length; index++) {
+    const part = parts[index];
+    if (part.kind === "text") {
+      content.push(<span key={index} data-phonetic-text><TextRuns runs={part.runs} /></span>);
+    } else if (part.kind === "paired") {
+      const following = parts[index + 1];
+      const meaning = following?.kind === "text" && /\p{Script=Han}/u.test(following.runs.map(run => run.text).join("")) ? following : undefined;
+      // Preserve the source text and formatting order; CSS places IPA after the meaning.
+      content.push(<span key={index} className={styles.phoneticEntry} data-phonetic-entry>
+        <span data-phonetic-word><TextRuns runs={part.wordRuns} /></span>
+        <span data-phonetic-sound><TextRuns runs={part.ipaRuns} /></span>
+        {meaning && <span data-phonetic-meaning><TextRuns runs={meaning.runs} /></span>}
+      </span>);
+      if (meaning) index++;
+    } else {
+      content.push(<span key={index} className={styles.standaloneIpa} data-phonetic-standalone><TextRuns runs={part.ipaRuns} /></span>);
+    }
+  }
+  return content;
 }
 
-const plainText = (runs: EnglishSixKnowledgeInline[]) => runs.map(run => run.text).join("");
 const vocabularyCellClasses = [styles.phoneticWordCell, styles.phoneticPosCell, styles.phoneticIpaCell, styles.phoneticMeaningCell];
-function pastReadHint(row: EnglishSixKnowledgeInline[][]) {
-  return row.length === 3 && plainText(row[1]).trim().toLowerCase() === "read"
-    && /过去式/.test(plainText(row[2])) && /\/red\//.test(plainText(row[2]));
-}
 
 function KnowledgeBlock({ block, sectionTitle, blockId = "" }: { block: EnglishSixKnowledgeBlock; sectionTitle: string; blockId?: string }) {
   const activeItem = useKnowledgeAudioActiveItem();
@@ -71,16 +82,14 @@ function KnowledgeBlock({ block, sectionTitle, blockId = "" }: { block: EnglishS
   if (block.kind === "paragraph") return <p className={block.tone === "note" ? styles.note : styles.paragraph} data-speech-active={activeItem === `${blockId}-p` || undefined}><KnowledgeAudioButton itemId={`${blockId}-p`} /><InlineText runs={block.runs} /></p>;
   if (block.kind === "callout") return <aside className={styles.callout} role="note">{block.paragraphs.map((paragraph, index) => <p key={index} data-speech-active={activeItem === `${blockId}-note-${index}` || undefined}><KnowledgeAudioButton itemId={`${blockId}-note-${index}`} /><InlineText runs={paragraph} /></p>)}</aside>;
   const vocabulary = block.rows.length > 0 && block.rows.every(row => row.length === 4 && phoneticOnlyRuns(row[2]));
-  const hasPastReadHint = !vocabulary && block.rows.some(pastReadHint);
   return <div className={styles.tableWrap}>
     <div className={styles.tableAudio}><KnowledgeAudioPlaylistButton blockIds={[blockId]} label="播放本表英文" /></div>
-    <table className={`${styles.table} ${vocabulary ? styles.phoneticTable : hasPastReadHint ? styles.phoneticHintTable : ""}`} aria-label={sectionTitle} role="table">
+    <table className={`${styles.table} ${vocabulary ? styles.phoneticTable : ""}`} aria-label={sectionTitle} role="table">
       {block.headers?.length ? <thead role="rowgroup"><tr role="row">{block.headers.map((header, index) => <th key={index} scope="col" role="columnheader" className={vocabulary ? vocabularyCellClasses[index] : undefined}><InlineText runs={header} /></th>)}</tr></thead> : null}
       <tbody role="rowgroup">{block.rows.map((row, rowIndex) => {
-        const hint = hasPastReadHint && pastReadHint(row);
-        return <tr key={rowIndex} role="row" className={hint ? styles.phoneticHintRow : undefined} data-phonetic-row={vocabulary ? "vocabulary" : hint ? "past-read" : undefined}>{row.map((cell, cellIndex) => <td key={cellIndex} role="cell" className={vocabulary ? vocabularyCellClasses[cellIndex] : hint ? [styles.phoneticHintFirstCell, styles.phoneticHintWordCell, styles.phoneticHintMeaningCell][cellIndex] : undefined} data-phonetic-ipa-cell={vocabulary && cellIndex === 2 || undefined}>
+        return <tr key={rowIndex} role="row" data-phonetic-row={vocabulary ? "vocabulary" : undefined}>{row.map((cell, cellIndex) => <td key={cellIndex} role="cell" className={vocabulary ? vocabularyCellClasses[cellIndex] : undefined} data-phonetic-ipa-cell={vocabulary && cellIndex === 2 || undefined}>
         {block.headers?.[cellIndex]?.some(run => run.text.trim()) && <span className={styles.mobileCellLabel} aria-hidden="true"><InlineText runs={block.headers[cellIndex]} /></span>}
-        <span className={styles.cellContent} data-knowledge-cell data-phonetic-word={(vocabulary && cellIndex === 0 || hint && cellIndex === 1) || undefined} data-speech-active={activeItem === `${blockId}-r${rowIndex}-c${cellIndex}` || undefined}><KnowledgeAudioButton itemId={`${blockId}-r${rowIndex}-c${cellIndex}`} /><InlineText runs={cell} /></span>
+        <span className={styles.cellContent} data-knowledge-cell data-phonetic-word={vocabulary && cellIndex === 0 || undefined} data-speech-active={activeItem === `${blockId}-r${rowIndex}-c${cellIndex}` || undefined}><KnowledgeAudioButton itemId={`${blockId}-r${rowIndex}-c${cellIndex}`} /><InlineText runs={cell} /></span>
       </td>)}</tr>;
       })}</tbody>
     </table>
