@@ -23,11 +23,49 @@ OLDER = {
     ('4d65d765912e1f9baf4553c7df5bebe9b16274eb', 'Yj7rcLNGEw2ejYX1YscEO'),
     ('bdc35f288531062f5abb029cd263bbd9b51d65b0', 'DKRqust1YId2JJhNlB18x'),
 }
+CANDIDATES = {'4d65d765912e1f9baf4553c7df5bebe9b16274eb', 'bdc35f288531062f5abb029cd263bbd9b51d65b0'}
 
 
 def pair(meta):
     BASE.require(meta and meta['buildMatchesMetadata'])
     return meta['commit'], meta['buildId']
+
+
+def allocation(fd):
+    """Stat-only inode accounting; no linked content is opened or followed."""
+    device = os.fstat(fd).st_dev
+    records = {}
+    files = symlinks = regular = allocated = 0
+    def walk(directory):
+        nonlocal files, symlinks, regular, allocated
+        for name in os.listdir(directory):
+            info = os.stat(name, dir_fd=directory, follow_symlinks=False)
+            BASE.require(info.st_dev == device)
+            identity = info.st_dev, info.st_ino
+            value = records.get(identity)
+            stable = (info.st_mode, info.st_uid, info.st_gid, info.st_size, info.st_mtime_ns, info.st_ctime_ns, info.st_nlink, info.st_blocks)
+            if value is None:
+                records[identity] = [stable, 1]
+                allocated += info.st_blocks * 512
+                if stat.S_ISREG(info.st_mode): regular += info.st_size; files += 1
+                elif stat.S_ISLNK(info.st_mode): symlinks += 1
+                else: BASE.require(stat.S_ISDIR(info.st_mode))
+            else:
+                BASE.require(value[0] == stable and not stat.S_ISDIR(info.st_mode))
+                value[1] += 1
+            if stat.S_ISDIR(info.st_mode):
+                child = BASE.child_dir(directory, name)
+                try:
+                    BASE.require((os.fstat(child).st_dev, os.fstat(child).st_ino) == identity)
+                    walk(child)
+                finally: os.close(child)
+    walk(fd)
+    outside = [entry for entry in records.values() if not stat.S_ISDIR(entry[0][0]) and entry[0][6] != entry[1]]
+    BASE.require(all(entry[0][6] >= entry[1] for entry in outside))
+    outside_bytes = sum(entry[0][7] * 512 for entry in outside)
+    return {'allocatedBytes': allocated, 'regularBytes': regular, 'files': files, 'symlinks': symlinks,
+        'outsideHardlinkedInodes': len(outside), 'outsideHardlinkedAllocatedBytes': outside_bytes,
+        'independentlyReleasableAllocatedBytes': allocated - outside_bytes, 'statOnlyHardlinkScan': True}
 
 
 def main():
@@ -55,8 +93,10 @@ def main():
                 if not meta: continue
                 identity = pair(meta)
                 BASE.require(identity == ROLLBACK or identity in OLDER)
-                retained.append({'metadata': meta, 'role': 'direct-rollback' if identity == ROLLBACK else 'older-inactive',
-                    'onRootFilesystem': os.fstat(fd).st_dev == os.fstat(releases).st_dev, 'size': BASE.sizes(fd)})
+                row = {'metadata': meta, 'role': 'direct-rollback' if identity == ROLLBACK else 'older-inactive',
+                    'onRootFilesystem': os.fstat(fd).st_dev == os.fstat(releases).st_dev}
+                if identity[0] in CANDIDATES: row['size'] = allocation(fd)
+                retained.append(row)
             finally: os.close(fd)
         BASE.require({pair(row['metadata']) for row in retained} == OLDER | {ROLLBACK})
         largest = 0
