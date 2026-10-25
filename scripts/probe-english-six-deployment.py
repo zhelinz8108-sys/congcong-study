@@ -162,7 +162,10 @@ def probe():
             try:
                 identity = metadata(folder)
                 if identity:
-                    rows.append({'role': 'latest-main-rollback' if name == LATEST_ROLLBACK else 'held-audio-rollback' if name == HELD_AUDIO else 'other-retained',
+                    role = ('rollback-of-current-commit' if name.startswith('previous-' + active['commit'] + '-')
+                            else 'previous-math-release-rollback' if name == LATEST_ROLLBACK
+                            else 'held-audio-rollback' if name == HELD_AUDIO else 'other-retained')
+                    rows.append({'role': role,
                                  'metadata': identity, 'size': sizes(folder)})
             finally:
                 os.close(folder)
