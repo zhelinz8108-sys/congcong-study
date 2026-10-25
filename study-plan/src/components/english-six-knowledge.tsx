@@ -62,6 +62,44 @@ function KnowledgeBlock({ block, sectionTitle }: { block: EnglishSixKnowledgeBlo
   </div>;
 }
 
+type KnowledgeTone = "blue" | "teal" | "violet" | "amber" | "rose" | "indigo" | "sky";
+
+function knowledgeTone(title: string, fallback: KnowledgeTone = "teal"): KnowledgeTone {
+  if (/易错|纠错|错误|陷阱/.test(title)) return "rose";
+  if (/语音|发音|音标|文化/.test(title)) return "sky";
+  if (/语法|过去时|现在时|将来时|疑问|感叹句/.test(title)) return "amber";
+  if (/写作|作文|范文|素材|话题|审题/.test(title)) return "indigo";
+  if (/句型|好句|例句|句子|对话|表达/.test(title)) return "violet";
+  if (/词汇|单词|词义|词性/.test(title)) return "blue";
+  if (/短语|词组|搭配/.test(title)) return "teal";
+  return fallback;
+}
+
+function KnowledgeContent({ blocks, sectionTitle }: { blocks: EnglishSixKnowledgeBlock[]; sectionTitle: string }) {
+  type Heading = Extract<EnglishSixKnowledgeBlock, { kind: "heading" }>;
+  const groups: { heading?: Heading; blocks: EnglishSixKnowledgeBlock[]; tone: KnowledgeTone }[] = [];
+  const sectionTone = knowledgeTone(sectionTitle);
+  let parentTone = sectionTone;
+  for (const block of blocks) {
+    if (block.kind === "heading") {
+      const tone = knowledgeTone(block.text, block.level === 3 ? sectionTone : parentTone);
+      if (block.level === 3) parentTone = tone;
+      groups.push({ heading: block, blocks: [], tone });
+    } else {
+      if (!groups.length) groups.push({ blocks: [], tone: sectionTone });
+      groups[groups.length - 1].blocks.push(block);
+    }
+  }
+  return groups.map((group, index) => {
+    if (!group.heading) return <div key={index} className={styles.sectionIntro}>{group.blocks.map((block, blockIndex) => <KnowledgeBlock key={blockIndex} block={block} sectionTitle={sectionTitle} />)}</div>;
+    if (!group.blocks.length) return <div key={index} className={styles.topicDivider} data-knowledge-tone={group.tone}><KnowledgeBlock block={group.heading} sectionTitle={sectionTitle} /></div>;
+    return <div key={index} className={styles.topicGroup} data-knowledge-group data-knowledge-tone={group.tone}>
+      <header className={styles.topicHeading}><KnowledgeBlock block={group.heading} sectionTitle={sectionTitle} /></header>
+      <div className={styles.topicBody}>{group.blocks.map((block, blockIndex) => <KnowledgeBlock key={blockIndex} block={block} sectionTitle={sectionTitle} />)}</div>
+    </div>;
+  });
+}
+
 export function EnglishSixKnowledgeHub({ subjectId, bookSummary }: { subjectId: string; bookSummary: EnglishSixKnowledgeBookSummary }) {
   const base = `/subjects/${subjectId}/english/six-knowledge`;
   return <ReadingFrame subjectId={subjectId}>
@@ -109,13 +147,13 @@ export function EnglishSixKnowledgeReader({ subjectId, unit, units }: { subjectI
     <nav className={styles.chapterNavigation} aria-label="本单元章节">
       <details open>
         <summary><span>本单元目录</span><span>{unit.sections.length} 节 <span aria-hidden="true">⌄</span></span></summary>
-        <ol>{unit.sections.map((section, index) => <li key={section.id}><a href={`#${section.id}`}><span className={styles.chapterNumber}>{String(index + 1).padStart(2, "0")}</span><span>{section.title}</span><span className={styles.anchorArrow} aria-hidden="true">↓</span></a></li>)}</ol>
+        <ol>{unit.sections.map((section, index) => <li key={section.id}><a href={`#${section.id}`} data-knowledge-tone={knowledgeTone(section.title)}><span className={styles.chapterNumber}>{String(index + 1).padStart(2, "0")}</span><span>{section.title}</span><span className={styles.anchorArrow} aria-hidden="true">↓</span></a></li>)}</ol>
       </details>
     </nav>
     <article className={styles.article} aria-label={`Unit ${unit.number} 知识点正文`}>
-      {unit.sections.map((section, index) => <section className={styles.section} id={section.id} key={section.id} data-knowledge-section>
+      {unit.sections.map((section, index) => <section className={styles.section} id={section.id} key={section.id} data-knowledge-section data-knowledge-tone={knowledgeTone(section.title)}>
         <header className={styles.sectionHeading}><span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><h2>{section.title}</h2></header>
-        <div className={styles.sectionContent}>{section.blocks.map((block, blockIndex) => <KnowledgeBlock key={blockIndex} block={block} sectionTitle={section.title} />)}</div>
+        <div className={styles.sectionContent}><KnowledgeContent blocks={section.blocks} sectionTitle={section.title} /></div>
         <a href="#" className={styles.backToDirectory}>返回页首 ↑</a>
       </section>)}
     </article>
