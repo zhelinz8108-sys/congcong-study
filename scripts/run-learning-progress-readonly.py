@@ -14,6 +14,8 @@ APP = '/www/study-plan'
 MAX_SCRIPT_BYTES = 1024 * 1024
 MAX_REPORT_BYTES = 256 * 1024
 MAX_STDERR_BYTES = 16 * 1024
+SAFE_FAILURE_STAGES = {'input', 'lock-open', 'app-open', 'child', 'app-identity', 'envelope'}
+FAILURE_STAGE = 'input'
 
 
 def require(value):
@@ -132,12 +134,14 @@ def run_bounded(command, script, environment, cwd, timeout=180):
 
 
 def main():
+    global FAILURE_STAGE
     require(os.geteuid() == 0 and not sys.argv[1:])
     script = sys.stdin.buffer.read(MAX_SCRIPT_BYTES + 1)
     require(0 < len(script) <= MAX_SCRIPT_BYTES and b'\0' not in script)
     script.decode('utf8')
     handles = []
     try:
+        FAILURE_STAGE = 'lock-open'
         lockdir = open_dir('/run/study-plan-release'); handles.append(lockdir)
         info = os.fstat(lockdir)
         require(info.st_uid == 0 and stat.S_IMODE(info.st_mode) == 0o700)
@@ -146,6 +150,7 @@ def main():
         info = os.fstat(lock)
         require(stat.S_ISREG(info.st_mode) and info.st_uid == 0 and info.st_nlink == 1 and stat.S_IMODE(info.st_mode) == 0o600)
         fcntl.flock(lock, fcntl.LOCK_SH | fcntl.LOCK_NB)
+        FAILURE_STAGE = 'app-open'
         app = open_dir(APP); handles.append(app)
         expected = identity(os.fstat(app))
         require(stat.S_IMODE(os.fstat(app).st_mode) & 0o022 == 0)
@@ -154,9 +159,12 @@ def main():
             NODE_OPTIONS='--max-old-space-size=768',
             PGOPTIONS='-c default_transaction_read_only=on -c statement_timeout=15000 -c lock_timeout=1000')
         # Only the successful encrypted envelope can reach public workflow logs.
+        FAILURE_STAGE = 'child'
         stdout = run_bounded(['/usr/bin/node', '--input-type=module', '-'], script, environment, APP)
         require(0 < len(stdout) <= MAX_REPORT_BYTES)
+        FAILURE_STAGE = 'app-identity'
         require(identity(os.stat(APP, follow_symlinks=False)) == expected and identity(os.fstat(app)) == expected)
+        FAILURE_STAGE = 'envelope'
         report = json.loads(stdout)
         validate_envelope(report)
         raw = json.dumps(report, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode('utf8')
@@ -176,5 +184,6 @@ if __name__ == '__main__':
     try:
         main()
     except BaseException:
-        print('Read-only progress query stopped safely; no private diagnostics exported.', flush=True)
+        stage = FAILURE_STAGE if FAILURE_STAGE in SAFE_FAILURE_STAGES else 'input'
+        print('Read-only progress query stopped safely; stage=' + stage + '; no private diagnostics exported.', flush=True)
         sys.exit(1)
