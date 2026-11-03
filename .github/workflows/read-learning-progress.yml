@@ -1,0 +1,62 @@
+name: Read-only aggregated mathematics and English learning progress
+
+on:
+  push:
+    branches: [ops/read-learning-progress-20261103]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  progress:
+    if: github.repository == 'zhelinz8108-sys/congcong-study' && github.ref == 'refs/heads/ops/read-learning-progress-20261103'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          lfs: false
+      - name: Validate the reviewed query and read-only transport syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s scripts/read-learning-progress.mjs
+          node --check scripts/read-learning-progress.mjs
+          python3 -B - <<'PY'
+          import pathlib
+          path=pathlib.Path('scripts/run-learning-progress-readonly.py')
+          compile(path.read_bytes(),str(path),'exec')
+          PY
+          python3 -B scripts/test-learning-progress-readonly.py
+      - name: Read only the reviewed aggregate from the active application
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$SERVER_HOST" = 124.223.31.175
+          test "$SERVER_USER" = ubuntu
+          test "$SERVER_PORT" = 22
+          test -n "$SERVER_SSH_KEY"
+          work_dir="$(mktemp -d "$RUNNER_TEMP/learning-progress.XXXXXXXX")"
+          trap 'rm -f -- "$work_dir/key"; rmdir -- "$work_dir"' EXIT
+          printf '%s\n' "$SERVER_SSH_KEY" > "$work_dir/key"
+          transport_code="$(base64 -w0 scripts/run-learning-progress-readonly.py)"
+          ssh -i "$work_dir/key" -p "$SERVER_PORT" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o PasswordAuthentication=no \
+            -o StrictHostKeyChecking=yes -o HostKeyAlgorithms=ssh-ed25519 \
+            -o UserKnownHostsFile=study-plan/scripts/cloud-recovery/known_hosts \
+            -o GlobalKnownHostsFile=/dev/null -o LogLevel=ERROR \
+            -o ServerAliveInterval=15 -o ServerAliveCountMax=6 -o ConnectTimeout=30 \
+            "$SERVER_USER@$SERVER_HOST" \
+            "sudo -n /usr/bin/python3 -B -c 'import base64;exec(compile(base64.b64decode(\"$transport_code\"),\"<read-only-progress-transport>\",\"exec\"))'" \
+            < scripts/read-learning-progress.mjs
