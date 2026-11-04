@@ -20,7 +20,9 @@ def fixture(root, name):
     (source / 'linked-data').symlink_to('/synthetic/external/data')
     (source / 'internal').symlink_to('资料.txt')
     (source / 'empty').mkdir()
-    os.setxattr(source / '资料.txt', 'user.fixture', b'kept')
+    os.setxattr(source / '资料.txt', 'user.fixture', b'kept\0\xff')
+    os.setxattr(source, 'user.root-fixture', b'root metadata')
+    os.link(source / '资料.txt', source / 'hardcopy')
     return source
 
 
@@ -67,7 +69,12 @@ with tempfile.TemporaryDirectory() as directory:
 
     source = fixture(root, 'pointer-failure'); before = helper.snapshot(source)
     try:
-        with patch.object(Path, 'symlink_to', side_effect=OSError('synthetic pointer failure')):
+        original_symlink = Path.symlink_to
+        def pointer_failure(path, target, *args, **kwargs):
+            if path == source:
+                raise OSError('synthetic pointer failure')
+            return original_symlink(path, target, *args, **kwargs)
+        with patch.object(Path, 'symlink_to', pointer_failure):
             helper.compact(source, root / 'pointer-archive', code)
     except OSError:
         assert source.is_dir() and helper.snapshot(source) == before
@@ -84,6 +91,13 @@ with tempfile.TemporaryDirectory() as directory:
     else:
         raise AssertionError('low space accepted')
     checks.append('insufficient-scratch-keeps-original')
+
+    source = fixture(root, 'retry-partial'); before = helper.snapshot(source)
+    destination = root / 'partial-archive'; destination.mkdir(mode=0o700)
+    partial = destination / 'archive.tar.gz'; partial.write_bytes(b'incomplete generated gzip'); partial.chmod(0o600)
+    helper.compact(source, destination, code)
+    assert source.is_symlink() and json.loads((destination / 'manifest.json').read_text())['files'] == before
+    checks.append('only-unverified-generated-partial-is-rebuilt-with-original-intact')
 
     link = root / 'linked-parent'; link.symlink_to(root, target_is_directory=True)
     try:
