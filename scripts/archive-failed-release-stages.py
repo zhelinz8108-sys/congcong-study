@@ -242,6 +242,34 @@ def relocate_npm_cache(data):
                          profile / 'relocation.json', 'ubuntu-npm-cacache', mutable=True)
 
 
+def storage_diagnostics():
+    """Only sizes and known release IDs, never private filenames or file text."""
+    PROGRESS['phase'] = 'read-only-storage-diagnostics'
+    targets = [Path('/tmp'), Path('/var/cache'), Path('/var/log')]
+    entries = []
+    active = Path('/www/study-plan').resolve()
+    for candidate in sorted(RELEASES.iterdir()):
+        if candidate.is_symlink() or not candidate.is_dir():
+            continue
+        # Log only known hexadecimal release identities, never arbitrary names.
+        import re
+        if not re.fullmatch(r'(?:previous-)?[a-f0-9]{40}-[0-9]+-[0-9]+', candidate.name):
+            continue
+        targets.append(candidate)
+        for directory in candidate.iterdir():
+            if directory.is_dir() and not directory.is_symlink() and directory.name.startswith('.next'):
+                targets.append(directory / 'cache')
+        entries.append({'release': candidate.name, 'active': candidate.resolve() == active})
+    sizes = []
+    for target in targets:
+        if not target.is_dir() or target.is_symlink():
+            continue
+        measured = subprocess.run(['du', '-sx', '-B1', str(target)], capture_output=True, text=True)
+        if measured.returncode == 0:
+            sizes.append({'path': str(target), 'MiB': int(measured.stdout.split()[0]) // 1024**2})
+    print('::notice title=Read-only release storage diagnosis::' + json.dumps({'releases': entries, 'sizes': sizes}), flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--apply', action='store_true', required=True)
@@ -290,6 +318,8 @@ def main():
             cache = relocate_npm_cache(DATA)
             free = shutil.disk_usage(RELEASES).free
         print('::notice title=Release storage::' + json.dumps({'rootFreeMiB': free // 1024**2, 'dataFreeMiB': shutil.disk_usage(DATA).free // 1024**2, 'stages': outcomes, 'npmDownloadCache': cache}), flush=True)
+        if free < 4 * 1024**3 + largest + 64 * 1024**2:
+            storage_diagnostics()
         require(free >= 4 * 1024**3 + largest + 64 * 1024**2, 'Root disk still lacks room for a new upload and 4 GiB build headroom; existing application and archives are retained')
 
 
