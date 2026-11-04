@@ -317,7 +317,7 @@ def main():
         if free < 4 * 1024**3 + largest + 64 * 1024**2:
             cache = relocate_npm_cache(DATA)
             free = shutil.disk_usage(RELEASES).free
-        print('::notice title=Release storage::' + json.dumps({'rootFreeMiB': free // 1024**2, 'dataFreeMiB': shutil.disk_usage(DATA).free // 1024**2, 'stages': outcomes, 'npmDownloadCache': cache}), flush=True)
+        print('::notice title=Release storage::' + json.dumps({'rootFreeMiB': free // 1024**2, 'dataFreeMiB': shutil.disk_usage(DATA).free // 1024**2, 'stages': outcomes, 'npmDownloadCache': cache, 'requiredRootMiB': (4 * 1024**3 + largest + 64 * 1024**2 + 1024**2 - 1) // 1024**2, 'estimatedCodeMiB': largest // 1024**2}), flush=True)
         if free < 4 * 1024**3 + largest + 64 * 1024**2:
             storage_diagnostics()
         require(free >= 4 * 1024**3 + largest + 64 * 1024**2, 'Root disk still lacks room for a new upload and 4 GiB build headroom; existing application and archives are retained')

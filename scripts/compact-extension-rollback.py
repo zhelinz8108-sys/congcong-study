@@ -7,6 +7,7 @@ import argparse
 import base64
 import fcntl
 import gzip
+import lzma
 from decimal import Decimal
 import tarfile
 import hashlib
@@ -99,20 +100,45 @@ def archive_name(name):
     return parsed.as_posix()
 
 
+def archive_stream(archive):
+    return (lzma.open if archive.name.startswith('archive.tar.xz') else gzip.open)(archive, 'rb')
+
+
+def extract_archive(archive, directory, names=None):
+    command = ['tar', '--extract', '--file', '-', '--directory', str(directory), '--same-owner', '--same-permissions', '--xattrs', '--xattrs-include=*', '--acls', '--selinux']
+    if names is not None:
+        command.extend(['--no-recursion', '--null', '--files-from', str(names)])
+    child = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        with archive_stream(archive) as incoming:
+            try:
+                shutil.copyfileobj(incoming, child.stdin, 1024 * 1024)
+            except BrokenPipeError:
+                pass
+    finally:
+        try:
+            child.stdin.close()
+        except BrokenPipeError:
+            pass
+        code = child.wait()
+    require(code == 0, 'GNU tar restoration failed; retain all copies')
+
+
 def verify_archive(folder, manifest):
     """Actually unpack and verify every entry, reclaiming each scratch file.
 
     GNU tar separately restores every xattr/ACL-bearing entry and hard-link
     group. Verification therefore needs the largest file, not a second tree.
     """
-    archive = folder / 'archive.tar.gz'
+    archive = folder / manifest.get('archiveFile', 'archive.tar.gz')
+    require(archive.name in ('archive.tar.gz', 'archive.tar.xz', 'archive.tar.xz.pending'), 'Unexpected retained archive name')
     require(digest(archive) == manifest['archiveSha256'], 'Archive checksum mismatch; retain all copies')
     temporary = folder / '.verify'
     require(not os.path.lexists(temporary), 'An interrupted verification requires review; retain all copies')
     temporary.mkdir(mode=0o700)
     headers, selected = {}, set()
     try:
-        with gzip.open(archive, 'rb') as uncompressed:
+        with archive_stream(archive) as uncompressed:
             with tarfile.open(fileobj=uncompressed, mode='r|') as contents:
                 for member in contents:
                     name = archive_name(member.name)
@@ -175,7 +201,7 @@ def verify_archive(folder, manifest):
                 for name in sorted(selected):
                     output.write(os.fsencode(headers[name]['name']) + b'\0')
             extracted = temporary / 'tree'; extracted.mkdir(mode=0o700)
-            subprocess.run(['tar', '--extract', '--gzip', '--file', str(archive), '--directory', str(extracted), '--same-owner', '--same-permissions', '--xattrs', '--xattrs-include=*', '--acls', '--selinux', '--no-recursion', '--null', '--files-from', str(names)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            extract_archive(archive, extracted, names)
             allowed = {'.'} | selected
             for name in selected:
                 allowed.update(parent.as_posix() for parent in PurePosixPath(name).parents)
@@ -239,6 +265,53 @@ def compact(source, destination, helper_source):
     return receipt
 
 
+def replace_private(target, text, mode=0o600):
+    temporary = target.with_name(target.name + '.next')
+    require(not os.path.lexists(temporary), 'An interrupted metadata update requires review')
+    write_private(temporary, text, mode)
+    os.replace(temporary, target)
+    sync_directory(target.parent)
+
+
+def recompress_retained(folder, manifest, helper_source):
+    """A verified gzip backup stays intact until its xz replacement passes."""
+    if manifest.get('archiveFile') == 'archive.tar.xz':
+        return manifest
+    original = folder / manifest.get('archiveFile', 'archive.tar.gz')
+    require(original.name == 'archive.tar.gz' and digest(original) == manifest['archiveSha256'], 'Original archive differs')
+    pending = folder / 'archive.tar.xz.pending'
+    require(not os.path.lexists(pending) and not (folder / 'archive.tar.xz').exists(), 'An interrupted recompression requires review')
+    reserve = max(row['size'] for row in manifest['files'].values()) + 512 * 1024**2
+    try:
+        with gzip.open(original, 'rb') as incoming, pending.open('xb') as raw_output:
+            pending.chmod(0o600)
+            with lzma.LZMAFile(raw_output, 'w', format=lzma.FORMAT_XZ, preset=6) as outgoing:
+                while chunk := incoming.read(1024 * 1024):
+                    require(shutil.disk_usage(folder).free >= reserve + 16 * 1024**2, 'Recompression scratch exhausted; original archive is retained')
+                    outgoing.write(chunk)
+            raw_output.flush(); os.fsync(raw_output.fileno())
+        require(pending.stat().st_size < original.stat().st_size, 'Recompression did not reduce space; original is retained')
+        candidate = {**manifest, 'archiveFile': pending.name, 'archiveSha256': digest(pending)}
+        verify_archive(folder, candidate)
+        final = folder / 'archive.tar.xz'
+        pending.rename(final); sync_directory(folder)
+        candidate['archiveFile'] = final.name
+        # New restore code understands both formats, so all interruption points
+        # still leave at least the old or the new fully verified backup usable.
+        replace_private(folder / 'restore.py', helper_source, 0o700)
+        replace_private(folder / 'manifest.json', json.dumps(candidate))
+        replace_private(folder / 'RESTORE_REQUIRED.txt', 'Full rollback is preserved in archive.tar.xz. Verify: python3 restore.py --verify\nRestore to a NEW private directory: python3 restore.py --restore /absolute/new-directory\nThis does not activate the app or restore a database. Never use this archive pointer as an application directory.\n')
+        replace_private(folder / 'receipt.json', json.dumps({'version': 1, 'release': manifest['release'], 'archiveSha256': candidate['archiveSha256'], 'restorationVerified': True, 'files': len(manifest['files'])}))
+        require(digest(final) == candidate['archiveSha256'], 'Replacement archive changed; retain both copies')
+        original.unlink(); sync_directory(folder)
+        return candidate
+    except BaseException:
+        # Do not discard a completed archive or a metadata-switched backup.
+        if original.is_file() and pending.exists():
+            pending.unlink(); sync_directory(folder)
+        raise
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--apply', action='store_true')
@@ -258,7 +331,7 @@ def main():
             require(target.parent.stat().st_uid == 0 and stat.S_IMODE(target.parent.stat().st_mode) == 0o700, 'Restore parent must be private root-owned mode 0700')
             require(shutil.disk_usage(target.parent).free >= sum(item['size'] for item in manifest['files'].values()) + 512 * 1024**2, 'Full restoration requires space for the original tree')
             target.mkdir(mode=0o700)
-            subprocess.run(['tar', '-xzf', str(folder / 'archive.tar.gz'), '-C', str(target), '--same-owner', '--same-permissions', '--xattrs', '--xattrs-include=*', '--acls', '--selinux'], check=True, stdout=subprocess.DEVNULL)
+            extract_archive(folder / manifest.get('archiveFile', 'archive.tar.gz'), target)
             require(snapshot(target) == manifest['files'], 'Restored files differ; do not activate')
         print(json.dumps({'verified': True, 'restored': bool(args.restore), 'applicationActivated': False}))
         return
@@ -280,12 +353,15 @@ def main():
             archived_manifest = json.loads((destination / 'manifest.json').read_text())
             verify_archive(destination, archived_manifest)
             remove_retained_duplicate(RELEASES / ('.compacting-' + IDENTITY), archived_manifest)
-            print(json.dumps({'alreadyPreserved': True})); return
+            source_code = globals().get('_SOURCE') or Path(__file__).read_text()
+            recompress_retained(destination, archived_manifest, source_code)
+            print(json.dumps({'alreadyPreserved': True, 'archiveFormat': 'xz', 'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2})); return
         inactive(source)
         require((source / '.next/BUILD_ID').read_text().strip() == receipt['oldBuildId'], 'Old rollback build identity differs')
         ARCHIVE_ROOT.mkdir(mode=0o700, exist_ok=True); ARCHIVE_ROOT.chmod(0o700); sync_directory(ARCHIVE_ROOT.parent)
         source_code = globals().get('_SOURCE') or Path(__file__).read_text()
         result = compact(source, destination, source_code)
+        recompress_retained(destination, json.loads((destination / 'manifest.json').read_text()), source_code)
         print(json.dumps({'preserved': result['restorationVerified'], 'files': result['files'], 'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2}))
 
 

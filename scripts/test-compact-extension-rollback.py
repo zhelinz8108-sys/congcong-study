@@ -41,6 +41,34 @@ with tempfile.TemporaryDirectory() as directory:
     checks.append('full-restoration-hashes-modes-owners-mtimes-links-xattrs-preserved')
     assert not (root / '.compacting-old-rollback').exists()
     checks.append('only-verified-duplicate-released')
+    updated = helper.recompress_retained(destination, manifest, code)
+    assert updated['archiveFile'] == 'archive.tar.xz'
+    assert updated['files'] == before
+    assert (destination / 'archive.tar.xz').is_file() and not (destination / 'archive.tar.gz').exists()
+    helper.verify_archive(destination, updated)
+    assert helper.recompress_retained(destination, updated, code) == updated
+    restored = root / 'full-restore'; restored.mkdir(mode=0o700)
+    helper.extract_archive(destination / 'archive.tar.xz', restored)
+    assert helper.snapshot(restored) == before
+    checks.append('xz-replacement-verified-before-old-generated-archive-release')
+    checks.append('xz-restore-preserves-all-file-metadata-and-hardlinks-without-external-xz')
+
+    failure_source = fixture(root, 'recompress-failure')
+    failure_destination = root / 'recompress-failure-archive'
+    helper.compact(failure_source, failure_destination, code)
+    failure_manifest = json.loads((failure_destination / 'manifest.json').read_text())
+    original_archive_sha = helper.digest(failure_destination / 'archive.tar.gz')
+    try:
+        with patch.object(helper, 'verify_archive', side_effect=ValueError('synthetic replacement corruption')):
+            helper.recompress_retained(failure_destination, failure_manifest, code)
+    except ValueError:
+        assert helper.digest(failure_destination / 'archive.tar.gz') == original_archive_sha
+        assert json.loads((failure_destination / 'manifest.json').read_text()) == failure_manifest
+        assert not (failure_destination / 'archive.tar.xz.pending').exists()
+    else:
+        raise AssertionError('unverified replacement accepted')
+    checks.append('failed-recompression-keeps-original-verified-backup-usable')
+
 
     source = fixture(root, 'verification-failure'); before = helper.snapshot(source)
     try:
