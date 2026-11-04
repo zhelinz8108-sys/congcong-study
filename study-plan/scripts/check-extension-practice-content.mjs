@@ -19,6 +19,12 @@ for(const subject of ['math','english']) {
  const privateData=crypto.decryptEnglishSixKnowledge(encrypted,secret);
  assert.equal(privateData.subject,subject);assert.equal(privateData.publicDigest,createHash('sha256').update(raw).digest('hex'));
  const rows=new Map(privateData.answers.map(row=>[row.id,row]));assert.equal(rows.size,privateData.answers.length);
+ if(subject==='math') {
+  assert.equal(data.manifest.version,'math-extension-astra-v2','Publish the complete Astra math release');
+  const audit=JSON.parse(await readFile(root+'audit.public.json','utf8'));
+  assert.equal(audit.publicDigest,privateData.publicDigest);
+  assert.equal(audit.authoringModel,'gpt-6-astra');assert.equal(audit.total,800);
+ }
  const count=subject==='math'?100:150;assert.equal(data.questions.length,8*count);assert.equal(rows.size,data.questions.length);
  const ids=new Set(),prompts=new Set();
  for(const q of data.questions) {
@@ -27,6 +33,10 @@ for(const subject of ['math','english']) {
   assert.ok(!Object.keys(q).some(key=>['accepted','answer','answerText','explanation','rules'].includes(key)));
   assert.equal(q.inputs.length,1);assert.equal(q.inputs[0].id,'answer');assert.deepEqual(q.resultInputIds,['answer']);
   const row=rows.get(q.id);assert.ok(row?.explanation.trim().length>=25);assert.ok(row.accepted.length>0);
+  if(subject==='math') {
+   assert.equal(q.id,`MX-${q.chapter}-${String(q.number+200).padStart(3,'0')}`);
+   assert.equal(row.authoring?.model,'gpt-6-astra');
+  }
   if(q.kind==='选择题') {assert.equal(q.inputs[0].choices.length,4);assert.equal(new Set(q.inputs[0].choices).size,4);assert.ok(row.accepted.every(v=>q.inputs[0].choices.includes(v)));}
   else assert.equal(q.kind,'填空题');
   for(const answer of row.accepted) {assert.equal((await bank.extensionFeedback(subject,q.id,{answer})).outcome,'correct',q.id+' canonical result');acceptedChecked++;}

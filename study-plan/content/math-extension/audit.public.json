@@ -1,8 +1,11 @@
 {
   "version": 1,
   "subject": "math",
+  "revision": "astra-v2",
+  "authoringModel": "gpt-6-astra",
+  "reviewReasoning": "ultra",
   "total": 800,
-  "publicDigest": "d4394a84973bb6aa532d73e3e04e17be7bfbe28b234e10b13281c6a1094ff82f",
+  "publicDigest": "124dd6e7b65649755102ad26f587b10802dc29659721923da7e54b8fd35c3194",
   "collections": [
     {
       "collectionId": "chapter-0",

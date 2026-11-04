@@ -10,6 +10,8 @@ const recipient=await readFile(recipientFile,'utf8');
 const mathTitles=['学习准备 · 分数除法','01 · 小数乘法和除法（二）','02 · 混合运算与数量关系（三）','03 · 数与运算的再认识','04 · 比和比例','05 · 圆','06 · 放大与缩小','07 · 确定位置'];
 const englishTitles=JSON.parse(await readFile('content/english-six-knowledge/manifest.public.json','utf8')).units.map(u=>`Unit ${u.number} · ${u.title}`);
 const titles=subject==='math'?mathTitles:englishTitles,perChapter=subject==='math'?100:150;
+// Immutable question identities keep earlier attempts attached to their original questions.
+const idOffset=subject==='math'?200:0,revision=subject==='math'?'astra-v2':'v1';
 const root=path.join('content',subject+'-extension');
 const outputRoot=process.argv[4]??root;
 const questions=[],answers=[],collections=[],audits=[];
@@ -41,25 +43,28 @@ for(let chapter=0;chapter<8;chapter++) {
  for(const [index,row] of rows.entries()) {
   assert.equal(row.number,index+1);assert.ok(row.prompt?.trim());assert.ok(row.explanation?.trim().length>=25);assert.ok(row.answer?.trim());
   assert.ok(!prompts.has(row.prompt.replace(/\s+/g,'')),`Duplicate prompt ${chapter}/${row.number}`);prompts.add(row.prompt.replace(/\s+/g,''));
-  const id=`${subject==='math'?'MX':'EX'}-${chapter}-${String(row.number).padStart(3,'0')}`;
+  const id=`${subject==='math'?'MX':'EX'}-${chapter}-${String(idOffset+row.number).padStart(3,'0')}`;
   const choice=row.kind==='choice';
   if(choice) {assert.equal(row.options?.length,4);assert.equal(new Set(row.options).size,4);assert.match(row.answer,/^[A-D]$/);}
   else assert.equal(row.kind,'fill');
-  const choices=choice?row.options.map((text,i)=>`${'ABCD'[i]}. ${text}`):undefined;
-  const correct=choice?choices['ABCD'.indexOf(row.answer)]:row.answer;
+  const originalCorrect=choice?row.options['ABCD'.indexOf(row.answer)]:row.answer;
+  const ordered=choice?(subject==='math'?row.options.map((text,i)=>({text,key:createHash('sha256').update(`${id}:${i}`).digest('hex')})).sort((a,b)=>a.key.localeCompare(b.key)).map(item=>item.text):row.options):undefined;
+  const choices=ordered?.map((text,i)=>`${'ABCD'[i]}. ${text}`);
+  const correctIndex=choice?ordered.indexOf(originalCorrect):-1;
+  const correct=choice?choices[correctIndex]:row.answer;
   const question={id,collectionId,number:row.number,chapter,originalNumber:String(row.number),sourceName:'课内考试拓展原创练习',sourcePage:0,topic:subject==='english'?(choice?'语境综合选择':'语境综合填空'):row.topic,difficulty:row.number<=perChapter/2?3:4,kind:choice?'选择题':'填空题',prompt:row.prompt,questionImages:[],inputs:[{id:'answer',label:choice?'请选择正确答案':`第 1 空${row.unit?`（${row.unit}）`:''}`,kind:choice?'choice':'text',...(choices?{choices}:{})}],resultInputIds:['answer']};
-  questions.push(question);refs.push({id,number:row.number,difficulty:question.difficulty,topic:row.topic,kind:question.kind});
-  answers.push({id,accepted:choice?[correct]:[...new Set([row.answer,...(row.accepted??[])])],numeric:!choice&&row.numeric===true,...(!choice&&row.unit?{unit:row.unit}:{}),topic:row.topic,authoring:{pattern:row.pattern,...(row.coverage?{coverage:row.coverage}:{}),...(row.check?{check:row.check}:{})},explanation:row.explanation,answerText:choice?`正确选项：${row.answer}。${row.options['ABCD'.indexOf(row.answer)]}`:`正确答案：${row.answer}${row.unit??''}`});
+  questions.push(question);refs.push({id,number:row.number,difficulty:question.difficulty,topic:question.topic,kind:question.kind});
+  answers.push({id,accepted:choice?[correct]:[...new Set([row.answer,...(row.accepted??[])])],numeric:!choice&&row.numeric===true,...(!choice&&row.unit?{unit:row.unit}:{}),topic:row.topic,authoring:{pattern:row.pattern,...(subject==='math'?{model:'gpt-6-astra',reviewReasoning:'ultra'}:{}),...(row.coverage?{coverage:row.coverage}:{}),...(row.check?{check:row.check}:{})},explanation:row.explanation,answerText:choice?`正确选项：${'ABCD'[correctIndex]}。${originalCorrect}`:`正确答案：${row.answer}${row.unit??''}`});
  }
  audits.push({collectionId,questions:rows.length,choice:perChapter/2,fill:perChapter/2,distinctPatternLabels:new Set(rows.map(row=>row.pattern)).size,...(knowledgePointCount?{sourceKnowledgePoints:knowledgePointCount}:{})});
  const topics=[...new Set(rows.map(r=>r.topic))];
  collections.push({id:collectionId,title:titles[chapter],subtitle:`${perChapter/2} 道选择 · ${perChapter/2} 道填空 · ${topics.slice(0,6).join(' / ')+(topics.length>6?' 等'+topics.length+'项':'')}`,mode:'chapter',chapter,palette:chapter,questionCount:perChapter,difficultyCounts:{3:perChapter/2,4:perChapter/2},questions:refs});
 }
-const manifest={version:`${subject}-extension-v1`,total:questions.length,sourceFiles:0,collections};
+const manifest={version:`${subject}-extension-${revision}`,total:questions.length,sourceFiles:0,collections};
 const raw=JSON.stringify({version:1,subject,manifest,questions},null,2)+'\n';
 const privateData={version:1,subject,publicDigest:createHash('sha256').update(raw).digest('hex'),answers};
 await mkdir(outputRoot,{recursive:true});
 await writeFile(path.join(outputRoot,'questions.public.json'),raw);
 await writeFile(path.join(outputRoot,'answers.encrypted.json'),JSON.stringify(encryptEnglishSixKnowledge(privateData,recipient))+'\n');
-await writeFile(path.join(outputRoot,'audit.public.json'),JSON.stringify({version:1,subject,total:questions.length,publicDigest:privateData.publicDigest,collections:audits},null,2)+'\n');
+await writeFile(path.join(outputRoot,'audit.public.json'),JSON.stringify({version:1,subject,revision,...(subject==='math'?{authoringModel:'gpt-6-astra',reviewReasoning:'ultra'}:{}),total:questions.length,publicDigest:privateData.publicDigest,collections:audits},null,2)+'\n');
 console.log(JSON.stringify({subject,total:questions.length,collections:collections.length,privateAnswersEncrypted:true}));

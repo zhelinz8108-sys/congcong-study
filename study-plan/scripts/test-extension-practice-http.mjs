@@ -28,7 +28,7 @@ try {
   for(let chapter=0;chapter<8;chapter++) {
    const refs=[];
    for(let n=1;n<=count;n++) {
-    const id=`${subject==='math'?'MX':'EX'}-${chapter}-${String(n).padStart(3,'0')}`,choice=n<=count/2;
+    const id=`${subject==='math'?'MX':'EX'}-${chapter}-${String(n+200).padStart(3,'0')}`,choice=n<=count/2;
     const q={id,collectionId:`${subject==='math'?'chapter-'+chapter:'unit-'+(chapter+1)}`,number:n,chapter,originalNumber:String(n),sourceName:'Synthetic QA',sourcePage:0,topic:'Synthetic QA',difficulty:3,kind:choice?'选择题':'填空题',prompt:choice?'Choose the matching synthetic QA answer.':'Fill in the synthetic QA answer.',questionImages:[],inputs:[{id:'answer',label:choice?'请选择正确答案':'第1空',kind:choice?'choice':'text',...(choice?{choices:['A. half','B. whole','C. double','D. quarter']}:{})}],resultInputIds:['answer']};
     questions.push(q);refs.push({id,number:n,difficulty:3,topic:q.topic,kind:q.kind});
     answers.push({id,accepted:[choice?'A. half':subject==='math'?'1/2':'went'],numeric:!choice&&subject==='math',explanation:'Synthetic private explanation, released only after submission.',answerText:'Synthetic private result'});
@@ -48,7 +48,7 @@ try {
   const data=await response.json();return {response,data};
  }
  for(const subject of ['math','english']) {
-  const id=`${subject==='math'?'MX':'EX'}-0-001`;
+  const id=`${subject==='math'?'MX':'EX'}-0-201`;
   assert.equal((await call(subject,'questions/'+id,{auth:''})).response.status,401);
   const q=await call(subject,'questions/'+id);assert.equal(q.response.status,200);assert.equal(q.response.headers.get('cache-control'),'private, no-store');assert.ok(!JSON.stringify(q.data).includes('Synthetic private'));
   assert.equal((await call(subject,`feedback?subject_id=${subjectId}&question_id=${id}`)).response.status,403);
@@ -61,10 +61,10 @@ try {
   const submitted=await call(subject,'submit',{method:'POST',body:{...body,base_revision:draft.data.revision}});assert.equal(submitted.response.status,200);assert.equal(submitted.data.feedback.outcome,'correct');assert.ok(submitted.data.feedback.detailedSolution.steps[0].content.includes('Synthetic private'));
   assert.equal((await call(subject,'draft',{method:'PUT',body:{...body,base_revision:submitted.data.response.revision}})).response.status,409,'locked first attempt');
   assert.equal((await call(subject,'feedback?subject_id='+subjectId+'&question_id='+id)).response.status,200);
-  const wrongId=id.replace(/001$/, '002');
+  const wrongId=id.replace(/201$/, '202');
   const wrong=await call(subject,'submit',{method:'POST',body:{...body,question_id:wrongId,answers:{answer:'B. whole'},base_revision:0}});
   assert.equal(wrong.response.status,200);assert.equal(wrong.data.feedback.outcome,'incorrect');assert.ok(wrong.data.feedback.answerText);
-  const other=subject==='math'?'EX-0-001':'MX-0-001';assert.equal((await call(subject,'questions/'+other)).response.status,404);
+  const other=subject==='math'?'EX-0-201':'MX-0-201';assert.equal((await call(subject,'questions/'+other)).response.status,404);
   const progress=await call(subject,'progress?subject_id='+subjectId);assert.ok(Object.keys(progress.data.responses).every(id=>id.startsWith(subject==='math'?'MX-':'EX-')));
  }
  if(process.argv.includes('--browser')) {

@@ -2,7 +2,7 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { bankAccess, bankBody, bankFailure, bankHeaders, bankInputSchema, bankProfile, bankStudentAnswers, bankSubject } from "@/server/grade6-bank/http";
 import { bankBaseRevision, bankProgress, bankResponse, BankRevisionConflict, saveBankResponse, bankIsIsolatedTestMemory } from "@/server/grade6-bank/progress";
-import { extensionQuestion, extensionSubject, extensionFeedback, isExtensionQuestion } from "./bank";
+import { extensionQuestion, extensionSubject, extensionFeedback, extensionManifest } from "./bank";
 
 export async function extensionRead(request: NextRequest, rawSubject: string, action: string) {
   const denied = bankAccess(request); if (denied) return denied;
@@ -12,7 +12,9 @@ export async function extensionRead(request: NextRequest, rawSubject: string, ac
     const subjectId = bankSubject(request.nextUrl.searchParams.get("subject_id")), studentId = bankProfile(request).id;
     if (action === "progress") {
       const progress = await bankProgress(studentId, subjectId);
-      return NextResponse.json({...progress, responses:Object.fromEntries(Object.entries(progress.responses).filter(([id])=>isExtensionQuestion(subject,id))), lastQuestionId:isExtensionQuestion(subject,progress.lastQuestionId)?progress.lastQuestionId:""}, {headers:{...bankHeaders,...(bankIsIsolatedTestMemory()?{"X-Grade6-QA-Memory":"isolated"}:{})}});
+      // Keep historical attempts stored; expose only IDs in the active release.
+      const currentIds = new Set((await extensionManifest(subject)).collections.flatMap(collection=>collection.questions.map(question=>question.id)));
+      return NextResponse.json({...progress, responses:Object.fromEntries(Object.entries(progress.responses).filter(([id])=>currentIds.has(id))), lastQuestionId:currentIds.has(progress.lastQuestionId)?progress.lastQuestionId:""}, {headers:{...bankHeaders,...(bankIsIsolatedTestMemory()?{"X-Grade6-QA-Memory":"isolated"}:{})}});
     }
     const id = request.nextUrl.searchParams.get("question_id") ?? "";
     if (!await extensionQuestion(subject,id)) return NextResponse.json({error:"题目不存在"},{status:404,headers:bankHeaders});
