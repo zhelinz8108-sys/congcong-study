@@ -22,6 +22,26 @@ def reject(name, function):
         raise AssertionError(name)
 
 
+with tempfile.TemporaryDirectory() as apt_folder:
+    apt = Path(apt_folder)
+    (apt / 'pkgcache.bin').write_bytes(b'synthetic rebuildable binary index')
+    (apt / 'srcpkgcache.bin').write_bytes(b'synthetic source binary index')
+    (apt / 'sources.list').write_text('synthetic configuration must stay')
+    (apt / 'archives').mkdir(); (apt / 'archives/package.deb').write_bytes(b'kept')
+    released = helper.release_generated_apt_indexes(apt, os.getuid())
+    assert {row['file'] for row in released} == {'pkgcache.bin', 'srcpkgcache.bin'}
+    assert (apt / 'sources.list').is_file() and (apt / 'archives/package.deb').is_file()
+    assert helper.release_generated_apt_indexes(apt, os.getuid()) == []
+    checks.append('only-two-rebuildable-apt-indexes-released-idempotently')
+    target = apt / 'unrelated'; target.write_text('must stay')
+    (apt / 'pkgcache.bin').symlink_to(target)
+    reject('apt-cache-symlink-rejected', lambda: helper.release_generated_apt_indexes(apt, os.getuid()))
+    assert target.read_text() == 'must stay'
+    (apt / 'pkgcache.bin').unlink()
+    os.link(target, apt / 'pkgcache.bin')
+    reject('apt-cache-hardlink-rejected', lambda: helper.release_generated_apt_indexes(apt, os.getuid()))
+    assert target.read_text() == 'must stay'
+
 with tempfile.TemporaryDirectory() as folder:
     root = Path(folder)
     releases = root / 'releases'; archives = root / 'archives'

@@ -242,6 +242,34 @@ def relocate_npm_cache(data):
                          profile / 'relocation.json', 'ubuntu-npm-cacache', mutable=True)
 
 
+def release_generated_apt_indexes(cache=Path('/var/cache/apt'), owner_uid=0):
+    """Only APT's two rebuildable binary index accelerators, never its lists,
+    package database, configuration, application data or rollback artifacts."""
+    no_links(cache)
+    if not cache.is_dir():
+        return []
+    require(cache.stat().st_uid == owner_uid, 'Unexpected APT cache directory owner')
+    released = []
+    for name in ('pkgcache.bin', 'srcpkgcache.bin'):
+        target = cache / name
+        try:
+            info = target.lstat()
+        except FileNotFoundError:
+            continue
+        require(stat.S_ISREG(info.st_mode) and info.st_uid == owner_uid and info.st_nlink == 1, 'Unexpected APT index cache type or owner')
+        descriptor = os.open(target, os.O_RDONLY | os.O_NOFOLLOW)
+        try:
+            opened = os.fstat(descriptor)
+            current = target.lstat()
+            require((opened.st_dev, opened.st_ino, opened.st_uid, opened.st_nlink) == (info.st_dev, info.st_ino, owner_uid, 1) and (current.st_dev, current.st_ino) == (info.st_dev, info.st_ino), 'APT cache changed; leave it for its owner')
+            target.unlink()
+            released.append({'file': name, 'MiB': info.st_size // 1024**2})
+        finally:
+            os.close(descriptor)
+    sync_directory(cache)
+    return released
+
+
 def storage_diagnostics():
     """Only sizes and known release IDs, never private filenames or file text."""
     PROGRESS['phase'] = 'read-only-storage-diagnostics'
@@ -317,6 +345,11 @@ def main():
         if free < 4 * 1024**3 + largest + 64 * 1024**2:
             cache = relocate_npm_cache(DATA)
             free = shutil.disk_usage(RELEASES).free
+        apt_indexes = []
+        if free < 4 * 1024**3 + largest + 64 * 1024**2:
+            apt_indexes = release_generated_apt_indexes()
+            free = shutil.disk_usage(RELEASES).free
+        print('::notice title=Generated APT index cache::' + json.dumps({'released': apt_indexes}), flush=True)
         print('::notice title=Release storage::' + json.dumps({'rootFreeMiB': free // 1024**2, 'dataFreeMiB': shutil.disk_usage(DATA).free // 1024**2, 'stages': outcomes, 'npmDownloadCache': cache, 'requiredRootMiB': (4 * 1024**3 + largest + 64 * 1024**2 + 1024**2 - 1) // 1024**2, 'estimatedCodeMiB': largest // 1024**2}), flush=True)
         if free < 4 * 1024**3 + largest + 64 * 1024**2:
             storage_diagnostics()
