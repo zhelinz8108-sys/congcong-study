@@ -1,0 +1,37 @@
+name: Read encrypted extension authoring context
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/extension-authoring-context.yml
+permissions:
+  contents: read
+jobs:
+  context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read only the selected learning sources
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SERVER_SSH_KEY" > ~/.ssh/context_key
+          ssh-keyscan -p "$SERVER_PORT" "$SERVER_HOST" >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/context_key -p "$SERVER_PORT" -o BatchMode=yes -o ConnectTimeout=30 -o ServerAliveInterval=15 "$SERVER_USER@$SERVER_HOST" \
+            "sudo -n bash -c 'set -a; source /etc/study-plan.env; set +a; cd /www/study-plan; node --input-type=module'" \
+            < scripts/export-extension-authoring-context.mjs > "$RUNNER_TEMP/context.encrypted.json"
+          rm -f ~/.ssh/context_key
+          test -s "$RUNNER_TEMP/context.encrypted.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extension-authoring-context-encrypted
+          path: ${{ runner.temp }}/context.encrypted.json
+          retention-days: 1
