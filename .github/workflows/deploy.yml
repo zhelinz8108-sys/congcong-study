@@ -69,13 +69,13 @@ jobs:
           chmod 600 ~/.ssh/config
           ssh-keyscan -p "$SERVER_PORT" "$SERVER_HOST" >> ~/.ssh/known_hosts
 
-      - name: Preserve the reviewed older rollback in a verified private archive
+      - name: Preserve reviewed historical rollbacks with verified restoration
         shell: bash
         run: |
           set -euo pipefail
           compact_code="$(base64 -w0 scripts/compact-extension-rollback.py)"
           ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
-            "sudo -n python3 -u -c 'import base64;code=base64.b64decode(\"$compact_code\").decode();exec(compile(code,\"<compact-old-rollback>\",\"exec\"),{\"__name__\":\"__main__\",\"_SOURCE\":code})' --apply"
+            "sudo -n python3 -u -c 'import base64;code=base64.b64decode(\"$compact_code\").decode();exec(compile(code,\"<compact-old-rollback>\",\"exec\"),{\"__name__\":\"__main__\",\"_SOURCE\":code})' --apply-astra"
 
       - name: Archive only this task's unused failed stages with full verification
         shell: bash

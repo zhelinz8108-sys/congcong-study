@@ -135,4 +135,42 @@ with tempfile.TemporaryDirectory() as directory:
     else:
         raise AssertionError('linked parent accepted')
 
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); releases = root / 'releases'; releases.mkdir()
+    backups = root / 'backups'; backups.mkdir()
+    identity = helper.ASTRA_PROTECTED[0]
+    protected = fixture(releases, identity)
+    receipt_folder = backups / ('before-main-' + identity.removeprefix('previous-')); receipt_folder.mkdir()
+    receipt_path = receipt_folder / 'receipt.json'
+    receipt_path.write_text(json.dumps({'status': 'deployed', 'previousDirectory': str(protected), 'oldBuildId': 'synthetic-build'}))
+    with patch.object(helper, 'RELEASES', releases), patch.object(helper, 'BACKUPS', backups):
+        for free_values, expected in [
+            ([6], [helper.IDENTITY]),
+            ([3, 6], [helper.IDENTITY, helper.NEWER[0]]),
+            ([3, 4], [helper.IDENTITY, *helper.NEWER]),
+        ]:
+            with patch.object(helper, 'preserve_reviewed') as preserve, patch.object(helper.shutil, 'disk_usage', side_effect=[SimpleNamespace(free=n * 1024**3) for n in free_values]):
+                helper.preserve_astra_rollbacks(code)
+                assert [call.args[0] for call in preserve.call_args_list] == expected
+                assert identity not in expected
+        checks.append('astra-only-fixed-older-identities-until-five-gib-with-latest-rollback-protected')
+        (protected / '.next/BUILD_ID').write_text('unexpected-build')
+        with patch.object(helper, 'preserve_reviewed') as preserve:
+            try:
+                helper.preserve_astra_rollbacks(code)
+            except ValueError:
+                preserve.assert_not_called()
+            else:
+                raise AssertionError('protected rollback identity mismatch accepted')
+        (protected / '.next/BUILD_ID').write_text('synthetic-build')
+        receipt_path.write_text(json.dumps({'status': 'rolled-back', 'previousDirectory': str(protected), 'oldBuildId': 'synthetic-build'}))
+        with patch.object(helper, 'preserve_reviewed') as preserve:
+            try:
+                helper.preserve_astra_rollbacks(code)
+            except ValueError:
+                preserve.assert_not_called()
+            else:
+                raise AssertionError('unsuccessful protected receipt accepted')
+        checks.append('astra-requires-successful-receipt-and-protected-build-before-any-archive-write')
+
 print(json.dumps({'passed': True, 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))

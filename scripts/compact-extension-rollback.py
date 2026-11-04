@@ -1,6 +1,6 @@
-"""Retain one specifically reviewed old rollback as a verified private archive.
+"""Retain specifically reviewed old rollbacks as verified private archives.
 
-Never change the live application, either newer rollback, learning records,
+Never change the live application, protected rollback, learning records,
 uploads or independent media. Linked data is retained as links, not copied.
 """
 import argparse
@@ -23,8 +23,11 @@ import time
 IDENTITY = 'previous-bd75c1df88402a39f7ff88a4e56507a541d5fc84-40200576699-1'
 NEWER = ('previous-f475be68d01c429544df5293187e4c8c47be28c6-40205282115-1',
          'previous-22573b4752de26ff3dedfaa514ba419b0255bbb1-40207660100-1')
+ASTRA_PROTECTED = ('previous-dfcf0e39b482a4cb9c771aead8f5a4f7f1d91255-41812512169-1',)
+ASTRA_REQUIRED_FREE = 5 * 1024**3
 ARCHIVE_ROOT = Path('/www/study-plan-retained-compressed/extension-20261104')
 RELEASES = Path('/www/study-plan-releases')
+BACKUPS = Path('/www/study-plan-data/backups')
 
 
 def require(condition, message):
@@ -312,13 +315,56 @@ def recompress_retained(folder, manifest, helper_source):
         raise
 
 
+def reviewed_receipt(identity):
+    receipt = json.loads((BACKUPS / ('before-main-' + identity.removeprefix('previous-')) / 'receipt.json').read_text())
+    require(receipt['status'] == 'deployed' and receipt['previousDirectory'] == str(RELEASES / identity), 'Successful old-release receipt is required')
+    return receipt
+
+
+def preserve_reviewed(identity, source_code):
+    source = RELEASES / identity
+    receipt = reviewed_receipt(identity)
+    destination = ARCHIVE_ROOT / identity
+    if source.is_symlink():
+        require(source.readlink() == destination / 'RESTORE_REQUIRED.txt', 'Unexpected archive pointer')
+        archived_manifest = json.loads((destination / 'manifest.json').read_text())
+        require(archived_manifest['release'] == identity, 'Archive release identity differs')
+        verify_archive(destination, archived_manifest)
+        remove_retained_duplicate(RELEASES / ('.compacting-' + identity), archived_manifest)
+        recompress_retained(destination, archived_manifest, source_code)
+        print(json.dumps({'alreadyPreserved': True, 'archiveFormat': 'xz', 'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2}), flush=True)
+        return
+    inactive(source)
+    require((source / '.next/BUILD_ID').read_text().strip() == receipt['oldBuildId'], 'Old rollback build identity differs')
+    ARCHIVE_ROOT.mkdir(mode=0o700, exist_ok=True); ARCHIVE_ROOT.chmod(0o700); sync_directory(ARCHIVE_ROOT.parent)
+    result = compact(source, destination, source_code)
+    recompress_retained(destination, json.loads((destination / 'manifest.json').read_text()), source_code)
+    print(json.dumps({'preserved': result['restorationVerified'], 'files': result['files'], 'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2}), flush=True)
+
+
+def preserve_astra_rollbacks(source_code):
+    # Exact identities from the failed Astra deployment's read-only diagnosis.
+    # Keep the latest successful rollback immediately usable, with its receipt.
+    for identity in ASTRA_PROTECTED:
+        candidate = RELEASES / identity
+        require(candidate.is_dir() and not candidate.is_symlink(), 'Latest rollback directory must remain intact')
+        receipt = reviewed_receipt(identity)
+        require((candidate / '.next/BUILD_ID').read_text().strip() == receipt['oldBuildId'], 'Protected rollback build identity differs')
+    preserve_reviewed(IDENTITY, source_code)
+    for identity in NEWER:
+        if shutil.disk_usage(RELEASES).free >= ASTRA_REQUIRED_FREE:
+            break
+        preserve_reviewed(identity, source_code)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--apply', action='store_true')
+    parser.add_argument('--apply-astra', action='store_true')
     parser.add_argument('--verify', action='store_true')
     parser.add_argument('--restore')
     args = parser.parse_args()
-    require(sum([args.apply, args.verify, bool(args.restore)]) == 1, 'Select exactly one operation')
+    require(sum([args.apply, args.apply_astra, args.verify, bool(args.restore)]) == 1, 'Select exactly one operation')
     require(os.geteuid() == 0, 'Preserving file ownership requires root')
     if args.verify or args.restore:
         folder = Path(__file__).resolve().parent
@@ -337,32 +383,17 @@ def main():
         return
     no_links(RELEASES); no_links(ARCHIVE_ROOT)
     require(ARCHIVE_ROOT.parent.is_dir() and ARCHIVE_ROOT.parent.stat().st_uid == 0 and stat.S_IMODE(ARCHIVE_ROOT.parent.stat().st_mode) == 0o700, 'Existing private archive base must be root-owned mode 0700')
-    source = RELEASES / IDENTITY
-    for name in NEWER:
-        candidate = RELEASES / name
-        require(candidate.is_dir() and not candidate.is_symlink(), 'Both newer rollback directories must remain intact')
-    old_receipt = Path('/www/study-plan-data/backups/before-main-' + IDENTITY.removeprefix('previous-') + '/receipt.json')
-    receipt = json.loads(old_receipt.read_text())
-    require(receipt['status'] == 'deployed' and receipt['previousDirectory'] == str(source), 'Successful old-release receipt is required')
-    destination = ARCHIVE_ROOT / IDENTITY
     no_links(Path('/run/study-plan-release'))
     with open('/run/study-plan-release/lock', 'r+') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        if source.is_symlink():
-            require(source.readlink() == destination / 'RESTORE_REQUIRED.txt', 'Unexpected archive pointer')
-            archived_manifest = json.loads((destination / 'manifest.json').read_text())
-            verify_archive(destination, archived_manifest)
-            remove_retained_duplicate(RELEASES / ('.compacting-' + IDENTITY), archived_manifest)
-            source_code = globals().get('_SOURCE') or Path(__file__).read_text()
-            recompress_retained(destination, archived_manifest, source_code)
-            print(json.dumps({'alreadyPreserved': True, 'archiveFormat': 'xz', 'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2})); return
-        inactive(source)
-        require((source / '.next/BUILD_ID').read_text().strip() == receipt['oldBuildId'], 'Old rollback build identity differs')
-        ARCHIVE_ROOT.mkdir(mode=0o700, exist_ok=True); ARCHIVE_ROOT.chmod(0o700); sync_directory(ARCHIVE_ROOT.parent)
         source_code = globals().get('_SOURCE') or Path(__file__).read_text()
-        result = compact(source, destination, source_code)
-        recompress_retained(destination, json.loads((destination / 'manifest.json').read_text()), source_code)
-        print(json.dumps({'preserved': result['restorationVerified'], 'files': result['files'], 'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2}))
+        if args.apply_astra:
+            preserve_astra_rollbacks(source_code)
+        else:
+            for name in NEWER:
+                candidate = RELEASES / name
+                require(candidate.is_dir() and not candidate.is_symlink(), 'Both newer rollback directories must remain intact')
+            preserve_reviewed(IDENTITY, source_code)
 
 
 if __name__ == '__main__':
