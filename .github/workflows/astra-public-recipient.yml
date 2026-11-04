@@ -1,0 +1,39 @@
+name: Read public recipient for Astra math publication
+on:
+  push:
+    branches: [codex/astra-public-recipient]
+    paths: [.github/workflows/astra-public-recipient.yml]
+permissions:
+  contents: read
+jobs:
+  public-recipient:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read only the public encryption recipient
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '22' }}
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          work=$(mktemp -d)
+          trap 'rm -rf -- "$work"' EXIT
+          test "$SERVER_HOST" = 124.223.31.175
+          test "$SERVER_USER" = ubuntu
+          printf '%s\n' "$SERVER_SSH_KEY" > "$work/key"
+          printf '[%s]:%s ssh-ed25519 %s\n%s ssh-ed25519 %s\n' "$SERVER_HOST" "$SERVER_PORT" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' "$SERVER_HOST" 'AAAAC3NzaC1lZDI1NTE5AAAAILhHI4cyauQRPMvmv+cz69EU3Txi13IfojtfKuQs6Mka' > "$work/known_hosts"
+          ssh -i "$work/key" -p "$SERVER_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o HostKeyAlgorithms=ssh-ed25519 -o "UserKnownHostsFile=$work/known_hosts" -o ConnectTimeout=30 "$SERVER_USER@$SERVER_HOST" "sudo -n bash -c 'set -a; source /etc/study-plan.env; set +a; node --input-type=module'" > "$work/public.pem" <<'NODE'
+          import {createPrivateKey,createPublicKey,hkdfSync} from 'node:crypto';
+          const s=process.env.HOLIDAY_MATH_700_KEY?.trim();
+          if(!/^[a-f0-9]{64}$/i.test(s??'')) throw new Error('Content service configuration unavailable');
+          const seed=Buffer.from(hkdfSync('sha256',Buffer.from(s,'hex'),Buffer.from('english-six-knowledge-v1'),Buffer.from('x25519-private'),32));
+          const key=createPrivateKey({key:Buffer.concat([Buffer.from('302e020100300506032b656e04220420','hex'),seed]),format:'der',type:'pkcs8'});
+          seed.fill(0);
+          process.stdout.write(createPublicKey(key).export({format:'pem',type:'spki'}));
+          NODE
+          test "$(wc -c < "$work/public.pem")" -eq 113
+          cat "$work/public.pem"
