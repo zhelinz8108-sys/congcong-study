@@ -39,6 +39,7 @@ if [[ ${1:-} == --worker ]]; then
       build_check english-knowledge node scripts/test-english-six-knowledge-speech.mjs
       build_check english-knowledge node scripts/test-english-knowledge-speech.mjs
       build_check english-six-new-only node scripts/test-english-six-new-only.mjs
+      build_check extension-content node scripts/check-extension-practice-content.mjs
       build_check next-build npm run build -- --webpack
       ;;
     serve)
@@ -48,6 +49,7 @@ if [[ ${1:-} == --worker ]]; then
     verify)
       [[ $argument == 3001 || $argument == 3002 ]] || fail 'Invalid verification port.'
       /usr/bin/node scripts/check-release-version.mjs "$argument"
+      /usr/bin/node scripts/check-extension-practice-content.mjs "$argument"
       /usr/bin/node --input-type=module - "$argument" <<'NODE'
 import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';

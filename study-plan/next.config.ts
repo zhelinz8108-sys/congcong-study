@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
     parallelServerBuildTraces: false,
   } : undefined,
   outputFileTracingIncludes: {
+    "/api/extension-practice/**": ["./content/math-extension/questions.public.json", "./content/math-extension/answers.encrypted.json", "./content/english-extension/questions.public.json", "./content/english-extension/answers.encrypted.json"],
+    "/subjects/*/math/extension-bank*": ["./content/math-extension/questions.public.json"],
+    "/subjects/*/math/extension-bank/**": ["./content/math-extension/questions.public.json"],
+    "/subjects/*/english/extension-practice*": ["./content/english-extension/questions.public.json"],
+    "/subjects/*/english/extension-practice/**": ["./content/english-extension/questions.public.json"],
     "/subjects/*/english/six-knowledge*": ["./content/english-six-knowledge/manifest.public.json", "./content/english-six-knowledge/sealed/book.encrypted.json"],
     "/subjects/*/english/six-knowledge/**": ["./content/english-six-knowledge/manifest.public.json", "./content/english-six-knowledge/sealed/book.encrypted.json"],
     "/api/english/toefl-temp/**": ["./content/toefl-temp/audio/*.mp3"],
@@ -37,6 +42,8 @@ const nextConfig: NextConfig = {
   outputFileTracingExcludes: {
     "/api/english/six/**": ["./content/english-six/assets/**/*", "./content/english-six/ocr-work/**/*"],
     "/*": [
+      "./content/math-extension/research/**/*",
+      "./content/english-extension/research/**/*",
       "./content/english-six-knowledge/private/**/*",
       "./content/chinese-six/*.private.json",
       "./content/chinese-six/pages/**/*",

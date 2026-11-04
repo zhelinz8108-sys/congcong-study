@@ -8,6 +8,7 @@ import { bankCurrentAnswers, bankLegacyAnswerEntries } from "@/lib/grade6-bank-i
 import { bankDrawingCompleted, Grade6BankNative } from "./grade6-bank-native";
 import { Grade6BankSolution } from "./grade6-bank-solution";
 import styles from "./grade6-bank.module.css";
+import { MathText } from "./math-text";
 
 // Remaining legacy crops and post-submit private images must bypass the public
 // image optimizer/cache. Reviewed native questions do not display these crops.
@@ -126,21 +127,21 @@ function QuestionSession({ question, collection, position, count, progress, go }
   return <article className={styles.question} style={palette(collection.palette)}>
     <header className={styles.questionTop}><h2>第 {String(question.number).padStart(3, "0")} 题</h2><span className={styles.badge}>{BANK_DIFFICULTIES.find((d) => d.value === question.difficulty)?.label}</span></header>
     <div className={styles.questionBody}>
-      {question.resultInputIds && <p className={styles.note}>{choiceOnly ? "请选择正确答案，提交后查看判定和完整解析。" : "填写各小问的最终答案即可，分数与小数会自动按数值比较；计算过程和说明可选填，不参与判分。"}</p>}
+      {question.resultInputIds && <p className={styles.note}>{choiceOnly ? "请选择正确答案，提交后查看判定和完整解析。" : question.id.startsWith("EX-") ? "根据题目要求填写答案，注意词形和词数；提交后查看判定与解析。" : "填写各小问的最终答案即可，分数与小数会自动按数值比较；计算过程和说明可选填，不参与判分。"}</p>}
       {existing?.previousSubmission?.submitted && <p className={styles.note}>{locked ? "本题已调整为明确作答形式，本次答案已提交。原作答保留在下方。" : "本题已调整为明确作答形式。原作答保留在下方，请提交本次答案。"}</p>}
       {question.resultPartCounts && <p className={styles.note}>同一栏有多个结果时，请按题目顺序填写，用分号分隔。</p>}
       {question.native ? <Grade6BankNative content={question.native} inputs={question.inputs} answers={answers} disabled={busy || controlsDisabled} onChange={change} results={feedback?.fields} /> : <>
-      {question.questionImages.length ? question.questionImages.map((src, index) => <SourceImage key={src} src={src} alt={`第${question.number}题，第${index + 1}部分`} />) : <p className={styles.prompt}>{question.prompt}</p>}
+      {question.questionImages.length ? question.questionImages.map((src, index) => <SourceImage key={src} src={src} alt={`第${question.number}题，第${index + 1}部分`} />) : <p className={styles.prompt}>{question.id.startsWith("MX-") ? <MathText text={question.prompt} /> : question.prompt}</p>}
       <div className={styles.inputArea}>
         {question.inputs.map((field) => <div key={field.id} className={styles.field}>
           {question.inputs.length > 1 && <span>{field.label}</span>}
-          {field.kind === "choice" && field.choices?.length ? <div className={styles.choices} role="group" aria-label={field.label}>{field.choices.map((value) => <button key={value} type="button" className={styles.choice} aria-pressed={answers[field.id] === value} disabled={busy || controlsDisabled} onClick={() => change(field.id, value)}><b>{value}</b></button>)}</div> : /^第\s*\d+\s*空|算式的结果/.test(field.label) ? <input type="text" aria-label={field.label} value={answers[field.id] ?? ""} onChange={(e) => change(field.id, e.target.value)} disabled={busy || controlsDisabled} placeholder="答案" /> : <textarea aria-label={field.label} value={answers[field.id] ?? ""} onChange={(e) => change(field.id, e.target.value)} disabled={busy || controlsDisabled} rows={question.inputs.length > 1 ? 2 : 3} placeholder="作答" />}
+          {field.kind === "choice" && field.choices?.length ? <div className={styles.choices} role="group" aria-label={field.label}>{field.choices.map((value) => <button key={value} type="button" className={styles.choice} aria-pressed={answers[field.id] === value} disabled={busy || controlsDisabled} onClick={() => change(field.id, value)}><b>{question.id.startsWith("MX-") ? <MathText text={value} /> : value}</b></button>)}</div> : /^第\s*\d+\s*空|算式的结果/.test(field.label) ? <input type="text" aria-label={field.label} value={answers[field.id] ?? ""} onChange={(e) => change(field.id, e.target.value)} disabled={busy || controlsDisabled} placeholder="答案" /> : <textarea aria-label={field.label} value={answers[field.id] ?? ""} onChange={(e) => change(field.id, e.target.value)} disabled={busy || controlsDisabled} rows={question.inputs.length > 1 ? 2 : 3} placeholder="作答" />}
         </div>)}
       </div></>}
       {historicAnswers.length > 0 && <details className={styles.history}><summary>原作答记录</summary>{historicAnswers.map(([id, value]) => <p key={id}>{value}</p>)}</details>}
       {error && <p role="alert" className={styles.error}>{error}</p>}
       {feedback && <section className={styles.feedback} data-outcome={feedback.outcome} aria-live="polite">
-        <div className={styles.feedbackHeading}><span className={styles.feedbackIcon} aria-hidden="true">{resultIcon}</span><div><h3>{resultTitle}</h3>{(feedback.outcome === "correct" || feedback.outcome === "incorrect") && <p className={styles.feedbackRule}>{choiceOnly ? "只按所选答案判分。" : "只按最终答案判分，计算过程不参与评判。"}</p>}</div></div>
+        <div className={styles.feedbackHeading}><span className={styles.feedbackIcon} aria-hidden="true">{resultIcon}</span><div><h3>{resultTitle}</h3>{(feedback.outcome === "correct" || feedback.outcome === "incorrect") && <p className={styles.feedbackRule}>{choiceOnly ? "只按所选答案判分。" : question.id.startsWith("EX-") ? "按所填英语答案判分。" : "只按最终答案判分，计算过程不参与评判。"}</p>}</div></div>
         {feedback.message && <p>{feedback.message}</p>}
         {feedback.score !== null && <p>答对 {feedback.score} / {feedback.maxScore} 项</p>}
         {feedback.fields.length > 1 && <ul className={styles.fieldResults} aria-label="各项答案判定">{feedback.fields.map((field, index) => <li key={field.id} data-result={field.correct === true ? "correct" : field.correct === false ? "incorrect" : "review"}><span aria-hidden="true">{field.correct === true ? "✓" : field.correct === false ? "✗" : "…"}</span>{question.inputs.find(input => input.id === field.id)?.label ?? `第 ${index + 1} 项`}：{field.correct === true ? "正确" : field.correct === false ? "错误" : "待核验"}</li>)}</ul>}
@@ -152,11 +153,13 @@ function QuestionSession({ question, collection, position, count, progress, go }
   </article>;
 }
 
-export function Grade6BankPractice({ subjectId, collection, initialQuestionId }: { subjectId: string; collection: BankCollection; initialQuestionId?: string }) {
-  const progress = useGrade6BankProgress(subjectId);
+export function Grade6BankPractice({ subjectId, collection, initialQuestionId, extension }: { subjectId: string; collection: BankCollection; initialQuestionId?: string; extension?: { apiBase: string; storageNamespace: string; backHref: string; backLabel: string } }) {
+  const apiBase = extension?.apiBase ?? "/api/math/grade6-bank";
+  const progress = useGrade6BankProgress(subjectId, apiBase, extension?.storageNamespace);
+  const [kindFilter, setKindFilter] = useState("all");
   const [filter, setFilter] = useState("all"), [currentId, setCurrentId] = useState(initialQuestionId ?? collection.questions[0]?.id ?? "");
   const [loaded, setLoaded] = useState<{ id: string; question: BankQuestion } | null>(null), [loadError, setLoadError] = useState<{ id: string; message: string } | null>(null);
-  const questions = useMemo(() => collection.questions.filter((q) => filter === "all" || String(q.difficulty) === filter), [collection, filter]);
+  const questions = useMemo(() => collection.questions.filter((q) => (filter === "all" || String(q.difficulty) === filter) && (kindFilter === "all" || q.kind === kindFilter)), [collection, filter, kindFilter]);
   const position = Math.max(0, questions.findIndex((q) => q.id === currentId));
   const activeId = questions[position]?.id ?? "";
   const error = loadError?.id === activeId ? loadError.message : "";
@@ -164,16 +167,16 @@ export function Grade6BankPractice({ subjectId, collection, initialQuestionId }:
   useEffect(() => {
     if (!activeId) return;
     const controller = new AbortController(); let canceled = false;
-    void fetch(`/api/math/grade6-bank/questions/${encodeURIComponent(activeId)}`, { cache: "no-store", signal: controller.signal }).then(async (r) => { const data = await r.json(); if (!r.ok) throw new Error(data.error || "题目加载失败"); if (!canceled) { setLoaded({ id: activeId, question: data }); setLoadError(null); } }).catch((e) => { if (!canceled) setLoadError({ id: activeId, message: e instanceof Error ? e.message : "题目加载失败，请刷新重试" }); });
+    void fetch(`${apiBase}/questions/${encodeURIComponent(activeId)}`, { cache: "no-store", signal: controller.signal }).then(async (r) => { const data = await r.json(); if (!r.ok) throw new Error(data.error || "题目加载失败"); if (!canceled) { setLoaded({ id: activeId, question: data }); setLoadError(null); } }).catch((e) => { if (!canceled) setLoadError({ id: activeId, message: e instanceof Error ? e.message : "题目加载失败，请刷新重试" }); });
     const url = new URL(window.location.href); url.searchParams.set("q", activeId); window.history.replaceState(null, "", url);
     return () => { canceled = true; controller.abort(); };
-  }, [activeId]);
+  }, [activeId, apiBase]);
   const go = (offset: number) => { const next = questions[position + offset]; if (!next) return; void progress.flush(); setCurrentId(next.id); window.scrollTo({ top: 0, behavior: "smooth" }); };
   return <main className={styles.page} style={palette(collection.palette)}><div className={styles.practiceWrap}>
-    <Link className={styles.back} href={`/subjects/${subjectId}/math/problem-bank`}>← 返回题库目录</Link>
-    <header className={styles.practiceHeader}><h1>{collection.title}</h1></header>
+    <Link className={styles.back} href={extension?.backHref ?? `/subjects/${subjectId}/math/problem-bank`}>← {extension?.backLabel ?? "返回题库目录"}</Link>
+    <header className={styles.practiceHeader}><h1>{collection.title}</h1>{extension && <p>{collection.subtitle}</p>}</header>
     <section className={styles.overview} style={{ margin: "0 0 18px" }}><div className={styles.overviewTop}><div className={styles.stats}><span>已答<b>{progress.ready ? stats.answered : "—"} / {collection.questionCount}</b></span><span>答对<b>{progress.ready ? stats.correct : "—"}</b></span><span>正确率<b>{progress.ready && stats.accuracy !== null ? `${stats.accuracy}%` : "—"}</b></span>{stats.review > 0 && <span>待核验<b>{stats.review}</b></span>}</div>{progress.sync !== "saved" && <span className={styles.note} role="status">{syncText[progress.sync]}</span>}</div></section>
-    <div className={styles.tools}>{collection.mode === "chapter" ? <label className={styles.note}>练习层级 <select aria-label="练习层级" value={filter} onChange={(e) => { void progress.flush(); setFilter(e.target.value); setCurrentId(collection.questions.find((q) => e.target.value === "all" || String(q.difficulty) === e.target.value)?.id ?? ""); }}><option value="all">全部 · 从简单到难</option>{BANK_DIFFICULTIES.filter((d) => collection.difficultyCounts[d.value]).map((d) => <option key={d.value} value={d.value}>{d.label} · {collection.difficultyCounts[d.value]} 题</option>)}</select></label> : <span className={styles.note}>按原卷顺序练习</span>}<label className={styles.note}>题号 <select aria-label="跳转到题号" value={activeId} onChange={(e) => { void progress.flush(); setCurrentId(e.target.value); }}>{questions.map((q) => <option key={q.id} value={q.id}>第 {String(q.number).padStart(3, "0")} 题{progress.progress.responses[q.id]?.submitted ? " · 已答" : ""}</option>)}</select></label></div>
+    <div className={styles.tools}>{extension ? <label className={styles.note}>题目类型 <select aria-label="题目类型" value={kindFilter} onChange={(event) => { void progress.flush(); setKindFilter(event.target.value); setCurrentId(collection.questions.find(q => event.target.value === "all" || q.kind === event.target.value)?.id ?? ""); }}><option value="all">全部 · {collection.questionCount} 题</option>{["选择题", "填空题"].map(kind => <option key={kind} value={kind}>{kind} · {collection.questions.filter(q => q.kind === kind).length} 题</option>)}</select></label> : collection.mode === "chapter" ? <label className={styles.note}>练习层级 <select aria-label="练习层级" value={filter} onChange={(e) => { void progress.flush(); setFilter(e.target.value); setCurrentId(collection.questions.find((q) => e.target.value === "all" || String(q.difficulty) === e.target.value)?.id ?? ""); }}><option value="all">全部 · 从简单到难</option>{BANK_DIFFICULTIES.filter((d) => collection.difficultyCounts[d.value]).map((d) => <option key={d.value} value={d.value}>{d.label} · {collection.difficultyCounts[d.value]} 题</option>)}</select></label> : <span className={styles.note}>按原卷顺序练习</span>}<label className={styles.note}>题号 <select aria-label="跳转到题号" value={activeId} onChange={(e) => { void progress.flush(); setCurrentId(e.target.value); }}>{questions.map((q) => <option key={q.id} value={q.id}>第 {String(q.number).padStart(3, "0")} 题{extension ? ` · ${q.kind}` : ""}{progress.progress.responses[q.id]?.submitted ? " · 已答" : ""}</option>)}</select></label></div>
     {error ? <div role="alert" className={styles.error}>{error} <button onClick={() => window.location.reload()}>重新加载</button></div> : !progress.ready || loaded?.id !== activeId ? <div className={styles.loading}>正在准备这道题…</div> : <QuestionSession key={activeId} question={loaded.question} collection={collection} position={position} count={questions.length} progress={progress} go={go} />}
   </div></main>;
 }

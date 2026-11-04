@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "subject": "english",
+  "total": 1200,
+  "publicDigest": "a311b16e4b06b2167058556870bd6b6d7aa35706cc660d1de61e24cb1c888b71",
+  "collections": [
+    {
+      "collectionId": "unit-1",
+      "questions": 150,
+      "choice": 75,
+      "fill": 75,
+      "distinctPatternLabels": 150,
+      "sourceKnowledgePoints": 77
+    },
+    {
+      "collectionId": "unit-2",
+      "questions": 150,
+      "choice": 75,
+      "fill": 75,
+      "distinctPatternLabels": 150,
+      "sourceKnowledgePoints": 73
+    },
+    {
+      "collectionId": "unit-3",
+      "questions": 150,
+      "choice": 75,
+      "fill": 75,
+      "distinctPatternLabels": 150,
+      "sourceKnowledgePoints": 134
+    },
+    {
+      "collectionId": "unit-4",
+      "questions": 150,
+      "choice": 75,
+      "fill": 75,
+      "distinctPatternLabels": 150,
+      "sourceKnowledgePoints": 80
+    },
+    {
+      "collectionId": "unit-5",
+      "questions": 150,
+      "choice": 75,
+      "fill": 75,
+      "distinctPatternLabels": 150,
+      "sourceKnowledgePoints": 147
+    },
+    {
+      "collectionId": "unit-6",
+      "questions": 150,
+      "choice": 75,
+      "fill": 75,
+      "distinctPatternLabels": 150,
+      "sourceKnowledgePoints": 122
+    },
+    {
+      "collectionId": "unit-7",
+      "questions": 150,
+      "choice": 75,
+      "fill": 75,
+      "distinctPatternLabels": 150,
+      "sourceKnowledgePoints": 83
+    },
+    {
+      "collectionId": "unit-8",
+      "questions": 150,
+      "choice": 75,
+      "fill": 75,
+      "distinctPatternLabels": 150,
+      "sourceKnowledgePoints": 103
+    }
+  ]
+}

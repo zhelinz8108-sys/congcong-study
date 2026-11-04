@@ -79,3 +79,7 @@ study-plan/scripts/review-english-six-quality.mjs
 study-plan/.next-six-qa/
 study-plan/content/chinese-six/*.private.json
 study-plan/content/chinese-six/pages/
+
+# Extension authoring work contains plaintext answer keys; publish sealed releases only.
+study-plan/content/math-extension/research/
+study-plan/content/english-extension/research/

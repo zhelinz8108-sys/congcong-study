@@ -794,6 +794,9 @@ export default function SubjectPage() {
             </div>
             <span aria-hidden="true">→</span>
           </Link>
+          <Link href={`/subjects/${id}/english/extension-practice`} className="mt-4 flex items-center justify-between gap-3 rounded-lg border-2 border-teal-200 bg-teal-50 px-5 py-5 text-teal-900 transition-colors hover:bg-teal-100">
+            <div><h2 className="text-2xl font-bold">拓展练习</h2><p className="mt-1 text-sm">六上 Unit 1–8 · 每单元 150 题 · 选择与填空 · 提交后看解析</p></div><span aria-hidden="true">→</span>
+          </Link>
           </div>
 
           {/* 右侧：单词 / 词组学习 */}
@@ -1105,6 +1108,9 @@ export default function SubjectPage() {
               </div>
               <span className="text-stone-400">→</span>
             </div>
+          </Link>
+          <Link href={`/subjects/${id}/math/extension-bank`} className="block rounded-2xl border border-amber-200 bg-amber-50/60 p-5 shadow-sm transition-colors hover:bg-amber-100/60" style={{ borderLeftWidth: 4, borderLeftColor: '#b87835' }}>
+            <div className="flex items-center justify-between gap-4"><div><h2 className="text-2xl font-bold text-stone-900">拓展题库</h2><p className="mt-1 text-sm leading-6 text-stone-500">六上 8 个章节 · 每章 100 题 · 选择与填空 · 提交后看解析</p></div><span aria-hidden="true" className="text-amber-600">→</span></div>
           </Link>
         </div>
       )}

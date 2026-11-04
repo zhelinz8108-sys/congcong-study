@@ -47,8 +47,8 @@ export function normalizeBankProgress(raw: unknown): BankProgress {
   return result;
 }
 
-export function useGrade6BankProgress(subjectId: string) {
-  const key = "study-plan-grade6-bank-v1:" + subjectId;
+export function useGrade6BankProgress(subjectId: string, apiBase = "/api/math/grade6-bank", storageNamespace = "study-plan-grade6-bank-v1") {
+  const key = storageNamespace + ":" + subjectId;
   const [progress, setProgress] = useState<BankProgress>(blank), [ready, setReady] = useState(false);
   const [sync, setSync] = useState<"loading" | "saved" | "saving" | "offline" | "conflict" | "legacy">("loading");
   const state = useRef<BankProgress>(blank()), alive = useRef(false), scope = useRef(0);
@@ -154,7 +154,7 @@ export function useGrade6BankProgress(subjectId: string) {
         // after a rejected PUT. This GET never contains teacher answers.
         let question = schemas.current.get(questionId);
         if (!question) {
-          const response = await fetch("/api/math/grade6-bank/questions/" + encodeURIComponent(questionId), { cache: "no-store", signal: AbortSignal.timeout(15000) });
+          const response = await fetch(apiBase + "/questions/" + encodeURIComponent(questionId), { cache: "no-store", signal: AbortSignal.timeout(15000) });
           if (scope.current !== scopeVersion) return;
           if (response.status === 410) { pauseRetired(questionId); return; }
           if (!response.ok) throw new Error("Question schema unavailable");
@@ -170,7 +170,7 @@ export function useGrade6BankProgress(subjectId: string) {
         const current = state.current.responses[questionId]; if (!current) return;
         const answers = { ...current.answers }, edit = edits.current.get(questionId) ?? 0;
         const baseRevision = current.baseRevision ?? current.revision;
-        const result = await fetch("/api/math/grade6-bank/draft", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject_id: subjectId, question_id: questionId, answers, base_revision: baseRevision, ...(question.native ? { input_schema: bankNativeInputSchema(question) } : {}) }), cache: "no-store", keepalive: true, signal: AbortSignal.timeout(15000) });
+        const result = await fetch(apiBase + "/draft", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject_id: subjectId, question_id: questionId, answers, base_revision: baseRevision, ...(question.native ? { input_schema: bankNativeInputSchema(question) } : {}) }), cache: "no-store", keepalive: true, signal: AbortSignal.timeout(15000) });
         const data = await result.json();
         if (scope.current !== scopeVersion) return;
         if (result.status === 410) { pauseRetired(questionId); return; }
@@ -188,7 +188,7 @@ export function useGrade6BankProgress(subjectId: string) {
     // Rejections keep dirty data and cannot break the serial write queue.
     queue.current = task.then(() => undefined, () => undefined);
     return task;
-  }, [subjectId, accept, keepConflict, pauseLegacy, pauseRetired, status]);
+  }, [apiBase, subjectId, accept, keepConflict, pauseLegacy, pauseRetired, status]);
   const flush = useCallback(() => {
     for (const timer of timers.current.values()) clearTimeout(timer);
     timers.current.clear();
@@ -233,7 +233,7 @@ export function useGrade6BankProgress(subjectId: string) {
       await previous;
       try {
         if (canceled) return;
-        const response = await fetch("/api/math/grade6-bank/progress?subject_id=" + encodeURIComponent(subjectId), { cache: "no-store", signal: AbortSignal.timeout(15000) });
+        const response = await fetch(apiBase + "/progress?subject_id=" + encodeURIComponent(subjectId), { cache: "no-store", signal: AbortSignal.timeout(15000) });
         if (!response.ok) throw new Error("Progress sync failed");
         const remote = normalizeBankProgress(await response.json());
         if (canceled) return;
@@ -286,7 +286,7 @@ export function useGrade6BankProgress(subjectId: string) {
       activeTimers.clear();
       document.removeEventListener("visibilitychange", visibility); window.removeEventListener("online", online); window.removeEventListener("pagehide", leave);
     };
-  }, [key, subjectId, mirror, flush, status]);
+  }, [key, apiBase, subjectId, mirror, flush, status]);
 
   const draft = useCallback((id: string, answers: BankAnswers) => {
     if (pausedRetired.current.has(id)) return;
@@ -335,7 +335,7 @@ export function useGrade6BankProgress(subjectId: string) {
       if (alive.current) setSync(conflicts.current.size ? "conflict" : "saving");
       try {
         const question = schemas.current.get(questionId);
-        const result = await fetch("/api/math/grade6-bank/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject_id: subjectId, question_id: questionId, answers, base_revision: baseRevision, ...(question?.native ? { input_schema: bankNativeInputSchema(question) } : {}) }), cache: "no-store", signal: AbortSignal.timeout(30000) });
+        const result = await fetch(apiBase + "/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject_id: subjectId, question_id: questionId, answers, base_revision: baseRevision, ...(question?.native ? { input_schema: bankNativeInputSchema(question) } : {}) }), cache: "no-store", signal: AbortSignal.timeout(30000) });
         const data = await result.json();
         if (scope.current !== scopeVersion) throw new Error("页面已切换，提交结果将从云端重新读取。");
         if (result.status === 410) { pauseRetired(questionId); throw new Error(retiredMessage); }
@@ -363,17 +363,17 @@ export function useGrade6BankProgress(subjectId: string) {
     });
     queue.current = task.then(() => undefined, () => undefined);
     return task;
-  }, [subjectId, flush, draft, remember, keepConflict, accept, pauseRetired, status]);
+  }, [apiBase, subjectId, flush, draft, remember, keepConflict, accept, pauseRetired, status]);
   const getResponse = useCallback((id: string) => state.current.responses[id], []);
   const getLegacyAnswers = useCallback((id: string) => legacyHistory.current[id] ?? {}, []);
   const feedback = useCallback(async (questionId: string): Promise<BankFeedback> => {
-    const response = await fetch(`/api/math/grade6-bank/feedback?subject_id=${encodeURIComponent(subjectId)}&question_id=${encodeURIComponent(questionId)}`, { cache: "no-store", signal: AbortSignal.timeout(30000) });
+    const response = await fetch(`${apiBase}/feedback?subject_id=${encodeURIComponent(subjectId)}&question_id=${encodeURIComponent(questionId)}`, { cache: "no-store", signal: AbortSignal.timeout(30000) });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "解析读取失败");
     const saved = normalizeBankProgress({ responses: { [questionId]: result.response } }).responses[questionId];
     if (!locked(saved)) throw new Error("尚未提交");
     keepConflict(questionId, saved, false);
     return result.feedback as BankFeedback;
-  }, [subjectId, keepConflict]);
+  }, [apiBase, subjectId, keepConflict]);
   return { progress, ready, sync, draft, submit, feedback, flush, getResponse, getLegacyAnswers, observeQuestion };
 }

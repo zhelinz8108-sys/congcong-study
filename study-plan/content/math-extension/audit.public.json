@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "subject": "math",
+  "total": 800,
+  "publicDigest": "d4394a84973bb6aa532d73e3e04e17be7bfbe28b234e10b13281c6a1094ff82f",
+  "collections": [
+    {
+      "collectionId": "chapter-0",
+      "questions": 100,
+      "choice": 50,
+      "fill": 50,
+      "distinctPatternLabels": 100
+    },
+    {
+      "collectionId": "chapter-1",
+      "questions": 100,
+      "choice": 50,
+      "fill": 50,
+      "distinctPatternLabels": 100
+    },
+    {
+      "collectionId": "chapter-2",
+      "questions": 100,
+      "choice": 50,
+      "fill": 50,
+      "distinctPatternLabels": 100
+    },
+    {
+      "collectionId": "chapter-3",
+      "questions": 100,
+      "choice": 50,
+      "fill": 50,
+      "distinctPatternLabels": 100
+    },
+    {
+      "collectionId": "chapter-4",
+      "questions": 100,
+      "choice": 50,
+      "fill": 50,
+      "distinctPatternLabels": 100
+    },
+    {
+      "collectionId": "chapter-5",
+      "questions": 100,
+      "choice": 50,
+      "fill": 50,
+      "distinctPatternLabels": 100
+    },
+    {
+      "collectionId": "chapter-6",
+      "questions": 100,
+      "choice": 50,
+      "fill": 50,
+      "distinctPatternLabels": 100
+    },
+    {
+      "collectionId": "chapter-7",
+      "questions": 100,
+      "choice": 50,
+      "fill": 50,
+      "distinctPatternLabels": 100
+    }
+  ]
+}
