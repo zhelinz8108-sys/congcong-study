@@ -128,10 +128,10 @@ def extract_archive(archive, directory, names=None):
 
 
 def verify_archive(folder, manifest):
-    """Actually unpack and verify every entry, reclaiming each scratch file.
+    """Fully decompress and hash every file, then verify restored metadata.
 
     GNU tar separately restores every xattr/ACL-bearing entry and hard-link
-    group. Verification therefore needs the largest file, not a second tree.
+    group. Plain file bytes stream through SHA-256 without a disk-sized copy.
     """
     archive = folder / manifest.get('archiveFile', 'archive.tar.gz')
     require(archive.name in ('archive.tar.gz', 'archive.tar.xz', 'archive.tar.xz.pending'), 'Unexpected retained archive name')
@@ -156,7 +156,7 @@ def verify_archive(folder, manifest):
                         continue
                     if member.isfile():
                         require(member.size == expected['size'], 'Archive size differs; original is retained')
-                        require(shutil.disk_usage(folder).free >= member.size + 512 * 1024**2, 'Insufficient scratch for largest file; original is retained')
+                        require(shutil.disk_usage(folder).free >= 512 * 1024**2, 'Insufficient verification headroom; original is retained')
                     if member.issym():
                         require(member.linkname == expected['link'], 'Archive link differs; original is retained')
                     special = bool(expected['xattrs']) or any('xattr' in key or key.startswith('SCHILY.acl.') or key == 'RHT.security.selinux' for key in member.pax_headers)
@@ -164,8 +164,14 @@ def verify_archive(folder, manifest):
                         selected.add(name)
                     sample = temporary / 'entry'
                     if member.isfile():
-                        with contents.extractfile(member) as input_stream, sample.open('xb') as output:
-                            shutil.copyfileobj(input_stream, output, 1024 * 1024)
+                        checksum = hashlib.sha256(); byte_count = 0
+                        with contents.extractfile(member) as input_stream:
+                            while chunk := input_stream.read(1024 * 1024):
+                                checksum.update(chunk); byte_count += len(chunk)
+                        require(byte_count == expected['size'] and checksum.hexdigest() == expected['sha256'], 'Decompressed file differs; original is retained')
+                        # The exact bytes were verified above. Use a zero-byte
+                        # probe for filesystem ownership, mode and timestamps.
+                        sample.touch(exist_ok=False)
                     elif member.isdir():
                         sample.mkdir(mode=0o700)
                     else:
@@ -176,6 +182,8 @@ def verify_archive(folder, manifest):
                     os.utime(sample, ns=(mtime, mtime), follow_symlinks=False)
                     restored = entry_record(sample)
                     fields = set(expected) - ({'xattrs'} if special else set())
+                    if member.isfile():
+                        fields -= {'size', 'sha256'}
                     require(all(restored[key] == expected[key] for key in fields), 'Unpacked entry differs; original is retained')
                     if sample.is_dir() and not sample.is_symlink():
                         sample.rmdir()
@@ -223,20 +231,31 @@ def compact(source, destination, helper_source):
         # This exact earlier failure produced only an incomplete generated
         # archive. The intact original was never renamed or released.
         require(destination.is_dir() and not destination.is_symlink() and stat.S_IMODE(destination.stat().st_mode) == 0o700 and destination.stat().st_uid == os.geteuid(), 'Unexpected previous attempt; retain all copies')
-        require({entry.name for entry in destination.iterdir()} == {'archive.tar.gz'}, 'A complete or ambiguous archive must be retained')
+        names = {entry.name for entry in destination.iterdir()}
+        if names == {'archive.tar.gz', 'manifest.json', 'restore.py', 'RESTORE_REQUIRED.txt'}:
+            # A failed verification retained the full original and archive.
+            # Resume only when the complete recorded source is still identical.
+            for entry in destination.iterdir():
+                info = entry.lstat()
+                require(stat.S_ISREG(info.st_mode) and info.st_uid == os.geteuid() and info.st_nlink == 1, 'Unexpected pending archive entry; retain all copies')
+            manifest = json.loads((destination / 'manifest.json').read_text())
+            require(manifest['release'] == source.name and manifest['files'] == before, 'Pending archive source differs; retain all copies')
+            verify_archive(destination, manifest)
+            replace_private(destination / 'restore.py', helper_source, 0o700)
+            return finalize_compaction(source, destination, before, manifest)
+        require(names == {'archive.tar.gz'}, 'A complete or ambiguous archive must be retained')
         partial = destination / 'archive.tar.gz'; metadata = partial.lstat()
         require(stat.S_ISREG(metadata.st_mode) and metadata.st_uid == os.geteuid() and metadata.st_nlink == 1 and stat.S_IMODE(metadata.st_mode) == 0o600, 'Unexpected partial archive; retain all copies')
         partial.unlink(); destination.rmdir(); sync_directory(destination.parent)
-    largest = max(item['size'] for item in before.values())
     free = shutil.disk_usage(source).free
-    require(free >= largest + 768 * 1024**2, 'Insufficient scratch space to verify largest file')
+    require(free >= 768 * 1024**2, 'Insufficient archive verification headroom')
     destination.mkdir(mode=0o700)
     archive = destination / 'archive.tar.gz'
     with archive.open('xb') as out:
         os.chmod(archive, 0o600)
         process = subprocess.Popen(['tar', '--create', '--format=pax', '--numeric-owner', '--xattrs', '--acls', '--selinux', '-I', 'gzip -1', '--file', '-', '--directory', str(source), '.'], stdout=out, stderr=subprocess.DEVNULL)
         while process.poll() is None:
-            if archive.stat().st_size > free - largest - 512 * 1024**2:
+            if archive.stat().st_size > free - 512 * 1024**2:
                 process.terminate(); process.wait()
                 raise ValueError('Compression did not leave safe verification space; original is retained')
             time.sleep(1)
@@ -250,6 +269,11 @@ def compact(source, destination, helper_source):
     write_private(instructions, 'Full rollback is preserved in archive.tar.gz. Verify: python3 restore.py --verify\nRestore to a NEW private directory: python3 restore.py --restore /absolute/new-directory\nThis does not activate the app or restore a database. Never use this archive pointer as an application directory.\n')
     sync_directory(destination); sync_directory(destination.parent)
     verify_archive(destination, manifest)
+    return finalize_compaction(source, destination, before, manifest)
+
+
+def finalize_compaction(source, destination, before, manifest):
+    instructions = destination / 'RESTORE_REQUIRED.txt'
     require(snapshot(source) == before, 'Source changed during verification; retain both copies')
     pending = source.parent / ('.compacting-' + source.name)
     require(not os.path.lexists(pending), 'An interrupted compaction requires review; retain all copies')
@@ -284,7 +308,7 @@ def recompress_retained(folder, manifest, helper_source):
     require(original.name == 'archive.tar.gz' and digest(original) == manifest['archiveSha256'], 'Original archive differs')
     pending = folder / 'archive.tar.xz.pending'
     require(not os.path.lexists(pending) and not (folder / 'archive.tar.xz').exists(), 'An interrupted recompression requires review')
-    reserve = max(row['size'] for row in manifest['files'].values()) + 512 * 1024**2
+    reserve = 512 * 1024**2
     try:
         with gzip.open(original, 'rb') as incoming, pending.open('xb') as raw_output:
             pending.chmod(0o600)

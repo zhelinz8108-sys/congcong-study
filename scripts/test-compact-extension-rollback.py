@@ -127,6 +127,55 @@ with tempfile.TemporaryDirectory() as directory:
     assert source.is_symlink() and json.loads((destination / 'manifest.json').read_text())['files'] == before
     checks.append('only-unverified-generated-partial-is-rebuilt-with-original-intact')
 
+    source = fixture(root, 'streaming-verification')
+    (source / 'large-plain-file').write_bytes(b'complete decompressed content\n' * 150000)
+    before = helper.snapshot(source)
+    destination = root / 'streaming-archive'
+    # Reproduce a verification failure after metadata was written, before
+    # any rename, then resume that exact archive with the source unchanged.
+    with patch.object(helper, 'verify_archive', side_effect=ValueError('synthetic insufficient scratch')):
+        try:
+            helper.compact(source, destination, code)
+        except ValueError:
+            assert helper.snapshot(source) == before
+        else:
+            raise AssertionError('failed verification should preserve source')
+    archive_sha = helper.digest(destination / 'archive.tar.gz')
+    with patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=512 * 1024**2 + 65536)):
+        helper.compact(source, destination, code)
+    assert source.is_symlink() and helper.digest(destination / 'archive.tar.gz') == archive_sha
+    manifest = json.loads((destination / 'manifest.json').read_text())
+    restored = root / 'streaming-restored'; restored.mkdir(mode=0o700)
+    helper.extract_archive(destination / 'archive.tar.gz', restored)
+    assert helper.snapshot(restored) == before
+    checks.append('large-plain-file-fully-verified-without-file-sized-scratch-and-restored-exactly')
+    checks.append('failed-verification-resumes-same-archive-only-with-identical-intact-source')
+    altered = {**manifest, 'files': {name: dict(row) for name, row in manifest['files'].items()}}
+    altered['files']['large-plain-file']['sha256'] = '0' * 64
+    try:
+        helper.verify_archive(destination, altered)
+    except ValueError:
+        checks.append('streaming-verification-rejects-wrong-decompressed-content-hash')
+    else:
+        raise AssertionError('decompressed content mismatch accepted')
+
+    source = fixture(root, 'pending-changed-source')
+    destination = root / 'pending-changed-archive'
+    with patch.object(helper, 'verify_archive', side_effect=ValueError('synthetic verification interruption')):
+        try:
+            helper.compact(source, destination, code)
+        except ValueError:
+            pass
+    (source / '资料.txt').write_text('a later legitimate update')
+    changed = helper.snapshot(source)
+    try:
+        helper.compact(source, destination, code)
+    except ValueError:
+        assert helper.snapshot(source) == changed and not source.is_symlink()
+        checks.append('pending-archive-retry-refuses-changed-source-and-retains-both')
+    else:
+        raise AssertionError('changed pending source accepted')
+
     link = root / 'linked-parent'; link.symlink_to(root, target_is_directory=True)
     try:
         helper.no_links(link / 'child')
