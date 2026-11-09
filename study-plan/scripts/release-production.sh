@@ -40,6 +40,7 @@ if [[ ${1:-} == --worker ]]; then
       build_check english-knowledge node scripts/test-english-knowledge-speech.mjs
       build_check english-six-new-only node scripts/test-english-six-new-only.mjs
       build_check extension-content node scripts/check-extension-practice-content.mjs
+      build_check dated-listening node scripts/test-dated-listening-api.mjs
       build_check next-build npm run build -- --webpack
       ;;
     serve)
@@ -71,11 +72,22 @@ const payload = `v1.${Date.now() + 30 * 60 * 1000}`;
 const token = `${payload}.${createHmac('sha256', secret).update(payload).digest('base64url')}`;
 const headers = {Cookie: `congcong_family_access=${token}`};
 for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chinese/six',
-  '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank']) {
+  '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank',
+  '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/listening/2026-11-09']) {
   const response = await fetch(`${base}${route}`, {headers, signal: AbortSignal.timeout(20000)});
   assert.equal(response.status, 200, route);
   await response.arrayBuffer();
 }
+// Loading the dated listening collection never initializes it or writes records.
+const datedListening = `${base}/api/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/listening/2026-11-09`;
+const datedResponse = await fetch(datedListening, {headers, signal: AbortSignal.timeout(10000)});
+assert.equal(datedResponse.status, 200);
+assert.ok(datedResponse.headers.get('cache-control')?.includes('no-store'));
+const datedData = await datedResponse.json();
+assert.match(datedData.unitId, /^[a-f0-9-]{36}$/);
+assert.ok(Array.isArray(datedData.materials));
+console.log(`Dated listening read-only verification passed: ${datedData.materials.length} files.`);
+assert.equal((await fetch(datedListening, {signal: AbortSignal.timeout(10000)})).status, 401);
 // Exercise the compiled public question route with both assessment forms.
 // These authenticated GETs never create drafts or learner submissions.
 const { loadHolidayTestModule } = await import(pathToFileURL(path.resolve('scripts/holiday-math-test-utils.mjs')));

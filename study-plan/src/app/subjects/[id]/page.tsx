@@ -785,6 +785,16 @@ export default function SubjectPage() {
             })}
           </div>
           <Link
+            href={`/subjects/${id}/listening/2026-11-09`}
+            className="mt-5 flex items-center justify-between gap-3 rounded-lg border-2 border-amber-200 bg-amber-50 px-5 py-5 text-amber-900 transition-colors hover:bg-amber-100"
+          >
+            <div>
+              <h2 className="text-2xl font-bold">11月9日听力</h2>
+              <p className="mt-1 text-sm">音频播放 · 听力题目与资料</p>
+            </div>
+            <span aria-hidden="true">→</span>
+          </Link>
+          <Link
             href={`/subjects/${id}/english/six`}
             className="mt-5 flex items-center justify-between gap-3 rounded-lg border-2 border-emerald-200 bg-white px-5 py-5 text-emerald-900 transition-colors hover:bg-emerald-50"
           >
