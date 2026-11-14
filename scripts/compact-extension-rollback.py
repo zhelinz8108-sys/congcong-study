@@ -367,6 +367,13 @@ def preserve_reviewed(identity, source_code):
 
 
 def preserve_astra_rollbacks(source_code):
+    # This is storage preparation, not the new release's backup/health check.
+    # Do not touch or require historical archives when there is already room.
+    free = shutil.disk_usage(RELEASES).free
+    print(json.dumps({'rootFreeMiB': free // 1024**2, 'archiveThresholdMiB': ASTRA_REQUIRED_FREE // 1024**2}), flush=True)
+    if free >= ASTRA_REQUIRED_FREE:
+        print(json.dumps({'archivingNeeded': False, 'historicalCopiesChanged': False}), flush=True)
+        return
     # Exact identities from the failed Astra deployment's read-only diagnosis.
     # Keep the latest successful rollback immediately usable, with its receipt.
     for identity in ASTRA_PROTECTED:

@@ -194,9 +194,10 @@ with tempfile.TemporaryDirectory() as directory:
     receipt_path.write_text(json.dumps({'status': 'deployed', 'previousDirectory': str(protected), 'oldBuildId': 'synthetic-build'}))
     with patch.object(helper, 'RELEASES', releases), patch.object(helper, 'BACKUPS', backups):
         for free_values, expected in [
-            ([6], [helper.IDENTITY]),
-            ([3, 6], [helper.IDENTITY, helper.NEWER[0]]),
-            ([3, 4], [helper.IDENTITY, *helper.NEWER]),
+            ([6], []),
+            ([3, 6], [helper.IDENTITY]),
+            ([3, 3, 6], [helper.IDENTITY, helper.NEWER[0]]),
+            ([3, 3, 4], [helper.IDENTITY, *helper.NEWER]),
         ]:
             with patch.object(helper, 'preserve_reviewed') as preserve, patch.object(helper.shutil, 'disk_usage', side_effect=[SimpleNamespace(free=n * 1024**3) for n in free_values]):
                 helper.preserve_astra_rollbacks(code)
@@ -204,7 +205,7 @@ with tempfile.TemporaryDirectory() as directory:
                 assert identity not in expected
         checks.append('astra-only-fixed-older-identities-until-five-gib-with-latest-rollback-protected')
         (protected / '.next/BUILD_ID').write_text('unexpected-build')
-        with patch.object(helper, 'preserve_reviewed') as preserve:
+        with patch.object(helper, 'preserve_reviewed') as preserve, patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=3 * 1024**3)):
             try:
                 helper.preserve_astra_rollbacks(code)
             except ValueError:
@@ -213,7 +214,7 @@ with tempfile.TemporaryDirectory() as directory:
                 raise AssertionError('protected rollback identity mismatch accepted')
         (protected / '.next/BUILD_ID').write_text('synthetic-build')
         receipt_path.write_text(json.dumps({'status': 'rolled-back', 'previousDirectory': str(protected), 'oldBuildId': 'synthetic-build'}))
-        with patch.object(helper, 'preserve_reviewed') as preserve:
+        with patch.object(helper, 'preserve_reviewed') as preserve, patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=3 * 1024**3)):
             try:
                 helper.preserve_astra_rollbacks(code)
             except ValueError:
@@ -221,5 +222,20 @@ with tempfile.TemporaryDirectory() as directory:
             else:
                 raise AssertionError('unsuccessful protected receipt accepted')
         checks.append('astra-requires-successful-receipt-and-protected-build-before-any-archive-write')
+        receipt_path.unlink()
+        before = helper.snapshot(protected)
+        with patch.object(helper, 'preserve_reviewed') as preserve, patch.object(helper, 'reviewed_receipt', side_effect=AssertionError('Unneeded historical read')), patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=5 * 1024**3)):
+            helper.preserve_astra_rollbacks(code)
+            preserve.assert_not_called()
+            assert helper.snapshot(protected) == before
+        checks.append('sufficient-space-never-reads-or-modifies-historical-backups')
+        with patch.object(helper, 'preserve_reviewed') as preserve, patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=3 * 1024**3)):
+            try:
+                helper.preserve_astra_rollbacks(code)
+            except FileNotFoundError:
+                preserve.assert_not_called()
+            else:
+                raise AssertionError('missing receipt accepted when archiving is needed')
+        checks.append('insufficient-space-still-requires-the-original-receipt')
 
 print(json.dumps({'passed': True, 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))
