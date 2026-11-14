@@ -37,6 +37,7 @@ jobs:
         run: |
           set -euo pipefail
           unset SERVER_HOST SERVER_USER SERVER_PORT SERVER_SSH_KEY
+          python3 -B scripts/test-ensure-release-data-mount.py
           python3 -B scripts/test-compact-extension-rollback.py
           python3 -B scripts/test-seed-release-upload.py
           python3 -B scripts/test-archive-failed-release-stages.py
@@ -68,6 +69,12 @@ jobs:
           printf '%s\n' 'Host *' '  ServerAliveInterval 15' '  ServerAliveCountMax 6' '  ConnectTimeout 30' '  BatchMode yes' > ~/.ssh/config
           chmod 600 ~/.ssh/config
           ssh-keyscan -p "$SERVER_PORT" "$SERVER_HOST" >> ~/.ssh/known_hosts
+
+      - name: Restore the existing configured data mount if absent
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" "sudo -n python3 -" < scripts/ensure-release-data-mount.py
 
       - name: Read deployment storage and mount diagnostics
         shell: bash
