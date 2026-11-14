@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "subject": "english",
+  "revision": "english-extension-short-v2",
+  "sourcePublicDigest": "a311b16e4b06b2167058556870bd6b6d7aa35706cc660d1de61e24cb1c888b71",
+  "shortChoicesDigest": "f31b6079ad3d48ba4a0a61228a57be5a75fb3f5d6e95f6481f646234e60d463a",
+  "totalChoices": 600,
+  "options": 2400,
+  "maxOptionWords": 5,
+  "maxOptionCharacters": 35,
+  "optionWordCounts": {
+    "1": 687,
+    "2": 731,
+    "3": 601,
+    "4": 337,
+    "5": 44
+  },
+  "rewrittenChoices": 338,
+  "retainedFillQuestions": 600
+}

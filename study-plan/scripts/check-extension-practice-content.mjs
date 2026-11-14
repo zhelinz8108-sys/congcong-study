@@ -4,6 +4,7 @@ import {createHash,createHmac} from 'node:crypto';
 import {loadHolidayTestModule} from './holiday-math-test-utils.mjs';
 const crypto=await loadHolidayTestModule('src/server/english-six-knowledge-envelope.ts');
 const bank=await loadHolidayTestModule('src/server/extension-practice/bank.ts');
+const short=await loadHolidayTestModule('src/server/extension-practice/short-choices.ts');
 const secret=process.env.HOLIDAY_MATH_700_KEY?.trim();
 assert.ok(secret,'Existing answer service configuration is required');
 const port=process.argv[2];assert.ok(!port||['3001','3002'].includes(port),'Only the existing local release ports are allowed');
@@ -19,6 +20,9 @@ for(const subject of ['math','english']) {
  const privateData=crypto.decryptEnglishSixKnowledge(encrypted,secret);
  assert.equal(privateData.subject,subject);assert.equal(privateData.publicDigest,createHash('sha256').update(raw).digest('hex'));
  const rows=new Map(privateData.answers.map(row=>[row.id,row]));assert.equal(rows.size,privateData.answers.length);
+ const edition=subject==='english'&&data.manifest.version==='english-extension-v1'?JSON.parse(await readFile(root+'short-choices.public.json','utf8')):undefined;
+ if(edition) short.validateShortChoices(edition,raw,data.questions);
+ const activeQuestions=edition?data.questions.map(q=>short.shortChoiceQuestion(q,edition)):data.questions;
  if(subject==='math') {
   assert.equal(data.manifest.version,'math-extension-astra-v2','Publish the complete Astra math release');
   const audit=JSON.parse(await readFile(root+'audit.public.json','utf8'));
@@ -39,14 +43,20 @@ for(const subject of ['math','english']) {
   }
   if(q.kind==='选择题') {assert.equal(q.inputs[0].choices.length,4);assert.equal(new Set(q.inputs[0].choices).size,4);assert.ok(row.accepted.every(v=>q.inputs[0].choices.includes(v)));}
   else assert.equal(q.kind,'填空题');
-  for(const answer of row.accepted) {assert.equal((await bank.extensionFeedback(subject,q.id,{answer})).outcome,'correct',q.id+' canonical result');acceptedChecked++;}
-  assert.equal((await bank.extensionFeedback(subject,q.id,{answer:'__not_an_answer__'})).outcome,'incorrect');
+  const active=edition?short.shortChoiceQuestion(q,edition):q;
+  const activeRow=edition?short.shortChoiceAnswer(row,q,edition):row;
+  for(const answer of activeRow.accepted) {assert.equal((await bank.extensionFeedback(subject,active.id,{answer})).outcome,'correct',active.id+' canonical result');acceptedChecked++;}
+  assert.equal((await bank.extensionFeedback(subject,active.id,{answer:'__not_an_answer__'})).outcome,'incorrect');
+  if(edition&&q.kind==='选择题') {
+   assert.equal(await bank.extensionQuestion(subject,q.id),undefined,'Old choice IDs must not accept new attempts');
+   for(const answer of active.inputs[0].choices) assert.equal((await bank.extensionFeedback(subject,active.id,{answer})).outcome,activeRow.accepted.includes(answer)?'correct':'incorrect');
+  }
   total++;
  }
  const manifest=await bank.extensionManifest(subject);assert.equal(manifest.total,8*count);assert.equal(manifest.collections.length,8);
  for(const collection of manifest.collections) {
   assert.equal(collection.questionCount,count);assert.equal(collection.questions.length,count);
-  const questions=data.questions.filter(q=>q.collectionId===collection.id);
+  const questions=activeQuestions.filter(q=>q.collectionId===collection.id);
   assert.equal(questions.length,count);assert.equal(questions.filter(q=>q.kind==='选择题').length,count/2);assert.equal(questions.filter(q=>q.kind==='填空题').length,count/2);
   assert.deepEqual(collection.questions.map(q=>q.id),questions.map(q=>q.id));
   if(port) for(const kind of ['选择题','填空题']) {
@@ -56,7 +66,7 @@ for(const subject of ['math','english']) {
   }
  }
  if(port) {
-  const first=data.questions[0].id;
+  const first=activeQuestions[0].id;
   assert.equal((await fetch(`http://127.0.0.1:${port}/api/extension-practice/${subject}/questions/${first}`,{signal:AbortSignal.timeout(10000)})).status,401);
   const route=subject==='math'?'math/extension-bank':'english/extension-practice';
   const response=await fetch(`http://127.0.0.1:${port}/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/${route}`,{headers,signal:AbortSignal.timeout(20000)});

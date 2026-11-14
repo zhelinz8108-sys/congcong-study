@@ -5,30 +5,52 @@ import { createHash } from "node:crypto";
 import { decryptEnglishSixKnowledge } from "@/server/english-six-knowledge-envelope";
 import type { BankQuestion, BankCollection, BankFeedback, BankManifest } from "@/lib/grade6-bank-types";
 import { gradeBankFinalAnswers, normalizeBankAnswer, type BankPrivateAnswer } from "@/lib/grade6-bank-grader";
+import { shortChoiceAnswer, shortChoiceManifest, shortChoiceQuestion, validateShortChoices, type ShortChoiceEdition } from "./short-choices";
 
 export type ExtensionSubject = "math" | "english";
 export type ExtensionPrivateRow = { id: string; accepted: string[]; numeric: boolean; unit?: string; topic?: string; explanation: string; answerText: string };
 type PublicRelease = { version: 1; subject: ExtensionSubject; manifest: BankManifest; questions: BankQuestion[] };
 type PrivateRelease = { version: 1; subject: ExtensionSubject; publicDigest: string; answers: ExtensionPrivateRow[] };
 const releaseCache = new Map<ExtensionSubject, Promise<PublicRelease>>();
+const sourceCache = new Map<ExtensionSubject, Promise<{ raw: string; data: PublicRelease; edition?: ShortChoiceEdition }>>();
 const answerCache = new Map<ExtensionSubject, Promise<Map<string, ExtensionPrivateRow>>>();
 export function extensionSubject(raw: unknown): ExtensionSubject | null { return raw === "math" || raw === "english" ? raw : null; }
 function root(subject: ExtensionSubject) { return path.join(process.cwd(), "content", `${subject}-extension`); }
 export function isExtensionQuestion(subject: ExtensionSubject, id: string) { return new RegExp(`^${subject === "math" ? "MX" : "EX"}-[0-7]-[0-9]{3}$`).test(id); }
-function release(subject: ExtensionSubject) {
-  let pending = releaseCache.get(subject);
+function sourceRelease(subject: ExtensionSubject) {
+  let pending = sourceCache.get(subject);
   if (!pending) {
-    pending = readFile(path.join(root(subject), "questions.public.json"), "utf8").then(raw => {
+    pending = readFile(path.join(root(subject), "questions.public.json"), "utf8").then(async raw => {
       const data = JSON.parse(raw) as PublicRelease;
       const expected = subject === "math" ? 800 : 1200;
       if (data.version !== 1 || data.subject !== subject || data.manifest.total !== expected || data.manifest.collections.length !== 8 || data.questions.length !== expected || new Set(data.questions.map(q => q.id)).size !== expected || data.questions.some(q => !isExtensionQuestion(subject, q.id))) throw new Error("拓展题库版本不完整");
-      return data;
+      if (subject === "english" && data.manifest.version === "english-extension-v1") {
+        const edition = JSON.parse(await readFile(path.join(root(subject), "short-choices.public.json"), "utf8")) as ShortChoiceEdition;
+        validateShortChoices(edition, raw, data.questions);
+        return { raw, data, edition };
+      }
+      return { raw, data };
     });
+    sourceCache.set(subject, pending);
+  }
+  return pending;
+}
+function release(subject: ExtensionSubject) {
+  let pending = releaseCache.get(subject);
+  if (!pending) {
+    pending = sourceRelease(subject).then(({ data, edition }) => edition ? {
+      ...data, manifest: shortChoiceManifest(data.manifest), questions: data.questions.map(q => shortChoiceQuestion(q, edition)),
+    } : data);
     releaseCache.set(subject, pending);
   }
   return pending;
 }
 export async function extensionManifest(subject: ExtensionSubject) { return (await release(subject)).manifest; }
+export async function isRetiredExtensionQuestion(subject: ExtensionSubject, id: string) {
+  if (subject !== "english" || !isExtensionQuestion(subject, id)) return false;
+  const { data, edition } = await sourceRelease(subject);
+  return Boolean(edition && data.questions.some(q => q.id === id && q.kind === "选择题"));
+}
 export async function extensionCollection(subject: ExtensionSubject, id: string): Promise<BankCollection | undefined> { return (await extensionManifest(subject)).collections.find(c => c.id === id); }
 export async function extensionQuestion(subject: ExtensionSubject, id: string): Promise<BankQuestion | undefined> {
   const row = isExtensionQuestion(subject, id) ? (await release(subject)).questions.find(q => q.id === id) : undefined;
@@ -44,11 +66,14 @@ async function answers(subject: ExtensionSubject) {
   let pending = answerCache.get(subject);
   if (!pending) {
     pending = (async () => {
-      const [publicRaw, encrypted] = await Promise.all([readFile(path.join(root(subject), "questions.public.json"), "utf8"), readFile(path.join(root(subject), "answers.encrypted.json"), "utf8")]);
+      const [{ raw: publicRaw, data: pub, edition }, encrypted] = await Promise.all([sourceRelease(subject), readFile(path.join(root(subject), "answers.encrypted.json"), "utf8")]);
       const data = decryptEnglishSixKnowledge(JSON.parse(encrypted), process.env.HOLIDAY_MATH_700_KEY?.trim() ?? "") as PrivateRelease;
-      const pub = await release(subject);
       if (data.version !== 1 || data.subject !== subject || data.publicDigest !== createHash("sha256").update(publicRaw).digest("hex") || data.answers.length !== pub.questions.length || new Set(data.answers.map(row => row.id)).size !== data.answers.length || data.answers.some(row => !pub.questions.some(q => q.id === row.id) || !row.accepted.length || !row.explanation.trim())) throw new Error("拓展答案与题目不匹配");
-      return new Map(data.answers.map(row => [row.id, row]));
+      const questions = new Map(pub.questions.map(q => [q.id, q]));
+      return new Map(data.answers.map(row => {
+        const active = edition ? shortChoiceAnswer(row, questions.get(row.id)!, edition) : row;
+        return [active.id, active];
+      }));
     })();
     answerCache.set(subject, pending);
   }

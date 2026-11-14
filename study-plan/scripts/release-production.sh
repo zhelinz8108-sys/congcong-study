@@ -40,6 +40,7 @@ if [[ ${1:-} == --worker ]]; then
       build_check english-knowledge node scripts/test-english-knowledge-speech.mjs
       build_check english-six-new-only node scripts/test-english-six-new-only.mjs
       build_check extension-content node scripts/check-extension-practice-content.mjs
+      build_check english-short-choices node scripts/test-english-extension-short-choices.mjs
       build_check dated-listening node scripts/test-dated-listening-api.mjs
       build_check next-build npm run build -- --webpack
       ;;

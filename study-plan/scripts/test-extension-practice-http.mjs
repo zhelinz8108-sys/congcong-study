@@ -16,6 +16,7 @@ let server,log='',browser,qaPage;
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const payload=`v1.${Date.now()+3600000}`,token=payload+'.'+createHmac('sha256',family).update(payload).digest('base64url');
 const cookie=`congcong_family_access=${token}`;
+const shortMode=process.argv.includes('--short-choices');
 try {
  for(const subject of ['math','english']) {
   const root=path.join('content',subject+'-extension');await mkdir(root,{recursive:true});
@@ -35,7 +36,14 @@ try {
    }
    collections.push({id:subject==='math'?'chapter-'+chapter:'unit-'+(chapter+1),title:`Synthetic ${subject} ${chapter+1}`,subtitle:'Synthetic QA',mode:'chapter',chapter,palette:chapter,questionCount:count,difficultyCounts:{3:count},questions:refs});
   }
-  const raw=JSON.stringify({version:1,subject,manifest:{version:'qa',total:questions.length,sourceFiles:0,collections},questions});
+  let raw=JSON.stringify({version:1,subject,manifest:{version:'qa',total:questions.length,sourceFiles:0,collections},questions});
+  if(shortMode&&subject==='english') {
+   raw=originals.get(path.join(root,'questions.public.json')).toString();
+   answers.length=0;
+   for(const q of JSON.parse(raw).questions) answers.push({id:q.id,
+    accepted:[q.kind==='选择题'?q.inputs[0].choices[q.chapter===1?1:2]:'went'], numeric:false,
+    explanation:'Synthetic private explanation, released only after submission.',answerText:'Synthetic private result'});
+  }
   await writeFile(path.join(root,'questions.public.json'),raw);
   await writeFile(path.join(root,'answers.encrypted.json'),JSON.stringify(crypto.encryptEnglishSixKnowledge({version:1,subject,publicDigest:createHash('sha256').update(raw).digest('hex'),answers},crypto.englishSixKnowledgePublicKey(secret))));
  }
@@ -52,7 +60,15 @@ try {
   assert.equal((await call(subject,'questions/'+id,{auth:''})).response.status,401);
   const q=await call(subject,'questions/'+id);assert.equal(q.response.status,200);assert.equal(q.response.headers.get('cache-control'),'private, no-store');assert.ok(!JSON.stringify(q.data).includes('Synthetic private'));
   assert.equal((await call(subject,`feedback?subject_id=${subjectId}&question_id=${id}`)).response.status,403);
-  const body={subject_id:subjectId,question_id:id,answers:{answer:'A. half'},base_revision:0};
+  const body={subject_id:subjectId,question_id:id,answers:{answer:shortMode&&subject==='english'?'C. was; am':'A. half'},base_revision:0};
+  if(shortMode&&subject==='english') {
+   assert.equal(q.data.prompt,'I ___ afraid yesterday, but I ___ happy now.');
+   assert.equal((await call(subject,'questions/EX-0-001')).response.status,410);
+   for(const [action,method] of [['draft','PUT'],['submit','POST']]) {
+    assert.equal((await call(subject,action,{method,body:{...body,question_id:'EX-0-001'}})).response.status,410);
+   }
+   assert.equal((await call(subject,`feedback?subject_id=${subjectId}&question_id=EX-0-001`)).response.status,410);
+  }
   assert.equal((await call(subject,'submit',{method:'POST',body:{...body,answers:{} }})).response.status,400);
   assert.equal((await call(subject,'submit',{method:'POST',body:{...body,answers:{answer:'Z'}}})).response.status,400);
   assert.equal((await call(subject,'submit',{method:'POST',body,origin:'https://cross-site.invalid'})).response.status,403);
@@ -62,7 +78,8 @@ try {
   assert.equal((await call(subject,'draft',{method:'PUT',body:{...body,base_revision:submitted.data.response.revision}})).response.status,409,'locked first attempt');
   assert.equal((await call(subject,'feedback?subject_id='+subjectId+'&question_id='+id)).response.status,200);
   const wrongId=id.replace(/201$/, '202');
-  const wrong=await call(subject,'submit',{method:'POST',body:{...body,question_id:wrongId,answers:{answer:'B. whole'},base_revision:0}});
+  const wrongQuestion=(await call(subject,'questions/'+wrongId)).data;
+  const wrong=await call(subject,'submit',{method:'POST',body:{...body,question_id:wrongId,answers:{answer:wrongQuestion.inputs[0].choices[1]},base_revision:0}});
   assert.equal(wrong.response.status,200);assert.equal(wrong.data.feedback.outcome,'incorrect');assert.ok(wrong.data.feedback.answerText);
   const other=subject==='math'?'EX-0-201':'MX-0-201';assert.equal((await call(subject,'questions/'+other)).response.status,404);
   const progress=await call(subject,'progress?subject_id='+subjectId);assert.ok(Object.keys(progress.data.responses).every(id=>id.startsWith(subject==='math'?'MX-':'EX-')));
@@ -74,11 +91,22 @@ try {
   const page=await context.newPage(),errors=[];qaPage=page;page.on('pageerror',e=>errors.push(e.message));
   for(const subject of ['math','english']) {
    const route=subject==='math'?'math/extension-bank':'english/extension-practice',collection=subject==='math'?'chapter-1':'unit-2';
-   await page.goto(`${base}/subjects/${subjectId}/${route}/${collection}`);await page.getByRole('button',{name:'A. half',exact:true}).waitFor();
-   await page.getByRole('button',{name:'A. half',exact:true}).click();await page.getByRole('button',{name:'提交答案',exact:true}).click();await page.getByRole('heading',{name:'回答正确',exact:true}).waitFor();
+   const choice=shortMode&&subject==='english'?'B. returning the extra money':'A. half';
+   await page.goto(`${base}/subjects/${subjectId}/${route}/${collection}`);await page.getByRole('button',{name:choice,exact:true}).waitFor();
+   await page.getByRole('button',{name:choice,exact:true}).click();await page.getByRole('button',{name:'提交答案',exact:true}).click();await page.getByRole('heading',{name:'回答正确',exact:true}).waitFor();
    await page.reload();await page.getByRole('heading',{name:'回答正确',exact:true}).waitFor();assert.ok(await page.getByRole('button',{name:'已提交 · 已锁定',exact:true}).isDisabled());
-   await page.getByLabel('题目类型',{exact:true}).selectOption('填空题');await page.getByRole('textbox',{name:'第1空',exact:true}).fill(subject==='math'?'0.5':'WENT');await page.getByRole('button',{name:'提交答案',exact:true}).click();await page.getByRole('heading',{name:'回答正确',exact:true}).waitFor();
+   await page.getByLabel('题目类型',{exact:true}).selectOption('填空题');await page.getByRole('textbox',{name:/第\s*1\s*空/}).fill(subject==='math'?'0.5':'WENT');await page.getByRole('button',{name:'提交答案',exact:true}).click();await page.getByRole('heading',{name:'回答正确',exact:true}).waitFor();
    for(const width of [390,1280]) {await page.setViewportSize({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
+  }
+  if(shortMode) {
+   await page.goto(`${base}/subjects/${subjectId}/english/extension-practice/unit-1?q=EX-0-201`);
+   await page.getByRole('button',{name:'C. was; am',exact:true}).waitFor();
+   for(const width of [390,1280]) {
+    await page.setViewportSize({width,height:900});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+    assert.equal(await page.getByRole('group',{name:'请选择正确答案'}).getByRole('button').count(),4);
+    await page.screenshot({path:`/tmp/english-short-choices-${width}.png`,fullPage:true});
+   }
   }
   assert.deepEqual(errors,[]);await browser.close();browser=undefined;
  }

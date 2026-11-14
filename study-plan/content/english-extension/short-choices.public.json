@@ -1,0 +1,5407 @@
+{
+  "version": 1,
+  "revision": "english-extension-short-v2",
+  "sourcePublicDigest": "a311b16e4b06b2167058556870bd6b6d7aa35706cc660d1de61e24cb1c888b71",
+  "questions": {
+    "EX-0-001": {
+      "prompt": "I ___ afraid yesterday, but I ___ happy now.",
+      "choices": [
+        "did; am",
+        "am; was",
+        "was; am",
+        "were; am"
+      ]
+    },
+    "EX-0-002": {
+      "prompt": "Mia and I left at 7:30 last night; Dad stayed until 9:00. At 8:00, Mia and I ___ outside, but Dad ___ inside.",
+      "choices": [
+        "was; were",
+        "were not; was not",
+        "are; is",
+        "were; was"
+      ]
+    },
+    "EX-0-003": {
+      "prompt": "Six chairs arrived on 4 May. Before that, the hall was empty. There ___ chairs in the hall on 2 May.",
+      "choices": [
+        "were no",
+        "was no",
+        "were already six",
+        "were six"
+      ]
+    },
+    "EX-0-004": {
+      "prompt": "Today I ___ last Friday's diary. It says the music ___ at six that evening.",
+      "choices": [
+        "read; begins",
+        "read; began",
+        "began; began",
+        "began; read"
+      ]
+    },
+    "EX-0-005": {
+      "prompt": "I usually walk to the club, but I took a bus last Friday because the road was closed. The bus trip was ___.",
+      "choices": [
+        "my only possible habit",
+        "my daily routine",
+        "a change of plan",
+        "a walk"
+      ]
+    },
+    "EX-0-006": {
+      "prompt": "—Did the twins finish the poster? —___; they only chose the colours.",
+      "choices": [
+        "No, they were not.",
+        "Yes, they did.",
+        "No, they do not.",
+        "No, they did not."
+      ]
+    },
+    "EX-0-007": {
+      "prompt": "Which pair completes the report? “I ___ ready, so I ___ go on stage.”",
+      "choices": [
+        "was not; did not",
+        "did not; was not",
+        "was not; was not",
+        "did not; did not"
+      ]
+    },
+    "EX-0-008": {
+      "prompt": "—___ you ___ the dance yesterday? —Yes, we did.",
+      "choices": [
+        "Were; see",
+        "Did; see",
+        "Do; saw",
+        "Did; saw"
+      ]
+    },
+    "EX-0-009": {
+      "prompt": "The diary says, “We studied, practised and tryed.” Which correction is needed?",
+      "choices": [
+        "studied → studyed",
+        "practised → practiseed",
+        "tryed → tried",
+        "studied → study"
+      ]
+    },
+    "EX-0-010": {
+      "prompt": "Stop → stopped doubles p. Which verb ends in p but does NOT double it in the past form?",
+      "choices": [
+        "plan → planned",
+        "stop → stopped",
+        "play → played",
+        "help → helped"
+      ]
+    },
+    "EX-0-011": {
+      "prompt": "At first, the singer could not recall the last line. Then it came back to her. First she ___ it; then she ___ it.",
+      "choices": [
+        "forgot; remembered",
+        "remembered; forgot",
+        "forgets; remember",
+        "was; did"
+      ]
+    },
+    "EX-0-012": {
+      "prompt": "The key did not turn. Dad said, “Try pushing the door; perhaps that will help.” Here “try pushing” means ___.",
+      "choices": [
+        "stop immediately",
+        "test a method",
+        "promise success",
+        "recall an earlier push"
+      ]
+    },
+    "EX-0-013": {
+      "prompt": "“We tried to carry the box, but it did not move.” What was the result?",
+      "choices": [
+        "an easy task",
+        "no attempt",
+        "effort without success",
+        "a successful move"
+      ]
+    },
+    "EX-0-014": {
+      "prompt": "The girls said, “We tried ___ best.” Their teacher said, “They tried ___ best.”",
+      "choices": [
+        "their; our",
+        "us; them",
+        "ours; theirs",
+        "our; their"
+      ]
+    },
+    "EX-0-015": {
+      "prompt": "Which phrase uses try as a noun?",
+      "choices": [
+        "give it a try",
+        "try to finish",
+        "tried very hard",
+        "tries every day"
+      ]
+    },
+    "EX-0-016": {
+      "prompt": "I stood on stage and spoke the king's words. My parents watched. I ___.",
+      "choices": [
+        "designed a poster",
+        "acted in a play",
+        "watched TV",
+        "watched a play"
+      ]
+    },
+    "EX-0-017": {
+      "prompt": "Monday's notice: “Rehearsal: Tuesday. Performance: Friday.” The club plans to ___ on Friday.",
+      "choices": [
+        "rehearse only",
+        "repeat last Friday's show",
+        "put on a play",
+        "wear a play"
+      ]
+    },
+    "EX-0-018": {
+      "prompt": "I want to become a music club member and enter Friday's competition. ___ the club; ___ the competition.",
+      "choices": [
+        "Take part in; join to",
+        "Join in to; take part",
+        "Take part; join to",
+        "Join; take part in"
+      ]
+    },
+    "EX-0-019": {
+      "prompt": "“Why don't you practise first?” has the same meaning as “Why ___ first?”",
+      "choices": [
+        "not practise",
+        "did you not practise",
+        "don't practise",
+        "not to practise"
+      ]
+    },
+    "EX-0-020": {
+      "prompt": "Nora fears deep water but enters the shallow pool calmly. She avoids ___.",
+      "choices": [
+        "every pool",
+        "jumping into deep water",
+        "all shallow water",
+        "staying out of danger"
+      ]
+    },
+    "EX-0-021": {
+      "prompt": "Correct one word in “Yesterday I was afraid of forget the words.”",
+      "choices": [
+        "afraid → afraidness",
+        "was → am",
+        "forget → forgetting",
+        "of → to forgetting"
+      ]
+    },
+    "EX-0-022": {
+      "prompt": "Your friend is nervous now. Give advice: “___ afraid of making a mistake.”",
+      "choices": [
+        "You did not",
+        "I was",
+        "You were not",
+        "Don't be"
+      ]
+    },
+    "EX-0-023": {
+      "prompt": "The pupils wait outside the hall; the piano is inside near the stage. The pupils are ___ the hall, while the piano is in the front of it.",
+      "choices": [
+        "in front of",
+        "in the front of",
+        "in front",
+        "at front of"
+      ]
+    },
+    "EX-0-024": {
+      "prompt": "Which action shows Jo observed every step of a six-minute dance?",
+      "choices": [
+        "viewing a still photo",
+        "watching the whole dance",
+        "reading the title",
+        "glimpsing one dancer"
+      ]
+    },
+    "EX-0-025": {
+      "prompt": "For twenty minutes, we ___ the dancer move across the stage and copied her steps.",
+      "choices": [
+        "looked",
+        "looked at to",
+        "watched",
+        "saw at"
+      ]
+    },
+    "EX-0-026": {
+      "prompt": "Our log says, “Ten minutes turning; five minutes singing; no jumping.” We practised ___ for ten minutes.",
+      "choices": [
+        "sang",
+        "jumping",
+        "to turning",
+        "turning"
+      ]
+    },
+    "EX-0-027": {
+      "prompt": "“The team kept listening and trying yesterday.” Which word carries the past tense?",
+      "choices": [
+        "kept",
+        "listening",
+        "trying",
+        "and"
+      ]
+    },
+    "EX-0-028": {
+      "prompt": "“We enjoyed acting, but missed some lines and asked for help.” We enjoyed it but needed ___.",
+      "choices": [
+        "a winner's prize",
+        "more practice",
+        "no further help",
+        "a different hobby"
+      ]
+    },
+    "EX-0-029": {
+      "prompt": "Mia has finished. Leo is next. It is ___ sing.",
+      "choices": [
+        "Leo's turn singing to",
+        "Leo turn",
+        "Leo's turn to",
+        "him turn to"
+      ]
+    },
+    "EX-0-030": {
+      "prompt": "Eva breathed slowly and stopped shaking after hearing “Calm down”. She became ___.",
+      "choices": [
+        "quieter with the music",
+        "lower in the building",
+        "unwilling to try",
+        "less nervous"
+      ]
+    },
+    "EX-0-031": {
+      "prompt": "“They began to practise at six” means “They began ___ at six.”",
+      "choices": [
+        "practising",
+        "practised",
+        "to practising",
+        "practise"
+      ]
+    },
+    "EX-0-032": {
+      "prompt": "The door was still open because I forgot ___ it before leaving.",
+      "choices": [
+        "closed",
+        "to close",
+        "close to",
+        "closing"
+      ]
+    },
+    "EX-0-033": {
+      "prompt": "“The light is off. I clearly remember ___ it off five minutes ago.”",
+      "choices": [
+        "turn",
+        "to turn",
+        "turning",
+        "turned"
+      ]
+    },
+    "EX-0-034": {
+      "prompt": "The play starts in an hour. “Remember ___ your costume before you leave home,” Mum says.",
+      "choices": [
+        "bringing",
+        "brought",
+        "bring to",
+        "to bring"
+      ]
+    },
+    "EX-0-035": {
+      "prompt": "The coach asked Nina to help Tom. We do not know what she did next. Nina certainly ___.",
+      "choices": [
+        "received a request",
+        "helped Tom",
+        "asked the coach",
+        "received Tom's help"
+      ]
+    },
+    "EX-0-036": {
+      "prompt": "We checked our movements in a mirror. What would prove they were correct?",
+      "choices": [
+        "wanting to improve",
+        "a coach confirming accuracy",
+        "having a mirror",
+        "using a large mirror"
+      ]
+    },
+    "EX-0-037": {
+      "prompt": "“Last term Rui was not good at acting” means “Last term Rui ___ well in acting.”",
+      "choices": [
+        "did not good",
+        "did",
+        "did not do",
+        "does not do"
+      ]
+    },
+    "EX-0-038": {
+      "prompt": "I could not dance well last year. I ___ good at ___ then.",
+      "choices": [
+        "did not; dance",
+        "was not; danced",
+        "am not; dancing",
+        "was not; dancing"
+      ]
+    },
+    "EX-0-039": {
+      "prompt": "We rehearse ___ the morning, but not ___ Monday morning.",
+      "choices": [
+        "in; on",
+        "on; in",
+        "on; on",
+        "in; in"
+      ]
+    },
+    "EX-0-040": {
+      "prompt": "Eva’s diary is dated 20 May: “We performed two days ago.” Jo reads it on 25 May. Which date does Eva’s sentence refer to?",
+      "choices": [
+        "25 May.",
+        "18 May.",
+        "23 May.",
+        "22 May."
+      ]
+    },
+    "EX-0-041": {
+      "prompt": "The pianist has not arrived. The costumes are ready ___ the show, but we are not ready ___ begin.",
+      "choices": [
+        "to; to",
+        "for; for",
+        "for; to",
+        "to; for"
+      ]
+    },
+    "EX-0-042": {
+      "prompt": "“After we finish colouring the poster, we still need to add the time.” What comes first?",
+      "choices": [
+        "putting it up",
+        "completing every part",
+        "adding the time",
+        "finishing the colouring"
+      ]
+    },
+    "EX-0-043": {
+      "prompt": "A sheet on the wall says “School Show — Friday, 3 p.m. — Hall”. It is probably ___.",
+      "choices": [
+        "a poster",
+        "a spoken line",
+        "a private diary",
+        "a dance movement"
+      ]
+    },
+    "EX-0-044": {
+      "prompt": "In September Jo needed help to copy a dance. In December Jo learned a new one alone. What shows improvement?",
+      "choices": [
+        "a longer guide",
+        "learning without help",
+        "a new costume",
+        "a later month"
+      ]
+    },
+    "EX-0-045": {
+      "prompt": "Which pair contains only body movements?",
+      "choices": [
+        "speak; read aloud",
+        "read aloud; turn",
+        "raise an arm; turn",
+        "raise an arm; speak"
+      ]
+    },
+    "EX-0-046": {
+      "prompt": "A snail failed twice, then reached a branch with help. Which claim is FALSE?",
+      "choices": [
+        "Help was requested.",
+        "Several tries were needed.",
+        "It was difficult.",
+        "Success was impossible."
+      ]
+    },
+    "EX-0-047": {
+      "prompt": "We reached the middle platform and began the final climb. What is still unknown?",
+      "choices": [
+        "reaching the top",
+        "the next platform",
+        "reaching the middle",
+        "starting the last climb"
+      ]
+    },
+    "EX-0-048": {
+      "prompt": "The programme says “Mulan — played by Eva”. Eva ___.",
+      "choices": [
+        "wrote the play",
+        "acted as Mulan",
+        "named the hall",
+        "watched from a seat"
+      ]
+    },
+    "EX-0-049": {
+      "prompt": "The task needed ten tries and help from a teacher. In this context, “hard” means ___.",
+      "choices": [
+        "calm",
+        "afraid",
+        "difficult",
+        "ready"
+      ]
+    },
+    "EX-0-050": {
+      "prompt": "I practise daily but keep making the same wrong turn. What should I do next?",
+      "choices": [
+        "assume it is correct",
+        "claim first prize",
+        "repeat without checking",
+        "ask for a check"
+      ]
+    },
+    "EX-0-051": {
+      "prompt": "I know the song but have never sung on stage. “Have a go; let's practise entering first.” This encourages ___.",
+      "choices": [
+        "a prepared first attempt",
+        "repeating an earlier performance",
+        "skipping all preparation",
+        "giving up singing"
+      ]
+    },
+    "EX-0-052": {
+      "prompt": "Choose the correct diary ending: “I ___ that ___ our best is important.”",
+      "choices": [
+        "learned; did trying",
+        "learned; trying",
+        "learning; try",
+        "learn yesterday; trying"
+      ]
+    },
+    "EX-0-053": {
+      "prompt": "Choose the most logical order: ① I practised each small step. ② I could not do the dance. ③ Finally, I performed it well.",
+      "choices": [
+        "③→①→②",
+        "③→②→①",
+        "②→①→③",
+        "①→③→②"
+      ]
+    },
+    "EX-0-054": {
+      "prompt": "Who learned from a mistake? The pupil who ___ the wrong turn.",
+      "choices": [
+        "avoided reading about",
+        "waited without trying",
+        "kept repeating",
+        "checked and corrected"
+      ]
+    },
+    "EX-0-055": {
+      "prompt": "Which list has -ed endings pronounced /t/, /d/, /ɪd/ in that order?",
+      "choices": [
+        "walked, lived, wanted",
+        "wanted, walked, lived",
+        "lived, wanted, walked",
+        "walked, wanted, lived"
+      ]
+    },
+    "EX-0-056": {
+      "prompt": "In keep, green and tree, ee has ___.",
+      "choices": [
+        "every possible e sound",
+        "the same vowel sound",
+        "no vowel sound",
+        "three different sounds"
+      ]
+    },
+    "EX-0-057": {
+      "prompt": "Which pair shows that -ed pronunciation depends on the base word's LAST SOUND, not just the letter t?",
+      "choices": [
+        "played /d/; tried /d/",
+        "lived /d/; played /d/",
+        "wanted /ɪd/; stopped /t/",
+        "wanted /ɪd/; needed /ɪd/"
+      ]
+    },
+    "EX-0-058": {
+      "prompt": "A teacher puts “practised” in the /t/ group. Which word belongs in the same group?",
+      "choices": [
+        "played",
+        "remembered",
+        "wanted",
+        "stopped"
+      ]
+    },
+    "EX-0-059": {
+      "prompt": "Choose the -ed sounds in order: tried; wanted.",
+      "choices": [
+        "/d/; /ɪd/",
+        "/t/; /ɪd/",
+        "/d/; /d/",
+        "/ɪd/; /ɪd/"
+      ]
+    },
+    "EX-0-060": {
+      "prompt": "“You enjoy singing. Why don't you join the show?” Which reply responds to the suggestion?",
+      "choices": [
+        "In the hall.",
+        "I'll give it a try.",
+        "Two years ago.",
+        "About an hour."
+      ]
+    },
+    "EX-0-061": {
+      "prompt": "My costume is ready, but I still forget half the lines. My preparation is ___.",
+      "choices": [
+        "missing a costume",
+        "complete",
+        "unfinished",
+        "already a finished show"
+      ]
+    },
+    "EX-0-062": {
+      "prompt": "“She used a mirror to practise” tells us her ___.",
+      "choices": [
+        "mirror's own actions",
+        "finishing time",
+        "inability to see",
+        "tool and purpose"
+      ]
+    },
+    "EX-0-063": {
+      "prompt": "“Ben did not practise yesterday” tells us about ___.",
+      "choices": [
+        "that day's practice",
+        "every day's practice",
+        "his ability to practise",
+        "his activity right now"
+      ]
+    },
+    "EX-0-064": {
+      "prompt": "—___ did you practise yesterday? —In the small room behind the hall.",
+      "choices": [
+        "Who",
+        "Where",
+        "How",
+        "When"
+      ]
+    },
+    "EX-0-065": {
+      "prompt": "“The teacher asked Nina to help Tom.” Who received the teacher’s request?",
+      "choices": [
+        "Nina’s whole family",
+        "Tom",
+        "Nina",
+        "The teacher’s father"
+      ]
+    },
+    "EX-0-066": {
+      "prompt": "“First I was afraid, but then I calmed down.” Which timeline fits?",
+      "choices": [
+        "calm → afraid",
+        "afraid → more afraid forever",
+        "calm all the time",
+        "afraid → calm"
+      ]
+    },
+    "EX-0-067": {
+      "prompt": "Today is 18 May. “We performed three days ago” refers to ___.",
+      "choices": [
+        "15 May",
+        "21 May",
+        "18 June",
+        "3 May"
+      ]
+    },
+    "EX-0-068": {
+      "prompt": "In which phrase does play mean “戏剧”?",
+      "choices": [
+        "play the king",
+        "a three-scene play",
+        "play basketball",
+        "play outside"
+      ]
+    },
+    "EX-0-069": {
+      "prompt": "I wanted to learn a dance yesterday, but the class was cancelled before it began. That class offered ___.",
+      "choices": [
+        "proof about every class",
+        "a successful dance lesson",
+        "no lesson that day",
+        "proof of no interest"
+      ]
+    },
+    "EX-0-070": {
+      "prompt": "In British English: We had a ___ session; we ___ singing.",
+      "choices": [
+        "practise; practised to",
+        "practiced; practiceed",
+        "practised; were practise",
+        "practice; practised"
+      ]
+    },
+    "EX-0-071": {
+      "prompt": "Which advice fits “Try your best”?",
+      "choices": [
+        "Learn from mistakes.",
+        "Stop after one mistake.",
+        "Let only winners try.",
+        "Hide mistakes."
+      ]
+    },
+    "EX-0-072": {
+      "prompt": "“There were six new lines. I read them twice and remembered them.” The last “them” refers to ___.",
+      "choices": [
+        "the parents",
+        "the six lines",
+        "the school plays",
+        "the two readings"
+      ]
+    },
+    "EX-0-073": {
+      "prompt": "“I was shy last year. Now I ___ speaking to new people every morning.”",
+      "choices": [
+        "practising",
+        "practised yesterday",
+        "practise",
+        "was practise"
+      ]
+    },
+    "EX-0-074": {
+      "prompt": "Practice started at 4:00 and ended at 4:40. Which start–finish pair is correct?",
+      "choices": [
+        "4:40–4:00",
+        "4:00–8:00",
+        "4:00–4:00",
+        "4:00–4:40"
+      ]
+    },
+    "EX-0-075": {
+      "prompt": "“I made two mistakes but finished the song and felt proud.” The singer ___.",
+      "choices": [
+        "finished despite mistakes",
+        "won first prize",
+        "made no mistakes",
+        "stopped halfway"
+      ]
+    },
+    "EX-1-001": {
+      "prompt": "A shop gave a pupil too much change. Which action shows honesty?",
+      "choices": [
+        "hiding the money",
+        "returning the extra money",
+        "denying receiving change",
+        "blaming someone else"
+      ]
+    },
+    "EX-1-002": {
+      "prompt": "Choose the pair: “___ matters. We trust an ___ person.”",
+      "choices": [
+        "Honesty; honest",
+        "Honest; honesty",
+        "Honesty; honesty",
+        "Honest; honest"
+      ]
+    },
+    "EX-1-003": {
+      "prompt": "Which phrase is correct?",
+      "choices": [
+        "a honest buyer",
+        "an poor buyer",
+        "a old buyer",
+        "an honest buyer"
+      ]
+    },
+    "EX-1-004": {
+      "prompt": "“It was ___ lie. Please tell ___ truth now.”",
+      "choices": [
+        "the; a",
+        "an; the",
+        "a; the",
+        "a; a"
+      ]
+    },
+    "EX-1-005": {
+      "prompt": "Which pair completes “Please ___ me what happened, then ___ sorry to Eva”?",
+      "choices": [
+        "say; tell",
+        "tell; say",
+        "tell; tell",
+        "say; say"
+      ]
+    },
+    "EX-1-006": {
+      "prompt": "Put ___ your bag, please.",
+      "choices": [
+        "it in",
+        "in it",
+        "your bag in it to",
+        "to it in"
+      ]
+    },
+    "EX-1-007": {
+      "prompt": "Choose the pair: “I met Eva on my way ___ home and Ben on my way ___ school.” Use “—” for no word.",
+      "choices": [
+        "to; —",
+        "to; to",
+        "at; to",
+        "—; to"
+      ]
+    },
+    "EX-1-008": {
+      "prompt": "The two girls found a note while walking home. It happened on ___ way home.",
+      "choices": [
+        "them",
+        "they",
+        "their",
+        "theirs"
+      ]
+    },
+    "EX-1-009": {
+      "prompt": "We ___ the missing key for an hour, but did not ___ it.",
+      "choices": [
+        "found; look for",
+        "looked for; find",
+        "looked for; found",
+        "looked; find for"
+      ]
+    },
+    "EX-1-010": {
+      "prompt": "—___ book is this? —Eva’s name is inside the cover.",
+      "choices": [
+        "Whose",
+        "Who",
+        "Where",
+        "When"
+      ]
+    },
+    "EX-1-011": {
+      "prompt": "The book has five short tales for young children, not facts about science. It is a ___.",
+      "choices": [
+        "repair plan",
+        "buyer’s bill",
+        "football timetable",
+        "storybook"
+      ]
+    },
+    "EX-1-012": {
+      "prompt": "We bought paper yesterday. We ___ glue.",
+      "choices": [
+        "did not bought",
+        "were not buy",
+        "did not buy",
+        "do not bought"
+      ]
+    },
+    "EX-1-013": {
+      "prompt": "___ they ___ yesterday?",
+      "choices": [
+        "Did; paid",
+        "Did; pay",
+        "Were; pay",
+        "Do; paid"
+      ]
+    },
+    "EX-1-014": {
+      "prompt": "—Did you leave the notebook at school? —___. I put it on my desk at home.",
+      "choices": [
+        "No, I did not.",
+        "Yes, I did.",
+        "No, I was not.",
+        "No, I do not."
+      ]
+    },
+    "EX-1-015": {
+      "prompt": "Choose the correct pair: “___ you worried yesterday?” “___ you tell anyone?”",
+      "choices": [
+        "Did; Were",
+        "Was; Did",
+        "Were; Were",
+        "Were; Did"
+      ]
+    },
+    "EX-1-016": {
+      "prompt": "My little brother ___ a lie last week.",
+      "choices": [
+        "does not told",
+        "did not told",
+        "did not tell",
+        "was not tell"
+      ]
+    },
+    "EX-1-017": {
+      "prompt": "The note says, “They had a sick ox.” Ask about it: “___ they ___ a sick ox?”",
+      "choices": [
+        "Did; had",
+        "Did; have",
+        "Were; have",
+        "Had; did have"
+      ]
+    },
+    "EX-1-018": {
+      "prompt": "—I returned the wallet. —What ___ next? —I went back to class.",
+      "choices": [
+        "did you do",
+        "do you do",
+        "was its colour",
+        "will you buy"
+      ]
+    },
+    "EX-1-019": {
+      "prompt": "The search ended at noon. We ___ the owner then and returned the book.",
+      "choices": [
+        "find",
+        "finded",
+        "were find",
+        "found"
+      ]
+    },
+    "EX-1-020": {
+      "prompt": "The chair broke in the morning and was usable again by evening. Which order fits?",
+      "choices": [
+        "repair → break",
+        "offer → sell",
+        "break → repair",
+        "find → ignore"
+      ]
+    },
+    "EX-1-021": {
+      "prompt": "After returning the money, I did not feel ___ any more; I felt ___.",
+      "choices": [
+        "badly; wellly",
+        "bad; good",
+        "badness; goodness",
+        "badly; goodness"
+      ]
+    },
+    "EX-1-022": {
+      "prompt": "“I ___ bad yesterday, but I did not ___ afraid after talking to Mum.”",
+      "choices": [
+        "felt; feel",
+        "feel; felt",
+        "felt; felt",
+        "feeled; feel"
+      ]
+    },
+    "EX-1-023": {
+      "prompt": "I lent Ben my ruler on Monday. He returned it on Tuesday. On Tuesday, I ___ my ruler.",
+      "choices": [
+        "sold",
+        "lost",
+        "replaced",
+        "got back"
+      ]
+    },
+    "EX-1-024": {
+      "prompt": "The teacher is returning our books. Can I ___ now?",
+      "choices": [
+        "get back mine",
+        "get now back to mine",
+        "get mine back",
+        "get my back"
+      ]
+    },
+    "EX-1-025": {
+      "prompt": "“The honest shopkeeper got a good name.” Here “a good name” means ___.",
+      "choices": [
+        "a longer name",
+        "a good reputation",
+        "a new sign",
+        "a different spelling"
+      ]
+    },
+    "EX-1-026": {
+      "prompt": "Eva paid Ben ten yuan for his book. Ben ___ the book.",
+      "choices": [
+        "sold Eva",
+        "bought from Eva",
+        "bought Eva",
+        "never sold"
+      ]
+    },
+    "EX-1-027": {
+      "prompt": "A visitor paid for a bike and took it away. Who was the buyer?",
+      "choices": [
+        "the shopkeeper",
+        "a visitor who left",
+        "every passer-by",
+        "the paying visitor"
+      ]
+    },
+    "EX-1-028": {
+      "prompt": "“The poor man had a sick ox.” Man: ___; ox: ___.",
+      "choices": [
+        "rich; rich",
+        "ill; healthy",
+        "poor; ill",
+        "rich; young"
+      ]
+    },
+    "EX-1-029": {
+      "prompt": "“The ox is old but healthy.” It is ___.",
+      "choices": [
+        "young and ill",
+        "not young or ill",
+        "old and ill",
+        "young and poor"
+      ]
+    },
+    "EX-1-030": {
+      "prompt": "My sister has a son and a daughter. Her son is my ___.",
+      "choices": [
+        "nephew",
+        "father",
+        "uncle",
+        "niece"
+      ]
+    },
+    "EX-1-031": {
+      "prompt": "“The seller was away from home for two days.” The seller was ___ during that time.",
+      "choices": [
+        "homeless",
+        "selling the home",
+        "indoors at home",
+        "not at home"
+      ]
+    },
+    "EX-1-032": {
+      "prompt": "Yesterday I came back ___, then walked ___.",
+      "choices": [
+        "to home; Eva's house",
+        "at home; Eva house",
+        "home; to Eva's house",
+        "home; Eva house"
+      ]
+    },
+    "EX-1-033": {
+      "prompt": "“Please watch the baby and keep him safe.” Here watch means ___.",
+      "choices": [
+        "watch a programme about",
+        "look after",
+        "sell to a buyer",
+        "write about"
+      ]
+    },
+    "EX-1-034": {
+      "prompt": "The story describes three animals of the same kind. Which noun phrase is correct?",
+      "choices": [
+        "three wolves",
+        "three wolfs",
+        "three wolf",
+        "three wolfes"
+      ]
+    },
+    "EX-1-035": {
+      "prompt": "The child lost his toy yesterday and ___ sadly.",
+      "choices": [
+        "cryed",
+        "cries yesterday",
+        "was cry",
+        "cried"
+      ]
+    },
+    "EX-1-036": {
+      "prompt": "Please ___ honestly.",
+      "choices": [
+        "answer to the question",
+        "answer the question to",
+        "answer the question",
+        "answering the question"
+      ]
+    },
+    "EX-1-037": {
+      "prompt": "Each of ___ responsible for our words.",
+      "choices": [
+        "we are",
+        "us is",
+        "us are",
+        "our is"
+      ]
+    },
+    "EX-1-038": {
+      "prompt": "We should ___ even when we make a mistake.",
+      "choices": [
+        "be honest",
+        "honest",
+        "are honest",
+        "be honesty"
+      ]
+    },
+    "EX-1-039": {
+      "prompt": "“I know I must repair it, but I do not know ___ it.”",
+      "choices": [
+        "what to repair",
+        "how repairing",
+        "what repair to",
+        "how to repair"
+      ]
+    },
+    "EX-1-040": {
+      "prompt": "The children did not know ___ next after finding the broken window.",
+      "choices": [
+        "how to do",
+        "what doing",
+        "what to do",
+        "what did"
+      ]
+    },
+    "EX-1-041": {
+      "prompt": "Yesterday I wanted ___ the broken box myself before asking for help.",
+      "choices": [
+        "to repaired",
+        "to repair",
+        "repairing to",
+        "repaired"
+      ]
+    },
+    "EX-1-042": {
+      "prompt": "“The clock still did not work, but I tried my best to repair it.” The repair involved ___.",
+      "choices": [
+        "effort without success",
+        "no effort",
+        "complete success",
+        "a dishonest sale"
+      ]
+    },
+    "EX-1-043": {
+      "prompt": "I broke Eva's pen. I should ___ Eva.",
+      "choices": [
+        "tell sorry at",
+        "say sorry pen to",
+        "say to sorry of",
+        "say sorry to"
+      ]
+    },
+    "EX-1-044": {
+      "prompt": "I ___ the money yesterday. Honesty ___ important.",
+      "choices": [
+        "return; were",
+        "returned tomorrow; did",
+        "returned; is",
+        "returning; are"
+      ]
+    },
+    "EX-1-045": {
+      "prompt": "Diary: “I damaged the box and felt afraid. After ___, I felt relieved.”",
+      "choices": [
+        "describing its colour",
+        "admitting it and apologising",
+        "eating yesterday's breakfast",
+        "discussing the weather"
+      ]
+    },
+    "EX-1-046": {
+      "prompt": "I thought I broke a toy and apologised. The owner said it broke last week. My apology showed ___.",
+      "choices": [
+        "admitting a believed mistake",
+        "proof of today's damage",
+        "proof it never broke",
+        "refusing to be honest"
+      ]
+    },
+    "EX-1-047": {
+      "prompt": "A seller explains a bike's damage before taking payment. This lets the buyer ___.",
+      "choices": [
+        "miss the hidden damage",
+        "get every bike free",
+        "ignore all information",
+        "make an informed choice"
+      ]
+    },
+    "EX-1-048": {
+      "prompt": "Choose the correct pair: “He ___ yesterday. Those ___ hurt his friend.”",
+      "choices": [
+        "lay; lies",
+        "lied; lie",
+        "lied; lies",
+        "lie; lied"
+      ]
+    },
+    "EX-1-049": {
+      "prompt": "Eva ___ the cup. Choose the correct denial of a past action.",
+      "choices": [
+        "did not broke",
+        "did not break",
+        "was not broke",
+        "did not breaking"
+      ]
+    },
+    "EX-1-050": {
+      "prompt": "—Did you and Leo return the rulers? —Yes, ___.",
+      "choices": [
+        "we did",
+        "they were",
+        "I was",
+        "we do"
+      ]
+    },
+    "EX-1-051": {
+      "prompt": "—___ did you return the tool so quickly? —Because the owner needed it.",
+      "choices": [
+        "Where",
+        "Who",
+        "When",
+        "Why"
+      ]
+    },
+    "EX-1-052": {
+      "prompt": "The buyer ___, “Thank you for telling me.”",
+      "choices": [
+        "sayed",
+        "told",
+        "said",
+        "did said"
+      ]
+    },
+    "EX-1-053": {
+      "prompt": "“I sold the bike ___ Eva. Eva bought it ___ me.”",
+      "choices": [
+        "from; to",
+        "to; from",
+        "for; to",
+        "to; to"
+      ]
+    },
+    "EX-1-054": {
+      "prompt": "We repaired it ___.",
+      "choices": [
+        "yesterday",
+        "in yesterday",
+        "yesterday now",
+        "at yesterday"
+      ]
+    },
+    "EX-1-055": {
+      "prompt": "Which pair can both introduce a past event?",
+      "choices": [
+        "ago two days; yesterday in",
+        "tomorrow; next week",
+        "two days next; ago last",
+        "two days ago; previously"
+      ]
+    },
+    "EX-1-056": {
+      "prompt": "—___ storybook is blue? —Noah's.",
+      "choices": [
+        "Who",
+        "Where",
+        "Whose",
+        "When"
+      ]
+    },
+    "EX-1-057": {
+      "prompt": "They ___ away from home last Monday.",
+      "choices": [
+        "did",
+        "were",
+        "was",
+        "are"
+      ]
+    },
+    "EX-1-058": {
+      "prompt": "“The mechanic repaired the bike.” He ___ it.",
+      "choices": [
+        "fixed",
+        "bought",
+        "sold",
+        "hid"
+      ]
+    },
+    "EX-1-059": {
+      "prompt": "Mum asks me to watch my little brother. I should ___.",
+      "choices": [
+        "ignore him",
+        "sell his toys",
+        "leave him alone",
+        "keep him safe"
+      ]
+    },
+    "EX-1-060": {
+      "prompt": "After making a mistake, an honest person can still ___.",
+      "choices": [
+        "claim to be perfect",
+        "reject every later truth",
+        "tell the truth",
+        "value only winning"
+      ]
+    },
+    "EX-1-061": {
+      "prompt": "“I felt better because I no longer hid the truth.” What caused the change?",
+      "choices": [
+        "a different date",
+        "telling the truth",
+        "buying more paper",
+        "moving house"
+      ]
+    },
+    "EX-1-062": {
+      "prompt": "Which word has ea pronounced /iː/, as in teacher?",
+      "choices": [
+        "each",
+        "head",
+        "bread",
+        "break"
+      ]
+    },
+    "EX-1-063": {
+      "prompt": "Which pair shares the /iː/ sound for ea?",
+      "choices": [
+        "head; teach",
+        "break; each",
+        "bread; head",
+        "teach; each"
+      ]
+    },
+    "EX-1-064": {
+      "prompt": "Which pair has -ed pronounced /d/ in both words?",
+      "choices": [
+        "washed; repaired",
+        "wanted; tried",
+        "repaired; tried",
+        "needed; washed"
+      ]
+    },
+    "EX-1-065": {
+      "prompt": "Put one word in each column /t/, /d/, /ɪd/. Which row is correct?",
+      "choices": [
+        "repaired; needed; washed",
+        "washed; repaired; needed",
+        "needed; washed; repaired",
+        "washed; needed; repaired"
+      ]
+    },
+    "EX-1-066": {
+      "prompt": "—Did Ben do the repair? —Yes, ___.",
+      "choices": [
+        "he did",
+        "he did do did",
+        "he was do",
+        "he does yesterday"
+      ]
+    },
+    "EX-1-067": {
+      "prompt": "I did not ___ the book or ___ the money.",
+      "choices": [
+        "sold; kept",
+        "sell; keeps",
+        "sell; keeping",
+        "sell; keep"
+      ]
+    },
+    "EX-1-068": {
+      "prompt": "“Monday, 6 May. Sunny.” gives a diary's ___.",
+      "choices": [
+        "owner, price and buyer",
+        "title and characters",
+        "day, date and weather",
+        "answers to every question"
+      ]
+    },
+    "EX-1-069": {
+      "prompt": "Choose the clearest order: ① I admitted the damage. ② I damaged the box. ③ The owner helped me fix it.",
+      "choices": [
+        "①→③→②",
+        "②→①→③",
+        "③→②→①",
+        "②→③→①"
+      ]
+    },
+    "EX-1-070": {
+      "prompt": "“Eva got her lost bag back yesterday.” Eva ___ yesterday.",
+      "choices": [
+        "had her bag again",
+        "found it in a park",
+        "bought a new bag",
+        "first lost the bag"
+      ]
+    },
+    "EX-1-071": {
+      "prompt": "In “a sick old ox”, which word names the animal itself?",
+      "choices": [
+        "sick",
+        "old",
+        "a",
+        "ox"
+      ]
+    },
+    "EX-1-072": {
+      "prompt": "Which phrase correctly describes two adult males?",
+      "choices": [
+        "two mans",
+        "two man",
+        "two men",
+        "two mens"
+      ]
+    },
+    "EX-1-073": {
+      "prompt": "—Does this clock work? —No, it stopped yesterday. The seller is ___.",
+      "choices": [
+        "claiming it works",
+        "explaining the problem honestly",
+        "refusing to answer",
+        "denying there is a buyer"
+      ]
+    },
+    "EX-1-074": {
+      "prompt": "I damaged a classmate's model, but no one saw me. What should I do?",
+      "choices": [
+        "admit it and help",
+        "hide it",
+        "blame someone else",
+        "deny it existed"
+      ]
+    },
+    "EX-1-075": {
+      "prompt": "Which list contains only correct past forms?",
+      "choices": [
+        "answerd, cried, comed, gave",
+        "answered, cryed, came, gived",
+        "answer, cried, come, give",
+        "answered, cried, came, gave"
+      ]
+    },
+    "EX-2-001": {
+      "prompt": "A nurse helped a lost child, and a driver took the child home. The child calls them heroes. Who are the child's heroes?",
+      "choices": [
+        "two famous hospital workers",
+        "the driver alone",
+        "the nurse and driver",
+        "the nurse alone"
+      ]
+    },
+    "EX-2-002": {
+      "prompt": "The woman is famous ___ a scientist and famous ___ her work on rice. Choose the pair.",
+      "choices": [
+        "for; as",
+        "as; for",
+        "as; as",
+        "for; for"
+      ]
+    },
+    "EX-2-003": {
+      "prompt": "Dr Lin studied plants and created a new watering tool. She was a ___.",
+      "choices": [
+        "designer who never studied",
+        "finder of existing tools",
+        "scientist and inventor",
+        "creator of all plants"
+      ]
+    },
+    "EX-2-004": {
+      "prompt": "A man made a machine that did not exist before. We say he ___ it.",
+      "choices": [
+        "invented",
+        "grew",
+        "passed",
+        "discovered"
+      ]
+    },
+    "EX-2-005": {
+      "prompt": "Lina dreamed of acting and teaching. By June, she had acted in a show but had not started teaching. How many dreams had come true?",
+      "choices": [
+        "two",
+        "one",
+        "none",
+        "three"
+      ]
+    },
+    "EX-2-006": {
+      "prompt": "The class finished its plant project last Friday. Ben ___ the seeds carefully before he wrote his report.",
+      "choices": [
+        "studied",
+        "study",
+        "studies",
+        "studying"
+      ]
+    },
+    "EX-2-007": {
+      "prompt": "The scientist ___ the rice years ago. Today it ___ people in many places.",
+      "choices": [
+        "develops; fed",
+        "developed; feed",
+        "develop; feeds",
+        "developed; feeds"
+      ]
+    },
+    "EX-2-008": {
+      "prompt": "One piece of paper makes three small cards. The class needs eight cards, and one whole piece is kept for mistakes. Which order is both sufficient and grammatically correct?",
+      "choices": [
+        "three pieces of paper",
+        "four papers of piece",
+        "four pieces of paper",
+        "two pieces of paper"
+      ]
+    },
+    "EX-2-009": {
+      "prompt": "Mei has 20 yuan. A notebook costs 80 yuan; a folder costs 12. What can she afford?",
+      "choices": [
+        "an 80-yuan folder",
+        "neither item",
+        "the notebook only",
+        "the folder only"
+      ]
+    },
+    "EX-2-010": {
+      "prompt": "The red book was mine yesterday. I ___ it to the library this morning, so it is there now.",
+      "choices": [
+        "give",
+        "giving",
+        "gives",
+        "gave"
+      ]
+    },
+    "EX-2-011": {
+      "prompt": "These twins ___ born in the same hospital in 2015, but they live in different cities now.",
+      "choices": [
+        "was",
+        "did",
+        "are",
+        "were"
+      ]
+    },
+    "EX-2-012": {
+      "prompt": "The children were sad to hear that their old teacher had died. Which phrase can replace 'died'?",
+      "choices": [
+        "grew up",
+        "came true",
+        "worked on",
+        "passed away"
+      ]
+    },
+    "EX-2-013": {
+      "prompt": "Course A teaches crop growing and animal care. Course B teaches poster design. Who chose a farming course for a suitable reason?",
+      "choices": [
+        "Leo: B for crops",
+        "Ben: B for animals",
+        "Mia: A for drawing",
+        "Eva: A for farming"
+      ]
+    },
+    "EX-2-014": {
+      "prompt": "Bamboo is heavy; silk is light but expensive; paper is light and cheap. Which meets a traveller's need for light, cheap writing material?",
+      "choices": [
+        "paper",
+        "silk",
+        "bamboo",
+        "bamboo and silk"
+      ]
+    },
+    "EX-2-015": {
+      "prompt": "One label says “silk” with no price. Another says “paper, 5 yuan”. The silk item's price is ___.",
+      "choices": [
+        "above 5 yuan",
+        "exactly 5 yuan",
+        "below 5 yuan",
+        "not given"
+      ]
+    },
+    "EX-2-016": {
+      "prompt": "Calling Yuan Longping “the father of hybrid rice” recognises his ___.",
+      "choices": [
+        "contribution to hybrid rice",
+        "studies of his children",
+        "ownership of all rice",
+        "relationship to every farmer"
+      ]
+    },
+    "EX-2-017": {
+      "prompt": "After years of practice, Nina finally performed. Her dream ___.",
+      "choices": [
+        "was came true",
+        "came true",
+        "did came true",
+        "came truly"
+      ]
+    },
+    "EX-2-018": {
+      "prompt": "The new bridge was not ready last month. The workers began to ___ it in March and are still busy now.",
+      "choices": [
+        "pass away",
+        "come true",
+        "work on",
+        "grow up"
+      ]
+    },
+    "EX-2-019": {
+      "prompt": "Readers in Asia, Africa and Europe enjoy the stories. This supports the phrase ___.",
+      "choices": [
+        "only in one hometown",
+        "every person without exception",
+        "personal visits to everyone",
+        "around the world"
+      ]
+    },
+    "EX-2-020": {
+      "prompt": "___, the work seemed impossible. Later, the team found a way. Which beginning fits best?",
+      "choices": [
+        "At first",
+        "Every day",
+        "Next year",
+        "At last"
+      ]
+    },
+    "EX-2-021": {
+      "prompt": "She enjoyed making things as a child, studied science at university, then developed a machine. Which order fits?",
+      "choices": [
+        "university = childhood interest",
+        "machine → interest → university",
+        "interest → university → machine",
+        "all during early childhood"
+      ]
+    },
+    "EX-2-022": {
+      "prompt": "Each morning she recorded plants in the field; each afternoon she compared notes at school. Which order fits?",
+      "choices": [
+        "observe → compare",
+        "observe → ignore",
+        "read → never observe",
+        "compare → collect"
+      ]
+    },
+    "EX-2-023": {
+      "prompt": "The first two tries failed, but the team did not give up ___ a better machine.",
+      "choices": [
+        "make",
+        "making",
+        "to make",
+        "made"
+      ]
+    },
+    "EX-2-024": {
+      "prompt": "The children were talking loudly. The teacher arrived, and they stopped ___. The room became quiet.",
+      "choices": [
+        "talking",
+        "talk",
+        "talked",
+        "to talk"
+      ]
+    },
+    "EX-2-025": {
+      "prompt": "The new clean water helped the village. It made people's lives ___ than before.",
+      "choices": [
+        "best",
+        "well",
+        "better",
+        "to better"
+      ]
+    },
+    "EX-2-026": {
+      "prompt": "The seeds need quiet care. Our teacher asked us ___ them during the holiday.",
+      "choices": [
+        "to not moving",
+        "not move",
+        "not to move",
+        "don't move"
+      ]
+    },
+    "EX-2-027": {
+      "prompt": "'My bag was very heavy yesterday. Thanks for ___ it for me,' said Grandma.",
+      "choices": [
+        "carry",
+        "to carry",
+        "carried",
+        "carrying"
+      ]
+    },
+    "EX-2-028": {
+      "prompt": "—Where did the helper ___ the lost child? —To the police station.",
+      "choices": [
+        "take",
+        "takes",
+        "taking",
+        "took"
+      ]
+    },
+    "EX-2-029": {
+      "prompt": "The notes describe the team's studies ___ water and plants, not a trip to a park.",
+      "choices": [
+        "from",
+        "at",
+        "to",
+        "on"
+      ]
+    },
+    "EX-2-030": {
+      "prompt": "Everyone calls the cleaner “Uncle Sun”. We call ___ Uncle Sun.",
+      "choices": [
+        "him as",
+        "him",
+        "to him",
+        "his"
+      ]
+    },
+    "EX-2-031": {
+      "prompt": "This new kind of rice ___ more people today than it did years ago.",
+      "choices": [
+        "feed",
+        "feeds",
+        "feeding",
+        "fed"
+      ]
+    },
+    "EX-2-032": {
+      "prompt": "The school is cleaner now because the children help ___ the playground every afternoon.",
+      "choices": [
+        "cleaned",
+        "cleans",
+        "to cleaning",
+        "clean"
+      ]
+    },
+    "EX-2-033": {
+      "prompt": "—___ carried the books yesterday? —The school helper did.",
+      "choices": [
+        "Why",
+        "Where",
+        "When",
+        "Who"
+      ]
+    },
+    "EX-2-034": {
+      "prompt": "Sue helped Ben yesterday. To ask about Ben: “Who ___?”",
+      "choices": [
+        "helped Sue",
+        "did help Sue",
+        "did Sue help",
+        "Sue helped"
+      ]
+    },
+    "EX-2-035": {
+      "prompt": "—___ was the artist born? —In 1942. —And where? —In a small town.",
+      "choices": [
+        "Who",
+        "How",
+        "When",
+        "Where"
+      ]
+    },
+    "EX-2-036": {
+      "prompt": "—___ did the children plant the trees? —Near the river, not behind the school.",
+      "choices": [
+        "When",
+        "Where",
+        "Why",
+        "Who"
+      ]
+    },
+    "EX-2-037": {
+      "prompt": "—___ did the team keep the young plants safe? —They put them inside on cold nights.",
+      "choices": [
+        "When",
+        "Why",
+        "How",
+        "Who"
+      ]
+    },
+    "EX-2-038": {
+      "prompt": "—Why did the helper go back to the station? —___ a child needed help.",
+      "choices": [
+        "In 2020",
+        "The helper",
+        "By bus",
+        "Because"
+      ]
+    },
+    "EX-2-039": {
+      "prompt": "—What did the inventor make for the children? —___",
+      "choices": [
+        "An inventor.",
+        "In his workshop.",
+        "Because it was dark.",
+        "A small reading lamp."
+      ]
+    },
+    "EX-2-040": {
+      "prompt": "—How ___ your visit to the science museum yesterday? —Wonderful!",
+      "choices": [
+        "did",
+        "were",
+        "was",
+        "is"
+      ]
+    },
+    "EX-2-041": {
+      "prompt": "—Did you visit the farm or the paper museum? —___",
+      "choices": [
+        "No, I wasn't.",
+        "Yes, I did.",
+        "The paper museum.",
+        "It was sunny."
+      ]
+    },
+    "EX-2-042": {
+      "prompt": "Dad gave the museum an old tool. Ask about the tool: “What ___ the museum?”",
+      "choices": [
+        "did Dad gave",
+        "does Dad gave",
+        "did Dad give",
+        "Dad did give"
+      ]
+    },
+    "EX-2-043": {
+      "prompt": "I ___ the answer at first, but I learned it from a book later.",
+      "choices": [
+        "didn't knew",
+        "don't knew",
+        "didn't know",
+        "wasn't know"
+      ]
+    },
+    "EX-2-044": {
+      "prompt": "Choose the correct pair: How ___ the show? What ___ you learn from it?",
+      "choices": [
+        "was; did",
+        "was; were",
+        "did; did",
+        "did; was"
+      ]
+    },
+    "EX-2-045": {
+      "prompt": "—When did the inventor finish the model? —___",
+      "choices": [
+        "With some paper.",
+        "Yes, he did.",
+        "On Monday afternoon.",
+        "At the school gate."
+      ]
+    },
+    "EX-2-046": {
+      "prompt": "In standard British pronunciation, which word has the same 'ar' sound as 'star'?",
+      "choices": [
+        "warm",
+        "share",
+        "quarter",
+        "card"
+      ]
+    },
+    "EX-2-047": {
+      "prompt": "Which pair both contain /ɑː/ in standard British English?",
+      "choices": [
+        "arm; park",
+        "warm; park",
+        "arm; care",
+        "share; warm"
+      ]
+    },
+    "EX-2-048": {
+      "prompt": "I read the guide every day, but yesterday I read a different one. The second 'read' sounds like ___.",
+      "choices": [
+        "reed",
+        "red",
+        "road",
+        "ride"
+      ]
+    },
+    "EX-2-049": {
+      "prompt": "The job was difficult, but the children worked ___ and finished it.",
+      "choices": [
+        "hard",
+        "hardly",
+        "harderly",
+        "hardestly"
+      ]
+    },
+    "EX-2-050": {
+      "prompt": "“Great people are like stars in the dark” suggests they bring ___.",
+      "choices": [
+        "night-time work only",
+        "hope and help",
+        "space lessons only",
+        "life beyond Earth"
+      ]
+    },
+    "EX-2-051": {
+      "prompt": "A recording says 'nineteen thirty'. Which year should you write?",
+      "choices": [
+        "1930",
+        "1913",
+        "1903",
+        "1990"
+      ]
+    },
+    "EX-2-052": {
+      "prompt": "Which reading does NOT mean the year 2003?",
+      "choices": [
+        "two thousand and three",
+        "two thousand three",
+        "twenty thirty",
+        "twenty oh three"
+      ]
+    },
+    "EX-2-053": {
+      "prompt": "A report says the event happened in 2021. Which written reading matches that year?",
+      "choices": [
+        "twenty twenty-one",
+        "twenty twelve",
+        "two thousand and twelve",
+        "nineteen twenty-one"
+      ]
+    },
+    "EX-2-054": {
+      "prompt": "The family moved there ___ 1964, and the town changed a lot ___ the 1960s.",
+      "choices": [
+        "on; in",
+        "in; on",
+        "in; in",
+        "at; on"
+      ]
+    },
+    "EX-2-055": {
+      "prompt": "The visitors sat under a tree and ___ the rice cakes they brought.",
+      "choices": [
+        "ate",
+        "eats",
+        "eat",
+        "eating"
+      ]
+    },
+    "EX-2-056": {
+      "prompt": "Our farm trip was yesterday, not tomorrow. We ___ there before breakfast.",
+      "choices": [
+        "go",
+        "went",
+        "going",
+        "goes"
+      ]
+    },
+    "EX-2-057": {
+      "prompt": "The old notes show that the plants ___ well in that field last summer.",
+      "choices": [
+        "grows",
+        "growed",
+        "grew",
+        "growing"
+      ]
+    },
+    "EX-2-058": {
+      "prompt": "The model on display is ours. We ___ it from old boxes during last week's project.",
+      "choices": [
+        "make",
+        "made",
+        "maked",
+        "making"
+      ]
+    },
+    "EX-2-059": {
+      "prompt": "When I asked for advice yesterday, the teacher ___, 'Keep trying.'",
+      "choices": [
+        "said",
+        "sayed",
+        "says",
+        "saying"
+      ]
+    },
+    "EX-2-060": {
+      "prompt": "Before he moved to the city, Mr Lin ___ children in a village school for many years.",
+      "choices": [
+        "teached",
+        "taught",
+        "teach",
+        "teaches"
+      ]
+    },
+    "EX-2-061": {
+      "prompt": "It began to rain on our walk yesterday. Luckily, Mum ___ an umbrella with her.",
+      "choices": [
+        "taked",
+        "took",
+        "takes",
+        "taking"
+      ]
+    },
+    "EX-2-062": {
+      "prompt": "The helpers ___ early and ___ the room ready before the children arrived.",
+      "choices": [
+        "came; got",
+        "come; get",
+        "came; get",
+        "comed; got"
+      ]
+    },
+    "EX-2-063": {
+      "prompt": "Last Saturday, we ___ our work first and then ___ a short rest.",
+      "choices": [
+        "do; have",
+        "did; had",
+        "did; have",
+        "doed; had"
+      ]
+    },
+    "EX-2-064": {
+      "prompt": "Chen helped on a farm as a child, studied farming, then solved a rice problem. Which sequence fits?",
+      "choices": [
+        "solution → experience",
+        "experience → study → application",
+        "childhood work → no study",
+        "study → useless experience"
+      ]
+    },
+    "EX-2-065": {
+      "prompt": "After two failures, May checked her notes, changed one part and succeeded. What helped her most?",
+      "choices": [
+        "learning from failed attempts",
+        "changing nothing",
+        "forgetting earlier successes",
+        "notes without another attempt"
+      ]
+    },
+    "EX-2-066": {
+      "prompt": "Dr Wu treated village children for thirty years and was not an inventor. He was a ___.",
+      "choices": [
+        "medicine inventor",
+        "caring village doctor",
+        "child treating doctors",
+        "doctor who refused children"
+      ]
+    },
+    "EX-2-067": {
+      "prompt": "Which action shows BOTH patience and helpfulness towards an elderly neighbour?",
+      "choices": [
+        "explaining until they understand",
+        "donating unused clothes",
+        "finishing one's own work",
+        "describing a door's colour"
+      ]
+    },
+    "EX-2-068": {
+      "prompt": "An inventor learned from failed tests. Which habit follows his example?",
+      "choices": [
+        "hide failed attempts",
+        "copy his birth year",
+        "expect instant success",
+        "check mistakes and improve"
+      ]
+    },
+    "EX-2-069": {
+      "prompt": "The writer passed away many years ago. Her books ___ children learn about nature today.",
+      "choices": [
+        "help",
+        "helped only",
+        "helping",
+        "was help"
+      ]
+    },
+    "EX-2-070": {
+      "prompt": "Aunt Li helps neighbours read letters even when tired after work. She is admired for ___.",
+      "choices": [
+        "demanding payment",
+        "having unlimited free time",
+        "reading for herself only",
+        "helping despite personal effort"
+      ]
+    },
+    "EX-2-071": {
+      "prompt": "—How did your group make the sign? —___",
+      "choices": [
+        "Beside the door.",
+        "With old paper.",
+        "Last Tuesday.",
+        "Three signs."
+      ]
+    },
+    "EX-2-072": {
+      "prompt": "Report on someone you know, using two actions you witnessed. Which plan fits?",
+      "choices": [
+        "famous scientist; copied dates",
+        "neighbour; two observed kindnesses",
+        "aunt; clothing colour only",
+        "unknown inventors; imagined stories"
+      ]
+    },
+    "EX-2-073": {
+      "prompt": "Put the ideas in a sensible order: ①The machine worked at last. ②At first it did not move. ③The inventor changed one part.",
+      "choices": [
+        "①②③",
+        "②③①",
+        "③①②",
+        "②①③"
+      ]
+    },
+    "EX-2-074": {
+      "prompt": "Born: 1940. Teaching began: 1962. School building opened: 1970. Died: 2010. The building opened ___ teaching began and ___ the person's death.",
+      "choices": [
+        "before; after",
+        "before; before",
+        "after; after",
+        "after; before"
+      ]
+    },
+    "EX-2-075": {
+      "prompt": "A scientist feeds people; a cleaner helps daily. Both are admired for ___.",
+      "choices": [
+        "fame alone",
+        "being unknown",
+        "helping others",
+        "appearing on television"
+      ]
+    },
+    "EX-3-001": {
+      "prompt": "Eight children stood ahead of May. Two of them left, and two new children joined ahead of her. What is May's position now?",
+      "choices": [
+        "ninth",
+        "seventh",
+        "eighth",
+        "eleventh"
+      ]
+    },
+    "EX-3-002": {
+      "prompt": "Ben cleaned while Dad rested. Ben could not buy a gift but wanted to show love. What best explains his choice?",
+      "choices": [
+        "Dad disliked all gifts.",
+        "Dad needed a rest.",
+        "Ben forgot the occasion.",
+        "Cleaning was for sale."
+      ]
+    },
+    "EX-3-003": {
+      "prompt": "Grandma wants to call us and take family photos. Our budget is 500 yuan. A smartphone costs 450 yuan; a camera 400; a music player 200; a tablet with no camera 480. Which should we choose?",
+      "choices": [
+        "the camera",
+        "the music player",
+        "the smartphone",
+        "the tablet"
+      ]
+    },
+    "EX-3-004": {
+      "prompt": "For Grandpa's 80th birthday, we wish him ___.",
+      "choices": [
+        "luck in tomorrow's test",
+        "a happy school start",
+        "a pleasant flight",
+        "a long, happy life"
+      ]
+    },
+    "EX-3-005": {
+      "prompt": "Grandpa blew out four of six candles. The room lamp stayed on. Which lights did he blow out?",
+      "choices": [
+        "four cake candles",
+        "every room light",
+        "two cake candles",
+        "the room lamp"
+      ]
+    },
+    "EX-3-006": {
+      "prompt": "I drew Grandma in the morning. Dad photographed everyone together that afternoon. Which picture shows the whole family?",
+      "choices": [
+        "my drawing of Grandma",
+        "Dad's afternoon photo",
+        "an empty-room photo",
+        "Grandma's old school photo"
+      ]
+    },
+    "EX-3-007": {
+      "prompt": "The person in the old picture could not reach the table. The same person is in Grade 6 now. Grandma says, 'You were a little kid then.' What does 'kid' mean here?",
+      "choices": [
+        "a new teacher",
+        "an old neighbour",
+        "a young child",
+        "a busy parent"
+      ]
+    },
+    "EX-3-008": {
+      "prompt": "The school note says, 'We hoped to visit in April. The visit took place in March because Grandma was away in April.' Which month belongs in a report of the actual visit?",
+      "choices": [
+        "February",
+        "April",
+        "May",
+        "March"
+      ]
+    },
+    "EX-3-009": {
+      "prompt": "An invitation says “4th April”. I will come on ___.",
+      "choices": [
+        "the fourth of April",
+        "the fourteenth of April",
+        "the fourth of March",
+        "the fourth of May"
+      ]
+    },
+    "EX-3-010": {
+      "prompt": "An invitation sent in June says, “Join us on 7th July.” When is the gathering?",
+      "choices": [
+        "in June",
+        "in July",
+        "before June",
+        "on 7th June"
+      ]
+    },
+    "EX-3-011": {
+      "prompt": "“8th August — Grandma's 70th birthday”: August gives the ___; 70th describes the ___.",
+      "choices": [
+        "age; month",
+        "year; date",
+        "month; birthday",
+        "day; month"
+      ]
+    },
+    "EX-3-012": {
+      "prompt": "“We planned a November meal, but it was cancelled.” The meal was ___.",
+      "choices": [
+        "certainly held in November",
+        "held on 1st November",
+        "held in December",
+        "planned but cancelled"
+      ]
+    },
+    "EX-3-013": {
+      "prompt": "A festival falls on lunar 9/9 each year, but its solar date changes. Which date stays fixed?",
+      "choices": [
+        "lunar 9/9",
+        "lunar 1/1",
+        "solar 9/9",
+        "solar 10/9"
+      ]
+    },
+    "EX-3-014": {
+      "prompt": "Grandma's floor was clean, but books and clothes were everywhere. We put them away. We ___ her room.",
+      "choices": [
+        "washed",
+        "tidied",
+        "cooked in",
+        "bought"
+      ]
+    },
+    "EX-3-015": {
+      "prompt": "Grandma looks at photos from my baby days to Grade 6 and says, “Time flies!” Time seems to pass ___.",
+      "choices": [
+        "through the air",
+        "in twelve minutes",
+        "very quickly",
+        "only when leaving"
+      ]
+    },
+    "EX-3-016": {
+      "prompt": "Card A: 'Grandma’s birthday—lunar 9/8.' Card B: 'Visit older neighbours the following day.' Card B is a plan for which festival?",
+      "choices": [
+        "the Spring Festival",
+        "the Mid-Autumn Festival",
+        "Children’s Day",
+        "the Double Ninth Festival"
+      ]
+    },
+    "EX-3-017": {
+      "prompt": "The Lantern Festival is on lunar 1/15. Our gathering is fourteen days earlier, on lunar 1/1. Which festival are we celebrating?",
+      "choices": [
+        "the Spring Festival",
+        "the Double Ninth Festival",
+        "the Dragon Boat Festival",
+        "the Mid-Autumn Festival"
+      ]
+    },
+    "EX-3-018": {
+      "prompt": "Which greeting is specifically for Grandma's birthday?",
+      "choices": [
+        "Happy Double Ninth Festival!",
+        "Happy seventieth birthday!",
+        "Let's visit older neighbours.",
+        "Happy holiday, children!"
+      ]
+    },
+    "EX-3-019": {
+      "prompt": "Sam finished before everyone else and received one prize. He won ___ place and got ___ prize.",
+      "choices": [
+        "one; first",
+        "last; one",
+        "first; one",
+        "third; one"
+      ]
+    },
+    "EX-3-020": {
+      "prompt": "We can cook only after the visit. We must finish the cards before the visit. No other activity is planned. What is the second activity?",
+      "choices": [
+        "making cards",
+        "cooking dinner",
+        "taking a bus home",
+        "visiting Grandpa"
+      ]
+    },
+    "EX-3-021": {
+      "prompt": "Start on the first floor. Go up three floors, then down one. Which floor are you on now?",
+      "choices": [
+        "the third floor",
+        "the second floor",
+        "the fourth floor",
+        "the fifth floor"
+      ]
+    },
+    "EX-3-022": {
+      "prompt": "A photo was fifth. Two photos before it were removed, then two were added before it. It is now the ___ photo.",
+      "choices": [
+        "third",
+        "fifth",
+        "seventh",
+        "fiveth"
+      ]
+    },
+    "EX-3-023": {
+      "prompt": "We took one family photo in each of six years, missed last year, and took one today. Today's is our ___ family photo.",
+      "choices": [
+        "eighth",
+        "sixth",
+        "seventh",
+        "seven"
+      ]
+    },
+    "EX-3-024": {
+      "prompt": "Ella was eleven yesterday. Today is her birthday. Next year's card will say “Happy ___ birthday!”",
+      "choices": [
+        "eleventh",
+        "twelfth",
+        "fourteenth",
+        "thirteenth"
+      ]
+    },
+    "EX-3-025": {
+      "prompt": "Twenty-one people signed up before you. Two cancelled, and no one else joined. You are now the ___.",
+      "choices": [
+        "twentieth person",
+        "nineteenth person",
+        "twenty-first person",
+        "twenty-second person"
+      ]
+    },
+    "EX-3-026": {
+      "prompt": "We meet on April's last day. That is the ___ of April.",
+      "choices": [
+        "thirteenth",
+        "thirtieth",
+        "thirty",
+        "thirty-first"
+      ]
+    },
+    "EX-3-027": {
+      "prompt": "A photo was numbered eighteen. Three new photos are inserted before it, and none are removed. Which new label is correct?",
+      "choices": [
+        "eighteenth",
+        "twentieth",
+        "twenty-first",
+        "twenty-fourth"
+      ]
+    },
+    "EX-3-028": {
+      "prompt": "Grandpa is 58 today; his sister is two years older. Her card says “Happy ___ birthday!”",
+      "choices": [
+        "fifty-eighth",
+        "sixtieth-first",
+        "sixty",
+        "sixtieth"
+      ]
+    },
+    "EX-3-029": {
+      "prompt": "Grandma's card three years ago said “Happy sixty-third birthday!” Today's card says “Happy ___ birthday!”",
+      "choices": [
+        "sixty-sixth",
+        "sixtieth",
+        "sixty-third",
+        "sixty-seventh"
+      ]
+    },
+    "EX-3-030": {
+      "prompt": "Which row gives the correct short forms for the eleventh, twelfth and thirteenth?",
+      "choices": [
+        "11st; 12nd; 13rd",
+        "11th; 12th; 13th",
+        "11th; 12nd; 13rd",
+        "11st; 12th; 13th"
+      ]
+    },
+    "EX-3-031": {
+      "prompt": "The family meal is exactly two weeks after 7th October. Which day-before-month date belongs on the invitation?",
+      "choices": [
+        "14th October",
+        "20th October",
+        "21st October",
+        "22nd October"
+      ]
+    },
+    "EX-3-032": {
+      "prompt": "The invitation first said '3rd January'. We changed only the month to February, keeping the day number. How should we read the corrected date?",
+      "choices": [
+        "the first of February",
+        "the third of January",
+        "the thirteenth of February",
+        "the third of February"
+      ]
+    },
+    "EX-3-033": {
+      "prompt": "We usually visit ___ April, but this year our visit is ___ 12th April.",
+      "choices": [
+        "in; on",
+        "on; in",
+        "at; on",
+        "in; at"
+      ]
+    },
+    "EX-3-034": {
+      "prompt": "The birthday lunch starts ___ noon ___ 8th August.",
+      "choices": [
+        "on; at",
+        "at; on",
+        "in; on",
+        "at; in"
+      ]
+    },
+    "EX-3-035": {
+      "prompt": "We went climbing ___ the morning of 9th October, not on another day.",
+      "choices": [
+        "in",
+        "at",
+        "on",
+        "for"
+      ]
+    },
+    "EX-3-036": {
+      "prompt": "We are taking photo number twenty. This is ___ photo.",
+      "choices": [
+        "our the twentieth",
+        "the our twentieth",
+        "our twenty",
+        "our twentieth"
+      ]
+    },
+    "EX-3-037": {
+      "prompt": "Ben has one book and buys another. It is ___ book.",
+      "choices": [
+        "Ben's second",
+        "Ben's the second",
+        "the Ben's second",
+        "Ben's two"
+      ]
+    },
+    "EX-3-038": {
+      "prompt": "There are ___ photos in the album. This is the ___ one. Choose the pair for 12 and 12th.",
+      "choices": [
+        "twelfth; twelve",
+        "twelve; twelfth",
+        "twelve; twelve",
+        "twelfth; twelfth"
+      ]
+    },
+    "EX-3-039": {
+      "prompt": "“We gave Grandma flowers” means “We gave flowers ___ Grandma.”",
+      "choices": [
+        "for",
+        "at",
+        "to",
+        "of"
+      ]
+    },
+    "EX-3-040": {
+      "prompt": "“We made Grandpa a card” means “We made a card ___ Grandpa.”",
+      "choices": [
+        "to",
+        "of",
+        "at",
+        "for"
+      ]
+    },
+    "EX-3-041": {
+      "prompt": "Yesterday I ___ with Grandma about her school days.",
+      "choices": [
+        "chatted",
+        "chated",
+        "chat",
+        "chatting"
+      ]
+    },
+    "EX-3-042": {
+      "prompt": "Both of my grandparents live in that house. It is my ___.",
+      "choices": [
+        "grandparent’s houses",
+        "grandparents’ house",
+        "grandparents house",
+        "grandparents’s house"
+      ]
+    },
+    "EX-3-043": {
+      "prompt": "When Mum was busy, Uncle Joe took care of the baby. 'Took care of' means ___.",
+      "choices": [
+        "looked at",
+        "looked for",
+        "looked after",
+        "looked out"
+      ]
+    },
+    "EX-3-044": {
+      "prompt": "The candles were burning. After making a wish, Dad ___ them out.",
+      "choices": [
+        "blowed",
+        "blows",
+        "blow",
+        "blew"
+      ]
+    },
+    "EX-3-045": {
+      "prompt": "The camera was ready. Everyone smiled, and Aunt Li ___ a family photo.",
+      "choices": [
+        "took",
+        "taked",
+        "takes",
+        "taking"
+      ]
+    },
+    "EX-3-046": {
+      "prompt": "I did not buy the picture. I ___ it for Grandpa last night.",
+      "choices": [
+        "drawed",
+        "drew",
+        "draw",
+        "drawing"
+      ]
+    },
+    "EX-3-047": {
+      "prompt": "We met at Grandma's house yesterday. My cousins ___ some fruit with them.",
+      "choices": [
+        "bringed",
+        "brings",
+        "brought",
+        "bringing"
+      ]
+    },
+    "EX-3-048": {
+      "prompt": "When I was a little child, Grandpa often ___ my hand on the way to school.",
+      "choices": [
+        "holded",
+        "holds",
+        "holding",
+        "held"
+      ]
+    },
+    "EX-3-049": {
+      "prompt": "We had noodles first and ___ the cake after Grandma blew out the candles.",
+      "choices": [
+        "ate",
+        "eat",
+        "eated",
+        "eating"
+      ]
+    },
+    "EX-3-050": {
+      "prompt": "My grandparents took care of me when I was small. Now I can ___ them.",
+      "choices": [
+        "took care of",
+        "take care of",
+        "taking care of",
+        "takes care of"
+      ]
+    },
+    "EX-3-051": {
+      "prompt": "“We will walk up Green Hill with Grandma.” Which activity is planned?",
+      "choices": [
+        "playing chess",
+        "buying a phone",
+        "going climbing",
+        "taking a train"
+      ]
+    },
+    "EX-3-052": {
+      "prompt": "Grandpa put a Chinese chess board and the pieces on the table. He asked me to ___ with him.",
+      "choices": [
+        "blow out candles",
+        "take a family photo",
+        "cook dinner",
+        "play Chinese chess"
+      ]
+    },
+    "EX-3-053": {
+      "prompt": "Which activity is a household chore?",
+      "choices": [
+        "sweeping the floor",
+        "choosing a phone",
+        "buying flowers",
+        "paying for a cake"
+      ]
+    },
+    "EX-3-054": {
+      "prompt": "Dinner and the card are ready at home. The cake is still in the shop. What must we collect?",
+      "choices": [
+        "dinner",
+        "the cake",
+        "the card",
+        "card-making paper"
+      ]
+    },
+    "EX-3-055": {
+      "prompt": "The children give Grandpa long noodles and wish him a long life. They show ___.",
+      "choices": [
+        "anger",
+        "impatience to leave",
+        "love and good wishes",
+        "dislike of grandparents"
+      ]
+    },
+    "EX-3-056": {
+      "prompt": "We had lunch, took a family photo, then chatted. What happened second?",
+      "choices": [
+        "lunch",
+        "chatting",
+        "shopping",
+        "a family photo"
+      ]
+    },
+    "EX-3-057": {
+      "prompt": "Friday: Grandma turns 70. Saturday: museum visit. Friday's gathering is for ___.",
+      "choices": [
+        "Grandma's birthday",
+        "the museum visit",
+        "a new school year",
+        "the Spring Festival"
+      ]
+    },
+    "EX-3-058": {
+      "prompt": "After I helped Grandpa tidy his room, he smiled. Which ending fits?",
+      "choices": [
+        "The train left.",
+        "We both felt happy.",
+        "March is my favourite.",
+        "Our class has thirty pupils."
+      ]
+    },
+    "EX-3-059": {
+      "prompt": "Which detail tells BOTH when and where Mum's birthday celebration happened?",
+      "choices": [
+        "after opening the card",
+        "feeling very happy",
+        "yesterday at home",
+        "helping Mum every day"
+      ]
+    },
+    "EX-3-060": {
+      "prompt": "Grandma says, “I have enough things. Please sit and talk with me.” She most wants ___.",
+      "choices": [
+        "an expensive phone",
+        "a bigger cake",
+        "more candles",
+        "time with her family"
+      ]
+    },
+    "EX-3-061": {
+      "prompt": "Our first meeting is in December and our second in January. We meet every month. The third meeting will be in which month of the calendar year?",
+      "choices": [
+        "the second month",
+        "the first month",
+        "the third month",
+        "the twelfth month"
+      ]
+    },
+    "EX-3-062": {
+      "prompt": "The class show is on 31st May. We visit Grandma eight days after the show. Which date is correct?",
+      "choices": [
+        "1st June",
+        "8th June",
+        "7th June",
+        "8th May"
+      ]
+    },
+    "EX-3-063": {
+      "prompt": "Our first visit is in June. We visit every two months, so the second is in August. When is the third?",
+      "choices": [
+        "September",
+        "November",
+        "October",
+        "December"
+      ]
+    },
+    "EX-3-064": {
+      "prompt": "Grandpa’s birthday is on 31st December. Aunt May’s birthday is two days later. In which month is Aunt May’s birthday?",
+      "choices": [
+        "November",
+        "December",
+        "February",
+        "January"
+      ]
+    },
+    "EX-3-065": {
+      "prompt": "In British pronunciation, which word has an unstressed final 'er' like 'flower'?",
+      "choices": [
+        "teacher",
+        "her",
+        "term",
+        "person"
+      ]
+    },
+    "EX-3-066": {
+      "prompt": "Which pair both end with the unstressed sound /ə(r)/ in standard British English?",
+      "choices": [
+        "flower; bird",
+        "flower; mother",
+        "mother; her",
+        "term; bird"
+      ]
+    },
+    "EX-3-067": {
+      "prompt": "Which phrase is correct for three pictures taken with a camera?",
+      "choices": [
+        "three photoes",
+        "three photo",
+        "three photos",
+        "third photos"
+      ]
+    },
+    "EX-3-068": {
+      "prompt": "Mum's 40th birthday was in 2024. In 2026 her birthday is her ___.",
+      "choices": [
+        "41st birthday",
+        "fortieth birthday",
+        "forty-two birthday",
+        "42nd birthday"
+      ]
+    },
+    "EX-3-069": {
+      "prompt": "___, Grandpa did not know how to use the phone. After a lesson, he could call us himself.",
+      "choices": [
+        "At first",
+        "At last",
+        "Every March",
+        "Tomorrow"
+      ]
+    },
+    "EX-3-070": {
+      "prompt": "The candles are still burning. Please ___.",
+      "choices": [
+        "blow out them",
+        "blow them out",
+        "out blow them",
+        "them blow out"
+      ]
+    },
+    "EX-3-071": {
+      "prompt": "The old people smiled when the children gave ___ cards.",
+      "choices": [
+        "they",
+        "their",
+        "them",
+        "theirs"
+      ]
+    },
+    "EX-3-072": {
+      "prompt": "I made a card ___ Mum and gave it ___ her after dinner.",
+      "choices": [
+        "to; for",
+        "for; for",
+        "to; to",
+        "for; to"
+      ]
+    },
+    "EX-3-073": {
+      "prompt": "Match the Spring Festival and the Double Ninth Festival to their lunar dates, in that order.",
+      "choices": [
+        "1/1; 9/9",
+        "9/9; 1/1",
+        "1/9; 9/1",
+        "9/1; 1/9"
+      ]
+    },
+    "EX-3-074": {
+      "prompt": "My grandparents held my hand when I was small. Now I hold theirs on the stairs. I am ___.",
+      "choices": [
+        "denying their past help",
+        "returning their care",
+        "asking for a phone",
+        "building new stairs"
+      ]
+    },
+    "EX-3-075": {
+      "prompt": "Every year we take a photo. Yesterday we ___ two because all the cousins were there.",
+      "choices": [
+        "take",
+        "takes",
+        "took",
+        "taking"
+      ]
+    },
+    "EX-4-001": {
+      "prompt": "A: There is only one broom, and Mia needs it. B: That is OK. I ____ the rubbish bags instead. 选择明确表达“我会改为拿垃圾袋”的一项。",
+      "choices": [
+        "am carry",
+        "carried",
+        "will carry",
+        "will carrying"
+      ]
+    },
+    "EX-4-002": {
+      "prompt": "Tomorrow Ben will collect the empty bottles and ____ the ground while I make posters.",
+      "choices": [
+        "sweeps",
+        "swept",
+        "sweep",
+        "sweeping"
+      ]
+    },
+    "EX-4-003": {
+      "prompt": "Toby fell down yesterday. He is still unable to walk alone, so his friends ____ him home after tomorrow’s club meeting.",
+      "choices": [
+        "walked",
+        "walks",
+        "walking",
+        "will walk"
+      ]
+    },
+    "EX-4-004": {
+      "prompt": "The two helpers will arrive at eight. One is ill, so only Grace ____ at eight tomorrow.",
+      "choices": [
+        "wills arrive",
+        "will arrive",
+        "will arrives",
+        "is will arrive"
+      ]
+    },
+    "EX-4-005": {
+      "prompt": "Promise a future action: “I ___ leave litter next month.”",
+      "choices": [
+        "shouldn't",
+        "didn't",
+        "won't",
+        "don't"
+      ]
+    },
+    "EX-4-006": {
+      "prompt": "告诉同伴“你不应该把香蕉皮留在那里”：You ___ leave it there.",
+      "choices": [
+        "won't",
+        "shouldn't",
+        "didn't",
+        "aren't"
+      ]
+    },
+    "EX-4-007": {
+      "prompt": "A: Will the new girl bring gloves? B: Yes, ____. 选择完整规范的简短回答。",
+      "choices": [
+        "she’ll",
+        "she is",
+        "she does",
+        "she will"
+      ]
+    },
+    "EX-4-008": {
+      "prompt": "A: Will your brother and you leave before the work is done? B: No, ____. We will stay until the end.",
+      "choices": [
+        "they won’t",
+        "we won’t",
+        "we don’t",
+        "I won’t"
+      ]
+    },
+    "EX-4-009": {
+      "prompt": "—___ will you do next Friday? —We will make signs.",
+      "choices": [
+        "What",
+        "Where",
+        "When",
+        "Who"
+      ]
+    },
+    "EX-4-010": {
+      "prompt": "We will clean River Park, but first we will meet outside the library. —___ will you meet? —Outside the library.",
+      "choices": [
+        "Where",
+        "Who",
+        "When",
+        "How"
+      ]
+    },
+    "EX-4-011": {
+      "prompt": "The bus leaves at 8:10 and arrives at 8:35. —When will it ___? —At 8:10.",
+      "choices": [
+        "arrive",
+        "leave",
+        "stop at the park",
+        "finish the trip"
+      ]
+    },
+    "EX-4-012": {
+      "prompt": "The volunteers cannot finish today, but the room ____ clean tomorrow afternoon.",
+      "choices": [
+        "will",
+        "will is",
+        "will be",
+        "will being"
+      ]
+    },
+    "EX-4-013": {
+      "prompt": "Our group usually cleans on Mondays. The park is closed next Monday, so we ____ there next Tuesday instead.",
+      "choices": [
+        "will work",
+        "worked",
+        "works",
+        "working"
+      ]
+    },
+    "EX-4-014": {
+      "prompt": "We ___ paper or ___ bottles on the benches tomorrow.",
+      "choices": [
+        "didn't throw; leave",
+        "won't throws; leaves",
+        "won't throw; leave",
+        "aren't throw; leave"
+      ]
+    },
+    "EX-4-015": {
+      "prompt": "“Ella is going to organise the clean-up” means “Ella ___ the clean-up.”",
+      "choices": [
+        "will organising",
+        "will to organise",
+        "will organise",
+        "wills organise"
+      ]
+    },
+    "EX-4-016": {
+      "prompt": "“My parents and my uncle will help,” says Wendy. She can report this as “____ help.”",
+      "choices": [
+        "We’ll",
+        "They’ll",
+        "He’ll",
+        "It’ll"
+      ]
+    },
+    "EX-4-017": {
+      "prompt": "“The new bin will be ready tomorrow” means “___ ready tomorrow.”",
+      "choices": [
+        "It'll",
+        "It's be",
+        "It'll be",
+        "It will"
+      ]
+    },
+    "EX-4-018": {
+      "prompt": "Some bags are on the wet ground. “Please ____ before they get dirty,” says the teacher.",
+      "choices": [
+        "pick up them",
+        "pick them up",
+        "pick it up",
+        "pick up it"
+      ]
+    },
+    "EX-4-019": {
+      "prompt": "The empty bottle is on the floor. Pick ___, please.",
+      "choices": [
+        "the empty bottle up",
+        "up it the bottle",
+        "it the bottle up",
+        "the bottle it up"
+      ]
+    },
+    "EX-4-020": {
+      "prompt": "Dad says, “Wait by the station gate. I’ll pick you up in the car.” What does “pick you up” mean here? （station：车站）",
+      "choices": [
+        "把你捡起来",
+        "开车接你",
+        "教会你英语",
+        "送你步行回家"
+      ]
+    },
+    "EX-4-021": {
+      "prompt": "“I lived with an English family and picked up some English while playing with the children.” Here “picked up” means ____.",
+      "choices": [
+        "自然学会",
+        "丢掉",
+        "开车接",
+        "从地上捡起"
+      ]
+    },
+    "EX-4-022": {
+      "prompt": "These old books are still useful. We will give them to other children, so don’t ____.",
+      "choices": [
+        "read them",
+        "put them in order",
+        "throw them away",
+        "keep them clean"
+      ]
+    },
+    "EX-4-023": {
+      "prompt": "A sign says, “Please use the bin. Do not throw anything ____ the ground.”",
+      "choices": [
+        "at",
+        "in",
+        "on",
+        "to"
+      ]
+    },
+    "EX-4-024": {
+      "prompt": "A boy eats a banana and leaves its outside covering on the path. It is the banana ____, not the fruit, that may make someone slip.",
+      "choices": [
+        "gate",
+        "bag",
+        "skin",
+        "group"
+      ]
+    },
+    "EX-4-025": {
+      "prompt": "Yesterday Amy stepped on a loose bottle, lost her balance and ____ down. Her friend helped her up. （lost her balance：失去平衡）",
+      "choices": [
+        "fall",
+        "fell",
+        "falls",
+        "will fall"
+      ]
+    },
+    "EX-4-026": {
+      "prompt": "The ground is clean now because the workers ____ it before breakfast this morning. （caretaker：管理员）",
+      "choices": [
+        "swept",
+        "sweeps",
+        "will sweep",
+        "sweep"
+      ]
+    },
+    "EX-4-027": {
+      "prompt": "Plogging combines jogging with ___.",
+      "choices": [
+        "collecting litter",
+        "indoor cleaning only",
+        "ignoring litter",
+        "swimming"
+      ]
+    },
+    "EX-4-028": {
+      "prompt": "After the clean-up we will go ____ along the river, so bring your sports shoes.",
+      "choices": [
+        "jog",
+        "jogs",
+        "jogged",
+        "jogging"
+      ]
+    },
+    "EX-4-029": {
+      "prompt": "Ava listens to the guide while she picks up bottles; neither action waits for the other to finish. She does both ____.",
+      "choices": [
+        "next month",
+        "on time",
+        "at first",
+        "at the same time"
+      ]
+    },
+    "EX-4-030": {
+      "prompt": "The clean-up starts at 9:00. Arriving exactly when agreed means arriving ___.",
+      "choices": [
+        "on time",
+        "in time",
+        "at times",
+        "for a time"
+      ]
+    },
+    "EX-4-031": {
+      "prompt": "The boy began to slip, but Nora caught his arm before he fell. She helped him ____.",
+      "choices": [
+        "too late",
+        "in time",
+        "next week",
+        "every day"
+      ]
+    },
+    "EX-4-032": {
+      "prompt": "The rubbish bags are open. The waste inside makes the entrance ____. （entrance：入口）",
+      "choices": [
+        "dirty",
+        "dirtily",
+        "dirties",
+        "to dirty"
+      ]
+    },
+    "EX-4-033": {
+      "prompt": "Jogging can keep us ____, and careful cleaning can keep the paths safe.",
+      "choices": [
+        "health",
+        "healthily",
+        "healthy",
+        "to health"
+      ]
+    },
+    "EX-4-034": {
+      "prompt": "“We can reuse the paper to make posters.” “That sounds ____. Let’s try it.”",
+      "choices": [
+        "greatly",
+        "great",
+        "greatness",
+        "to great"
+      ]
+    },
+    "EX-4-035": {
+      "prompt": "The plan sounds helpful, and the two posters ____ interesting too.",
+      "choices": [
+        "sound",
+        "sounds",
+        "sounded tomorrow",
+        "is sound"
+      ]
+    },
+    "EX-4-036": {
+      "prompt": "Ask permission to help the cleaning group: “___ join you?”",
+      "choices": [
+        "Would you like to",
+        "Can I",
+        "Will you",
+        "Where did you"
+      ]
+    },
+    "EX-4-037": {
+      "prompt": "Invite a neighbour to the clean-up: “Would you like to ___?”",
+      "choices": [
+        "come with us",
+        "let me join you",
+        "tell us about yesterday",
+        "warn someone about litter"
+      ]
+    },
+    "EX-4-038": {
+      "prompt": "—Can you help at ten? —___. I have a doctor's appointment then.",
+      "choices": [
+        "Yes, I'll be there",
+        "Sorry, I can't then",
+        "Sure, I'm free",
+        "Yes, I have no plans"
+      ]
+    },
+    "EX-4-039": {
+      "prompt": "The park needs help again. “Let’s ____ another cleaning day and invite more neighbours.”",
+      "choices": [
+        "to plan",
+        "plans",
+        "planning",
+        "plan"
+      ]
+    },
+    "EX-4-040": {
+      "prompt": "The school has no cleaning club yet. Mei wants ____ one, so she is asking for helpers.",
+      "choices": [
+        "start",
+        "to start",
+        "starting",
+        "started"
+      ]
+    },
+    "EX-4-041": {
+      "prompt": "The notice says, “Please bring gloves. We’ll do some ____ after the market closes.”",
+      "choices": [
+        "clean",
+        "cleans",
+        "cleaning",
+        "cleaned"
+      ]
+    },
+    "EX-4-042": {
+      "prompt": "Twenty-four children will work in groups of six. How many groups will there be?",
+      "choices": [
+        "Two groups.",
+        "Three groups.",
+        "Six groups.",
+        "Four groups."
+      ]
+    },
+    "EX-4-043": {
+      "prompt": "The visitors must wait outside the school grounds, not outside a classroom. Which place does the instruction refer to?",
+      "choices": [
+        "the classroom floor",
+        "the classroom door",
+        "the school gate",
+        "the rubbish bin"
+      ]
+    },
+    "EX-4-044": {
+      "prompt": "The helpers will meet ____ the west gate ____ half past eight, then walk to the river together.",
+      "choices": [
+        "at; at",
+        "on; at",
+        "at; on",
+        "in; in"
+      ]
+    },
+    "EX-4-045": {
+      "prompt": "Choose the correct notice: “We will clean the garden ____ Sunday morning, not ____ the evening.”",
+      "choices": [
+        "on; at",
+        "in; on",
+        "at; on",
+        "on; in"
+      ]
+    },
+    "EX-4-046": {
+      "prompt": "After the activity, I’ll walk ____ because her ankle still hurts.",
+      "choices": [
+        "home her",
+        "her to home",
+        "she home",
+        "her home"
+      ]
+    },
+    "EX-4-047": {
+      "prompt": "The books are clean but mixed up. We need to ___.",
+      "choices": [
+        "put them in order",
+        "throw them down",
+        "make them dirty",
+        "walk them home"
+      ]
+    },
+    "EX-4-048": {
+      "prompt": "“Come and join our cleaning group!” The poster aims to ___.",
+      "choices": [
+        "cancel the activity",
+        "keep people away",
+        "sell gloves",
+        "attract more helpers"
+      ]
+    },
+    "EX-4-049": {
+      "prompt": "Six helpers work in three separate groups. Notice: “Two helpers will sweep. Three will collect bottles. One will make signs. Everyone will put rubbish in the bins.” How many helpers will put rubbish in the bins?",
+      "choices": [
+        "One.",
+        "Two.",
+        "Six.",
+        "Three."
+      ]
+    },
+    "EX-4-050": {
+      "prompt": "Sunday's plogging group requires gloves and the ability to jog. Who qualifies?",
+      "choices": [
+        "Sam: jogs, no gloves",
+        "Eva: jogs, has gloves",
+        "Amy: gloves, cannot jog",
+        "Tim: evening availability only"
+      ]
+    },
+    "EX-4-051": {
+      "prompt": "If dry, we clean the path; if rainy, we make posters indoors. Rain is forecast. We will ___.",
+      "choices": [
+        "stay home",
+        "clean the path",
+        "swim in the river",
+        "make posters indoors"
+      ]
+    },
+    "EX-4-052": {
+      "prompt": "The latest message says, “The gate is closed. Meet by the library at nine.” Where should we meet?",
+      "choices": [
+        "by the library",
+        "at the closed gate",
+        "inside the park",
+        "at home"
+      ]
+    },
+    "EX-4-053": {
+      "prompt": "Plan: 9:00–9:40 collect rubbish; 9:40–10:00 rest; 10:00–10:30 sweep. How long will the children actually do cleaning work?",
+      "choices": [
+        "Forty minutes.",
+        "Fifty minutes.",
+        "Seventy minutes.",
+        "Ninety minutes."
+      ]
+    },
+    "EX-4-054": {
+      "prompt": "The helpers finished cleaning and tidying. Praise them: “___!”",
+      "choices": [
+        "You did a great job",
+        "Start working now",
+        "Work hasn't started",
+        "Make it dirty"
+      ]
+    },
+    "EX-4-055": {
+      "prompt": "Plogging gave Ruth exercise and left less litter. Which title fits both results?",
+      "choices": [
+        "Staying Indoors",
+        "Faster but Dirtier",
+        "Cleaning Without Exercise",
+        "Healthy People, Clean Paths"
+      ]
+    },
+    "EX-4-056": {
+      "prompt": "Jay dropped a fruit skin. Someone slipped before he picked it up. What is the best lesson?",
+      "choices": [
+        "Leave cleaning to victims.",
+        "Later help prevents harm.",
+        "Skins cannot cause slips.",
+        "Never drop litter."
+      ]
+    },
+    "EX-4-057": {
+      "prompt": "In which phrase is clean an adjective describing a result?",
+      "choices": [
+        "will clean the playground",
+        "clean the playground weekly",
+        "please clean the playground",
+        "keep the playground clean"
+      ]
+    },
+    "EX-4-058": {
+      "prompt": "After the festival, there ___ rubbish near the gate.",
+      "choices": [
+        "were a",
+        "were much",
+        "was many",
+        "was much"
+      ]
+    },
+    "EX-4-059": {
+      "prompt": "A plan has four sentences: ① We will collect litter there. ② First, we will meet by the gate. ③ Finally, we will wash our hands. ④ Then we will walk to the park. Choose the clearest order. （clearest order：最清晰的顺序）",
+      "choices": [
+        "④②③①",
+        "①③②④",
+        "③①④②",
+        "②④①③"
+      ]
+    },
+    "EX-4-060": {
+      "prompt": "Which ending values the clean-up and promises to help again?",
+      "choices": [
+        "Clean today; litter tomorrow.",
+        "Clean cities matter. I'll help!",
+        "Yesterday's work is over.",
+        "My shoes are colourful."
+      ]
+    },
+    "EX-4-061": {
+      "prompt": "“We will not leave rubbish” means “We ___ leave rubbish.”",
+      "choices": [
+        "willn't",
+        "won't",
+        "wont'",
+        "won't to"
+      ]
+    },
+    "EX-4-062": {
+      "prompt": "A: “I'd like to join.” B: “I'll join; I'm booked.” A expresses a ___; B states a ___.",
+      "choices": [
+        "completed action; refusal",
+        "wish; future action",
+        "past action; past action",
+        "wish; identical wish"
+      ]
+    },
+    "EX-4-063": {
+      "prompt": "A: Which activity would you like to take part in? B: I’d like ____ in the bottle-collecting activity.",
+      "choices": [
+        "taking part",
+        "to take part",
+        "take part",
+        "took part"
+      ]
+    },
+    "EX-4-064": {
+      "prompt": "___ rubbish on the floor, and ___ it behind the door.",
+      "choices": [
+        "Won't drop; won't hide",
+        "Not drop; not hide",
+        "Don't drops; don't hides",
+        "Don't drop; don't hide"
+      ]
+    },
+    "EX-4-065": {
+      "prompt": "There is less litter this week. Let’s all try ____ it that way.",
+      "choices": [
+        "kept",
+        "keep",
+        "keeping to",
+        "to keep"
+      ]
+    },
+    "EX-4-066": {
+      "prompt": "Remember that ___ a bin beside the exit.",
+      "choices": [
+        "there is",
+        "there",
+        "there are",
+        "is there"
+      ]
+    },
+    "EX-4-067": {
+      "prompt": "Plogging can keep us ___ and make our city ___.",
+      "choices": [
+        "healthy us; clean our",
+        "health; cleanly",
+        "healthy; clean",
+        "healthily; cleaning"
+      ]
+    },
+    "EX-4-068": {
+      "prompt": "按本单元英式读音，哪一组两个词中的ir都发/ɜː/？",
+      "choices": [
+        "tired; dirty",
+        "fire; girl",
+        "bird; shirt",
+        "skirt; fire"
+      ]
+    },
+    "EX-4-069": {
+      "prompt": "Complete this sound group: girl, bird, shirt, ____. 要求新词中的ir也读/ɜː/（英式读音）。",
+      "choices": [
+        "fire",
+        "tired",
+        "thirsty",
+        "tiger"
+      ]
+    },
+    "EX-4-070": {
+      "prompt": "A pupil reads dirty as /ˈdaɪti/. Which word can help correct the vowel in its first syllable?",
+      "choices": [
+        "white",
+        "time",
+        "shirt",
+        "bike"
+      ]
+    },
+    "EX-4-071": {
+      "prompt": "Which phrase has at least two ir spellings pronounced /ɜː/ in British English?",
+      "choices": [
+        "a white bike",
+        "a girl's dirty skirt",
+        "five mice",
+        "a clean gate"
+      ]
+    },
+    "EX-4-072": {
+      "prompt": "In “I will help”, the vowel in will is the same as the vowel in ____.",
+      "choices": [
+        "bin",
+        "clean",
+        "gate",
+        "ground"
+      ]
+    },
+    "EX-4-073": {
+      "prompt": "We need the past-tense word for this sentence: “Last night someone ____ a bottle over the wall.” Which spelling is correct?",
+      "choices": [
+        "threw",
+        "throwed",
+        "throw",
+        "through"
+      ]
+    },
+    "EX-4-074": {
+      "prompt": "Plogging began in Sweden and is now enjoyed in China too. Which order fits?",
+      "choices": [
+        "rubbish → no connection",
+        "China → Sweden",
+        "Sweden → nowhere else",
+        "Sweden → China"
+      ]
+    },
+    "EX-4-075": {
+      "prompt": "Which topic best opens a plan to keep our neighbourhood clean?",
+      "choices": [
+        "organising a weekend clean-up",
+        "a favourite computer game",
+        "buying colourful stationery",
+        "a rooftop restaurant"
+      ]
+    },
+    "EX-5-001": {
+      "prompt": "A “green shop” asks customers to reuse bags. Green here means ___.",
+      "choices": [
+        "saving resources",
+        "having green walls",
+        "offering more plastic bags",
+        "selling only green vegetables"
+      ]
+    },
+    "EX-5-002": {
+      "prompt": "Everyone has finished using the computer. I will ___.",
+      "choices": [
+        "turn off it",
+        "turn it off",
+        "turn it on",
+        "turns it off"
+      ]
+    },
+    "EX-5-003": {
+      "prompt": "It is too dark for Ada to read. She should ___ the light first.",
+      "choices": [
+        "turn off",
+        "turn down",
+        "turn on",
+        "avoid using"
+      ]
+    },
+    "EX-5-004": {
+      "prompt": "The radio is useful for the lesson, but its music is too loud. “Please _____,” says the teacher.",
+      "choices": [
+        "turn it off",
+        "turn it up",
+        "turn down it",
+        "turn it down"
+      ]
+    },
+    "EX-5-005": {
+      "prompt": "The speaker is on, but pupils at the back cannot hear. Please ___ the speaker.",
+      "choices": [
+        "turn up",
+        "turn on again",
+        "turn off",
+        "turn down"
+      ]
+    },
+    "EX-5-006": {
+      "prompt": "In “The nurse helped save the child”, save means ___.",
+      "choices": [
+        "use less water",
+        "keep alive or safe",
+        "store money",
+        "spend more time"
+      ]
+    },
+    "EX-5-007": {
+      "prompt": "Leo saves two yuan each Friday to buy a bag later. Save means ___.",
+      "choices": [
+        "turn into electricity",
+        "spend immediately",
+        "keep for later",
+        "give it all away"
+      ]
+    },
+    "EX-5-008": {
+      "prompt": "Nina is brushing her teeth while unused water runs. To save that water, she should ___.",
+      "choices": [
+        "open the tap wider",
+        "leave the tap running",
+        "switch off a light",
+        "turn off the tap"
+      ]
+    },
+    "EX-5-009": {
+      "prompt": "A map is on one face of the sheet and notes on the other. We used ___ the paper.",
+      "choices": [
+        "both sides of",
+        "both side of",
+        "both of sides of",
+        "all three sides of"
+      ]
+    },
+    "EX-5-010": {
+      "prompt": "Kai needs 20 more lines. The back of his sheet is empty. What uses the least new paper?",
+      "choices": [
+        "take two new sheets",
+        "use the empty back",
+        "discard and restart",
+        "use another sheet's front"
+      ]
+    },
+    "EX-5-011": {
+      "prompt": "Mia has exactly two shopping bags. One is red and one is blue. _____ the bags are made of cloth.",
+      "choices": [
+        "Both of two",
+        "Both side of",
+        "Both of",
+        "Every of"
+      ]
+    },
+    "EX-5-012": {
+      "prompt": "Rob takes only what he needs and finishes it. He ___ his food.",
+      "choices": [
+        "takes too much of",
+        "wastes",
+        "turns up",
+        "eats up"
+      ]
+    },
+    "EX-5-013": {
+      "prompt": "There are two small apples left. They are fresh, and the children are still hungry. Which instruction is correct?",
+      "choices": [
+        "Eat them up.",
+        "Eat up they.",
+        "Eat up them.",
+        "Eat it up."
+      ]
+    },
+    "EX-5-014": {
+      "prompt": "Tomorrow we won't ___.",
+      "choices": [
+        "waste foods",
+        "waste food",
+        "wasting food",
+        "to waste food"
+      ]
+    },
+    "EX-5-015": {
+      "prompt": "Refer to the particular rainwater in the bucket: We will save ___.",
+      "choices": [
+        "a water",
+        "waters",
+        "the water",
+        "saving the water"
+      ]
+    },
+    "EX-5-016": {
+      "prompt": "A shop gives customers many _____ bags. Which form fits the material before bags?",
+      "choices": [
+        "plastics",
+        "a plastic",
+        "plastically",
+        "plastic"
+      ]
+    },
+    "EX-5-017": {
+      "prompt": "This shopping bag is soft. It is made from the same kind of material as a shirt, and Mum washes and uses it again. It is a _____ bag.",
+      "choices": [
+        "cloth",
+        "glass",
+        "electricity",
+        "vegetable"
+      ]
+    },
+    "EX-5-018": {
+      "prompt": "Ella brushes her teeth twice a day. Tomorrow she will _____ them before leaving for camp.",
+      "choices": [
+        "brushes",
+        "brushing",
+        "brush",
+        "brushed"
+      ]
+    },
+    "EX-5-019": {
+      "prompt": "The cook needs carrots, potatoes and tomatoes. The children will carry these _____ in a cloth bag.",
+      "choices": [
+        "vegetable",
+        "electricity",
+        "teeth",
+        "vegetables"
+      ]
+    },
+    "EX-5-020": {
+      "prompt": "The green club meets for _____ hour, not for a whole afternoon.",
+      "choices": [
+        "an",
+        "a",
+        "two",
+        "many"
+      ]
+    },
+    "EX-5-021": {
+      "prompt": "The class starts a talk at 2:00 and finishes at 2:40. Every week, this talk _____ for forty minutes.",
+      "choices": [
+        "last",
+        "lasts",
+        "is last",
+        "lasting"
+      ]
+    },
+    "EX-5-022": {
+      "prompt": "In “The last game lasts ten minutes”, last and lasts mean ___.",
+      "choices": [
+        "final; final",
+        "game; game",
+        "final; continues",
+        "ten; minutes"
+      ]
+    },
+    "EX-5-023": {
+      "prompt": "Ben switches off his lights at 8:45 p.m. until 9:30 p.m. He takes part for ___.",
+      "choices": [
+        "15 minutes",
+        "75 minutes",
+        "120 minutes",
+        "45 minutes"
+      ]
+    },
+    "EX-5-024": {
+      "prompt": "The family’s note says, “Meet _____ the last Saturday of March _____ 8:20 p.m., ten minutes before the lights go off.”",
+      "choices": [
+        "on; at",
+        "in; on",
+        "at; in",
+        "for; on"
+      ]
+    },
+    "EX-5-025": {
+      "prompt": "The team starts at 9:00 and finishes at 11:00. They work ___ 9:00 ___ 11:00 a.m.",
+      "choices": [
+        "to; from",
+        "from; to",
+        "from; from",
+        "at; for"
+      ]
+    },
+    "EX-5-026": {
+      "prompt": "Earth Hour is in March; Earth Day is on 22 April. Which activity belongs on 22 April?",
+      "choices": [
+        "March's final Saturday event",
+        "a month-long Earth Hour",
+        "Earth Day poster-making",
+        "a one-hour-only Earth Day"
+      ]
+    },
+    "EX-5-027": {
+      "prompt": "Three groups will count bags, interview shopkeepers and make posters. Together, these tasks form the class’s green _____.",
+      "choices": [
+        "tooth",
+        "electricity",
+        "side",
+        "project"
+      ]
+    },
+    "EX-5-028": {
+      "prompt": "I will ___ blue on our poster.",
+      "choices": [
+        "colour the sea",
+        "blue the colour sea",
+        "colouring the sea",
+        "colour blue the sea it"
+      ]
+    },
+    "EX-5-029": {
+      "prompt": "The poster's picture is finished but it needs a slogan. —Will you draw or write? —I'll ___.",
+      "choices": [
+        "say yes only",
+        "write the slogan",
+        "say no only",
+        "draw it again"
+      ]
+    },
+    "EX-5-030": {
+      "prompt": "The teacher asks two pupils, “Will you two help with the green project?” Both agree. They answer together, “_____”",
+      "choices": [
+        "Yes, you will.",
+        "Yes, we do.",
+        "Yes, we will.",
+        "Yes, they are."
+      ]
+    },
+    "EX-5-031": {
+      "prompt": "“Will your sister buy new plastic bags tomorrow?” “No, _____. She has put a cloth bag by the door.”",
+      "choices": [
+        "she doesn’t",
+        "he won’t",
+        "she isn’t",
+        "she won’t"
+      ]
+    },
+    "EX-5-032": {
+      "prompt": "—___ take the car to school? —No, we won't. We will walk instead.",
+      "choices": [
+        "Will you",
+        "Will you to",
+        "How will you",
+        "Where will you"
+      ]
+    },
+    "EX-5-033": {
+      "prompt": "Next term, they ___ the tap running.",
+      "choices": [
+        "won't leaving",
+        "won't leave",
+        "aren't leave",
+        "not will leave"
+      ]
+    },
+    "EX-5-034": {
+      "prompt": "“I don't waste paper at school” describes Joy's ___.",
+      "choices": [
+        "new promise only",
+        "question",
+        "usual habit",
+        "past event only"
+      ]
+    },
+    "EX-5-035": {
+      "prompt": "“I _____ bring a cloth bag tomorrow. I _____ ask for a new plastic one,” says Amy in her green plan.",
+      "choices": [
+        "won’t; will",
+        "will; will",
+        "won’t; won’t",
+        "will; won’t"
+      ]
+    },
+    "EX-5-036": {
+      "prompt": "Will your brother _____ the Earth and _____ it green and blue?",
+      "choices": [
+        "draw; colour",
+        "draws; colours",
+        "drawing; colour",
+        "draw; coloured"
+      ]
+    },
+    "EX-5-037": {
+      "prompt": "“_____ will you carry your own cup?” “Because I don’t want to use a new plastic cup.”",
+      "choices": [
+        "When",
+        "Why",
+        "Where",
+        "Who"
+      ]
+    },
+    "EX-5-038": {
+      "prompt": "“_____ will help you carry the vegetables?” “My dad will. The bag is heavy.”",
+      "choices": [
+        "Where",
+        "When",
+        "Who",
+        "How"
+      ]
+    },
+    "EX-5-039": {
+      "prompt": "“_____ will the green club meet after school?” “Outside the library, next to the old tree.”",
+      "choices": [
+        "What",
+        "How",
+        "Why",
+        "Where"
+      ]
+    },
+    "EX-5-040": {
+      "prompt": "“We know we will make a poster, but _____ will we start?” “At half past three, after the last lesson.”",
+      "choices": [
+        "when",
+        "what",
+        "where",
+        "who"
+      ]
+    },
+    "EX-5-041": {
+      "prompt": "“We all want to save water. _____ will you do that at home?” “I’ll collect water from washing vegetables and use it for plants.”",
+      "choices": [
+        "When",
+        "How",
+        "Who",
+        "Where"
+      ]
+    },
+    "EX-5-042": {
+      "prompt": "What ___ next Sunday to help the Earth?",
+      "choices": [
+        "your family will do",
+        "will your family does",
+        "will your family do",
+        "does your family will do"
+      ]
+    },
+    "EX-5-043": {
+      "prompt": "—I'll switch off unused lights. —What ___ will you do? —I'll also reuse paper.",
+      "choices": [
+        "time yesterday",
+        "number of lights",
+        "place",
+        "else"
+      ]
+    },
+    "EX-5-044": {
+      "prompt": "“Will you pass me that pen?” is ___.",
+      "choices": [
+        "a request for help",
+        "a weather question",
+        "a colour description",
+        "a refusal"
+      ]
+    },
+    "EX-5-045": {
+      "prompt": "Correct “Will Sam to use his cloth bag tomorrow?”",
+      "choices": [
+        "use → uses",
+        "Will → Does",
+        "delete to",
+        "move Will after Sam"
+      ]
+    },
+    "EX-5-046": {
+      "prompt": "“We should use fewer plastic bags” gives ___.",
+      "choices": [
+        "a past fact",
+        "a bag colour",
+        "a month name",
+        "advice"
+      ]
+    },
+    "EX-5-047": {
+      "prompt": "___ the food. Don't ___ it.",
+      "choices": [
+        "Taste; waste",
+        "Tastes; wastes",
+        "To taste; not waste",
+        "Tasting; won't"
+      ]
+    },
+    "EX-5-048": {
+      "prompt": "Choose rhyming line-end words for a water-saving poster: “Save each ___; let the running tap ___.”",
+      "choices": [
+        "paper; bag",
+        "drop; stop",
+        "tree; light",
+        "flower; bed"
+      ]
+    },
+    "EX-5-049": {
+      "prompt": "“Use the back; save a tree” encourages ___.",
+      "choices": [
+        "leaving taps running",
+        "buying new bags",
+        "using both paper sides",
+        "leaving lights on"
+      ]
+    },
+    "EX-5-050": {
+      "prompt": "A reusable bag saves money “in the long run”, meaning ___.",
+      "choices": [
+        "during a race",
+        "before breakfast",
+        "for one hour",
+        "over a long period"
+      ]
+    },
+    "EX-5-051": {
+      "prompt": "Each pupil saves a sheet every day. Small actions add up because ___.",
+      "choices": [
+        "many people repeat them",
+        "one sheet equals Earth",
+        "only one pupil acts",
+        "everyone stops immediately"
+      ]
+    },
+    "EX-5-052": {
+      "prompt": "“Love Mother Earth. Never let her down.” Her refers to ___.",
+      "choices": [
+        "the writer's mother",
+        "the Earth",
+        "a girl called Down",
+        "a shopping bag"
+      ]
+    },
+    "EX-5-053": {
+      "prompt": "We want to keep our planet _____ and _____. Which pair completes the green message?",
+      "choices": [
+        "health; cleaning",
+        "healthily; cleanly",
+        "healthy; clean",
+        "health; cleanly"
+      ]
+    },
+    "EX-5-054": {
+      "prompt": "___ really cool. Choose the complete sentence opening.",
+      "choices": [
+        "Be green are",
+        "Being green are",
+        "Being green",
+        "Being green is"
+      ]
+    },
+    "EX-5-055": {
+      "prompt": "“Animals, plants, land and sea are important to _____,” says a pupil. Choose the correct personal pronoun.",
+      "choices": [
+        "me",
+        "I",
+        "my",
+        "mine"
+      ]
+    },
+    "EX-5-056": {
+      "prompt": "It is important ___ the Earth.",
+      "choices": [
+        "take care of",
+        "to take care of",
+        "taking care",
+        "to takes care of"
+      ]
+    },
+    "EX-5-057": {
+      "prompt": "Which entry names a specific green action?",
+      "choices": [
+        "shout “Green!”",
+        "like the colour green",
+        "reuse worksheets for notes",
+        "own a lovely pencil case"
+      ]
+    },
+    "EX-5-058": {
+      "prompt": "“First, I will save water at home. I will _____ bring my own bag when shopping.” Which word clearly adds another action?",
+      "choices": [
+        "yesterday",
+        "never",
+        "only",
+        "also"
+      ]
+    },
+    "EX-5-059": {
+      "prompt": "Arrange the ideas for a short green plan: ① Let’s help the Earth together. ② I will save water and reuse paper. ③ It is important to live a green life. Which order is best?",
+      "choices": [
+        "③→②→①",
+        "②→①→③",
+        "①→③→②",
+        "③→①→②"
+      ]
+    },
+    "EX-5-060": {
+      "prompt": "We will switch off unused lights for Earth Hour and keep saving energy afterwards. Choose the best title.",
+      "choices": [
+        "One Hour Is Enough",
+        "One Hour, Lasting Change",
+        "Only March Matters",
+        "Never Use Any Lights"
+      ]
+    },
+    "EX-5-061": {
+      "prompt": "Earth Hour began in 2007; our schools joined in 2015. It began ___ our schools joined.",
+      "choices": [
+        "when",
+        "the year",
+        "before",
+        "only after"
+      ]
+    },
+    "EX-5-062": {
+      "prompt": "The green talk is from 4:00 to 5:00 p.m. Sue is free from 3:30 to 5:30; Tom is free after 4:30; Eva must leave at 4:40. Who can stay for the whole talk?",
+      "choices": [
+        "Tom.",
+        "Eva.",
+        "Nobody.",
+        "Sue."
+      ]
+    },
+    "EX-5-063": {
+      "prompt": "Mum stops an unused tap; Dad switches off an unused lamp. Both actions ___.",
+      "choices": [
+        "avoid wasting resources",
+        "save paper only",
+        "keep machines running",
+        "require new plastic bags"
+      ]
+    },
+    "EX-5-064": {
+      "prompt": "“We will walk to school” means “We will go to school ___.”",
+      "choices": [
+        "on walk",
+        "on foot",
+        "by foot",
+        "on feet"
+      ]
+    },
+    "EX-5-065": {
+      "prompt": "Lena walks to school and reuses a bag. Nothing is said about meals. We know she ___.",
+      "choices": [
+        "never wastes food",
+        "grows every vegetable",
+        "has two green habits",
+        "joins every Earth Hour"
+      ]
+    },
+    "EX-5-066": {
+      "prompt": "采用教材英式读音，选出 or 与另外三项不同的一词。",
+      "choices": [
+        "born",
+        "short",
+        "horse",
+        "word"
+      ]
+    },
+    "EX-5-067": {
+      "prompt": "采用教材英式读音，哪组所有单词中的 or 都读 /ɔː/？",
+      "choices": [
+        "morning, sport, short",
+        "word, morning, sport",
+        "work, short, horse",
+        "doctor, word, born"
+      ]
+    },
+    "EX-5-068": {
+      "prompt": "按教材给出的强读形式，句子中的 for 单独重读为 /fɔː/。它与哪个词的元音相同？",
+      "choices": [
+        "work",
+        "word",
+        "horse",
+        "bag"
+      ]
+    },
+    "EX-5-069": {
+      "prompt": "Born and sport contain /ɔː/. Does or ALWAYS have this sound?",
+      "choices": [
+        "Never /ɔː/.",
+        "Neither word has or.",
+        "Every vowel is identical.",
+        "No; there are exceptions."
+      ]
+    },
+    "EX-5-070": {
+      "prompt": "There are four lamps in the empty hall. “Nobody needs these lamps now. I’ll _____,” says the monitor.",
+      "choices": [
+        "turn them off",
+        "turn off them",
+        "turn it off",
+        "turn they off"
+      ]
+    },
+    "EX-5-071": {
+      "prompt": "We ___ this sheet.",
+      "choices": [
+        "will uses both sides of",
+        "will use both sides of",
+        "will use both of sides",
+        "will using both side of"
+      ]
+    },
+    "EX-5-072": {
+      "prompt": "“I will take my own bag _____ help reduce plastic waste.” Choose the word that gives the purpose.",
+      "choices": [
+        "of",
+        "at",
+        "to",
+        "from"
+      ]
+    },
+    "EX-5-073": {
+      "prompt": "Saving water, reusing paper and carrying a cloth bag all ___.",
+      "choices": [
+        "depend on bag colour",
+        "must stop tomorrow",
+        "save food only",
+        "help the Earth"
+      ]
+    },
+    "EX-5-074": {
+      "prompt": "The class uses one sheet of paper to make a picture with a short green message. They put it on the wall for everyone to read. What have they made?",
+      "choices": [
+        "A poster.",
+        "A tap.",
+        "Electricity.",
+        "A tooth."
+      ]
+    },
+    "EX-5-075": {
+      "prompt": "A poster asks us to protect animals, save water and keep land clean. Which plan covers all three?",
+      "choices": [
+        "save water; drop litter",
+        "protect animals, water, land",
+        "clean land; hurt animals",
+        "discuss colours only"
+      ]
+    },
+    "EX-6-001": {
+      "prompt": "We need something hard and clear for a window in our model house. We want to see through it. Which material fits both needs?",
+      "choices": [
+        "Cardboard.",
+        "Old trousers.",
+        "Grey paint.",
+        "Glass."
+      ]
+    },
+    "EX-6-002": {
+      "prompt": "Use glass first as a material, then a drinking container: “___ is hard, and this ___ holds water.”",
+      "choices": [
+        "Glass; glass",
+        "Glasses; glass",
+        "A glass; glasses",
+        "Glass; glasses"
+      ]
+    },
+    "EX-6-003": {
+      "prompt": "A notice says, “Bring one box on Monday and two more on Tuesday.” How many ___ must a child bring in total?",
+      "choices": [
+        "boxs",
+        "boxes",
+        "boxies",
+        "box"
+      ]
+    },
+    "EX-6-004": {
+      "prompt": "We need two small round things from an old coat for our robot’s eyes. Which things should we use?",
+      "choices": [
+        "An old hat.",
+        "A recycling truck.",
+        "The coat’s buttons.",
+        "The coat’s sleeves."
+      ]
+    },
+    "EX-6-005": {
+      "prompt": "First the workers put paper and plastic in separate groups. Later, machines make the paper into new paper. Which pair names the two actions in order?",
+      "choices": [
+        "Burn; recycle.",
+        "Throw away; sort.",
+        "Recycle; sort.",
+        "Sort; recycle."
+      ]
+    },
+    "EX-6-006": {
+      "prompt": "An old bottle travelled from a home to a bin, then to a centre, and finally to a shop as a new bottle. Which title fits the whole account?",
+      "choices": [
+        "One Bottle's Journey",
+        "A Picture of a Bin",
+        "My New Library Card",
+        "Buying a Hat"
+      ]
+    },
+    "EX-6-007": {
+      "prompt": "No one knew how to make wheels. A child used four bottle tops, and the toy moved. “That was ___!” the teacher said.",
+      "choices": [
+        "rainy",
+        "clever",
+        "grey",
+        "plastic"
+      ]
+    },
+    "EX-6-008": {
+      "prompt": "The sign says, “Clean cardboard: grey bin. Glass: white bin.” Where should a clean cardboard box go?",
+      "choices": [
+        "into a fire",
+        "into any bin",
+        "into the grey bin",
+        "into the white bin"
+      ]
+    },
+    "EX-6-009": {
+      "prompt": "The old paper must travel along a road and then be processed inside a building. Which pair is in the correct order?",
+      "choices": [
+        "Library, then hat.",
+        "Button, then bottle.",
+        "Machine, then truck.",
+        "Truck, then machine."
+      ]
+    },
+    "EX-6-010": {
+      "prompt": "A box says, “I used to carry fruit. Now children borrow me and read my pages.” Where is it most likely now?",
+      "choices": [
+        "In a library.",
+        "Inside a rubbish truck.",
+        "On a coat.",
+        "Under a tap."
+      ]
+    },
+    "EX-6-011": {
+      "prompt": "Choose the label that means “a bottle made of plastic”, not a bottle holding plastic pieces.",
+      "choices": [
+        "a cardboard box",
+        "a plastic bottle",
+        "plastic pieces",
+        "a bottle of buttons"
+      ]
+    },
+    "EX-6-012": {
+      "prompt": "These old trousers ___ useful for a new bag.",
+      "choices": [
+        "is",
+        "a trousers is",
+        "are",
+        "it are"
+      ]
+    },
+    "EX-6-013": {
+      "prompt": "The robot's body ___ made with a box; its arms ___ made with cups.",
+      "choices": [
+        "is; am",
+        "are; are",
+        "is; is",
+        "is; are"
+      ]
+    },
+    "EX-6-014": {
+      "prompt": "Made ___ Mei, ___ Suzhou. Choose the maker and place prepositions.",
+      "choices": [
+        "by; in",
+        "of; from",
+        "from; of",
+        "in; by"
+      ]
+    },
+    "EX-6-015": {
+      "prompt": "Wood was processed into paper and is no longer recognisable. Paper is made ___ wood.",
+      "choices": [
+        "in",
+        "from",
+        "of a worker's",
+        "by"
+      ]
+    },
+    "EX-6-016": {
+      "prompt": "“Mia made the model with old boxes” means she ___ old boxes to make it.",
+      "choices": [
+        "lived in",
+        "made",
+        "used",
+        "was made by"
+      ]
+    },
+    "EX-6-017": {
+      "prompt": "Replace “the box” with “it”: Do not ___.",
+      "choices": [
+        "it throw away",
+        "throw it into away",
+        "throw away it",
+        "throw it away"
+      ]
+    },
+    "EX-6-018": {
+      "prompt": "Pick ___ and put ___ the bin.",
+      "choices": [
+        "them up; them into",
+        "them up; into them",
+        "up them; the bin into",
+        "up them; into them"
+      ]
+    },
+    "EX-6-019": {
+      "prompt": "The factory used old paper to make a notebook. It turned ___ a notebook.",
+      "choices": [
+        "the notebook into",
+        "old paper into",
+        "into old paper",
+        "a notebook with"
+      ]
+    },
+    "EX-6-020": {
+      "prompt": "Let's ___ her so she feels included.",
+      "choices": [
+        "make friend with",
+        "make friends",
+        "make friends with",
+        "make with friends"
+      ]
+    },
+    "EX-6-021": {
+      "prompt": "We are on the bus and have reached the centre. Before entering, we must ___.",
+      "choices": [
+        "move the centre",
+        "go to sleep",
+        "get on",
+        "get off"
+      ]
+    },
+    "EX-6-022": {
+      "prompt": "Correct “What was happened to the hat?”",
+      "choices": [
+        "remove was",
+        "to → with",
+        "add by",
+        "was → were"
+      ]
+    },
+    "EX-6-023": {
+      "prompt": "Every Monday, the truck ___ here in the morning. Last Monday, it ___ here at ten.",
+      "choices": [
+        "got; gets",
+        "gets; got",
+        "get; get",
+        "got; got"
+      ]
+    },
+    "EX-6-024": {
+      "prompt": "The boxes are dirty now. Tomorrow we ___ them before the show.",
+      "choices": [
+        "will cleaned",
+        "won’t cleans",
+        "will clean",
+        "cleaned"
+      ]
+    },
+    "EX-6-025": {
+      "prompt": "Which pair fits a report written today? “Yesterday I ___ a holder. Now it ___ my pencils tidy.”",
+      "choices": [
+        "make; kept",
+        "made; keep",
+        "will make; kept",
+        "made; keeps"
+      ]
+    },
+    "EX-6-026": {
+      "prompt": "Last month, the box ___ into a machine and later ___ a book.",
+      "choices": [
+        "went; became",
+        "goed; became",
+        "went; become",
+        "goes; becomes"
+      ]
+    },
+    "EX-6-027": {
+      "prompt": "___ the workers are!",
+      "choices": [
+        "What a careful",
+        "How careful",
+        "What careful",
+        "How careful workers"
+      ]
+    },
+    "EX-6-028": {
+      "prompt": "___ useful machine!",
+      "choices": [
+        "What",
+        "What an",
+        "What a",
+        "How a"
+      ]
+    },
+    "EX-6-029": {
+      "prompt": "The class won the art prize. ___ good news!",
+      "choices": [
+        "What an",
+        "What a",
+        "How",
+        "What"
+      ]
+    },
+    "EX-6-030": {
+      "prompt": "What colourful ___!",
+      "choices": [
+        "bottles they are",
+        "a bottles they are",
+        "bottles are they",
+        "bottles they is"
+      ]
+    },
+    "EX-6-031": {
+      "prompt": "Praise the way the child paints: ___ the child paints!",
+      "choices": [
+        "What a careful",
+        "How carefully",
+        "What carefully",
+        "How careful"
+      ]
+    },
+    "EX-6-032": {
+      "prompt": "“What a clever plan!” means “How ___!”",
+      "choices": [
+        "a clever plan is",
+        "cleverly the plan is",
+        "clever the plan is",
+        "clever plan it is"
+      ]
+    },
+    "EX-6-033": {
+      "prompt": "Complete “How wonderful!” as an exclamation: How ___!",
+      "choices": [
+        "a wonderful boat it is",
+        "wonderful it",
+        "wonderful is it",
+        "wonderful it is"
+      ]
+    },
+    "EX-6-034": {
+      "prompt": "There is one large toy fish. What ___!",
+      "choices": [
+        "a big fish it is",
+        "big fishes it is",
+        "a big fish they are",
+        "big fish they are"
+      ]
+    },
+    "EX-6-035": {
+      "prompt": "The box slept for many days. ___ long sleep!",
+      "choices": [
+        "What an",
+        "What a",
+        "How a",
+        "What"
+      ]
+    },
+    "EX-6-036": {
+      "prompt": "Choose the correct word order for an exclamation.",
+      "choices": [
+        "A useful what box!",
+        "What useful a box!",
+        "What a useful box!",
+        "A what useful box!"
+      ]
+    },
+    "EX-6-037": {
+      "prompt": "A: “What did you use to make the wings?” Which answer supplies the requested information?",
+      "choices": [
+        "My younger brother.",
+        "At the recycling centre.",
+        "Last Thursday.",
+        "Two old plastic bags."
+      ]
+    },
+    "EX-6-038": {
+      "prompt": "—How clever you are! Your model is lovely. —___",
+      "choices": [
+        "Thank you!",
+        "You're welcome.",
+        "No, yesterday, not Friday.",
+        "It sleeps at six."
+      ]
+    },
+    "EX-6-039": {
+      "prompt": "“I found two boxes. I cut them and made a house. I painted it blue.” What does “it” refer to?",
+      "choices": [
+        "the scissors",
+        "the house",
+        "the two separate boxes",
+        "the paint"
+      ]
+    },
+    "EX-6-040": {
+      "prompt": "Paint the box, let it dry, then put pencils in it. What must happen before adding pencils?",
+      "choices": [
+        "filling before painting",
+        "wetting the pencils",
+        "letting the paint dry",
+        "throwing the box away"
+      ]
+    },
+    "EX-6-041": {
+      "prompt": "A report already covers the product, use and feelings. Which detail adds the materials?",
+      "choices": [
+        "liking the work",
+        "keeping pencils together",
+        "finding it useful",
+        "a tin and two buttons"
+      ]
+    },
+    "EX-6-042": {
+      "prompt": "Which detail does NOT belong in a report about making a carton boat?",
+      "choices": [
+        "Uncle's favourite school subject",
+        "painting the boat",
+        "cutting the carton",
+        "using a button window"
+      ]
+    },
+    "EX-6-043": {
+      "prompt": "Some toys are repaired; some paper is recycled. Old things can ___.",
+      "choices": [
+        "only become paper",
+        "have different new uses",
+        "always be cut safely",
+        "only be reused by machines"
+      ]
+    },
+    "EX-6-044": {
+      "prompt": "The bin accepts clean, dry paper. A newspaper is clean but wet. What should you do?",
+      "choices": [
+        "mix in plastic",
+        "put it in wet",
+        "dry it first",
+        "add more water"
+      ]
+    },
+    "EX-6-045": {
+      "prompt": "“Let's use these old jars to grow plants” suggests ___.",
+      "choices": [
+        "the maker",
+        "a show date",
+        "a purchase price",
+        "a new use"
+      ]
+    },
+    "EX-6-046": {
+      "prompt": "We will use the box to store paper instead of discarding it. The box will ___.",
+      "choices": [
+        "remain useful",
+        "be burned",
+        "contain no paper",
+        "become brand new"
+      ]
+    },
+    "EX-6-047": {
+      "prompt": "A box yesterday, a book now, perhaps recycled next year. Which order fits?",
+      "choices": [
+        "now → yesterday → next",
+        "yesterday → now → next",
+        "next → now → yesterday",
+        "yesterday → next → now"
+      ]
+    },
+    "EX-6-048": {
+      "prompt": "In British English, which pair has the same vowel sound as ur in turn?",
+      "choices": [
+        "grey and glass",
+        "cup and bottle",
+        "nurse and bird",
+        "hat and box"
+      ]
+    },
+    "EX-6-049": {
+      "prompt": "Choose a word that has /ɜː/ in British English and means “伤害”.",
+      "choices": [
+        "hat",
+        "heat",
+        "heart",
+        "hurt"
+      ]
+    },
+    "EX-6-050": {
+      "prompt": "Which group contains only words with /ɜː/ in British English?",
+      "choices": [
+        "Thursday, purple, burn",
+        "Thursday, blue, box",
+        "purple, put, bag",
+        "burn, hat, grey"
+      ]
+    },
+    "EX-6-051": {
+      "prompt": "The rule says ur usually has /ɜː/ in stressed syllables. This means ___.",
+      "choices": [
+        "always, in every word",
+        "often, when stressed",
+        "never, when stressed",
+        "only ur makes /ɜː/"
+      ]
+    },
+    "EX-6-052": {
+      "prompt": "Which sound is the vowel in the British pronunciation /bɜːn/?",
+      "choices": [
+        "/n/",
+        "/eɪ/",
+        "/ɜː/",
+        "/b/"
+      ]
+    },
+    "EX-6-053": {
+      "prompt": "—___ made the model? —Our art teacher.",
+      "choices": [
+        "What",
+        "Where",
+        "When",
+        "Who"
+      ]
+    },
+    "EX-6-054": {
+      "prompt": "“Made by hand” describes the ___.",
+      "choices": [
+        "making method",
+        "maker's name",
+        "production place",
+        "material"
+      ]
+    },
+    "EX-6-055": {
+      "prompt": "Which notice gives a correct negative instruction?",
+      "choices": [
+        "Not to burning rubbish.",
+        "Don’t burn rubbish.",
+        "Doesn’t burn rubbish!",
+        "Don’t burns rubbish."
+      ]
+    },
+    "EX-6-056": {
+      "prompt": "Which action protects Mother Earth?",
+      "choices": [
+        "breaking useful cups",
+        "burning rubbish",
+        "keeping paper for reuse",
+        "throwing bottles in rivers"
+      ]
+    },
+    "EX-6-057": {
+      "prompt": "“First I washed the jar. Then I let it dry. ___, I put flowers in it and showed it to Mum.” Which word marks the last step?",
+      "choices": [
+        "Yesterday",
+        "Because",
+        "Usually",
+        "Finally"
+      ]
+    },
+    "EX-6-058": {
+      "prompt": "“What happened to the bag?” asks about ___.",
+      "choices": [
+        "an event affecting it",
+        "a future plan",
+        "its maker",
+        "its material"
+      ]
+    },
+    "EX-6-059": {
+      "prompt": "Tuesday: making models. Friday: displaying them to visitors. Tuesday was the ___; Friday was the ___.",
+      "choices": [
+        "show; project",
+        "project; show",
+        "truck; truck",
+        "rain; rain"
+      ]
+    },
+    "EX-6-060": {
+      "prompt": "Choose the complete sentence with no repeated time word.",
+      "choices": [
+        "I'm now a book now!",
+        "Now I a book!",
+        "Now I'm a book!",
+        "Now now I'm a book!"
+      ]
+    },
+    "EX-6-061": {
+      "prompt": "Two buttons became eyes because they had the right ___.",
+      "choices": [
+        "reading skills",
+        "making date",
+        "record-breaking size",
+        "shape and size"
+      ]
+    },
+    "EX-6-062": {
+      "prompt": "Which ending fits a report about turning an old cup into a holder?",
+      "choices": [
+        "New uses for old things!",
+        "First, find a cup.",
+        "Next, wash the cup.",
+        "What did I make?"
+      ]
+    },
+    "EX-6-063": {
+      "prompt": "An old bottle now waters plants. Its new use is ___.",
+      "choices": [
+        "reading stories",
+        "watering plants",
+        "carrying pupils",
+        "making paper"
+      ]
+    },
+    "EX-6-064": {
+      "prompt": "I reused a box for pencils instead of buying a holder. This avoided ___.",
+      "choices": [
+        "all future breakage",
+        "all shops selling holders",
+        "one new purchase",
+        "every future purchase"
+      ]
+    },
+    "EX-6-065": {
+      "prompt": "The old box tells a future plan: “Next time, I ___ something else.” Which completion is correct?",
+      "choices": [
+        "became",
+        "becomes yesterday",
+        "will became",
+        "will become"
+      ]
+    },
+    "EX-6-066": {
+      "prompt": "At the centre yesterday, there ___ one glass bottle and there ___ three plastic cups.",
+      "choices": [
+        "was; were",
+        "were; was",
+        "is; are",
+        "are; is"
+      ]
+    },
+    "EX-6-067": {
+      "prompt": "—What did you ___? —A small drum from an old tin.",
+      "choices": [
+        "colour",
+        "make",
+        "sleep",
+        "drive"
+      ]
+    },
+    "EX-6-068": {
+      "prompt": "Which option is a complete report sentence?",
+      "choices": [
+        "Then a blue box.",
+        "Finally, with two buttons.",
+        "I washed the bottle.",
+        "Because the old paper."
+      ]
+    },
+    "EX-6-069": {
+      "prompt": "A twenty-year-old box has “a new life” as a toy house. What is new?",
+      "choices": [
+        "its birth date",
+        "all its materials",
+        "its age",
+        "its use"
+      ]
+    },
+    "EX-6-070": {
+      "prompt": "The little box made ___ the two cups.",
+      "choices": [
+        "friends with",
+        "friend with their",
+        "with them friends",
+        "friends with they"
+      ]
+    },
+    "EX-6-071": {
+      "prompt": "The robot has button eyes, cup arms and a box body. Arms: ___; eyes: ___.",
+      "choices": [
+        "cups; cups",
+        "cups; buttons",
+        "cups; boxes",
+        "buttons; buttons"
+      ]
+    },
+    "EX-6-072": {
+      "prompt": "A list has glass bottles, old cardboard, plastic cups, and scissors. Which item is mainly a cutting tool in an art project?",
+      "choices": [
+        "Old cardboard.",
+        "Plastic cups.",
+        "Scissors.",
+        "Glass bottles."
+      ]
+    },
+    "EX-6-073": {
+      "prompt": "Which is an exclamation of admiration?",
+      "choices": [
+        "What is it?",
+        "How did you make it?",
+        "How nice is it?",
+        "How nice it is!"
+      ]
+    },
+    "EX-6-074": {
+      "prompt": "Which note includes old material, a making action and a present use?",
+      "choices": [
+        "cut old box; holds cards",
+        "red tray; lovely",
+        "tomorrow's show",
+        "art; nice show"
+      ]
+    },
+    "EX-6-075": {
+      "prompt": "Which phrase means falling asleep?",
+      "choices": [
+        "went into a machine",
+        "went to sleep",
+        "went to a centre",
+        "went to a library"
+      ]
+    },
+    "EX-7-001": {
+      "prompt": "It is 8 p.m. now. Our team ___ an online meeting at 3 p.m. today.",
+      "choices": [
+        "has",
+        "had",
+        "have",
+        "having"
+      ]
+    },
+    "EX-7-002": {
+      "prompt": "Grandpa is describing his childhood: “I ___ to the village shop every day when I was ten.”",
+      "choices": [
+        "go",
+        "goes",
+        "going",
+        "went"
+      ]
+    },
+    "EX-7-003": {
+      "prompt": "Look at the live camera! Mum ___ an online meeting at this moment, so please keep quiet.",
+      "choices": [
+        "is having",
+        "has",
+        "had",
+        "have"
+      ]
+    },
+    "EX-7-004": {
+      "prompt": "Dad’s new weekly plan says “Home: Monday and Friday.” These days he ___ from home twice a week.",
+      "choices": [
+        "worked",
+        "is work",
+        "works",
+        "working"
+      ]
+    },
+    "EX-7-005": {
+      "prompt": "At the station yesterday, we bought our tickets, ___ for the train and read the notices.",
+      "choices": [
+        "wait",
+        "waited",
+        "waits",
+        "are waiting"
+      ]
+    },
+    "EX-7-006": {
+      "prompt": "An editor corrects ONE word in “The robot didn’t cooked dinner last night.” Which change is needed?",
+      "choices": [
+        "robot→robots",
+        "didn’t→doesn’t",
+        "cooked→cook",
+        "night→nights"
+      ]
+    },
+    "EX-7-007": {
+      "prompt": "—___ the shop accept cash last year? —Yes, it did, but now it only accepts phone payments.",
+      "choices": [
+        "Does",
+        "Was",
+        "Do",
+        "Did"
+      ]
+    },
+    "EX-7-008": {
+      "prompt": "___ the robot helper in your kitchen ___ the floor every evening?",
+      "choices": [
+        "Does; clean",
+        "Does; cleans",
+        "Do; clean",
+        "Did; cleaned"
+      ]
+    },
+    "EX-7-009": {
+      "prompt": "Our old robot doesn’t cook dinner or ___ Chinese chess; it only cleans the floor.",
+      "choices": [
+        "plays",
+        "played",
+        "play",
+        "playing"
+      ]
+    },
+    "EX-7-010": {
+      "prompt": "The office was small in 1990. There ___ only one room then, but there ___ four rooms now.",
+      "choices": [
+        "were; is",
+        "was; are",
+        "is; were",
+        "was; was"
+      ]
+    },
+    "EX-7-011": {
+      "prompt": "The old till is empty today. Yesterday there ___ some cash in it.",
+      "choices": [
+        "were",
+        "are",
+        "was",
+        "have"
+      ]
+    },
+    "EX-7-012": {
+      "prompt": "The list of changes in our lives ___ on the classroom wall now.",
+      "choices": [
+        "are",
+        "were",
+        "have",
+        "is"
+      ]
+    },
+    "EX-7-013": {
+      "prompt": "The e-book cost ten yuan. I paid ten yuan ___ it, not for the tablet.",
+      "choices": [
+        "for",
+        "from",
+        "with",
+        "to"
+      ]
+    },
+    "EX-7-014": {
+      "prompt": "The school sold its old computers to a shop. The shop bought the computers ___ the school.",
+      "choices": [
+        "to",
+        "for",
+        "from",
+        "about"
+      ]
+    },
+    "EX-7-015": {
+      "prompt": "Ava lives abroad, but I chat ___ her ___ the internet every Sunday.",
+      "choices": [
+        "on; with",
+        "with; on",
+        "to; in",
+        "with; at"
+      ]
+    },
+    "EX-7-016": {
+      "prompt": "In the past, the journey was slow. We spent three hours ___ the road, not in the meeting.",
+      "choices": [
+        "at",
+        "for",
+        "with",
+        "on"
+      ]
+    },
+    "EX-7-017": {
+      "prompt": "Grandma paid ___ cash for the same service years ago. These days she pays ___ her smartphone.",
+      "choices": [
+        "in; on",
+        "on; in",
+        "by; in",
+        "with; at"
+      ]
+    },
+    "EX-7-018": {
+      "prompt": "We go there ___ high-speed train.",
+      "choices": [
+        "by a",
+        "take",
+        "by",
+        "on foots"
+      ]
+    },
+    "EX-7-019": {
+      "prompt": "“Please come back ___ before six,” Mum said. Choose the grammatically correct ending.",
+      "choices": [
+        "to home",
+        "home",
+        "at home",
+        "in home"
+      ]
+    },
+    "EX-7-020": {
+      "prompt": "Play Chinese chess ___ a robot.",
+      "choices": [
+        "to",
+        "with",
+        "from",
+        "on a"
+      ]
+    },
+    "EX-7-021": {
+      "prompt": "The robot did not win the first game, but it ___ the next two games.",
+      "choices": [
+        "wins",
+        "winning",
+        "winned",
+        "won"
+      ]
+    },
+    "EX-7-022": {
+      "prompt": "Nobody expected the old robot to sing. What ___ surprise its song was!",
+      "choices": [
+        "a",
+        "an",
+        "the",
+        "/"
+      ]
+    },
+    "EX-7-023": {
+      "prompt": "The phone's screen is black but it still makes sounds. We know there is a problem with ___.",
+      "choices": [
+        "nothing",
+        "every future repair",
+        "the screen",
+        "every phone part"
+      ]
+    },
+    "EX-7-024": {
+      "prompt": "I didn’t send a paper letter. I sent ___ email with three photos.",
+      "choices": [
+        "a",
+        "an",
+        "some",
+        "many"
+      ]
+    },
+    "EX-7-025": {
+      "prompt": "Technology changes our ___. Here the missing word means “生活”, not “居住”.",
+      "choices": [
+        "live",
+        "living",
+        "life’s",
+        "lives"
+      ]
+    },
+    "EX-7-026": {
+      "prompt": "A ticket costs 35 yuan and a book costs 15 yuan. The receipt’s total should read ___.",
+      "choices": [
+        "fifteen yuan",
+        "fivety yuan",
+        "fifty yuan",
+        "fifty yuans"
+      ]
+    },
+    "EX-7-027": {
+      "prompt": "These ___ fast.",
+      "choices": [
+        "high-speed trains travel",
+        "high-speeds train travels",
+        "high-speed train travel",
+        "trains high-speed travel"
+      ]
+    },
+    "EX-7-028": {
+      "prompt": "Use online as an adjective, then an adverb: an ___ meeting; shop ___.",
+      "choices": [
+        "online; online",
+        "online; in online",
+        "online; on online",
+        "on-line; at online"
+      ]
+    },
+    "EX-7-029": {
+      "prompt": "The small robot plans routes and answers questions. Smart here means ___.",
+      "choices": [
+        "large",
+        "expensive",
+        "old",
+        "clever"
+      ]
+    },
+    "EX-7-030": {
+      "prompt": "Ordering food online saves Mum a long bus ride. She finds it convenient because it ___.",
+      "choices": [
+        "costs nothing",
+        "saves a journey",
+        "never causes problems",
+        "closes every shop"
+      ]
+    },
+    "EX-7-031": {
+      "prompt": "One machine cleans floors, carries boxes and follows simple orders. In this description it is a ___.",
+      "choices": [
+        "meeting",
+        "cash",
+        "helper",
+        "change"
+      ]
+    },
+    "EX-7-032": {
+      "prompt": "Technology ___ our life easier.",
+      "choices": [
+        "make",
+        "makes",
+        "are making",
+        "making"
+      ]
+    },
+    "EX-7-033": {
+      "prompt": "In “The change changes how we pay”, change and changes are a ___ and a ___.",
+      "choices": [
+        "noun; verb",
+        "noun; noun",
+        "verb; verb",
+        "verb; noun"
+      ]
+    },
+    "EX-7-034": {
+      "prompt": "The old device showed only words; the new one shows videos too. What could the old one show?",
+      "choices": [
+        "videos too",
+        "videos in 2005",
+        "words only",
+        "nothing at all"
+      ]
+    },
+    "EX-7-035": {
+      "prompt": "The robot won three games and lost the fourth. It won ___.",
+      "choices": [
+        "every time",
+        "three times",
+        "no games",
+        "four games"
+      ]
+    },
+    "EX-7-036": {
+      "prompt": "On Monday Dad bought a robot. On Wednesday he used it for the first time. It is Friday now. When did he first use it?",
+      "choices": [
+        "On Monday.",
+        "On Tuesday.",
+        "On Friday.",
+        "On Wednesday."
+      ]
+    },
+    "EX-7-037": {
+      "prompt": "Jo wrote to her sister in 1995 and chats with her online now. What changed?",
+      "choices": [
+        "the person contacted",
+        "the communication method",
+        "her sister's city",
+        "having a sister"
+      ]
+    },
+    "EX-7-038": {
+      "prompt": "The museum formerly took cash; now tickets are bought by phone. What changed?",
+      "choices": [
+        "tickets becoming free",
+        "visitors disappearing",
+        "the payment method",
+        "all indoor phone use"
+      ]
+    },
+    "EX-7-039": {
+      "prompt": "A journey took four hours before and takes one hour now. It is now ___.",
+      "choices": [
+        "quicker",
+        "four trips daily",
+        "the only train route",
+        "cheaper"
+      ]
+    },
+    "EX-7-040": {
+      "prompt": "On Tuesdays, Mr Li joins meetings and sends work reports from his house. He ___.",
+      "choices": [
+        "has no job",
+        "only plays games",
+        "works from home",
+        "visits every office"
+      ]
+    },
+    "EX-7-041": {
+      "prompt": "Lena says, “I bought one tablet and put twenty e-books on it.” What does twenty count?",
+      "choices": [
+        "Tablets.",
+        "Digital books.",
+        "Bookshops.",
+        "Paper pages."
+      ]
+    },
+    "EX-7-042": {
+      "prompt": "People in four cities need to see and hear each other without travelling. They should have ___.",
+      "choices": [
+        "a letter exchange",
+        "a cash payment",
+        "separate e-book reading",
+        "an online meeting"
+      ]
+    },
+    "EX-7-043": {
+      "prompt": "The robot cooks and cleans, but its chess program is broken. It can still ___.",
+      "choices": [
+        "cook rice",
+        "win at chess",
+        "repair every machine",
+        "teach all subjects"
+      ]
+    },
+    "EX-7-044": {
+      "prompt": "Grandpa wrote letters in 1975. Ask about the waiting time: “___ did you wait for a reply?”",
+      "choices": [
+        "What colour",
+        "How old",
+        "How long",
+        "How many trains"
+      ]
+    },
+    "EX-7-045": {
+      "prompt": "Ask about school life in 1980: “What ___ in 1980?”",
+      "choices": [
+        "was school life like",
+        "is your favourite subject",
+        "do you like",
+        "is your favourite lesson"
+      ]
+    },
+    "EX-7-046": {
+      "prompt": "—How do you pay for lunch these days? —___.",
+      "choices": [
+        "In cash long ago",
+        "On my smartphone",
+        "Near my old school",
+        "At six yesterday"
+      ]
+    },
+    "EX-7-047": {
+      "prompt": "What ___ life like fifty years ago?",
+      "choices": [
+        "did",
+        "was",
+        "were",
+        "does"
+      ]
+    },
+    "EX-7-048": {
+      "prompt": "To study changes in family travel, ask about ___.",
+      "choices": [
+        "favourite colours",
+        "invented answers",
+        "transport then and now",
+        "the report's title only"
+      ]
+    },
+    "EX-7-049": {
+      "prompt": "Which plan compares past and present in TWO areas?",
+      "choices": [
+        "communication and payment",
+        "letters and envelopes",
+        "online shopping only",
+        "new phones only"
+      ]
+    },
+    "EX-7-050": {
+      "prompt": "Online shopping saves Mum time, but she sometimes buys unnecessary things. We should use technology ___.",
+      "choices": [
+        "without any limits",
+        "wisely",
+        "never",
+        "to close all shops"
+      ]
+    },
+    "EX-7-051": {
+      "prompt": "“In 1970, Grandma walked to work then.” Then means ___.",
+      "choices": [
+        "next week",
+        "at that time",
+        "every morning now",
+        "after this sentence"
+      ]
+    },
+    "EX-7-052": {
+      "prompt": "I wrote letters to my parents and teachers. Now I chat with them online. Them means ___.",
+      "choices": [
+        "the letters",
+        "online shops",
+        "parents and teachers",
+        "the computers"
+      ]
+    },
+    "EX-7-053": {
+      "prompt": "I enjoy video calls but put my phone away at family meals. This balances technology with ___.",
+      "choices": [
+        "replacing all conversation",
+        "banning every video call",
+        "eating every meal online",
+        "face-to-face time"
+      ]
+    },
+    "EX-7-054": {
+      "prompt": "In 1998 the family shopped in town; now they order by phone at home. Past: ___; present: ___.",
+      "choices": [
+        "town; home",
+        "home; home",
+        "town; Saturdays only",
+        "town; no shopping"
+      ]
+    },
+    "EX-7-055": {
+      "prompt": "An editor needs the past forms of shop and chat for a diary. Which pair is correctly spelt?",
+      "choices": [
+        "shoped; chated",
+        "shopped; chatted",
+        "shops; chats",
+        "shopping; chatting"
+      ]
+    },
+    "EX-7-056": {
+      "prompt": "Which pair correctly completes “Every week Mia ___ technology; last year she ___ art”?",
+      "choices": [
+        "studys; studied",
+        "studies; studyed",
+        "studies; studied",
+        "study; studies"
+      ]
+    },
+    "EX-7-057": {
+      "prompt": "The helper ___ music every morning.",
+      "choices": [
+        "plaies",
+        "plays",
+        "played",
+        "play"
+      ]
+    },
+    "EX-7-058": {
+      "prompt": "Choose the pair for “Dad ___ to the office and the robot ___ the dishes every weekday.”",
+      "choices": [
+        "go; wash",
+        "goes; wash",
+        "go; washes",
+        "goes; washes"
+      ]
+    },
+    "EX-7-059": {
+      "prompt": "“Last night I read an e-book.” In this sentence read is pronounced ___.",
+      "choices": [
+        "/riːd/",
+        "/red/",
+        "/raɪd/",
+        "/rɪd/"
+      ]
+    },
+    "EX-7-060": {
+      "prompt": "Read: “After lunch, Dad had an online meeting with his team.” Which suggested pause is natural?",
+      "choices": [
+        "After / lunch",
+        "lunch, / Dad",
+        "an / online",
+        "with / his"
+      ]
+    },
+    "EX-7-061": {
+      "prompt": "Which reading keeps “works from home” together?",
+      "choices": [
+        "works from home /",
+        "works / from / home",
+        "works from / home",
+        "works / from home"
+      ]
+    },
+    "EX-7-062": {
+      "prompt": "Read: “Then I used cash, but now I pay by phone.” Where should the main pause separate past and present?",
+      "choices": [
+        "cash, / but",
+        "I / used",
+        "used / cash",
+        "pay / by"
+      ]
+    },
+    "EX-7-063": {
+      "prompt": "To read in thought groups, pause between ___.",
+      "choices": [
+        "parts of long words",
+        "every single word",
+        "meaningful phrases",
+        "no sentences at all"
+      ]
+    },
+    "EX-7-064": {
+      "prompt": "“When I ___ a child, I ___ home before dark.” Choose the correct pair for a past memory.",
+      "choices": [
+        "am; come",
+        "was; came",
+        "were; comes",
+        "was; come"
+      ]
+    },
+    "EX-7-065": {
+      "prompt": "Dad said, “I work from home every Friday.” Work is present tense because he describes ___.",
+      "choices": [
+        "his current routine",
+        "only a past action",
+        "doing no work",
+        "yesterday's action only"
+      ]
+    },
+    "EX-7-066": {
+      "prompt": "Mum is at home and calls her son: “Please ___ back home now. Dinner is ready.”",
+      "choices": [
+        "goes",
+        "came",
+        "comes",
+        "come"
+      ]
+    },
+    "EX-7-067": {
+      "prompt": "Which phrase refers to the same past period as “twenty years ago”?",
+      "choices": [
+        "in the past",
+        "every day now",
+        "these days",
+        "next year"
+      ]
+    },
+    "EX-7-068": {
+      "prompt": "The office was far away in 1990. Now it ___ near our home, so Dad walks there.",
+      "choices": [
+        "was",
+        "is being",
+        "are",
+        "is"
+      ]
+    },
+    "EX-7-069": {
+      "prompt": "The screen is working again. It stopped just now, but the helper ___ it a minute ago.",
+      "choices": [
+        "fixes",
+        "fixed",
+        "fix",
+        "is fix"
+      ]
+    },
+    "EX-7-070": {
+      "prompt": "Choose a title for a report comparing letters with video calls, and old shops with online orders.",
+      "choices": [
+        "My Favourite Colour",
+        "A Zoo Visit",
+        "Communication and Shopping Changes",
+        "Cooking Rice"
+      ]
+    },
+    "EX-7-071": {
+      "prompt": "Nana sent no emails in 2000 but sends one daily now. She ___ emails then, but she ___ them now.",
+      "choices": [
+        "didn't send; sends",
+        "didn't send; doesn't send",
+        "sends; sends",
+        "didn't send; send"
+      ]
+    },
+    "EX-7-072": {
+      "prompt": "Amy's current habit: she often ___ online.",
+      "choices": [
+        "shop",
+        "shopped",
+        "shops",
+        "shopping"
+      ]
+    },
+    "EX-7-073": {
+      "prompt": "The robot cooks dinner but cannot drive. Which claim goes beyond this information?",
+      "choices": [
+        "It cooks dinner.",
+        "It cannot drive.",
+        "It has a useful skill.",
+        "It does every human job."
+      ]
+    },
+    "EX-7-074": {
+      "prompt": "Grandpa's trip once took two hours; now it takes thirty minutes. It now takes ___.",
+      "choices": [
+        "less time",
+        "no journeys",
+        "thirty yuan",
+        "four times more space"
+      ]
+    },
+    "EX-7-075": {
+      "prompt": "“The robot can win a chess game” expresses ___.",
+      "choices": [
+        "winning every game",
+        "a win yesterday",
+        "the ability to win",
+        "never losing"
+      ]
+    }
+  }
+}

@@ -2,7 +2,7 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import { bankAccess, bankBody, bankFailure, bankHeaders, bankInputSchema, bankProfile, bankStudentAnswers, bankSubject } from "@/server/grade6-bank/http";
 import { bankBaseRevision, bankProgress, bankResponse, BankRevisionConflict, saveBankResponse, bankIsIsolatedTestMemory } from "@/server/grade6-bank/progress";
-import { extensionQuestion, extensionSubject, extensionFeedback, extensionManifest } from "./bank";
+import { extensionQuestion, extensionSubject, extensionFeedback, extensionManifest, isRetiredExtensionQuestion } from "./bank";
 
 export async function extensionRead(request: NextRequest, rawSubject: string, action: string) {
   const denied = bankAccess(request); if (denied) return denied;
@@ -17,6 +17,7 @@ export async function extensionRead(request: NextRequest, rawSubject: string, ac
       return NextResponse.json({...progress, responses:Object.fromEntries(Object.entries(progress.responses).filter(([id])=>currentIds.has(id))), lastQuestionId:currentIds.has(progress.lastQuestionId)?progress.lastQuestionId:""}, {headers:{...bankHeaders,...(bankIsIsolatedTestMemory()?{"X-Grade6-QA-Memory":"isolated"}:{})}});
     }
     const id = request.nextUrl.searchParams.get("question_id") ?? "";
+    if (await isRetiredExtensionQuestion(subject,id)) return NextResponse.json({error:"本题已更新，旧作答记录已保留。"},{status:410,headers:bankHeaders});
     if (!await extensionQuestion(subject,id)) return NextResponse.json({error:"题目不存在"},{status:404,headers:bankHeaders});
     const response = await bankResponse(studentId,subjectId,id);
     if (!response || !response.submitted && response.submissions < 1) return NextResponse.json({error:"请先提交本题"},{status:403,headers:bankHeaders});
@@ -31,6 +32,7 @@ export async function extensionWrite(request: NextRequest, rawSubject: string, a
     const body=await bankBody(request);
     if (Object.keys(body).some(key=>!["subject_id","question_id","answers","base_revision","input_schema"].includes(key))) throw new Error("提交字段不正确");
     const revision=bankBaseRevision(body.base_revision),subjectId=bankSubject(body.subject_id);
+    if (typeof body.question_id === "string" && await isRetiredExtensionQuestion(subject,body.question_id)) return NextResponse.json({error:"本题已更新，旧草稿已保留，请进入新版选择题。"},{status:410,headers:bankHeaders});
     const q=typeof body.question_id === "string" ? await extensionQuestion(subject,body.question_id):undefined;
     if (!q) return NextResponse.json({error:"题目不存在"},{status:404,headers:bankHeaders});
     bankInputSchema(body.input_schema,q);
