@@ -9,10 +9,10 @@ import tempfile
 
 spec = importlib.util.spec_from_file_location('root_reserve', Path(__file__).with_name('prepare-release-root-reserve.py'))
 helper = importlib.util.module_from_spec(spec); spec.loader.exec_module(helper)
-header = {'Filesystem UUID': helper.ROOT_UUID, 'Block size': '4096', 'Block count': '10485760', 'Reserved block count': '524288'}
+header = {'Filesystem UUID': helper.ROOT_UUID, 'Block size': '4096', 'Block count': '10485243', 'Reserved block count': '445577'}
 free = 4453 * 1024**2
 plan = helper.adjustment(header, free)
-assert plan['targetReservedBlocks'] == 314573
+assert plan['targetReservedBlocks'] == 314558
 assert free + (plan['originalReservedBlocks'] - plan['targetReservedBlocks']) * 4096 >= helper.REQUIRED_FREE
 assert plan['targetReservedBlocks'] * 4096 > 1024**3
 updated = {**header, 'Reserved block count': str(plan['targetReservedBlocks'])}
@@ -38,7 +38,7 @@ with tempfile.TemporaryDirectory() as directory:
     def mutate(command, **kwargs):
         assert json.loads(record.read_text()) == plan
         assert record.stat().st_mode & 0o777 == 0o600
-        assert command == ['tune2fs', '-r', '314573', '/dev/synthetic']
+        assert command == ['tune2fs', '-r', '314558', '/dev/synthetic']
         return SimpleNamespace(returncode=0)
     with patch.object(helper, 'read_header', side_effect=[header, updated]), patch.object(helper.subprocess, 'run', side_effect=mutate) as run:
         helper.apply_adjustment('/dev/synthetic', plan, record, owner_uid=os.geteuid())

@@ -14,7 +14,9 @@ import subprocess
 RELEASES = Path('/www/study-plan-releases')
 ROOT_UUID = '9842d3d6-a839-4127-bda7-f19137effe71'
 RECORD = Path('/www/study-plan-retained-compressed/root-reserve-20261114.json')
-REQUIRED_FREE = 5 * 1024**3
+# The diagnosed upload gate is 4819 MiB, including the unchanged 4 GiB build
+# headroom. Retain an additional 64 MiB rather than consuming more reserve.
+REQUIRED_FREE = 4883 * 1024**2
 
 
 def require(condition, message):
@@ -37,13 +39,13 @@ def adjustment(header, available):
     block_size = int(header['Block size'])
     blocks = int(header['Block count'])
     reserved = int(header['Reserved block count'])
-    require(block_size == 4096 and 39 * 1024**3 <= blocks * block_size <= 41 * 1024**3, 'Expected the existing 40 GiB root filesystem')
+    require(block_size == 4096 and blocks == 10485243, 'Expected the diagnosed 40 GiB root filesystem')
     target = (blocks * 3 + 99) // 100
     require(target * block_size >= 1024**3, 'Keep at least 1 GiB reserved for root')
     if reserved == target:
         return None
-    require(abs(reserved - blocks // 20) <= 1, 'Only the original 5 percent reservation may be adjusted')
-    require(available + (reserved - target) * block_size >= REQUIRED_FREE + 64 * 1024**2, 'This bounded adjustment would not provide sufficient release space')
+    require(reserved == 445577, 'Only the diagnosed 4.25 percent reservation may be adjusted')
+    require(available + (reserved - target) * block_size >= REQUIRED_FREE, 'This bounded adjustment would not provide sufficient release space')
     return {'version': 1, 'filesystemUuid': ROOT_UUID, 'blockSize': block_size, 'blockCount': blocks,
             'originalReservedBlocks': reserved, 'targetReservedBlocks': target}
 
