@@ -26,6 +26,9 @@ for line in fstab.read_text().splitlines():
     if len(fields) >= 3 and not line.lstrip().startswith('#') and fields[1] == str(data):
         configured.append({'target': fields[1], 'filesystem': fields[2]})
 print(json.dumps({'configuredDataMount': configured}), flush=True)
+devices = subprocess.run(['lsblk', '--json', '--output', 'NAME,TYPE,FSTYPE,UUID,SIZE,MOUNTPOINTS'], capture_output=True, text=True)
+if devices.returncode == 0:
+    print(json.dumps({'blockDevices': json.loads(devices.stdout)}), flush=True)
 backups = data / 'backups'
 if backups.is_dir():
     receipts = [{'release': p.name, 'receiptExists': (p / 'receipt.json').is_file()}
