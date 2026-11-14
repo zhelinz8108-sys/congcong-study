@@ -238,4 +238,54 @@ with tempfile.TemporaryDirectory() as directory:
                 raise AssertionError('missing receipt accepted when archiving is needed')
         checks.append('insufficient-space-still-requires-the-original-receipt')
 
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); releases = root / 'releases'; releases.mkdir()
+    backups = root / 'backups'; backups.mkdir()
+    protected = fixture(releases, helper.SHORT_CHOICES_PROTECTED)
+    older = fixture(releases, helper.SHORT_CHOICES_ARCHIVE)
+    archive_root = root / 'archives'; archive_root.mkdir(mode=0o700)
+    receipts = {}
+    for identity in (helper.SHORT_CHOICES_PROTECTED, helper.SHORT_CHOICES_ARCHIVE):
+        folder = backups / ('before-main-' + identity.removeprefix('previous-')); folder.mkdir()
+        receipts[identity] = folder / 'receipt.json'
+        receipts[identity].write_text(json.dumps({'status': 'deployed', 'previousDirectory': str(releases / identity), 'oldBuildId': 'synthetic-build'}))
+    protected_before = helper.snapshot(protected)
+    older_before = helper.snapshot(older)
+    with patch.object(helper, 'RELEASES', releases), patch.object(helper, 'BACKUPS', backups), patch.object(helper, 'ARCHIVE_ROOT', archive_root):
+        with patch.object(helper, 'reviewed_receipt', side_effect=AssertionError('Unneeded historical read')), patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=5 * 1024**3)):
+            helper.preserve_short_choices_rollback(code)
+        assert helper.snapshot(protected) == protected_before and helper.snapshot(older) == older_before
+        # Every failure must leave both original directories untouched.
+        for identity, field, wrong_value in [
+            (helper.SHORT_CHOICES_PROTECTED, 'status', 'rolled-back'),
+            (helper.SHORT_CHOICES_PROTECTED, 'oldBuildId', 'wrong-build'),
+            (helper.SHORT_CHOICES_PROTECTED, 'previousDirectory', '/wrong/path'),
+            (helper.SHORT_CHOICES_ARCHIVE, 'status', 'rolled-back'),
+            (helper.SHORT_CHOICES_ARCHIVE, 'oldBuildId', 'wrong-build'),
+        ]:
+            receipt = receipts[identity]; original = receipt.read_text()
+            contents = json.loads(original); contents[field] = wrong_value; receipt.write_text(json.dumps(contents))
+            with patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=3 * 1024**3)):
+                try:
+                    helper.preserve_short_choices_rollback(code)
+                except ValueError:
+                    assert helper.snapshot(protected) == protected_before and helper.snapshot(older) == older_before
+                    assert not list(archive_root.iterdir())
+                else:
+                    raise AssertionError('mismatched short-choice rollout receipt accepted')
+            receipt.write_text(original)
+        with patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=3 * 1024**3)):
+            helper.preserve_short_choices_rollback(code)
+            assert older.is_symlink() and helper.snapshot(protected) == protected_before
+            helper.preserve_short_choices_rollback(code)
+            assert helper.snapshot(protected) == protected_before
+        manifest = json.loads((archive_root / helper.SHORT_CHOICES_ARCHIVE / 'manifest.json').read_text())
+        restored = root / 'restored'; restored.mkdir(mode=0o700)
+        helper.extract_archive(archive_root / helper.SHORT_CHOICES_ARCHIVE / manifest['archiveFile'], restored)
+        assert helper.snapshot(restored) == older_before
+        assert list(archive_root.iterdir()) == [archive_root / helper.SHORT_CHOICES_ARCHIVE]
+        checks.append('short-choices-keeps-newest-full-rollback-and-only-archives-exact-older-version')
+        checks.append('short-choices-rejects-bad-protected-or-target-receipts-with-both-originals-intact')
+        checks.append('short-choices-archive-restores-exactly-and-retry-is-idempotent')
+
 print(json.dumps({'passed': True, 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))

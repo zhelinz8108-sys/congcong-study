@@ -25,6 +25,8 @@ NEWER = ('previous-f475be68d01c429544df5293187e4c8c47be28c6-40205282115-1',
          'previous-22573b4752de26ff3dedfaa514ba419b0255bbb1-40207660100-1')
 ASTRA_PROTECTED = ('previous-dfcf0e39b482a4cb9c771aead8f5a4f7f1d91255-41812512169-1',)
 ASTRA_REQUIRED_FREE = 5 * 1024**3
+SHORT_CHOICES_PROTECTED = 'previous-ac22b62892a02aca54c136a5c702580500fea2cd-41871923456-1'
+SHORT_CHOICES_ARCHIVE = 'previous-dfcf0e39b482a4cb9c771aead8f5a4f7f1d91255-41812512169-1'
 ARCHIVE_ROOT = Path('/www/study-plan-retained-compressed/extension-20261104')
 RELEASES = Path('/www/study-plan-releases')
 BACKUPS = Path('/www/study-plan-data/backups')
@@ -388,14 +390,30 @@ def preserve_astra_rollbacks(source_code):
         preserve_reviewed(identity, source_code)
 
 
+def preserve_short_choices_rollback(source_code):
+    free = shutil.disk_usage(RELEASES).free
+    print(json.dumps({'rootFreeMiB': free // 1024**2, 'archiveThresholdMiB': ASTRA_REQUIRED_FREE // 1024**2}), flush=True)
+    if free >= ASTRA_REQUIRED_FREE:
+        print(json.dumps({'archivingNeeded': False, 'historicalCopiesChanged': False}), flush=True)
+        return
+    # The November 14 diagnosis found this newer complete rollback. Keep it
+    # immediately usable; only the exact older, inactive copy can be archived.
+    candidate = RELEASES / SHORT_CHOICES_PROTECTED
+    require(candidate.is_dir() and not candidate.is_symlink(), 'Latest rollback directory must remain intact')
+    receipt = reviewed_receipt(SHORT_CHOICES_PROTECTED)
+    require((candidate / '.next/BUILD_ID').read_text().strip() == receipt['oldBuildId'], 'Protected rollback build identity differs')
+    preserve_reviewed(SHORT_CHOICES_ARCHIVE, source_code)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--apply', action='store_true')
     parser.add_argument('--apply-astra', action='store_true')
+    parser.add_argument('--apply-short-choices', action='store_true')
     parser.add_argument('--verify', action='store_true')
     parser.add_argument('--restore')
     args = parser.parse_args()
-    require(sum([args.apply, args.apply_astra, args.verify, bool(args.restore)]) == 1, 'Select exactly one operation')
+    require(sum([args.apply, args.apply_astra, args.apply_short_choices, args.verify, bool(args.restore)]) == 1, 'Select exactly one operation')
     require(os.geteuid() == 0, 'Preserving file ownership requires root')
     if args.verify or args.restore:
         folder = Path(__file__).resolve().parent
@@ -418,7 +436,9 @@ def main():
     with open('/run/study-plan-release/lock', 'r+') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         source_code = globals().get('_SOURCE') or Path(__file__).read_text()
-        if args.apply_astra:
+        if args.apply_short_choices:
+            preserve_short_choices_rollback(source_code)
+        elif args.apply_astra:
             preserve_astra_rollbacks(source_code)
         else:
             for name in NEWER:
