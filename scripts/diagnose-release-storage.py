@@ -93,19 +93,26 @@ def compressed_measurements():
             if metadata.get('kind') == 'file' and metadata.get('links') == 1 and metadata.get('sizeBytes', 0) <= 32 * 1024**2:
                 try:
                     manifest = json.loads(manifest_file.read_text())
-                    known = ('version', 'release', 'files', 'entries', 'archiveSha256', 'archiveFile', 'archive_sha256')
+                    def schema_fields(value):
+                        return {key: type(item).__name__ for key, item in value.items()
+                                if isinstance(key, str) and re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,48}', key)}
                     if isinstance(manifest, dict):
-                        manifest_shape['fields'] = {key: type(manifest[key]).__name__ for key in known if key in manifest}
+                        manifest_shape['fields'] = schema_fields(manifest)
                         records = manifest.get('files', manifest.get('entries'))
                     else:
                         records = manifest
                     manifest_shape['recordsType'] = type(records).__name__
                     if isinstance(records, (dict, list)):
                         manifest_shape['recordCount'] = len(records)
-                        first = next(iter(records.values()), None) if isinstance(records, dict) else next(iter(records), None)
-                        if isinstance(first, dict):
-                            fields = ('kind', 'type', 'mode', 'uid', 'gid', 'mtime', 'mtime_ns', 'size', 'sha256', 'hash', 'link', 'xattrs', 'path', 'name', 'relative')
-                            manifest_shape['recordFields'] = {key: type(first[key]).__name__ for key in fields if key in first}
+                        examples = {}
+                        values = records.values() if isinstance(records, dict) else records
+                        for row in values:
+                            if not isinstance(row, dict):
+                                continue
+                            kind = row.get('kind', row.get('type'))
+                            if kind in ('file', 'directory', 'link', 'dir', 'symlink') and kind not in examples:
+                                examples[kind] = schema_fields(row)
+                        manifest_shape['recordFieldsByKind'] = examples
                 except (OSError, ValueError, TypeError):
                     manifest_shape = {'shapeReadable': False}
             receipt_shape = {}
@@ -114,9 +121,9 @@ def compressed_measurements():
             if metadata.get('kind') == 'file' and metadata.get('links') == 1 and metadata.get('sizeBytes', 0) <= 1024**2:
                 try:
                     receipt = json.loads(receipt_file.read_text())
-                    known = ('version', 'release', 'archiveSha256', 'archiveFile', 'restorationVerified', 'files', 'verified', 'sha256', 'filesCount')
                     if isinstance(receipt, dict):
-                        receipt_shape = {key: type(receipt[key]).__name__ for key in known if key in receipt}
+                        receipt_shape = {key: type(item).__name__ for key, item in receipt.items()
+                                         if isinstance(key, str) and re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,48}', key)}
                 except (OSError, ValueError, TypeError):
                     receipt_shape = {'shapeReadable': False}
             items.append({'collection': 'base' if base == compressed else 'extension-20261104',
