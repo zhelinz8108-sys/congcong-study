@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadCloudState } from "@/lib/cloud-progress";
 import { useEnglishLocked } from "@/lib/use-english-locked";
 import { getSentenceText } from "@/lib/sentences";
@@ -61,6 +61,8 @@ type SessionHistoryRecord = {
 };
 
 const SESSION_SIZE_OPTIONS: Exclude<SessionSize, "all">[] = [100, 200, 300, 500, 800, 1000];
+const AUTO_NEXT_DELAY_MS = 900;
+const AUTO_NEXT_KEY = "study-plan-interactive-vocab-auto-next";
 
 const POS_TAGS = [
   "限定词",
@@ -292,6 +294,30 @@ export function InteractiveMemorizeMode({
   const [search, setSearch] = useState("");
   const [saveError, setSaveError] = useState("");
   const [pendingSaves, setPendingSaves] = useState(0);
+  const [autoNext, setAutoNext] = useState(() => {
+    try {
+      return typeof window === "undefined" || window.localStorage.getItem(AUTO_NEXT_KEY) !== "0";
+    } catch {
+      return true;
+    }
+  });
+  const [advanceQuestionId, setAdvanceQuestionId] = useState<string | null>(null);
+  const questionVersion = useRef(0);
+  const submitting = useRef(false);
+
+  const resetQuestionState = useCallback(() => {
+    questionVersion.current += 1;
+    submitting.current = false;
+    setAdvanceQuestionId(null);
+    setSelectedId(null);
+    setSaveError("");
+    setPendingSaves(0);
+  }, []);
+
+  const goToNextQuestion = useCallback(() => {
+    resetQuestionState();
+    setCurrentIdx((index) => index + 1);
+  }, [resetQuestionState]);
 
   useEffect(() => {
     let active = true;
@@ -370,10 +396,14 @@ export function InteractiveMemorizeMode({
     return [{ entry, selectedId: null, selectedText: String(record.response), answerText: record.feedback.answer,
       correct: record.feedback.correct === true, skipped: false }];
   }), [sessionEntries, mode, locked.records]);
+  const questionOptions = useMemo(
+    () => current ? buildOptions(current, activeEntries, mode) : [],
+    [activeEntries, current, mode]
+  );
   const currentOptions = useMemo(
     () => {
       if (!current) return [];
-      const options = buildOptions(current, activeEntries, mode);
+      const options = [...questionOptions];
       // Restore the originally selected distractor as well as the immutable response.
       const saved = typeof currentRecord?.response === "string" ? currentRecord.response : "";
       const selected = activeEntries.find(entry => answerText(entry, mode) === saved);
@@ -383,11 +413,21 @@ export function InteractiveMemorizeMode({
       }
       return options;
     },
-    [activeEntries, current, mode, currentRecord?.response]
+    [activeEntries, current, mode, questionOptions, currentRecord?.response]
   );
   const selectedId = currentRecord
     ? currentOptions.find(entry => answerText(entry, mode) === currentRecord.response)?.word.id ?? null
     : draftSelectedId;
+
+  useEffect(() => {
+    if (!autoNext || !current || advanceQuestionId !== `${mode}:${current.word.id}` ||
+      currentRecord?.feedback.correct !== true || pendingSaves > 0) return;
+    const version = questionVersion.current;
+    const timer = setTimeout(() => {
+      if (questionVersion.current === version) goToNextQuestion();
+    }, AUTO_NEXT_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [autoNext, current, mode, advanceQuestionId, currentRecord?.feedback.correct, pendingSaves, goToNextQuestion]);
 
   const correctCount = answers.filter((answer) => answer.correct).length;
   const wrongCount = answers.length - correctCount;
@@ -447,10 +487,8 @@ export function InteractiveMemorizeMode({
     setSessionEntries(nextEntries);
     setSessionStarted(true);
     setCurrentIdx(0);
-    setSelectedId(null);
+    resetQuestionState();
     setStreak(0);
-    setSaveError("");
-    setPendingSaves(0);
   }
 
   function finalizeSession(completed: boolean, answerList = answers) {
@@ -478,12 +516,12 @@ export function InteractiveMemorizeMode({
     setSessionEntries([]);
     setSessionStarted(false);
     setCurrentIdx(0);
-    setSelectedId(null);
-    setSaveError("");
+    resetQuestionState();
   }
 
   function exitPractice() {
     finalizeSession(false);
+    resetQuestionState();
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -492,6 +530,7 @@ export function InteractiveMemorizeMode({
 
   function prepareForHome() {
     finalizeSession(false);
+    resetQuestionState();
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -552,29 +591,32 @@ export function InteractiveMemorizeMode({
     window.speechSynthesis.speak(utterance);
   }
 
-  function goToNextQuestion() {
-    setCurrentIdx((index) => index + 1);
-    setSelectedId(null);
-    setSaveError("");
-  }
-
-  async function submitAnswer() {
-    if (!current || answered || !locked.ready || locked.busy || pendingSaves || !draftSelectedId) return;
-    const selected = currentOptions.find(entry => entry.word.id === draftSelectedId);
+  async function submitAnswer(optionId = draftSelectedId) {
+    if (!current || answered || !locked.ready || locked.busy || submitting.current || !optionId) return;
+    const selected = currentOptions.find(entry => entry.word.id === optionId);
     if (!selected) return;
+    const version = questionVersion.current;
+    submitting.current = true;
+    setSelectedId(optionId);
     setSaveError("");
     setPendingSaves(1);
     try {
       const record = await locked.submit(`${mode}:${current.word.id}`, answerText(selected, mode));
+      if (questionVersion.current !== version) return;
       setStreak(value => record.feedback.correct === true ? value + 1 : 0);
-      // Spaced-repetition scheduling is not the student's objective score.
-      await onReview(current.word.id, record.feedback.correct === true ? 2 : 0).catch(() => {
-        setSaveError("答案已锁定；复习日程暂未更新。");
+      // Only this submission's server-confirmed result can schedule a transition.
+      // Restored records stay visible, and review scheduling cannot delay feedback.
+      if (record.feedback.correct === true) setAdvanceQuestionId(`${mode}:${current.word.id}`);
+      void onReview(current.word.id, record.feedback.correct === true ? 2 : 0).catch(() => {
+        if (questionVersion.current === version) setSaveError("答案已锁定；复习日程暂未更新。");
       });
     } catch {
-      setSaveError("提交未确认，请重试；不会在本地判分或显示答案。");
+      if (questionVersion.current === version) setSaveError("提交未确认，请重试。");
     } finally {
-      setPendingSaves(0);
+      if (questionVersion.current === version) {
+        submitting.current = false;
+        setPendingSaves(0);
+      }
     }
   }
 
@@ -592,6 +634,7 @@ export function InteractiveMemorizeMode({
 
   useEffect(() => {
     return () => {
+      questionVersion.current += 1;
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
@@ -901,7 +944,7 @@ export function InteractiveMemorizeMode({
                 return (
                   <button
                     key={`${option.word.id}-${index}`}
-                    onClick={() => { if (!answered && locked.ready && !locked.busy) setSelectedId(option.word.id); }}
+                    onClick={() => void submitAnswer(option.word.id)}
                     disabled={answered || !locked.ready || locked.busy || pendingSaves > 0}
                     className={`min-h-[104px] rounded-lg border px-4 py-3 text-left font-bold leading-6 transition ${stateClass}`}
                   >
@@ -923,9 +966,9 @@ export function InteractiveMemorizeMode({
               })}
             </div>
 
-            <div className={`mt-4 min-h-[58px] rounded-lg border px-4 py-3 text-sm font-semibold leading-6 ${answered ? (currentRecord?.feedback.correct ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-rose-200 bg-rose-50 text-rose-800") : "border-transparent text-stone-500"}`}>
-              {answered ? feedbackText : " "}
-              {pendingSaves > 0 && <span className="ml-2 text-xs text-stone-500">保存中...</span>}
+            <div role="status" aria-live="polite" className={`mt-4 min-h-[58px] rounded-lg border px-4 py-3 text-sm font-semibold leading-6 ${answered ? (currentRecord?.feedback.correct ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-rose-200 bg-rose-50 text-rose-800") : "border-transparent text-stone-500"}`}>
+              {answered ? feedbackText : pendingSaves > 0 ? "正在判题…" : "点击选项后立即判题"}
+              {autoNext && advanceQuestionId && currentRecord?.feedback.correct === true && <p className="mt-1 text-xs">即将自动进入{currentIdx + 1 >= sessionEntries.length ? "成绩页" : "下一题"}…</p>}
               {saveError && <p className="mt-1 text-xs text-rose-700">{saveError}</p>}
               {locked.error && <p className="mt-1 text-xs text-rose-700">{locked.error}</p>}
               {!locked.ready && <p className="text-xs text-stone-500">正在读取首次答题记录…</p>}
@@ -944,7 +987,7 @@ export function InteractiveMemorizeMode({
                 disabled={!locked.ready || locked.busy || pendingSaves > 0 || (!answered && !!current && !draftSelectedId)}
                 className="min-h-10 rounded-lg bg-emerald-700 px-5 text-sm font-bold text-white transition hover:bg-emerald-800 disabled:opacity-50"
               >
-                {!current ? "回看练习" : !answered ? "提交答案" : currentIdx + 1 >= sessionEntries.length ? "查看成绩" : "下一题"}
+                {!current ? "回看练习" : pendingSaves > 0 ? "判题中…" : !answered ? draftSelectedId ? "重试提交" : "请选择答案" : currentIdx + 1 >= sessionEntries.length ? "查看成绩" : "下一题"}
               </button>
             </div>
           </section>
@@ -1050,6 +1093,19 @@ export function InteractiveMemorizeMode({
                 />
                 随机出题
               </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={autoNext}
+                  onChange={(event) => {
+                    const enabled = event.target.checked;
+                    setAutoNext(enabled);
+                    try { window.localStorage.setItem(AUTO_NEXT_KEY, enabled ? "1" : "0"); } catch { /* Keep the in-memory preference when storage is unavailable. */ }
+                  }}
+                  className="h-4 w-4 accent-emerald-700"
+                />
+                答对后自动下一题
+              </label>
             </div>
 
             <div className="mt-4 rounded-lg border border-stone-200 bg-[#fbfcfa] p-3">
@@ -1110,8 +1166,8 @@ export function InteractiveMemorizeMode({
                   onClick={() => {
                     const index = sessionEntries.findIndex((item) => item.word.id === entry.word.id);
                     if (index >= 0) {
+                      resetQuestionState();
                       setCurrentIdx(index);
-                      setSelectedId(null);
                     }
                   }}
                   className="rounded-lg border border-stone-200 bg-white px-3 py-2 text-left"

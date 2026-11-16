@@ -96,7 +96,7 @@ await assert.rejects(vocab.gradeVocabLocked(`zh-en:${canonicalWordId.replaceAll(
 const client = readFileSync(path.join(root, "src/app/subjects/[id]/final-review/final-review-viewer.tsx"), "utf8");
 assert.doesNotMatch(client, /import.+english-final-review-answers|const ANSWERS/);
 const active = readFileSync(path.join(root, "src/components/interactive-memorize-mode.tsx"), "utf8");
-assert.doesNotMatch(active, /recordAnswer\(|resetLocalPractice|autoNext|saveCloudState/);
+assert.doesNotMatch(active, /recordAnswer\(|resetLocalPractice|saveCloudState/);
 assert.match(active, /locked\.submit\(`\$\{mode\}:\$\{current\.word\.id\}`/);
 assert.doesNotMatch(readFileSync(path.join(root, "src/app/subjects/[id]/vocab/page.tsx"), "utf8"), /function MemorizeMode/);
 console.log(JSON.stringify({ choices, fills, fields, checks: "private server grading, all existing numbered questions rendered, exact field counts, restored inputs disabled, no client answers or score reset, vocabulary two directions", mockSelects: selects, studentWrites: 0 }));
