@@ -105,6 +105,8 @@ def compressed_measurements():
                     if isinstance(records, (dict, list)):
                         manifest_shape['recordCount'] = len(records)
                         examples = {}
+                        hardlink_types, hardlink_lengths = set(), set()
+                        hardlinks_name_files = True
                         values = records.values() if isinstance(records, dict) else records
                         for row in values:
                             if not isinstance(row, dict):
@@ -112,7 +114,18 @@ def compressed_measurements():
                             kind = row.get('kind', row.get('type'))
                             if kind in ('file', 'directory', 'link', 'dir', 'symlink') and kind not in examples:
                                 examples[kind] = schema_fields(row)
+                            group = row.get('hardlinkGroup')
+                            if kind == 'file' and isinstance(group, list):
+                                hardlink_lengths.add(len(group))
+                                hardlink_types.update(type(item).__name__ for item in group)
+                                hardlinks_name_files = hardlinks_name_files and all(
+                                    isinstance(item, str) and isinstance(records, dict) and
+                                    isinstance(records.get(item), dict) and records[item].get('kind') == 'file'
+                                    for item in group)
                         manifest_shape['recordFieldsByKind'] = examples
+                        manifest_shape['hardlinkGroupShape'] = {'elementTypes': sorted(hardlink_types),
+                                                                'lengths': sorted(hardlink_lengths),
+                                                                'allElementsNameKnownFiles': hardlinks_name_files}
                 except (OSError, ValueError, TypeError):
                     manifest_shape = {'shapeReadable': False}
             receipt_shape = {}
@@ -124,6 +137,10 @@ def compressed_measurements():
                     if isinstance(receipt, dict):
                         receipt_shape = {key: type(item).__name__ for key, item in receipt.items()
                                          if isinstance(key, str) and re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,48}', key)}
+                        if isinstance(receipt.get('sourceMetadata'), dict):
+                            receipt_shape['sourceMetadataFields'] = {
+                                key: type(item).__name__ for key, item in receipt['sourceMetadata'].items()
+                                if isinstance(key, str) and re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,48}', key)}
                 except (OSError, ValueError, TypeError):
                     receipt_shape = {'shapeReadable': False}
             items.append({'collection': 'base' if base == compressed else 'extension-20261104',
