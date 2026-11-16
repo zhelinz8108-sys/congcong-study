@@ -548,8 +548,11 @@ def normalize_legacy_manifest(folder, manifest, receipt, manifest_bytes):
             isinstance(manifest['entries'], dict) and manifest['entries'], 'Unsupported legacy manifest schema')
     receipt_types = {'version': int, 'status': str, 'sourceBasename': str, 'sourceIdentity': list,
                      'sourceMetadata': dict, 'archiveBytes': int, 'archiveSha256': str, 'manifestSha256': str}
-    require(isinstance(receipt, dict) and set(receipt) == set(receipt_types) and
-            all(type(receipt[key]) is kind for key, kind in receipt_types.items()) and receipt['version'] == 1,
+    require(isinstance(receipt, dict) and set(receipt_types).issubset(receipt) and
+            set(receipt) - set(receipt_types) <= {'evictedWebpackBytes'} and
+            all(type(receipt[key]) is kind for key, kind in receipt_types.items()) and receipt['version'] == 1 and
+            ('evictedWebpackBytes' not in receipt or
+             type(receipt['evictedWebpackBytes']) is int and receipt['evictedWebpackBytes'] >= 0),
             'Unsupported legacy receipt schema')
     require(re.fullmatch(r'[0-9a-f]{64}', receipt['manifestSha256']) and
             hashlib.sha256(manifest_bytes).hexdigest() == receipt['manifestSha256'], 'Legacy manifest checksum differs')

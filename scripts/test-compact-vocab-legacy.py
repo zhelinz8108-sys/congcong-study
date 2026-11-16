@@ -34,7 +34,7 @@ def metadata(path):
                        for name in os.listxattr(path, follow_symlinks=False)}}
 
 
-def fixture(root, name):
+def fixture(root, name, receipt_extra=None):
     source = root / (name + '-source'); source.mkdir(mode=0o700)
     (source / 'nested').mkdir(mode=0o750)
     data = source / 'nested/data.txt'
@@ -74,6 +74,8 @@ def fixture(root, name):
                'sourceIdentity': [source.stat().st_dev, source.stat().st_ino],
                'sourceMetadata': {'mode': 0o700, 'uid': os.getuid(), 'gid': os.getgid()},
                'archiveBytes': archive.stat().st_size, 'archiveSha256': helper.digest(archive), 'manifestSha256': sha(raw)}
+    if receipt_extra:
+        receipt.update(receipt_extra)
     for filename, contents in [('manifest.json', raw), ('receipt.json', json.dumps(receipt).encode()),
                                ('restore.py', b'# original synthetic legacy restore helper\n'),
                                ('RESTORE_REQUIRED.txt', b'original synthetic legacy restore instructions\n')]:
@@ -119,7 +121,8 @@ def fixture_main(folder, arguments, restore_parent=None):
 
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
-    folder, legacy, receipt, raw = fixture(root, 'legacy-complete')
+    folder, legacy, receipt, raw = fixture(root, '7540ccd7cee2d07796cce61318e79d1d1be9e923-synthetic-build',
+                                           receipt_extra={'evictedWebpackBytes': 123})
     before = helper.snapshot(folder)
     modern = helper.normalize_legacy_manifest(folder, legacy, receipt, raw)
     assert modern['legacySchema'] == 'entries-v1'
@@ -169,7 +172,9 @@ with tempfile.TemporaryDirectory() as directory:
     for name in names:
         assert (folder / (name + '.before-vocab')).read_bytes() == old_bytes[name]
         assert metadata(folder / (name + '.before-vocab')) == old_metadata[name]
+    assert json.loads((folder / 'receipt.json.before-vocab').read_bytes())['evictedWebpackBytes'] == 123
     checks.append('legacy-recompression-keeps-exact-old-helper-manifest-receipt-instructions-and-xattrs-until-xz-stream-is-verified')
+    checks.append('diagnosed-optional-webpack-eviction-count-survives-legacy-verification-recompression-and-restoration')
 
     for field, wrong in [('tarSha256', '0' * 64), ('tarBytes', updated['tarBytes'] + 1)]:
         wrong_manifest = copy.deepcopy(updated); wrong_manifest[field] = wrong
@@ -246,6 +251,18 @@ with tempfile.TemporaryDirectory() as directory:
             else:
                 raise AssertionError('Incorrect archive/manifest receipt hash or byte count accepted')
     checks.append('wrong-original-gzip-hash-size-or-manifest-hash-fails-before-any-filesystem-write')
+    for extras in ({'evictedWebpackBytes': -1}, {'evictedWebpackBytes': True}, {'evictedWebpackBytes': '123'},
+                   {'unknownReceiptField': 123}, {'evictedWebpackBytes': 123, 'unknownReceiptField': 1}):
+        altered = {**receipt, **extras}
+        before = helper.snapshot(folder)
+        with patch.object(Path, 'mkdir', side_effect=AssertionError('Receipt schema rejection must precede writes')):
+            try:
+                helper.normalize_legacy_manifest(folder, original, altered, original_raw)
+            except ValueError:
+                assert helper.snapshot(folder) == before
+            else:
+                raise AssertionError('Invalid optional eviction count or unknown receipt field accepted')
+    checks.append('optional-webpack-eviction-count-rejects-negative-bool-string-and-all-unknown-receipt-fields-without-writes')
 
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
