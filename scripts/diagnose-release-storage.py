@@ -50,7 +50,10 @@ def cache_measurements():
     for target in known:
         item = {'path': str(target), **path_metadata(target)}
         if item.get('kind') == 'symlink':
-            resolved = target.resolve()
+            try:
+                resolved = target.resolve()
+            except (OSError, RuntimeError):
+                resolved = None
             if resolved in known and not resolved.is_symlink():
                 item.update(knownTarget=str(resolved), **directory_size(resolved))
             else:
@@ -80,12 +83,45 @@ def compressed_measurements():
             if identity is None or path_metadata(folder).get('kind') != 'directory':
                 continue
             artifacts = []
-            for name in ('archive.tar.gz', 'archive.tar.xz', 'manifest.json', 'receipt.json'):
+            for name in ('archive.tar.gz', 'archive.tar.xz', 'manifest.json', 'receipt.json', 'restore.py'):
                 metadata = path_metadata(folder / name)
                 if metadata.get('exists'):
                     artifacts.append({'artifact': name, **metadata})
+            manifest_shape = {}
+            manifest_file = folder / 'manifest.json'
+            metadata = path_metadata(manifest_file)
+            if metadata.get('kind') == 'file' and metadata.get('links') == 1 and metadata.get('sizeBytes', 0) <= 32 * 1024**2:
+                try:
+                    manifest = json.loads(manifest_file.read_text())
+                    known = ('version', 'release', 'files', 'entries', 'archiveSha256', 'archiveFile', 'archive_sha256')
+                    if isinstance(manifest, dict):
+                        manifest_shape['fields'] = {key: type(manifest[key]).__name__ for key in known if key in manifest}
+                        records = manifest.get('files', manifest.get('entries'))
+                    else:
+                        records = manifest
+                    manifest_shape['recordsType'] = type(records).__name__
+                    if isinstance(records, (dict, list)):
+                        manifest_shape['recordCount'] = len(records)
+                        first = next(iter(records.values()), None) if isinstance(records, dict) else next(iter(records), None)
+                        if isinstance(first, dict):
+                            fields = ('kind', 'type', 'mode', 'uid', 'gid', 'mtime', 'mtime_ns', 'size', 'sha256', 'hash', 'link', 'xattrs', 'path', 'name', 'relative')
+                            manifest_shape['recordFields'] = {key: type(first[key]).__name__ for key in fields if key in first}
+                except (OSError, ValueError, TypeError):
+                    manifest_shape = {'shapeReadable': False}
+            receipt_shape = {}
+            receipt_file = folder / 'receipt.json'
+            metadata = path_metadata(receipt_file)
+            if metadata.get('kind') == 'file' and metadata.get('links') == 1 and metadata.get('sizeBytes', 0) <= 1024**2:
+                try:
+                    receipt = json.loads(receipt_file.read_text())
+                    known = ('version', 'release', 'archiveSha256', 'archiveFile', 'restorationVerified', 'files', 'verified', 'sha256', 'filesCount')
+                    if isinstance(receipt, dict):
+                        receipt_shape = {key: type(receipt[key]).__name__ for key in known if key in receipt}
+                except (OSError, ValueError, TypeError):
+                    receipt_shape = {'shapeReadable': False}
             items.append({'collection': 'base' if base == compressed else 'extension-20261104',
-                          'identity': identity, 'artifacts': artifacts})
+                          'identity': identity, 'artifacts': artifacts, 'manifestShape': manifest_shape,
+                          'receiptShape': receipt_shape})
     return items
 
 
