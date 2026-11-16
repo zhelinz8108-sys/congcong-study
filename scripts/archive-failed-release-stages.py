@@ -270,6 +270,14 @@ def release_generated_apt_indexes(cache=Path('/var/cache/apt'), owner_uid=0):
     return released
 
 
+def prepare_generated_apt_indexes():
+    # The same two existing, rebuildable indexes may be released before the
+    # longer archive preparation. All later upload/build gates remain in place.
+    threshold = 5 * 1024**3 + 64 * 1024**2
+    released = release_generated_apt_indexes() if shutil.disk_usage(RELEASES).free < threshold else []
+    return {'released': released, 'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2}
+
+
 def storage_diagnostics():
     """Only sizes and known release IDs, never private filenames or file text."""
     PROGRESS['phase'] = 'read-only-storage-diagnostics'
@@ -300,8 +308,10 @@ def storage_diagnostics():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--apply', action='store_true', required=True)
-    parser.parse_args()
+    operation = parser.add_mutually_exclusive_group(required=True)
+    operation.add_argument('--apply', action='store_true')
+    operation.add_argument('--prepare-indexes', action='store_true')
+    args = parser.parse_args()
     require(os.geteuid() == 0, 'Archive relocation must run as root')
     no_links(RELEASES); no_links(DATA)
     require(RELEASES.is_dir() and DATA.is_dir(), 'Existing release and data directories are required')
@@ -312,6 +322,9 @@ def main():
     require(lockdir.stat().st_uid == 0 and stat.S_IMODE(lockdir.stat().st_mode) == 0o700, 'Invalid release lock directory')
     with os.fdopen(os.open(lockdir / 'lock', os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600), 'w') as lock:
         acquire_lock(lock)
+        if args.prepare_indexes:
+            print(json.dumps({'generatedAptPreparation': prepare_generated_apt_indexes()}), flush=True)
+            return
         PROGRESS['phase'] = 'checking-failed-stages'
         needed = 0
         largest = 0

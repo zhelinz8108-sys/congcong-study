@@ -176,4 +176,13 @@ with patch.object(helper.fcntl, 'flock', side_effect=[BlockingIOError(), None]) 
     helper.acquire_lock(object())
     assert lock_call.call_count == 2
     checks.append('waits-for-disconnected-worker-lock-before-any-mutation')
+
+with patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=6 * 1024**3)), patch.object(helper, 'release_generated_apt_indexes') as cleanup:
+    assert helper.prepare_generated_apt_indexes()['released'] == []
+    cleanup.assert_not_called()
+    checks.append('sufficient-root-capacity-does-not-touch-apt-indexes')
+with patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=3 * 1024**3)), patch.object(helper, 'release_generated_apt_indexes', return_value=[]) as cleanup:
+    helper.prepare_generated_apt_indexes()
+    cleanup.assert_called_once_with()
+    checks.append('bounded-apt-preparation-reuses-original-two-index-validator')
 print(json.dumps({'status': 'pass', 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))
