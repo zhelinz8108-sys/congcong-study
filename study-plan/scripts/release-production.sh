@@ -29,6 +29,8 @@ if [[ ${1:-} == --worker ]]; then
         return 1
       }
       build_check dependencies npm ci --include=dev
+      build_check english-vocab-rounds node scripts/test-english-vocab-sessions.mjs
+      build_check english-vocab-feedback node scripts/test-interactive-vocab-feedback.mjs
       build_check version npm run test:version
       build_check mathematics npm run test:grade6-bank
       build_check final-results node scripts/test-grade6-bank-result-release.mjs
