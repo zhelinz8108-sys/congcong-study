@@ -276,7 +276,8 @@ export function InteractiveMemorizeMode({
 }) {
   const mistakeKey = `study-plan-interactive-vocab-mistakes:${subjectName}`;
   const historyKey = `study-plan-interactive-vocab-history:${subjectName}`;
-  const locked = useEnglishLocked("vocab", subjectId);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const locked = useEnglishLocked("vocab", subjectId, sessionId);
 
   const [activeBook, setActiveBook] = useState<InteractiveWordBook | null>(null);
   const [mode, setMode] = useState<PracticeMode>("en-zh");
@@ -335,12 +336,12 @@ export function InteractiveMemorizeMode({
   }, [historyKey, mistakeKey]);
 
   const mistakeIds = useMemo(() => {
-    const result = new Set(legacyMistakeIds);
+    const result = new Set([...legacyMistakeIds, ...locked.mistakeWordIds]);
     for (const record of Object.values(locked.records)) {
       if (record.feedback.correct === false) result.add(record.id.replace(/^(?:en-zh|zh-en):/, ""));
     }
     return result;
-  }, [legacyMistakeIds, locked.records]);
+  }, [legacyMistakeIds, locked.mistakeWordIds, locked.records]);
 
   const entriesByBook = useMemo(() => {
     const result = new Map<string, PracticeEntry[]>();
@@ -484,6 +485,7 @@ export function InteractiveMemorizeMode({
       : nextFilteredEntries.slice(0, sessionLimit);
 
     const nextEntries = nextShuffle ? source : [...source].sort(sortEntries);
+    setSessionId(crypto.randomUUID());
     setSessionEntries(nextEntries);
     setSessionStarted(true);
     setCurrentIdx(0);
@@ -492,8 +494,8 @@ export function InteractiveMemorizeMode({
   }
 
   function finalizeSession(completed: boolean, answerList = answers) {
-    // Session selection is presentation only. Grades come exclusively from immutable
-    // server records; the older browser-made history is preserved, never overwritten.
+    // Grades come exclusively from this round's immutable server records;
+    // the older browser-made history is preserved, never overwritten.
     void completed;
     void answerList;
   }
@@ -513,6 +515,7 @@ export function InteractiveMemorizeMode({
       window.speechSynthesis.cancel();
     }
     setActiveBook(null);
+    setSessionId(null);
     setSessionEntries([]);
     setSessionStarted(false);
     setCurrentIdx(0);
@@ -819,7 +822,7 @@ export function InteractiveMemorizeMode({
   }
 
   const feedbackText = currentRecord
-    ? `${currentRecord.feedback.correct ? "答对了" : "答错了"} · 你选：${String(currentRecord.response)} · 正确答案：${currentRecord.feedback.answer}（首次答案已锁定）`
+    ? `${currentRecord.feedback.correct ? "答对了" : "答错了"} · 你选：${String(currentRecord.response)} · 正确答案：${currentRecord.feedback.answer}（本轮答案已保存）`
     : "";
 
   return (
@@ -971,7 +974,7 @@ export function InteractiveMemorizeMode({
               {autoNext && advanceQuestionId && currentRecord?.feedback.correct === true && <p className="mt-1 text-xs">即将自动进入{currentIdx + 1 >= sessionEntries.length ? "成绩页" : "下一题"}…</p>}
               {saveError && <p className="mt-1 text-xs text-rose-700">{saveError}</p>}
               {locked.error && <p className="mt-1 text-xs text-rose-700">{locked.error}</p>}
-              {!locked.ready && <p className="text-xs text-stone-500">正在读取首次答题记录…</p>}
+              {!locked.ready && <p className="text-xs text-stone-500">正在准备本轮练习…</p>}
             </div>
 
             <div className="mt-4 flex justify-end gap-2">
@@ -1067,7 +1070,7 @@ export function InteractiveMemorizeMode({
                 </button>
               </div>
               <p className="text-xs leading-5 text-stone-500">
-                按当前词表与句子范围抽题；数量不足时使用全部可测词。
+                按当前词表与句子范围抽题；数量不足时使用全部可测词。调整范围后开始新一轮，本场从 0 计数。
               </p>
             </div>
 

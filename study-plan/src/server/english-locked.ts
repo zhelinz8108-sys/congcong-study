@@ -3,7 +3,7 @@ import type { PoolClient } from "pg";
 
 import { pool } from "@/lib/db";
 import { ensureCloudProgressSchema } from "@/lib/cloud-progress-schema";
-import { firstSubmissions, saveFirstSubmission } from "@/server/first-submission";
+import { ensureFirstSubmissionSchema, firstSubmissions, saveFirstSubmission } from "@/server/first-submission";
 import { englishSixGrade } from "@/server/english-six";
 import { englishSixBankGrade } from "@/server/english-six-bank";
 import { englishSixReaderGrade } from "@/server/english-six-reader-practice";
@@ -29,7 +29,15 @@ const listening = listeningData as ListeningBook;
 type Legacy = { answer: EnglishLockedAnswer; feedback: EnglishLockedFeedback; submittedAt?: string };
 
 export function englishLockedModule(value: unknown): value is EnglishLockedModule { return typeof value === "string" && modules.has(value as EnglishLockedModule); }
-export const englishLockedScope = (module: EnglishLockedModule) => `english:locked:${module}:v1`;
+const vocabSessionPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+export function englishLockedSession(module: EnglishLockedModule, value: unknown): value is string | undefined {
+  return value === undefined || (module === "vocab" && typeof value === "string" && vocabSessionPattern.test(value));
+}
+export function englishLockedScope(module: EnglishLockedModule, session?: string) {
+  if (!englishLockedSession(module, session)) throw new Error("无效的单词练习场次");
+  const scope = `english:locked:${module}:v1`;
+  return session === undefined ? scope : `${scope}:session:${session}`;
+}
 const object = (value: unknown): Record<string, unknown> | undefined => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
 const text = (answer: EnglishLockedAnswer): string => {
   if (typeof answer !== "string" || !answer.trim() || answer.length > 10000) throw new Error("请先完成本题");
@@ -172,15 +180,33 @@ function publicRecord(module: EnglishLockedModule, id: string, saved: { answer: 
   const feedback = module === "six" ? englishSixReviewedFeedback(id, saved.feedback, () => gradeEnglishLocked(module, id, saved.answer)) : saved.feedback;
   return { id, response: saved.answer, feedback, submittedAt: saved.submittedAt ?? "" };
 }
-export async function englishLockedRecords(studentId: string, module: EnglishLockedModule, subjectId: string) {
+export async function englishLockedRecords(studentId: string, module: EnglishLockedModule, subjectId: string, session?: string) {
   void subjectId; // Kept for the URL/API contract; never used as a lock namespace.
-  const legacy = await legacyRecords(studentId, module);
-  const saved = await firstSubmissions<EnglishLockedAnswer, EnglishLockedFeedback>(studentId, englishLockedScope(module));
+  const scope = englishLockedScope(module, session);
+  const legacy = session === undefined ? await legacyRecords(studentId, module) : {};
+  const saved = await firstSubmissions<EnglishLockedAnswer, EnglishLockedFeedback>(studentId, scope);
   return Object.fromEntries(Object.entries({ ...legacy, ...saved }).map(([id, record]) => [id, publicRecord(module, id, record)]));
 }
-export async function englishLockedSubmit(studentId: string, module: EnglishLockedModule, subjectId: string, id: string, response: EnglishLockedAnswer) {
+export async function englishLockedSubmit(studentId: string, module: EnglishLockedModule, subjectId: string, id: string, response: EnglishLockedAnswer, session?: string) {
   if (!id || id.length > 200 || /[\u0000-\u001f]/.test(id)) throw new Error("题目编号不正确");
-  const legacy = (await legacyRecords(studentId, module))[id];
-  const saved = await saveFirstSubmission<EnglishLockedAnswer, EnglishLockedFeedback>(studentId, englishLockedScope(module), id, response, async (answer, client) => gradeEnglishLockedAsync(module, id, answer, client), legacy);
+  const scope = englishLockedScope(module, session);
+  const legacy = session === undefined ? (await legacyRecords(studentId, module))[id] : undefined;
+  const saved = await saveFirstSubmission<EnglishLockedAnswer, EnglishLockedFeedback>(studentId, scope, id, response, async (answer, client) => gradeEnglishLockedAsync(module, id, answer, client), legacy);
   return publicRecord(module, id, saved);
+}
+
+/** Historical mistakes are a review pool, never answers or scores for a new session. */
+export async function englishVocabMistakeWordIds(studentId: string): Promise<string[]> {
+  if (!/^[a-z0-9_-]{1,64}$/i.test(studentId)) throw new Error("无效的学生标识");
+  await ensureFirstSubmissionSchema();
+  const scope = englishLockedScope("vocab");
+  const sessionScopes = `^${scope}:session:${vocabSessionPattern.source.slice(1, -1)}$`;
+  const result = await pool.query<{ question_id: string }>(
+    "SELECT DISTINCT question_id FROM student_first_submissions WHERE student_id=$1 AND (scope=$2 OR scope ~ $3) AND feedback->'correct' = 'false'::jsonb ORDER BY question_id",
+    [studentId, scope, sessionScopes]
+  );
+  return [...new Set(result.rows.flatMap(({ question_id }) => {
+    const match = /^(?:en-zh|zh-en):([a-z0-9][a-z0-9_-]{0,127})$/.exec(question_id);
+    return match ? [match[1]] : [];
+  }))].sort();
 }

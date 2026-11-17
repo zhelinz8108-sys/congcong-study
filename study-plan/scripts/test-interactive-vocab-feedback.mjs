@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { randomUUID } from "node:crypto";
 import ts from "typescript";
 
 // Execute the real component and locking hook with an in-memory HTTP server,
@@ -57,7 +58,8 @@ function record(id, response, correct = true) {
 
 async function mount({ initialRecords = {}, storage = new Map(), count = 4, holdReview = false } = {}) {
   const slots = [], timers = new Map(), posts = [], requests = [], reviews = [];
-  const serverRecords = structuredClone(initialRecords);
+  const historyRecords = structuredClone(initialRecords), sessions = new Map();
+  let currentSession = null;
   let cursor = 0, dirty = true, tree, unmounted = false, time = 0, timerId = 0;
   let effects = [], randomSeed = 7261;
   const depsEqual = (a, b) => a !== undefined && b !== undefined && a.length === b.length && a.every((value, index) => Object.is(value, b[index]));
@@ -109,19 +111,35 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
   const math = Object.create(Math);
   math.random = () => ((randomSeed = (Math.imul(randomSeed, 1664525) + 1013904223) >>> 0) / 2 ** 32);
   const fetchMock = (url, options = {}) => {
-    assert.match(url, /^\/api\/english\/locked\?module=vocab&subject=qa-subject$/);
+    const parsed = new URL(url, "http://fixture.invalid");
+    assert.equal(parsed.pathname, "/api/english/locked");
+    assert.equal(parsed.searchParams.get("module"), "vocab");
+    assert.equal(parsed.searchParams.get("subject"), "qa-subject");
+    const session = parsed.searchParams.get("session");
+    if (session) {
+      assert.match(session, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+      if (!sessions.has(session)) sessions.set(session, {});
+    }
     const method = options.method ?? "GET";
-    requests.push({ url, method });
-    if (method === "GET") return Promise.resolve({ ok: true, json: async () => ({ records: structuredClone(serverRecords) }) });
+    requests.push({ url, method, session });
+    if (method === "GET") {
+      if (session) currentSession = session;
+      const records = session ? sessions.get(session) : historyRecords;
+      const mistakes = Object.values(historyRecords).concat([...sessions.values()].flatMap(Object.values))
+        .filter(item => item.feedback.correct === false).map(item => item.id.replace(/^(?:en-zh|zh-en):/, ""));
+      return Promise.resolve({ ok: true, json: async () => ({ records: structuredClone(records), mistakeWordIds: [...new Set(mistakes)] }) });
+    }
     assert.equal(method, "POST");
+    assert.ok(session, "Every vocabulary submission must carry this round's session UUID");
     assert.equal(options.cache, "no-store");
     const body = JSON.parse(options.body);
     assert.deepEqual(Object.keys(body).sort(), ["id", "response"]);
-    return new Promise((resolve, reject) => posts.push({ body, resolve, reject }));
+    return new Promise((resolve, reject) => posts.push({ body, session, resolve, reject }));
   };
+  const crypto = { randomUUID };
   const context = {
     console, AbortController, AbortSignal, fetch: fetchMock, setTimeout: schedule, clearTimeout: clear,
-    Math: math, window: { localStorage, setTimeout: schedule, clearTimeout: clear }, localStorage,
+    Math: math, crypto, window: { localStorage, crypto, setTimeout: schedule, clearTimeout: clear }, localStorage,
   };
   const load = (code, dependencies) => {
     const compiledModule = { exports: {} };
@@ -143,7 +161,7 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
   }).InteractiveMemorizeMode;
   const props = {
     subjectId: "qa-subject", subjectName: "QA English",
-    books: [{ groupName: "QA fixture book", units, totalWords: count }],
+    books: [{ groupName: "QA fixture book", units, totalWords: count }, { groupName: "QA second book", units, totalWords: count }],
     words: words.slice(0, count), onFinish: () => {},
     onReview: (id, quality) => {
       const review = { id, quality };
@@ -200,10 +218,19 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
     const match = /第\s*(\d+)\/\d+\s*题/.exec(text(tree));
     return match ? Number(match[1]) : null;
   };
-  const streak = () => {
-    const container = find("div", node => nodes(node.props.children).some(child => child.type === "small" && text(child) === "连对") &&
+  const stat = label => {
+    const container = find("div", node => nodes(node.props.children).some(child => child.type === "small" && text(child) === label) &&
       !nodes(node.props.children).some(child => child.type === "div"));
-    return Number(text(nodes(container).find(node => node.type === "span")));
+    return text(nodes(container).find(node => node.type === "span"));
+  };
+  const streak = () => Number(stat("连对"));
+  const assertFresh = () => {
+    assert.equal(position(), 1);
+    assert.match(stat("本场"), /^0\/\d+$/, "Only this session's answers count toward current progress");
+    assert.equal(stat("正确率"), "0%");
+    assert.equal(streak(), 0);
+    assert.doesNotMatch(text(tree), /答对了|答错了/, "Previous rounds cannot lock or reveal this round's answers");
+    assert.ok(options().every(option => !option.props.disabled), "New round can answer previously tested words");
   };
   async function advance(milliseconds) {
     const target = time + milliseconds;
@@ -224,8 +251,9 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
     assert.ok(post, `Missing POST ${index}`);
     assert.equal(post.finished, undefined, "POST can resolve only once");
     post.finished = true;
-    const saved = serverRecords[post.body.id] ?? record(post.body.id, post.body.response, correct);
-    serverRecords[post.body.id] = saved;
+    const records = sessions.get(post.session);
+    const saved = records[post.body.id] ?? record(post.body.id, post.body.response, correct);
+    records[post.body.id] = saved;
     post.resolve({ ok: true, json: async () => ({ record: structuredClone(saved) }) });
     await settle();
   }
@@ -243,8 +271,10 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
   checkbox("随机出题").props.onChange({ target: { checked: false } });
   await settle();
   assert.equal(position(), 1);
-  return { get tree() { render(); return tree; }, posts, requests, reviews, storage, serverRecords, timers,
-    settle, click, button, checkbox, answer, options, position, streak, advance, confirm, fail, find, unmount };
+  return { get tree() { render(); return tree; }, get sessionId() { return currentSession; },
+    get serverRecords() { return sessions.get(currentSession) ?? {}; }, historyRecords, sessions,
+    posts, requests, reviews, storage, timers,
+    settle, click, button, checkbox, answer, options, position, streak, stat, assertFresh, advance, confirm, fail, find, unmount };
 }
 
 {
@@ -362,16 +392,104 @@ for (const delayedResponse of [false, true]) {
 }
 
 {
-  const saved = record("en-zh:word-1", "苹果");
-  const h = await mount({ initialRecords: { [saved.id]: saved } });
-  assert.match(text(h.tree), /答对了/);
-  assert.ok(h.options().every(node => node.props.disabled));
+  const saved = Object.fromEntries(words.map(word => [`en-zh:${word.id}`, record(`en-zh:${word.id}`, word.meaning, false)]));
+  for (let index = 0; index < 546; index++) {
+    const id = `en-zh:historic-${index}`;
+    saved[id] = { id, response: "historical response", submittedAt: "2026-01-01T00:00:00.000Z",
+      feedback: { correct: index % 2 === 0, answer: "historical answer", explanation: "Preserved history" } };
+  }
+  const h = await mount({ initialRecords: saved });
+  assert.equal(Object.keys(h.historyRecords).length, 550);
+  h.assertFresh();
   await h.advance(5000);
-  assert.equal(h.position(), 1, "Restored record does not trigger automatic navigation");
+  assert.equal(h.position(), 1, "Past correct records never trigger a new round's navigation");
   assert.equal(h.posts.length, 0);
-  assert.equal(h.reviews.length, 0);
+  await h.click(h.answer("苹果"));
+  await h.confirm(0);
+  assert.equal(h.stat("本场"), "1/4", "550 historic records do not enter this round's numerator");
+  assert.equal(h.serverRecords["en-zh:word-1"].feedback.correct, true);
+  assert.deepEqual(h.historyRecords, saved, "Legacy history is preserved byte-for-byte rather than reset or overwritten");
+  h.find("select", () => true).props.onChange({ target: { value: "mistakes" } });
+  await h.settle();
+  h.assertFresh();
+  assert.equal(h.stat("本场"), "0/4", "Historical mistakes still populate the review pool without counting as this round's answers");
+  assert.deepEqual(h.historyRecords, saved);
   h.unmount();
-  checks.push("restored immutable answer stays visible without a write or automatic advance");
+  checks.push("550 historical answers are retained, excluded from fresh-round scores and available to the mistake pool");
+}
+
+const resetActions = [
+  ["sentence scope", h => h.click(h.find("button", node => node.props.title === "QA sentence 1"))],
+  ["test quantity", h => h.click(h.button("200 词"))],
+  ["direction", h => h.click(h.button("中文选英文"))],
+  ["new round", h => h.click(h.button("调整练习范围"))],
+  ["word book", async h => {
+    await h.click(h.button("词书选择"));
+    await h.click(h.find("button", node => text(node).includes("QA second book")));
+  }],
+  ["word-list filter", async h => {
+    h.find("select", () => true).props.onChange({ target: { value: "due" } });
+    await h.settle();
+  }],
+];
+for (const [name, change] of resetActions) {
+  const h = await mount();
+  await h.click(h.answer("苹果"));
+  await h.confirm(0);
+  const previousSession = h.sessionId;
+  const previousRecord = structuredClone(h.serverRecords["en-zh:word-1"]);
+  assert.equal(h.stat("本场"), "1/4");
+  await change(h);
+  assert.notEqual(h.sessionId, previousSession, `${name} starts a separate server session`);
+  h.assertFresh();
+  assert.deepEqual(h.sessions.get(previousSession)["en-zh:word-1"], previousRecord, `${name} does not delete the preceding round's answer`);
+  await h.advance(2000);
+  h.assertFresh();
+  h.unmount();
+  checks.push(`${name} resets progress, accuracy and streak with a new UUID while preserving prior answers`);
+}
+
+{
+  const h = await mount();
+  await h.click(h.answer("苹果"));
+  await h.confirm(0);
+  const previousSession = h.sessionId;
+  await h.click(h.button("调整练习范围"));
+  h.assertFresh();
+  await h.click(h.answer("书"));
+  assert.equal(h.posts[1].body.id, h.posts[0].body.id, "The same vocabulary question can be answered in the next round");
+  assert.notEqual(h.posts[1].session, h.posts[0].session);
+  await h.confirm(1, false);
+  assert.equal(h.sessions.get(previousSession)["en-zh:word-1"].feedback.correct, true);
+  assert.equal(h.serverRecords["en-zh:word-1"].feedback.correct, false);
+  assert.equal(h.stat("本场"), "1/4");
+  assert.equal(h.stat("正确率"), "0%");
+  assert.ok(h.options().every(option => option.props.disabled), "This round's first answer remains immutable");
+  await h.advance(2000);
+  assert.equal(h.position(), 1);
+  h.unmount();
+  checks.push("same word has independent first-answer locks and scores in separate rounds");
+}
+
+{
+  const h = await mount();
+  await h.click(h.answer("苹果"));
+  const previousSession = h.sessionId;
+  await h.click(h.button("调整练习范围"));
+  h.assertFresh();
+  assert.notEqual(h.sessionId, previousSession);
+  await h.click(h.answer("书"));
+  assert.equal(h.posts.length, 2, "Previous round's pending request cannot block or deduplicate this round's same-word submission");
+  await h.confirm(1, false);
+  await h.confirm(0, true);
+  assert.match(text(h.tree), /答错了/);
+  assert.equal(h.serverRecords["en-zh:word-1"].feedback.correct, false);
+  assert.equal(h.streak(), 0);
+  assert.equal(h.stat("本场"), "1/4");
+  await h.advance(2000);
+  assert.equal(h.position(), 1, "Late correct response from an old round cannot advance this round's wrong answer");
+  h.unmount();
+  checks.push("pending same-word requests are isolated by round; late older response cannot overwrite feedback or navigate");
 }
 
 {
@@ -413,8 +531,14 @@ for (const delayedResponse of [false, true]) {
   assert.equal(h.position(), null);
   assert.match(text(h.tree), /本场正确率\s*100%/);
   assert.match(text(h.tree), /答对\s*2\s*题，答错\s*0\s*题/);
+  const completedSession = h.sessionId;
+  await h.click(h.button("再练一轮"));
+  assert.notEqual(h.sessionId, completedSession);
+  h.assertFresh();
+  assert.equal(h.stat("本场"), "0/2");
+  assert.equal(Object.keys(h.sessions.get(completedSession)).length, 2, "Starting again preserves the completed round");
   h.unmount();
-  checks.push("last correct answer automatically opens results after its feedback delay");
+  checks.push("last correct answer opens results after its feedback delay; practice-again starts from zero and preserves the completed round");
 }
 
 {
