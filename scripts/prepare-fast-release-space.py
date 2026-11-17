@@ -1,11 +1,14 @@
 """Release only fixed, obsolete generated trees; keep live/latest rollback data.
 
-The user authorized removing unused server content. This operation never
-selects source, materials, uploads, configuration, backups or retained archives.
+The user authorized removing unused server content. Generated trees are
+preferred; an older source/material file is eligible only when independent
+byte-identical live and latest-rollback copies both remain verified intact.
+Uploads, independent media, configuration, backups and archives are excluded.
 Default is a read-only plan. No compression or release thresholds change.
 """
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -20,6 +23,8 @@ COMMIT = 'c64ae9005711af6475daf44698224ba85048916a'
 PROTECTED = 'previous-' + COMMIT + '-43834284884-1'
 OLDER = 'previous-37adda11b81ee4c73c90d931656c0f5d22902103-43653324834-1'
 TARGET_FREE = 5 * 1024**3 + 64 * 1024**2
+DIRECTORY_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
 
 
 class SpaceError(ValueError):
@@ -128,6 +133,25 @@ def scan_generated(path, device):
 def deletion_plan(live, releases, device):
     older = releases / OLDER
     candidates = []
+    # Only the diagnosed older rollback's named Next output namespaces. An
+    # arbitrary similarly named directory without a build marker is retained.
+    for generated in sorted(older.iterdir()):
+        if not generated.name.startswith(('.next-before-', '.next-failed-', '.next-english-')):
+            continue
+        no_links(generated)
+        if not generated.is_dir():
+            continue
+        evidence = False
+        for name in ('BUILD_ID', 'build-manifest.json', 'routes-manifest.json'):
+            marker = generated / name
+            if os.path.lexists(marker):
+                no_links(marker)
+                info = marker.lstat()
+                require(stat.S_ISREG(info.st_mode) and info.st_dev == device and info.st_size > 0,
+                        'Unexpected compiled-output marker')
+                evidence = True
+        if evidence:
+            candidates.append(('older-extra-next-generated', generated))
     modules = older / 'node_modules'
     if os.path.lexists(modules):
         require(modules.is_dir() and not modules.is_symlink(), 'Obsolete dependencies must be a real directory')
@@ -142,6 +166,124 @@ def deletion_plan(live, releases, device):
         require(webpack.is_dir() and not webpack.is_symlink(), 'Live webpack cache must be a real directory')
         candidates.append(('live-webpack-cache', webpack))
     return [(label, path, scan_generated(path, device)) for label, path in candidates]
+
+
+def duplicate_allowed(relative):
+    parts = relative.parts
+    if not parts or parts[0] not in ('src', 'content', 'public'):
+        return False
+    if any(part.startswith('.env') or part in ('.data', 'uploads', 'listening', 'media') for part in parts):
+        return False
+    if parts[:2] in (('content', 'english-six'), ('content', 'toefl-listening')):
+        return False
+    name = relative.name.lower()
+    if 'manifest' in name or 'receipt' in name or name in ('build_id', 'release-metadata.json'):
+        return False
+    if '.enc' in (suffix.lower() for suffix in relative.suffixes) or name.endswith('.enc'):
+        if not name.endswith('.enc') or parts[:4] not in (
+                ('content', 'grade6-bank', 'sealed', 'private'),
+                ('content', 'chinese-six', 'sealed', 'pages')):
+            return False
+    return not set(suffix.lower() for suffix in relative.suffixes).intersection(
+        ('.db', '.sqlite', '.sqlite3', '.sql', '.dump', '.backup', '.bak', '.zip', '.tar',
+         '.gz', '.xz', '.bz2', '.zst', '.tgz', '.7z', '.rar', '.lzma', '.db-wal', '.db-shm'))
+
+
+def open_directory(path):
+    descriptor = os.open('/', DIRECTORY_FLAGS)
+    try:
+        for part in path.parts[1:]:
+            child = os.open(part, DIRECTORY_FLAGS, dir_fd=descriptor)
+            os.close(descriptor); descriptor = child
+        return descriptor
+    except BaseException:
+        os.close(descriptor); raise
+
+
+def inspect_duplicate(paths, device, expected=None, remove=False):
+    """Hold three nofollow file/parent descriptors through the final unlink."""
+    parents, descriptors, signatures, hashes, allocated = [], [], [], [], 0
+    try:
+        for path in paths:
+            parent = open_directory(path.parent); parents.append(parent)
+            descriptor = os.open(path.name, FILE_FLAGS, dir_fd=parent); descriptors.append(descriptor)
+            info = os.fstat(descriptor)
+            require(stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_dev == device,
+                    'Duplicate copy must remain a regular single-link root-filesystem file')
+            signatures.append(identity(info))
+            if len(descriptors) == 1:
+                allocated = info.st_blocks * 512
+        require(len({row[6] for row in signatures}) == 1, 'Independent copies differ in size')
+        if expected:
+            require(signatures == expected['signatures'], 'Duplicate file identity changed; remaining copies retained')
+        for descriptor in descriptors:
+            with os.fdopen(os.dup(descriptor), 'rb') as incoming:
+                checksum = hashlib.sha256()
+                while chunk := incoming.read(1024 * 1024):
+                    checksum.update(chunk)
+                hashes.append(checksum.hexdigest())
+        require(len(set(hashes)) == 1 and (not expected or hashes[0] == expected['sha256']),
+                'Independent copies differ in bytes; remaining copies retained')
+        for path, parent, descriptor, signature in zip(paths, parents, descriptors, signatures):
+            require(identity(os.fstat(descriptor)) == signature and
+                    identity(os.stat(path.name, dir_fd=parent, follow_symlinks=False)) == signature,
+                    'Duplicate copy changed during verification; remaining copies retained')
+        if remove:
+            os.unlink(paths[0].name, dir_fd=parents[0])
+        return {'paths': paths, 'signatures': signatures, 'sha256': hashes[0], 'allocated': allocated}
+    finally:
+        for descriptor in descriptors + parents:
+            os.close(descriptor)
+
+
+def duplicate_plan(live, releases, device):
+    older, protected = releases / OLDER, releases / PROTECTED
+    plans, skipped = [], 0
+    for name in ('src', 'content', 'public'):
+        base = older / name
+        if not base.is_dir() or base.is_symlink():
+            continue
+        for directory, directories, files in os.walk(base, followlinks=False):
+            parent = Path(directory)
+            directories[:] = [name for name in sorted(directories)
+                              if duplicate_allowed((parent / name).relative_to(older)) and not (parent / name).is_symlink()]
+            for name in sorted(files):
+                path = parent / name; relative = path.relative_to(older)
+                if not duplicate_allowed(relative):
+                    skipped += 1; continue
+                try:
+                    candidate = inspect_duplicate((path, live / relative, protected / relative), device)
+                    if candidate['allocated'] > 0:
+                        plans.append(candidate)
+                except (OSError, SpaceError):
+                    skipped += 1
+    return sorted(plans, key=lambda row: row['allocated'], reverse=True), skipped
+
+
+def prune_duplicates(live, releases, backups, device, available, target, apply=True):
+    validate_layout(live, releases, backups)
+    roots = (releases / OLDER, live, releases / PROTECTED)
+    root_ids = {path: identity(path.stat())[:5] for path in roots}
+    plans, skipped = duplicate_plan(live, releases, device)
+    capacity = sum(row['allocated'] for row in plans)
+    metrics = {'duplicateCandidates': len(plans), 'duplicateCandidateMiB': capacity // 1024**2,
+               'duplicateSkipped': skipped}
+    if not apply:
+        return metrics
+    require(capacity >= max(0, target - available()),
+            'Verified duplicate capacity is insufficient; no duplicate files were removed', **metrics)
+    removed = 0
+    for plan in plans:
+        if available() >= target:
+            break
+        for path in roots:
+            no_links(path)
+            require(identity(path.stat())[:5] == root_ids[path], 'Retained release root changed; remaining copies retained')
+        inspect_duplicate(plan['paths'], device, expected=plan, remove=True)
+        removed += 1
+    require(available() >= target, 'Concurrent disk use exhausted verified duplicate savings',
+            duplicateFilesRemoved=removed, **metrics)
+    return {'duplicateFilesRemoved': removed, **metrics}
 
 
 def summary(plan):
@@ -165,6 +307,9 @@ def recover_space(live, releases, backups, available, apply=False, target=TARGET
     metrics = {'rootFreeMiB': initial // 1024**2, 'requiredRootMiB': (target + 1024**2 - 1) // 1024**2,
                'generatedCandidates': summary(plan)}
     if not apply:
+        estimated = sum(row[6] for _label, _path, rows in plan for row in rows.values() if stat.S_ISREG(row[2]))
+        if initial + estimated < target:
+            metrics.update(prune_duplicates(live, releases, backups, device, available, target, apply=False))
         return {'changed': False, 'dryRun': True, **metrics}
     # Validate every target again before the first deletion. Failure leaves all
     # generated trees, current app and latest rollback untouched.
@@ -182,11 +327,19 @@ def recover_space(live, releases, backups, available, apply=False, target=TARGET
         else:
             path.unlink()
         removed += 1
+    duplicates = {}
+    if available() < target:
+        try:
+            duplicates = prune_duplicates(live, releases, backups, device, available, target)
+        except SpaceError as error:
+            error.metrics = {**metrics, 'removedTargets': removed, **error.metrics, 'rootFreeMiB': available() // 1024**2}
+            raise
     final = available()
     require(final >= target, 'Reviewed generated content was insufficient; deployment remains blocked',
             removedTargets=removed, **{**metrics, 'rootFreeMiB': final // 1024**2})
-    return {'changed': removed > 0, 'removedTargets': removed, 'rootFreeMiB': final // 1024**2,
-            'requiredRootMiB': metrics['requiredRootMiB'], 'generatedCandidates': metrics['generatedCandidates']}
+    return {'changed': removed > 0 or duplicates.get('duplicateFilesRemoved', 0) > 0,
+            'removedTargets': removed, 'rootFreeMiB': final // 1024**2,
+            'requiredRootMiB': metrics['requiredRootMiB'], 'generatedCandidates': metrics['generatedCandidates'], **duplicates}
 
 
 def main():

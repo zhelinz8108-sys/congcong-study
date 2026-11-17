@@ -155,4 +155,76 @@ with tempfile.TemporaryDirectory() as directory:
         expect_rejected(lambda: helper.recover_space(live, releases, backups, lambda: 0, apply=True), root)
     checks.append('insufficient-fixed-generated-capacity-fails-closed-quickly-and-retries-without-new-deletions')
 
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); live, releases, backups, protected, older, receipts = fixture(root)
+    extra = [older / '.next-before-reviewed', older / '.next-failed-reviewed', older / '.next-english-reviewed']
+    for path, marker in zip(extra, ('BUILD_ID', 'build-manifest.json', 'routes-manifest.json')):
+        write(path / marker, 'compiled-build' if marker == 'BUILD_ID' else '{}')
+        write(path / 'server/chunk.js', 'generated compiled bytes')
+    unknown = older / '.next-before-not-compiled'; write(unknown / 'keep.txt', 'no compiled evidence, retain')
+    write(protected / '.next-before-keep/BUILD_ID', 'latest rollback retained')
+    write(live / '.next-before-keep/BUILD_ID', 'current application retained')
+    protected_before, live_before = snapshot(protected), snapshot(live)
+    available = lambda: helper.TARGET_FREE if all(not path.exists() for path in extra) else 0
+    with patch.object(helper, 'assert_inactive'):
+        result = helper.recover_space(live, releases, backups, available, apply=True)
+    assert result['removedTargets'] == 3 and (older / 'node_modules').exists()
+    assert (unknown / 'keep.txt').exists() and snapshot(protected) == protected_before and snapshot(live) == live_before
+    checks.append('only-older-next-prefix-directories-with-compiled-evidence-are-removed-first')
+
+assert helper.duplicate_allowed(Path('content/grade6-bank/sealed/private/static.png.enc'))
+assert helper.duplicate_allowed(Path('content/chinese-six/sealed/pages/static.png.enc'))
+for relative in ('src/.env.private', 'src/.data/student.json', 'public/uploads/user.pdf', 'public/listening/a.mp3',
+                 'content/english-six/resource.json', 'content/toefl-listening/audio.mp3', 'content/media/audio.mp3',
+                 'content/snapshot.db', 'content/snapshot.dump.enc', 'content/archive.tar.gz.enc',
+                 'content/manifest.json.enc', 'content/questions/static.png.enc', 'src/other.json.enc',
+                 'content/grade6-bank/sealed/private/snapshot.dump.enc',
+                 'content/chinese-six/sealed/pages/archive.tar.gz.enc',
+                 'src/receipt.json', 'src/BUILD_ID', 'public/release-metadata.json'):
+    assert not helper.duplicate_allowed(Path(relative)), relative
+checks.append('duplicate-exclusions-cover-independent-media-databases-archives-config-and-metadata-even-when-encrypted')
+
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); live, releases, backups, protected, older, receipts = fixture(root)
+    for directory in (live, protected, older):
+        write(directory / 'content/grade6-bank/sealed/private/000-matched.png.enc', 'identical encrypted static lesson bytes\n' * 1000)
+        write(directory / 'content/unique.txt', 'same size, different bytes' if directory == protected else 'a different old lesson!!!')
+    old_before, live_before, protected_before = snapshot(older), snapshot(live), snapshot(protected)
+    with patch.object(helper, 'assert_inactive'):
+        try:
+            helper.prune_duplicates(live, releases, backups, live.stat().st_dev, lambda: 0, 1024**3)
+        except helper.SpaceError:
+            assert snapshot(older) == old_before and snapshot(live) == live_before and snapshot(protected) == protected_before
+        else:
+            raise AssertionError('Insufficient duplicate preflight capacity caused partial deletion')
+    target_file = older / 'content/grade6-bank/sealed/private/000-matched.png.enc'
+    available = lambda: 4096 if not target_file.exists() else 0
+    with patch.object(helper, 'assert_inactive'):
+        result = helper.prune_duplicates(live, releases, backups, live.stat().st_dev, available, 4096)
+    assert result['duplicateFilesRemoved'] == 1 and not target_file.exists()
+    assert snapshot(live) == live_before and snapshot(protected) == protected_before
+    assert (older / 'src/source.ts').exists() and (older / 'content/unique.txt').exists()
+    checks.append('insufficient-duplicate-capacity-removes-nothing-and-sufficient-capacity-stops-after-actual-space-is-recovered')
+    checks.append('only-older-triple-verified-duplicate-is-unlinked-with-live-and-latest-copy-bytes-unchanged')
+
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); live, releases, backups, protected, older, receipts = fixture(root)
+    for directory in (live, protected, older):
+        write(directory / 'content/000-largest.json', 'same verified lesson\n' * 1000)
+    older_before, protected_before = snapshot(older), snapshot(protected)
+    original_inspect = helper.inspect_duplicate
+    def changed_retained(paths, device, expected=None, remove=False):
+        if remove:
+            (live / 'content/000-largest.json').write_text('legitimate later edit')
+        return original_inspect(paths, device, expected=expected, remove=remove)
+    with patch.object(helper, 'assert_inactive'), patch.object(helper, 'inspect_duplicate', side_effect=changed_retained):
+        try:
+            helper.prune_duplicates(live, releases, backups, live.stat().st_dev, lambda: 0, 4096)
+        except helper.SpaceError:
+            assert snapshot(older) == older_before and snapshot(protected) == protected_before
+            assert (live / 'content/000-largest.json').read_text() == 'legitimate later edit'
+        else:
+            raise AssertionError('Changed retained copy allowed the older file to be removed')
+    checks.append('retained-inode-metadata-and-content-are-rechecked-immediately-before-older-duplicate-unlink')
+
 print(json.dumps({'passed': True, 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))

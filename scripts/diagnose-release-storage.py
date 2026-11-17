@@ -223,6 +223,13 @@ if root.is_dir():
             cache = release / '.next/cache'
             build_caches.append({'release': release.name, **path_metadata(cache), **directory_size(cache)})
 print(json.dumps({'nextBuildCaches': build_caches}), flush=True)
+older = root / 'previous-37adda11b81ee4c73c90d931656c0f5d22902103-43653324834-1'
+if path_metadata(older).get('kind') == 'directory' and not any(p.is_symlink() for p in older.parents):
+    known_parts = []
+    for child in sorted(older.iterdir()):
+        if child.name in ('node_modules', '.next', 'src', 'content', 'public', '.data', 'scripts') or re.fullmatch(r'\.next-(?:before|failed|english)-[a-z0-9-]{1,96}', child.name):
+            known_parts.append({'part': child.name, **path_metadata(child), **directory_size(child)})
+    print(json.dumps({'obsoleteReleaseParts': known_parts}), flush=True)
 print(json.dumps({'aptBinaryIndexes': [{'file': name, **path_metadata(Path('/var/cache/apt') / name)}
                                       for name in ('pkgcache.bin', 'srcpkgcache.bin')]}), flush=True)
 print(json.dumps({'temporaryDirectory': directory_size(Path('/tmp'))}), flush=True)
