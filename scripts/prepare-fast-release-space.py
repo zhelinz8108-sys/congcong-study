@@ -172,7 +172,11 @@ def duplicate_allowed(relative):
     parts = relative.parts
     if not parts or parts[0] not in ('src', 'content', 'public'):
         return False
-    if any(part.startswith('.env') or part in ('.data', 'uploads', 'listening', 'media') for part in parts):
+    if any(part.startswith('.env') or part in ('.data', 'uploads', 'media') for part in parts):
+        return False
+    # Only a third obsolete listening copy may be pruned. The same nofollow,
+    # single-link checks require two independent real retained media files.
+    if 'listening' in parts and parts[:2] != ('public', 'listening'):
         return False
     if parts[:2] in (('content', 'english-six'), ('content', 'toefl-listening')):
         return False

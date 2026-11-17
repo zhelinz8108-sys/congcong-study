@@ -174,7 +174,8 @@ with tempfile.TemporaryDirectory() as directory:
 
 assert helper.duplicate_allowed(Path('content/grade6-bank/sealed/private/static.png.enc'))
 assert helper.duplicate_allowed(Path('content/chinese-six/sealed/pages/static.png.enc'))
-for relative in ('src/.env.private', 'src/.data/student.json', 'public/uploads/user.pdf', 'public/listening/a.mp3',
+assert helper.duplicate_allowed(Path('public/listening/a.mp3'))
+for relative in ('src/.env.private', 'src/.data/student.json', 'public/uploads/user.pdf',
                  'content/english-six/resource.json', 'content/toefl-listening/audio.mp3', 'content/media/audio.mp3',
                  'content/snapshot.db', 'content/snapshot.dump.enc', 'content/archive.tar.gz.enc',
                  'content/manifest.json.enc', 'content/questions/static.png.enc', 'src/other.json.enc',
@@ -226,5 +227,30 @@ with tempfile.TemporaryDirectory() as directory:
         else:
             raise AssertionError('Changed retained copy allowed the older file to be removed')
     checks.append('retained-inode-metadata-and-content-are-rechecked-immediately-before-older-duplicate-unlink')
+
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); live, releases, backups, protected, older, receipts = fixture(root)
+    relative = Path('public/listening/001.mp3')
+    for directory in (live, protected, older):
+        write(directory / relative, 'synthetic identical listening audio\n' * 2000)
+    live_before, protected_before = snapshot(live), snapshot(protected)
+    available = lambda: 4096 if not (older / relative).exists() else 0
+    with patch.object(helper, 'assert_inactive'):
+        result = helper.prune_duplicates(live, releases, backups, live.stat().st_dev, available, 4096)
+    assert result['duplicateFilesRemoved'] == 1 and not (older / relative).exists()
+    assert snapshot(live) == live_before and snapshot(protected) == protected_before
+    checks.append('obsolete-third-listening-copy-only-removed-with-two-independent-real-media-originals-unchanged')
+
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); live, releases, backups, protected, older, receipts = fixture(root)
+    relative = Path('public/listening/sound.mp3')
+    linked = root / 'canonical-listening'
+    (live / 'public/listening').rename(linked)
+    (live / 'public/listening').symlink_to(linked, target_is_directory=True)
+    before = snapshot(root)
+    plans, _ = helper.duplicate_plan(live, releases, live.stat().st_dev)
+    assert not any(plan['paths'][0] == older / relative for plan in plans)
+    assert snapshot(root) == before
+    checks.append('symlinked-canonical-listening-storage-cannot-qualify-an-obsolete-copy-for-removal')
 
 print(json.dumps({'passed': True, 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))
