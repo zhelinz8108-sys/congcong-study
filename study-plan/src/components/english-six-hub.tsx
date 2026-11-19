@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { GradeSixReview } from "./grade-six-review";
 import { useSearchParams } from "next/navigation";
 import { englishSixCollections, englishSixResources, englishSixResourceScope, englishSixResourceStage, englishSixResourceTitle, englishSixStages, type EnglishSixIndex, type SixCollection, type SixStage } from "@/lib/english-six";
 import styles from "./english-six.module.css";
@@ -74,6 +75,7 @@ export default function EnglishSixHub({ subjectId }: { subjectId: string }) {
       <div><p className={styles.eyebrow}>六年级上册 · 英语</p><h1>六上</h1></div>
       <span className={styles.edition}>2026 新版</span>
     </header>
+    <GradeSixReview subject="english" />
     {error && <p role="alert">{error}</p>}
     {!index && !error && <p role="status">正在载入资料…</p>}
     {index && <>

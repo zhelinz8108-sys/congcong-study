@@ -1,5 +1,7 @@
 "use client";
 
+import { GradeSixReview } from "@/components/grade-six-review";
+
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -1078,6 +1080,7 @@ export default function SubjectPage() {
 
       {isMath && (
         <div className="space-y-4">
+          <GradeSixReview subject="math" />
           <Link
             href={`/subjects/${id}/national-day-math`}
             className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"

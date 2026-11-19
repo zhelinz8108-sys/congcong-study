@@ -56,7 +56,8 @@ if [[ ${1:-} == --worker ]]; then
       /usr/bin/node scripts/check-extension-practice-content.mjs "$argument"
       /usr/bin/node --input-type=module - "$argument" <<'NODE'
 import assert from 'node:assert/strict';
-import { createHmac } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import nextEnv from '@next/env';
@@ -74,6 +75,26 @@ assert.ok(secret && (process.env.FAMILY_ACCESS_PASSWORD || '').trim(), 'Family a
 const payload = `v1.${Date.now() + 30 * 60 * 1000}`;
 const token = `${payload}.${createHmac('sha256', secret).update(payload).digest('base64url')}`;
 const headers = {Cookie: `congcong_family_access=${token}`};
+const guides = JSON.parse(await readFile('src/data/grade-six-reviews.json', 'utf8'));
+for (const guide of guides) {
+  const url = `${base}/api/grade-six-reviews/${guide.id}`;
+  const response = await fetch(url, {headers, signal: AbortSignal.timeout(20000)});
+  assert.equal(response.status, 200, guide.id);
+  assert.equal(response.headers.get('content-type'), guide.type);
+  assert.equal(createHash('sha256').update(Buffer.from(await response.arrayBuffer())).digest('hex'), guide.sha256, guide.id);
+  assert.equal((await fetch(url, {method: 'HEAD'})).status, 401);
+}
+for (const [subjectPage, guide] of [
+  ['/subjects/4ea6b4fe-bfd3-440f-b780-6d71c2011609/math/grade-6', 'math'],
+  ['/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/english/six', 'english'],
+]) {
+  const response = await fetch(base + subjectPage, {headers, signal: AbortSignal.timeout(20000)});
+  assert.equal(response.status, 200, subjectPage);
+  const html = await response.text();
+  assert.ok(html.includes(`href="/api/grade-six-reviews/${guide}"`), subjectPage);
+  if (guide === 'english') assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);
+}
+console.log(`Grade-six review links and original PDF/MP3 hashes verified on port ${port}.`);
 for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chinese/six',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/listening/2026-11-09']) {
