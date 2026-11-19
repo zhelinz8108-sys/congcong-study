@@ -88,6 +88,13 @@ jobs:
           ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
             "sudo -n python3 -" < scripts/diagnose-release-storage.py
 
+      - name: Prepare the existing two rebuildable APT binary indexes if needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
+            "sudo -n python3 - --prepare-indexes" < scripts/archive-failed-release-stages.py
+
       - name: Prepare only reviewed obsolete generated release files
         shell: bash
         run: |
@@ -107,13 +114,6 @@ jobs:
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
             "sudo -n python3 - --apply" < scripts/prepare-release-download-cache.py
-
-      - name: Prepare the existing two rebuildable APT binary indexes if needed
-        shell: bash
-        run: |
-          set -euo pipefail
-          ssh -i ~/.ssh/deploy_key -p "$SERVER_PORT" "$SERVER_USER@$SERVER_HOST" \
-            "sudo -n python3 - --prepare-indexes" < scripts/archive-failed-release-stages.py
 
       - name: Archive only this task's unused failed stages with full verification
         shell: bash
