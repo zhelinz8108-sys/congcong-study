@@ -22,6 +22,7 @@ LOCK = Path('/run/study-plan-release/lock')
 COMMIT = 'be86fb9e392bc3e9779b4465e751d228eb9c7df9'
 PROTECTED = 'previous-' + COMMIT + '-44458782126-1'
 OLDER = 'previous-0add12fc94fdb6c2e0337dfd3b5eaadd4fe51a6d-44058067878-1'
+EARLIER_DUPLICATES = 'previous-c64ae9005711af6475daf44698224ba85048916a-43834284884-1'
 TARGET_FREE = 5 * 1024**3 + 64 * 1024**2
 DIRECTORY_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
@@ -86,11 +87,12 @@ def assert_inactive(directory):
             continue
 
 
-def validate_layout(live, releases, backups):
-    for directory in (live, releases, backups, releases / PROTECTED, releases / OLDER):
+def validate_layout(live, releases, backups, older_release=OLDER):
+    require(older_release in (OLDER, EARLIER_DUPLICATES), 'Unknown older release')
+    for directory in (live, releases, backups, releases / PROTECTED, releases / older_release):
         no_links(directory)
         require(directory.is_dir(), 'Required intact release directory is unavailable')
-    protected, older = releases / PROTECTED, releases / OLDER
+    protected, older = releases / PROTECTED, releases / older_release
     require(live.resolve() not in (protected.resolve(), older.resolve()) and protected.resolve() != older.resolve(),
             'Live and protected rollback identities must remain distinct')
     device = live.stat().st_dev
@@ -100,7 +102,7 @@ def validate_layout(live, releases, backups):
     current_build = build_id(live)
     require(isinstance(metadata, dict) and metadata.get('commit') == COMMIT and metadata.get('buildId') == current_build,
             'Current release commit or build identity differs')
-    for release, directory in ((PROTECTED, protected), (OLDER, older)):
+    for release, directory in ((PROTECTED, protected), (older_release, older)):
         receipt = json.loads(read_regular(backups / ('before-main-' + release.removeprefix('previous-')) / 'receipt.json', private=True))
         require(isinstance(receipt, dict) and receipt.get('status') == 'deployed' and
                 receipt.get('commit') == release.removeprefix('previous-').split('-')[0] and
@@ -217,6 +219,7 @@ def inspect_duplicate(paths, device, expected=None, remove=False):
             signatures.append(identity(info))
             if len(descriptors) == 1:
                 allocated = info.st_blocks * 512
+        require(len({row[:2] for row in signatures}) == 3, 'Duplicate copies must be independent files')
         require(len({row[6] for row in signatures}) == 1, 'Independent copies differ in size')
         if expected:
             require(signatures == expected['signatures'], 'Duplicate file identity changed; remaining copies retained')
@@ -240,8 +243,8 @@ def inspect_duplicate(paths, device, expected=None, remove=False):
             os.close(descriptor)
 
 
-def duplicate_plan(live, releases, device):
-    older, protected = releases / OLDER, releases / PROTECTED
+def duplicate_plan(live, releases, device, older_release=OLDER):
+    older, protected = releases / older_release, releases / PROTECTED
     plans, skipped = [], 0
     for name in ('src', 'content', 'public'):
         base = older / name
@@ -266,10 +269,19 @@ def duplicate_plan(live, releases, device):
 
 def prune_duplicates(live, releases, backups, device, available, target, apply=True):
     validate_layout(live, releases, backups)
-    roots = (releases / OLDER, live, releases / PROTECTED)
-    root_ids = {path: identity(path.stat())[:5] for path in roots}
+    roots = [releases / OLDER, live, releases / PROTECTED]
     plans, skipped = duplicate_plan(live, releases, device)
     capacity = sum(row['allocated'] for row in plans)
+    earlier = releases / EARLIER_DUPLICATES
+    if capacity < target - available() and os.path.lexists(earlier):
+        validate_layout(live, releases, backups, EARLIER_DUPLICATES)
+        extra, extra_skipped = duplicate_plan(live, releases, device, EARLIER_DUPLICATES)
+        plans.extend(extra)
+        capacity += sum(row['allocated'] for row in extra)
+        skipped += extra_skipped
+        roots.append(earlier)
+    root_ids = {path: identity(path.stat())[:5] for path in roots}
+    require(len({row[:2] for row in root_ids.values()}) == len(roots), 'Release directories must be distinct')
     metrics = {'duplicateCandidates': len(plans), 'duplicateCandidateMiB': capacity // 1024**2,
                'duplicateSkipped': skipped}
     if not apply:

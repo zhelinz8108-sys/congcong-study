@@ -253,4 +253,38 @@ with tempfile.TemporaryDirectory() as directory:
     assert snapshot(root) == before
     checks.append('symlinked-canonical-listening-storage-cannot-qualify-an-obsolete-copy-for-removal')
 
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); live, releases, backups, protected, older, _ = fixture(root)
+    earlier = releases / helper.EARLIER_DUPLICATES
+    write(earlier / '.next/BUILD_ID', 'earlier-build')
+    receipt_id = earlier.name.removeprefix('previous-')
+    receipt = backups / ('before-main-' + receipt_id) / 'receipt.json'
+    record = {'status': 'deployed', 'commit': receipt_id.split('-')[0],
+              'previousDirectory': str(earlier), 'oldBuildId': 'earlier-build'}
+    write(receipt, json.dumps(record)); receipt.chmod(0o600)
+    relative = Path('src/earlier-only.ts')
+    for directory in (live, protected, earlier):
+        write(directory / relative, 'identical fixture' * 1300)
+    write(earlier / 'src/unique.ts', 'retain this older revision')
+    write(earlier / 'node_modules/keep', 'outside duplicate-file scope')
+    primary, _ = helper.duplicate_plan(live, releases, live.stat().st_dev)
+    candidates = {plan['paths'][0]: plan['allocated'] for plan in primary}
+    initial_capacity = sum(candidates.values())
+    candidates[earlier / relative] = (earlier / relative).stat().st_blocks * 512
+    def available():
+        return sum(size for path, size in candidates.items() if not path.exists())
+    def prune(target, apply=True):
+        return helper.prune_duplicates(live, releases, backups, live.stat().st_dev, available, target, apply=apply)
+    live_before, protected_before = snapshot(live), snapshot(protected)
+    with patch.object(helper, 'assert_inactive'):
+        write(receipt, json.dumps({**record, 'oldBuildId': 'unexpected'}))
+        assert prune(initial_capacity, apply=False)['duplicateCandidates'] == len(primary)
+        expect_rejected(lambda: prune(initial_capacity + 1), root)
+        write(receipt, json.dumps(record))
+        expect_rejected(lambda: prune(sum(candidates.values()) + 1), root)
+        assert prune(initial_capacity + 1)['duplicateFilesRemoved'] == len(candidates)
+    assert snapshot(live) == live_before and snapshot(protected) == protected_before
+    assert (earlier / 'src/unique.ts').is_file() and (earlier / 'node_modules/keep').is_file()
+    checks.append('secondary-rollback-only-when-needed-with-receipt-intact-and-sufficient-combined-triple-verified-bytes')
+
 print(json.dumps({'passed': True, 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))
