@@ -64,6 +64,14 @@ import nextEnv from '@next/env';
 nextEnv.loadEnvConfig(process.cwd());
 const port = process.argv[2];
 const base = `http://127.0.0.1:${port}`;
+const notify = async method => fetch(base + '/dot/mcp', {
+  method: 'POST', headers: {'Content-Type':'application/json'}, signal: AbortSignal.timeout(10000),
+  body: JSON.stringify({jsonrpc:'2.0',id:1,method})
+});
+assert.equal((await (await notify('events/list')).json()).result.events[0].name, 'practice.completed');
+assert.equal((await notify('events/subscribe')).status, 401);
+const protectedResource = await fetch(base + '/.well-known/oauth-protected-resource/dot/mcp');
+assert.equal((await protectedResource.json()).resource, 'https://congcong-study.cn/dot/mcp');
 const health = await fetch(`${base}/api/health`, {signal: AbortSignal.timeout(10000)});
 assert.equal(health.status, 200);
 const result = await health.json();
@@ -162,7 +170,8 @@ NODE
       ;;
     migrate)
       # Only the reviewed, additive and idempotent migration is allowed here.
-      [[ $(sha256sum scripts/migrate-postgres.mjs | cut -d' ' -f1) == 81962036a657d97c9ac1cfe459fde675553398e5d1bf609f8720f274d44be49f ]] || fail 'Migration changed; review it before releasing.'
+      [[ $(sha256sum scripts/migrate-postgres.mjs | cut -d' ' -f1) == ec51abe6712bfe7b55f220e8e858ef62dad6e037ca0ff6c6aad152656f29e2e0 ]] || fail 'Migration changed; review it before releasing.'
+      [[ $(sha256sum scripts/practice-notifications.sql | cut -d' ' -f1) == 263b9dc10b8ba7607e01456391b33b946c700149d467b00b05e0e3b45f4ed4d1 ]] || fail 'Notification migration changed; review it before releasing.'
       export PGOPTIONS="${PGOPTIONS:+$PGOPTIONS }-c default_transaction_read_only=off"
       exec /usr/bin/node scripts/migrate-postgres.mjs
       ;;

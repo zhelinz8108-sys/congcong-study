@@ -38,7 +38,7 @@ export async function extensionWrite(request: NextRequest, rawSubject: string, a
     bankInputSchema(body.input_schema,q);
     const values=bankStudentAnswers(body.answers,q,action==="submit");
     const feedback=action==="submit"?await extensionFeedback(subject,q.id,values):undefined;
-    const response=await saveBankResponse(bankProfile(request).id,subjectId,q.id,values,revision,feedback);
+    const response=await saveBankResponse(bankProfile(request).id,subjectId,q.id,values,revision,feedback,request.headers.get("x-practice-round"),subject === "math" ? "数学拓展" : "英语拓展");
     return NextResponse.json(feedback?{response,feedback}:response,{headers:bankHeaders});
   } catch(error) {
     if (error instanceof BankRevisionConflict) return NextResponse.json({error:error.message,response:error.response},{status:409,headers:bankHeaders});

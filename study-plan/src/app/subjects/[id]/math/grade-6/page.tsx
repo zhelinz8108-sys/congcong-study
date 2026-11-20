@@ -1,4 +1,5 @@
 "use client";
+import { finishPracticeRound, submitInPracticeRound } from "@/lib/practice-round";
 
 import Link from "next/link";
 import { GradeSixReview } from "@/components/grade-six-review";
@@ -136,8 +137,9 @@ export default function MathGradeSixPage() {
     if (pending || answers[question.id]) return;
     setPending(true); setNotice("");
     try {
-      const response = await fetch("/api/math/grade-six", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question_id: question.id, value: index }), cache: "no-store" });
+      const response = await submitInPracticeRound("/api/math/grade-six", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question_id: question.id, value: index }), cache: "no-store" });
       const result = await response.json(); if (!response.ok) throw new Error(result.error || "提交失败");
+      if (questions.every(q => q.id === question.id || answers[q.id])) finishPracticeRound();
       setAnswers(previous => ({ ...previous, [question.id]: result }));
     } catch (error) { setNotice(error instanceof Error ? error.message : "提交失败"); } finally { setPending(false); }
   };
@@ -240,6 +242,7 @@ export default function MathGradeSixPage() {
                   key={unit.key}
                   type="button"
                   onClick={() => {
+                    if (activeUnitKey !== unit.key) finishPracticeRound();
                     setActiveUnitKey(unit.key);
                     setCurrentIndex(0);
                   }}
@@ -309,6 +312,7 @@ export default function MathGradeSixPage() {
                   key={item.key}
                   type="button"
                   onClick={() => {
+                    if (difficulty !== item.key) finishPracticeRound();
                     setDifficulty(item.key);
                     setCurrentIndex(0);
                   }}

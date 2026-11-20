@@ -1,4 +1,5 @@
 "use client";
+import { finishPracticeRound } from "@/lib/practice-round";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -66,6 +67,7 @@ export default function EnglishSixPractice({ subjectId, unit }: { subjectId: str
     setBusy(true); setError("");
     try {
       const saved = await locked.submit(question.id, draft);
+      if (questions.every(q => q.id === question.id || locked.records[q.id])) finishPracticeRound();
       const result: SixFeedback = { id: saved.id, response: typeof saved.response === "string" ? saved.response : draft, ...saved.feedback };
       setProgress(p => ({ ...p, drafts: { ...p.drafts, [question.id]: result.response }, results: { ...p.results, [question.id]: result } }));
     } catch (e) { setError(e instanceof Error ? e.message : "提交失败"); }
@@ -73,6 +75,7 @@ export default function EnglishSixPractice({ subjectId, unit }: { subjectId: str
   };
   const move = (n: number) => { if (mistakes) setReviewIndex(n); else setProgress(p => ({ ...p, index: n })); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const reviewFromStart = () => { move(0); setFinished(false); };
+  function finish() { finishPracticeRound(); setFinished(true); }
   return <main className={styles.practicePage}>
     <Link href={`/subjects/${subjectId}/english/six?unit=${unit}&stage=test`} className={styles.back}>← 返回六上目录</Link>
     <header className={styles.header}><div><p className={styles.eyebrow}>Unit {unit} · {mistakes ? "错题复习" : "单元测评"}</p><h1>{paper?.title ?? "单元测评"}</h1></div>
@@ -97,7 +100,7 @@ export default function EnglishSixPractice({ subjectId, unit }: { subjectId: str
       </div>
       <div className={styles.bottomNav}><button className={styles.secondary} disabled={!position || busy} onClick={() => move(position - 1)}>← 上一题</button>
         <span>{position + 1} / {questions.length}</span>
-        <button className={styles.primary} disabled={!feedback || busy} onClick={() => position + 1 < questions.length ? move(position + 1) : setFinished(true)}>{position + 1 < questions.length ? "下一题 →" : "查看成绩"}</button></div>
+        <button className={styles.primary} disabled={!feedback || busy} onClick={() => position + 1 < questions.length ? move(position + 1) : finish()}>{position + 1 < questions.length ? "下一题 →" : "查看成绩"}</button></div>
       <p className={styles.textButton}>提交后永久锁定，成绩按首次作答统计。</p>
     </>}
     {finished && <section className={styles.results}><h2>{stats.answered === questions.length ? "本套练习完成" : "本套练习进度"}</h2><p>已答 {stats.answered} / {questions.length} 题 · 客观题答对 {stats.correct} / {stats.graded} · 正确率 {stats.accuracy ?? 0}%</p><p>开放题不计入客观题正确率，原答案保留待教师评价。</p><button className={styles.primary} onClick={reviewFromStart}>回看首次作答</button>{unit < 8 && <Link href={`/subjects/${subjectId}/english/six/practice/${unit + 1}`} className={styles.secondary}>Unit {unit + 1} →</Link>}</section>}

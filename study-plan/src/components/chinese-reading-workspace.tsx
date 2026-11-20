@@ -1,4 +1,5 @@
 "use client";
+import { finishPracticeRound, submitInPracticeRound } from "@/lib/practice-round";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -41,11 +42,12 @@ export default function ChineseReadingWorkspace({ subjectId, passage, topic }: {
     if (!ready || response || !value || busyRef.current) return;
     busyRef.current = true; setBusy(true); setError("");
     try {
-      const res = await fetch("/api/chinese/reading/progress", { method: "POST", headers: { "Content-Type": "application/json" },
+      const res = await submitInPracticeRound("/api/chinese/reading/progress", { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ passageId: passage.id, questionId: question.id, value }) });
       const data = await res.json() as Results;
       if (!res.ok) throw new Error(data.error || "提交失败。");
       setRecords(data.records);
+      if (passage.questions.every(q => data.records[q.id])) finishPracticeRound();
       if (data.replayed) setError("本题已有锁定答案，已显示原提交记录。");
     } catch (e) {
       setReady(false);

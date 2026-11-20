@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     const teaching = await bankResultTeaching(q.id, detailedSolution, feedback.answerText);
     const studentId = bankProfile(request).id;
     const previous = q.resultAssessment === "closed-v1" ? await bankResponse(studentId, subject, q.id) : undefined;
-    const response = await saveBankResponse(studentId, subject, bankResultStorageId(q), studentAnswers, baseRevision, feedback);
+    const response = await saveBankResponse(studentId, subject, bankResultStorageId(q), studentAnswers, baseRevision, feedback, request.headers.get("x-practice-round"));
     return NextResponse.json({ feedback: { ...feedback, answerText: teaching.answerText, answerImages: images, ...(teaching.detailedSolution ? { detailedSolution: teaching.detailedSolution } : {}) }, response: previous ? withBankPreviousWork(response, previous) : response }, { headers: bankHeaders });
   } catch (error) {
     if (error instanceof BankRevisionConflict) return NextResponse.json({ error: error.message, response: error.response }, { status: 409, headers: bankHeaders });

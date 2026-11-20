@@ -1,4 +1,5 @@
 "use client";
+import { finishPracticeRound } from "@/lib/practice-round";
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
@@ -71,7 +72,7 @@ export function Grade6BankDirectory({ subjectId, manifest }: { subjectId: string
 }
 
 type ProgressHook = ReturnType<typeof useGrade6BankProgress>;
-function QuestionSession({ question, collection, position, count, progress, go }: { question: BankQuestion; collection: BankCollection; position: number; count: number; progress: ProgressHook; go: (offset: number) => void }) {
+function QuestionSession({ question, collection, position, count, progress, go, onAnswered }: { question: BankQuestion; collection: BankCollection; position: number; count: number; progress: ProgressHook; go: (offset: number) => void; onAnswered: () => void }) {
   const existing = progress.progress.responses[question.id];
   const locked = existing?.submitted || (existing?.submissions ?? 0) > 0;
   const controlsDisabled = !progress.ready || locked;
@@ -119,6 +120,7 @@ function QuestionSession({ question, collection, position, count, progress, go }
     setBusy(true); setError("");
     try {
       const value = await progress.submit(question.id, answers);
+      onAnswered();
       setFeedback({ revision: progress.getResponse(question.id)?.revision ?? -1, value });
     } catch (e) { setError(e instanceof Error ? e.message : "提交失败，请稍后重试"); } finally { setBusy(false); }
   };
@@ -173,10 +175,13 @@ export function Grade6BankPractice({ subjectId, collection, initialQuestionId, e
   }, [activeId, apiBase]);
   const go = (offset: number) => { const next = questions[position + offset]; if (!next) return; void progress.flush(); setCurrentId(next.id); window.scrollTo({ top: 0, behavior: "smooth" }); };
   return <main className={styles.page} style={palette(collection.palette)}><div className={styles.practiceWrap}>
-    <Link className={styles.back} href={extension?.backHref ?? `/subjects/${subjectId}/math/problem-bank`}>← {extension?.backLabel ?? "返回题库目录"}</Link>
+    <Link onClick={() => finishPracticeRound()} className={styles.back} href={extension?.backHref ?? `/subjects/${subjectId}/math/problem-bank`}>← {extension?.backLabel ?? "返回题库目录"}</Link>
     <header className={styles.practiceHeader}><h1>{collection.title}</h1>{extension && <p>{collection.subtitle}</p>}</header>
     <section className={styles.overview} style={{ margin: "0 0 18px" }}><div className={styles.overviewTop}><div className={styles.stats}><span>已答<b>{progress.ready ? stats.answered : "—"} / {collection.questionCount}</b></span><span>答对<b>{progress.ready ? stats.correct : "—"}</b></span><span>正确率<b>{progress.ready && stats.accuracy !== null ? `${stats.accuracy}%` : "—"}</b></span>{stats.review > 0 && <span>待核验<b>{stats.review}</b></span>}</div>{progress.sync !== "saved" && <span className={styles.note} role="status">{syncText[progress.sync]}</span>}</div></section>
     <div className={styles.tools}>{extension ? <label className={styles.note}>题目类型 <select aria-label="题目类型" value={kindFilter} onChange={(event) => { void progress.flush(); setKindFilter(event.target.value); setCurrentId(collection.questions.find(q => event.target.value === "all" || q.kind === event.target.value)?.id ?? ""); }}><option value="all">全部 · {collection.questionCount} 题</option>{["选择题", "填空题"].map(kind => <option key={kind} value={kind}>{kind} · {collection.questions.filter(q => q.kind === kind).length} 题</option>)}</select></label> : collection.mode === "chapter" ? <label className={styles.note}>练习层级 <select aria-label="练习层级" value={filter} onChange={(e) => { void progress.flush(); setFilter(e.target.value); setCurrentId(collection.questions.find((q) => e.target.value === "all" || String(q.difficulty) === e.target.value)?.id ?? ""); }}><option value="all">全部 · 从简单到难</option>{BANK_DIFFICULTIES.filter((d) => collection.difficultyCounts[d.value]).map((d) => <option key={d.value} value={d.value}>{d.label} · {collection.difficultyCounts[d.value]} 题</option>)}</select></label> : <span className={styles.note}>按原卷顺序练习</span>}<label className={styles.note}>题号 <select aria-label="跳转到题号" value={activeId} onChange={(e) => { void progress.flush(); setCurrentId(e.target.value); }}>{questions.map((q) => <option key={q.id} value={q.id}>第 {String(q.number).padStart(3, "0")} 题{extension ? ` · ${q.kind}` : ""}{progress.progress.responses[q.id]?.submitted ? " · 已答" : ""}</option>)}</select></label></div>
-    {error ? <div role="alert" className={styles.error}>{error} <button onClick={() => window.location.reload()}>重新加载</button></div> : !progress.ready || loaded?.id !== activeId ? <div className={styles.loading}>正在准备这道题…</div> : <QuestionSession key={activeId} question={loaded.question} collection={collection} position={position} count={questions.length} progress={progress} go={go} />}
+    {error ? <div role="alert" className={styles.error}>{error} <button onClick={() => window.location.reload()}>重新加载</button></div> : !progress.ready || loaded?.id !== activeId ? <div className={styles.loading}>正在准备这道题…</div> : <QuestionSession key={activeId} question={loaded.question} collection={collection} position={position} count={questions.length} progress={progress} go={go} onAnswered={() => {
+      if (questions.every(q => q.id === activeId || progress.getResponse(q.id)?.submitted)) finishPracticeRound();
+    }} />}
+    <Link className={styles.button} href={extension?.backHref ?? `/subjects/${subjectId}/math/problem-bank`} onClick={() => finishPracticeRound()}>结束本轮练习</Link>
   </div></main>;
 }

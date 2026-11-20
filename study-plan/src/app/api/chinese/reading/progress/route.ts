@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     body = JSON.parse(text);
     if (!body || typeof body.passageId !== "string" || typeof body.questionId !== "string" || typeof body.value !== "string") throw new Error();
   } catch { return NextResponse.json({ error: "请求格式有误。" }, { status: 400, headers }); }
-  try { return NextResponse.json(await submitReadingResponse(student.id, body.passageId, body.questionId, body.value), { headers }); }
+  try { return NextResponse.json(await submitReadingResponse(student.id, body.passageId, body.questionId, body.value, request.headers.get("x-practice-round")), { headers }); }
   catch (error) {
     const message = error instanceof Error ? error.message : "";
     const expected = /没有找到|请选择|请填写|本题|已提交|锁定/.test(message);

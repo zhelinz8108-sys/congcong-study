@@ -1,4 +1,5 @@
 import "server-only";
+import { recordPracticeAnswer } from "@/server/dot/rounds";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -57,7 +58,7 @@ async function localState(studentId: string, action?: SixAction): Promise<SixPro
   return run;
 }
 
-export async function sixStudentProgress(studentId: string, action?: SixAction) {
+export async function sixStudentProgress(studentId: string, action?: SixAction, round?: string | null) {
   // Production answers must never switch to an independent filesystem record.
   // A cloud outage cannot make already-submitted questions appear unanswered.
   try { await ensureCloudProgressSchema(); }
@@ -75,6 +76,7 @@ export async function sixStudentProgress(studentId: string, action?: SixAction) 
     if (action) await client.query(
       "INSERT INTO student_cloud_state(student_id,scope,payload,updated_at) VALUES($1,$2,$3::jsonb,NOW()) ON CONFLICT(student_id,scope) DO UPDATE SET payload=EXCLUDED.payload,updated_at=NOW()",
       [studentId,scope,JSON.stringify(next)]);
+    if (action?.action === "answer") await recordPracticeAnswer(client, studentId, "六上语文", round);
     await client.query("COMMIT");
     return { progress: next, storage: "cloud" as const };
   } catch (error) { await client.query("ROLLBACK"); throw error; }

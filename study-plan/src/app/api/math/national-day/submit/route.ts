@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "这道自测题不存在" }, { status: 404, headers });
   }
   try {
-    const saved = await submitNationalOnce(bankProfile(request).id, body.questionId, body.answers);
+    const saved = await submitNationalOnce(bankProfile(request).id, body.questionId, body.answers, request.headers.get("x-practice-round"));
     return NextResponse.json({ ...saved.feedback, answers: saved.answer, locked: true }, { headers });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";

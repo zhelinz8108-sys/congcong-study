@@ -187,11 +187,11 @@ export async function englishLockedRecords(studentId: string, module: EnglishLoc
   const saved = await firstSubmissions<EnglishLockedAnswer, EnglishLockedFeedback>(studentId, scope);
   return Object.fromEntries(Object.entries({ ...legacy, ...saved }).map(([id, record]) => [id, publicRecord(module, id, record)]));
 }
-export async function englishLockedSubmit(studentId: string, module: EnglishLockedModule, subjectId: string, id: string, response: EnglishLockedAnswer, session?: string) {
+export async function englishLockedSubmit(studentId: string, module: EnglishLockedModule, subjectId: string, id: string, response: EnglishLockedAnswer, session?: string, round?: string | null) {
   if (!id || id.length > 200 || /[\u0000-\u001f]/.test(id)) throw new Error("题目编号不正确");
   const scope = englishLockedScope(module, session);
   const legacy = session === undefined ? (await legacyRecords(studentId, module))[id] : undefined;
-  const saved = await saveFirstSubmission<EnglishLockedAnswer, EnglishLockedFeedback>(studentId, scope, id, response, async (answer, client) => gradeEnglishLockedAsync(module, id, answer, client), legacy);
+  const saved = await saveFirstSubmission<EnglishLockedAnswer, EnglishLockedFeedback>(studentId, scope, id, response, async (answer, client) => gradeEnglishLockedAsync(module, id, answer, client), legacy, session ?? round);
   return publicRecord(module, id, saved);
 }
 

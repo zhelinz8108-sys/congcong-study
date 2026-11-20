@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { submitInPracticeRound } from "./practice-round";
 import type { EnglishLockedAnswer, EnglishLockedModule, EnglishLockedRecord } from "./english-locked-types";
 
 /** Answers are immutable within their server scope; vocabulary rounds have separate scopes. */
@@ -52,10 +53,10 @@ export function useEnglishLocked(module: EnglishLockedModule, subjectId: string,
     if (pending) return pending;
     setBusyUrl(url);
     setFailure(null);
-    const request = fetch(url, {
+    const request = submitInPracticeRound(url, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, response }), cache: "no-store", signal: AbortSignal.timeout(20000),
-    }).then(async result => {
+    }, sessionId).then(async result => {
       const body = await result.json() as { record?: EnglishLockedRecord; error?: string };
       if (!result.ok || !body.record || body.record.id !== id) throw new Error(body.error ?? "提交未保存，请重试");
       if (active.current && currentUrl.current === url) {

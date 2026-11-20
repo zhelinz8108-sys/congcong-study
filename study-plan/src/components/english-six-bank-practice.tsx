@@ -1,4 +1,5 @@
 "use client";
+import { finishPracticeRound } from "@/lib/practice-round";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -61,11 +62,15 @@ export default function EnglishSixBankPractice({ subjectId, paperId, resourceId 
   async function submit() {
     if (!question || !canSubmit) return;
     setBusy(true); setError("");
-    try { await locked.submit(question.id, draft); }
+    try {
+      await locked.submit(question.id, draft);
+      if (paper?.questions.every(q => q.id === question.id || results[q.id])) finishPracticeRound();
+    }
     catch (e) { setError(e instanceof Error ? e.message : "提交失败，请重试"); }
     finally { setBusy(false); }
   }
   function move(position: number) { setState(p => ({ ...p, position })); setFinished(false); window.scrollTo({ top: 0, behavior: "smooth" }); }
+  function finish() { finishPracticeRound(); setFinished(true); }
   return <main className={styles.practicePage}>
     <Link className={styles.back} href={resourceId ? `${base}?${params.toString()}` : `${base}/bank?${params.toString()}`}>{resourceId ? "← 返回六上目录" : "← 返回互动题组"}</Link>
     <header className={styles.header}><div><p className={styles.eyebrow}>{paper?.unit ? `Unit ${paper.unit}` : "六上英语"} · 原题练习</p><h1 className={styles.readerTitle}>{paper?.title ?? "互动练习"}</h1></div>
@@ -86,7 +91,7 @@ export default function EnglishSixBankPractice({ subjectId, paperId, resourceId 
         </section> : <button className={styles.primary} disabled={!canSubmit} onClick={submit}>{busy ? "提交中…" : "提交答案"}</button>}
         <Link className={styles.bankSourceLink} href={`${base}/resource/${paper.sourceId}?mode=source&unit=all&page=${question.sourcePage}`}>查看原题 · 第 {question.sourcePage} 页</Link>
       </section>
-      <nav className={styles.bottomNav} aria-label="题目导航"><button className={styles.secondary} disabled={!state.position || busy} onClick={() => move(state.position - 1)}>← 上一题</button><span>{state.position + 1}/{paper.questions.length}</span><button className={styles.primary} disabled={!feedback || busy} onClick={() => state.position + 1 < paper.questions.length ? move(state.position + 1) : setFinished(true)}>{state.position + 1 < paper.questions.length ? "下一题 →" : "查看成绩"}</button></nav>
+      <nav className={styles.bottomNav} aria-label="题目导航"><button className={styles.secondary} disabled={!state.position || busy} onClick={() => move(state.position - 1)}>← 上一题</button><span>{state.position + 1}/{paper.questions.length}</span><button className={styles.primary} disabled={!feedback || busy} onClick={() => state.position + 1 < paper.questions.length ? move(state.position + 1) : finish()}>{state.position + 1 < paper.questions.length ? "下一题 →" : "查看成绩"}</button></nav>
     </>}
     {finished && <section className={styles.results}><h2>{stats.answered === paper?.questions.length ? "题组完成" : "题组进度"}</h2><p>已答 {stats.answered} 题 · 客观题答对 {stats.correct}/{stats.graded} · 正确率 {stats.accuracy ?? "--"}{stats.accuracy === null ? "" : "%"}</p><button className={styles.secondary} onClick={() => move(0)}>回看作答</button><Link className={styles.primary} href={`${base}/bank?${params.toString()}`}>选择下一题组</Link></section>}
   </main>;

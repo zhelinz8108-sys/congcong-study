@@ -1,4 +1,5 @@
 "use client";
+import { submitInPracticeRound } from "./practice-round";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BankAnswers, BankFeedback, BankProgress, BankQuestion, BankResponse } from "./grade6-bank-types";
 import { assertBankNative } from "./grade6-bank-native-validation";
@@ -335,7 +336,7 @@ export function useGrade6BankProgress(subjectId: string, apiBase = "/api/math/gr
       if (alive.current) setSync(conflicts.current.size ? "conflict" : "saving");
       try {
         const question = schemas.current.get(questionId);
-        const result = await fetch(apiBase + "/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject_id: subjectId, question_id: questionId, answers, base_revision: baseRevision, ...(question?.native ? { input_schema: bankNativeInputSchema(question) } : {}) }), cache: "no-store", signal: AbortSignal.timeout(30000) });
+        const result = await submitInPracticeRound(apiBase + "/submit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ subject_id: subjectId, question_id: questionId, answers, base_revision: baseRevision, ...(question?.native ? { input_schema: bankNativeInputSchema(question) } : {}) }), cache: "no-store", signal: AbortSignal.timeout(30000) });
         const data = await result.json();
         if (scope.current !== scopeVersion) throw new Error("页面已切换，提交结果将从云端重新读取。");
         if (result.status === 410) { pauseRetired(questionId); throw new Error(retiredMessage); }

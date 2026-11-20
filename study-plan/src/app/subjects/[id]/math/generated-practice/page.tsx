@@ -1,4 +1,5 @@
 "use client";
+import { finishPracticeRound, submitInPracticeRound } from "@/lib/practice-round";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -562,6 +563,7 @@ export default function GeneratedMathPracticePage() {
   const progressPercent = Math.round((answeredCount / questions.length) * 100);
 
   const resetSession = (unitId = selectedUnitId, nextDifficulty = difficulty) => {
+    finishPracticeRound();
     setSelectedUnitId(unitId);
     setDifficulty(nextDifficulty);
     setStarted(true);
@@ -574,8 +576,9 @@ export default function GeneratedMathPracticePage() {
     if (answers[question.id] || pending) return;
     setPending(true); setNotice("");
     try {
-      const response = await fetch("/api/math/generated-practice", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question_id: question.id, value }), cache: "no-store" });
+      const response = await submitInPracticeRound("/api/math/generated-practice", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question_id: question.id, value }), cache: "no-store" });
       const result = await response.json(); if (!response.ok) throw new Error(result.error || "提交失败");
+      if (questions.every(q => q.id === question.id || answers[q.id])) finishPracticeRound();
       setAnswers(prev => ({ ...prev, [question.id]: result }));
     } catch (error) { setNotice(error instanceof Error ? error.message : "提交失败"); }
     finally { setPending(false); }

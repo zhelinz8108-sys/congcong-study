@@ -12,6 +12,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const { NextRequest, NextResponse } = require("next/server");
 const rows = new Map(), lockTails = new Map(), cache = new Map(), queries = [];
 const key = (student, scope, id) => JSON.stringify([student, scope, id]);
+const roundCounts = new Map();
 const words = new Map([
   ["word-school", { id: "word-school", word: "school", meaning: "学校" }],
   ["word-book", { id: "word-book", word: "book", meaning: "书" }],
@@ -55,6 +56,11 @@ async function query(raw, args = [], client) {
       const [student, scope, id] = JSON.parse(identity);
       return student === args[0] && scope === args[1] && (args.length < 3 || id === args[2]);
     }).map(([identity, row]) => ({ ...structuredClone(row), question_id: JSON.parse(identity)[2] })) };
+  }
+  if (sql.startsWith("INSERT INTO practice_rounds")) {
+    const round = JSON.stringify(args.slice(0, 3));
+    roundCounts.set(round, (roundCounts.get(round) ?? 0) + args[3]);
+    return { rows: [] };
   }
   if (sql.startsWith("INSERT INTO student_first_submissions")) {
     const identity = key(...args.slice(0, 3));
@@ -100,7 +106,7 @@ function load(relative) {
       englishSixReviewedFeedback: (_id, feedback) => feedback,
     };
     if (specifier === "@/data/listening/yiben-grade-6.json") return { exercises: [] };
-    if (["@/lib/family-access", "@/lib/cloud-progress-schema", "@/server/first-submission", "@/server/english-vocab-lock", "@/server/english-locked"].includes(specifier)) {
+    if (["@/lib/family-access", "@/lib/cloud-progress-schema", "@/server/first-submission", "@/server/dot/rounds", "@/server/english-vocab-lock", "@/server/english-locked"].includes(specifier)) {
       return load(`src/${specifier.slice(2)}.ts`);
     }
     if (specifier.startsWith("@/")) return {}; // Other exercise banks are outside these fixtures.
@@ -198,6 +204,7 @@ const posted = (await response.json()).record;
 assert.equal(posted.feedback.correct, true);
 response = await route.POST(request(sessionParams(sessionC), { id: "en-zh:word-school", response: "wrong" }));
 assert.deepEqual((await response.json()).record, posted);
+assert.equal(roundCounts.get(JSON.stringify(["congcong", "英语单词", sessionC])), 1, "A replay cannot count twice in the round");
 response = await route.GET(request(sessionParams(sessionC)));
 assert.deepEqual(Object.keys((await response.json()).records), ["en-zh:word-school"]);
 assert.deepEqual(rows.get(key(apiStudent, base, "en-zh:word-school")), historicalApiRow);

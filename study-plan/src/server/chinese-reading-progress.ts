@@ -70,11 +70,11 @@ export async function readingStudentResults(studentId: string, passageId?: strin
   return { records, mistakes };
 }
 
-export async function submitReadingResponse(studentId: string, passageId: string, questionId: string, value: string) {
+export async function submitReadingResponse(studentId: string, passageId: string, questionId: string, value: string, round?: string | null) {
   gradeReadingSubmission(passageId, questionId, value); // Validate before any persistence.
   const legacy = (await retainedLegacyMistakes(studentId)).filter(r => r.passageId === passageId && r.questionId === questionId)
     .sort((a, b) => (a.updatedAt ?? "").localeCompare(b.updatedAt ?? ""))[0];
   const result = await saveFirstSubmission<string, ReadingFeedback>(studentId, CHINESE_READING_SCOPE, questionId, value.trim(),
-    answer => gradeReadingSubmission(passageId, questionId, answer), legacy ? legacySubmission(legacy) : undefined);
+    answer => gradeReadingSubmission(passageId, questionId, answer), legacy ? legacySubmission(legacy) : undefined, round);
   return { ...result, ...(await readingStudentResults(studentId, passageId)) };
 }

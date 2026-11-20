@@ -1,4 +1,5 @@
 "use client";
+import { finishPracticeRound, submitInPracticeRound } from "@/lib/practice-round";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -74,7 +75,7 @@ export default function ChineseSixWorkspace({ subjectId, item, guide, initialQue
     if (busyRef.current) return false;
     busyRef.current = true; setBusy(true); setError("");
     try {
-      const res = await fetch("/api/chinese/six/progress", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ itemId: item.id, ...body }) });
+      const res = await (body.action === "answer" ? submitInPracticeRound : fetch)("/api/chinese/six/progress", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ itemId: item.id, ...body }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "保存失败。");
       applyResult(data);
@@ -102,7 +103,8 @@ export default function ChineseSixWorkspace({ subjectId, item, guide, initialQue
 
   async function submit(value: string) {
     if (!question || !attempt || response || !value.trim() || !ready) return;
-    await act({ action: "answer", attemptId: attempt.id, questionId: question.id, value });
+    const saved = await act({ action: "answer", attemptId: attempt.id, questionId: question.id, value });
+    if (saved && item.questions.every(q => q.id === question.id || attempt.responses[q.id])) finishPracticeRound();
   }
 
   function oldAttempt(attempt: SixAttempt) {

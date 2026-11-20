@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import nextEnv from "@next/env";
 import { Pool } from "pg";
 
@@ -39,6 +40,7 @@ async function main() {
     );
     ALTER TABLE grade6_bank_responses ADD COLUMN IF NOT EXISTS revision INTEGER NOT NULL DEFAULT 1;
   `);
+  await pool.query(await readFile(new URL("./practice-notifications.sql", import.meta.url), "utf8"));
   console.log("PostgreSQL migrations completed.");
 }
 

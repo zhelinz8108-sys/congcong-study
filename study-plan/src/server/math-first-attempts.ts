@@ -43,16 +43,16 @@ async function legacyNational(student: string, id: string) {
   }
   return undefined;
 }
-export async function submitHolidayOnce(student: string, id: string, answer: unknown) {
+export async function submitHolidayOnce(student: string, id: string, answer: unknown, round?: string | null) {
   return saveFirstSubmission<HolidayStudentAnswer, HolidayFeedback>(student, HOLIDAY_FIRST_SCOPE, id, answer as HolidayStudentAnswer,
-    async value => checkHolidayAnswer(id, value), await legacyHoliday(student, id));
+    async value => checkHolidayAnswer(id, value), await legacyHoliday(student, id), round);
 }
 export async function readHolidayFeedback(student: string, id: string) {
   return await firstSubmission<HolidayStudentAnswer, HolidayFeedback>(student, HOLIDAY_FIRST_SCOPE, id) ?? await legacyHoliday(student, id) ?? null;
 }
-export async function submitNationalOnce(student: string, id: string, answer: unknown) {
+export async function submitNationalOnce(student: string, id: string, answer: unknown, round?: string | null) {
   return saveFirstSubmission<Record<string, string>, NationalDayMathSubmissionResult>(student, NATIONAL_FIRST_SCOPE, id, answer as Record<string, string>,
-    async value => submitNationalDayMath(id, value), await legacyNational(student, id));
+    async value => submitNationalDayMath(id, value), await legacyNational(student, id), round);
 }
 export async function readNationalFeedback(student: string, id: string) {
   return await firstSubmission<Record<string, string>, NationalDayMathSubmissionResult>(student, NATIONAL_FIRST_SCOPE, id) ?? await legacyNational(student, id) ?? null;

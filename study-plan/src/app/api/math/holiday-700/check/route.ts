@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
         { error: "题目不存在" },
         { status: 404, headers: holidayHeaders },
       );
-    const saved = await submitHolidayOnce(bankProfile(request).id, body.question_id, body.student_answer);
+    const saved = await submitHolidayOnce(bankProfile(request).id, body.question_id, body.student_answer, request.headers.get("x-practice-round"));
     return NextResponse.json(
       { ...saved.feedback, student_answer: saved.answer, locked: true },
       { headers: holidayHeaders },

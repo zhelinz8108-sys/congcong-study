@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     if (body.value !== undefined && typeof body.value !== "string") throw new Error();
   } catch { return NextResponse.json({ error: "请求格式有误。" }, { status: 400, headers }); }
   try {
-    const result = await sixStudentProgress(profile.id, body);
+    const result = await sixStudentProgress(profile.id, body, request.headers.get("x-practice-round"));
     return NextResponse.json({ ...result, feedback: sixSubmittedFeedback(result.progress, body.itemId) }, { headers });
   } catch (error) {
     const message = error instanceof Error ? error.message : "保存失败。";

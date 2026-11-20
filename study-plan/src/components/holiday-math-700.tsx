@@ -1,4 +1,5 @@
 "use client";
+import { submitInPracticeRound } from "@/lib/practice-round";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import Link from "next/link";
@@ -355,7 +356,7 @@ function QuestionCard({
     setError("");
     setPending(true);
     try {
-      const response = await fetch(`/api/math/holiday-700/${kind}`, {
+      const response = await (kind === "check" ? submitInPracticeRound : fetch)(`/api/math/holiday-700/${kind}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(

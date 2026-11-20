@@ -1,4 +1,5 @@
 "use client";
+import { submitInPracticeRound } from "@/lib/practice-round";
 
 import Link from "next/link";
 import { memo, useEffect, useState, type CSSProperties } from "react";
@@ -78,7 +79,7 @@ const QuestionCard = memo(function QuestionCard({ question, sectionId, tone, rea
     setPending(true);
     setNotice("");
     try {
-      const response = await fetch("/api/math/national-day/submit", {
+      const response = await submitInPracticeRound("/api/math/national-day/submit", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questionId: question.id, answers: values }), cache: "no-store",
         signal: AbortSignal.timeout(20000),

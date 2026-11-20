@@ -8,6 +8,7 @@ import ts from "typescript";
 // dependency-aware React hooks and a virtual clock. Nothing reaches a network,
 // database, browser profile or learner record.
 const componentCode = compile("../src/components/interactive-memorize-mode.tsx");
+const roundCode = compile("../src/lib/practice-round.ts");
 const lockedHookCode = compile("../src/lib/use-english-locked.ts");
 const preferenceKey = "study-plan-interactive-vocab-auto-next";
 const checks = [];
@@ -57,7 +58,7 @@ function record(id, response, correct = true) {
 }
 
 async function mount({ initialRecords = {}, storage = new Map(), count = 4, holdReview = false } = {}) {
-  const slots = [], timers = new Map(), posts = [], requests = [], reviews = [];
+  const slots = [], timers = new Map(), posts = [], requests = [], reviews = [], completions = [];
   const historyRecords = structuredClone(initialRecords), sessions = new Map();
   let currentSession = null;
   let cursor = 0, dirty = true, tree, unmounted = false, time = 0, timerId = 0;
@@ -101,6 +102,7 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
   const localStorage = {
     getItem: key => storage.get(key) ?? null,
     setItem: (key, value) => storage.set(key, String(value)),
+    removeItem: key => storage.delete(key),
   };
   const schedule = (callback, milliseconds = 0) => {
     const id = ++timerId;
@@ -112,6 +114,11 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
   math.random = () => ((randomSeed = (Math.imul(randomSeed, 1664525) + 1013904223) >>> 0) / 2 ** 32);
   const fetchMock = (url, options = {}) => {
     const parsed = new URL(url, "http://fixture.invalid");
+    if (parsed.pathname === "/api/practice-round") {
+      const body = JSON.parse(options.body);
+      if (body.action === "finish") completions.push(body.round);
+      return Promise.resolve({ ok: true });
+    }
     assert.equal(parsed.pathname, "/api/english/locked");
     assert.equal(parsed.searchParams.get("module"), "vocab");
     assert.equal(parsed.searchParams.get("subject"), "qa-subject");
@@ -138,7 +145,7 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
   };
   const crypto = { randomUUID };
   const context = {
-    console, AbortController, AbortSignal, fetch: fetchMock, setTimeout: schedule, clearTimeout: clear,
+    console, AbortController, AbortSignal, Headers, location: { pathname: "/fixture/vocab" }, sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} }, fetch: fetchMock, setTimeout: schedule, clearTimeout: clear,
     Math: math, crypto, window: { localStorage, crypto, setTimeout: schedule, clearTimeout: clear }, localStorage,
   };
   const load = (code, dependencies) => {
@@ -146,7 +153,9 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
     vm.runInNewContext(code, { ...context, module: compiledModule, exports: compiledModule.exports, require: dependencies });
     return compiledModule.exports;
   };
+  const rounds = load(roundCode, name => { throw new Error(name); });
   const hook = load(lockedHookCode, name => {
+    if (name.endsWith("practice-round")) return rounds;
     assert.equal(name, "react");
     return react;
   });
@@ -154,6 +163,7 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
     if (name === "react") return react;
     if (name === "react/jsx-runtime") return { jsx, jsxs: jsx, Fragment: "fragment" };
     if (name === "next/link") return { __esModule: true, default: "link" };
+    if (name.endsWith("practice-round")) return rounds;
     if (name === "@/lib/use-english-locked") return hook;
     if (name === "@/lib/cloud-progress") return { loadCloudState: async (_namespace, _key, fallback) => fallback };
     if (name === "@/lib/sentences") return { getSentenceText: () => null };
@@ -273,7 +283,7 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
   assert.equal(position(), 1);
   return { get tree() { render(); return tree; }, get sessionId() { return currentSession; },
     get serverRecords() { return sessions.get(currentSession) ?? {}; }, historyRecords, sessions,
-    posts, requests, reviews, storage, timers,
+    posts, requests, reviews, completions, storage, timers,
     settle, click, button, checkbox, answer, options, position, streak, stat, assertFresh, advance, confirm, fail, find, unmount };
 }
 
@@ -305,6 +315,18 @@ async function mount({ initialRecords = {}, storage = new Map(), count = 4, hold
   assert.doesNotMatch(text(h.tree), /复习日程暂未更新/, "Old review failure cannot pollute the next question");
   h.unmount();
   checks.push("click submits once; authoritative result; stable options; 900ms advance independent of review scheduling");
+}
+
+{
+  const h = await mount();
+  const round = h.sessionId;
+  await h.click(h.answer("书"));
+  await h.confirm(0, false);
+  await h.click(h.button("结束本轮"));
+  await h.settle();
+  assert.deepEqual(h.completions, [round], "Ending a partial round delivers one completion");
+  h.unmount();
+  checks.push("partial vocabulary session sends one completion for the exact round");
 }
 
 {

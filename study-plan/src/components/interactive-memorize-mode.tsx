@@ -1,4 +1,5 @@
 "use client";
+import { finishPracticeRound } from "@/lib/practice-round";
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -485,6 +486,7 @@ export function InteractiveMemorizeMode({
       : nextFilteredEntries.slice(0, sessionLimit);
 
     const nextEntries = nextShuffle ? source : [...source].sort(sortEntries);
+    if (sessionId) finishPracticeRound(sessionId);
     setSessionId(crypto.randomUUID());
     setSessionEntries(nextEntries);
     setSessionStarted(true);
@@ -493,12 +495,15 @@ export function InteractiveMemorizeMode({
     setStreak(0);
   }
 
-  function finalizeSession(completed: boolean, answerList = answers) {
-    // Grades come exclusively from this round's immutable server records;
-    // the older browser-made history is preserved, never overwritten.
-    void completed;
-    void answerList;
+  const isComplete = sessionEntries.length > 0 && currentIdx >= sessionEntries.length;
+
+  function finalizeSession() {
+    if (sessionId) finishPracticeRound(sessionId);
   }
+
+  useEffect(() => {
+    if (isComplete && sessionId) finishPracticeRound(sessionId);
+  }, [isComplete, sessionId]);
 
   function openBook(book: InteractiveWordBook) {
     const emptySelection = new Set<string>();
@@ -510,7 +515,7 @@ export function InteractiveMemorizeMode({
   }
 
   function backToBooks() {
-    finalizeSession(false);
+    finalizeSession();
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -523,7 +528,7 @@ export function InteractiveMemorizeMode({
   }
 
   function exitPractice() {
-    finalizeSession(false);
+    finalizeSession();
     resetQuestionState();
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
@@ -532,7 +537,7 @@ export function InteractiveMemorizeMode({
   }
 
   function prepareForHome() {
-    finalizeSession(false);
+    finalizeSession();
     resetQuestionState();
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
@@ -541,19 +546,19 @@ export function InteractiveMemorizeMode({
 
   function toggleMode(nextMode: PracticeMode) {
     if (nextMode === mode) return;
-    finalizeSession(false);
+    finalizeSession();
     setMode(nextMode);
     startSession();
   }
 
   function chooseScope(nextScope: PracticeScope) {
-    finalizeSession(false);
+    finalizeSession();
     setScope(nextScope);
     startSession({ scope: nextScope });
   }
 
   function toggleUnit(unitId: string) {
-    finalizeSession(false);
+    finalizeSession();
     const nextIds = new Set(selectedUnitIds);
     if (nextIds.has(unitId)) nextIds.delete(unitId);
     else nextIds.add(unitId);
@@ -563,14 +568,14 @@ export function InteractiveMemorizeMode({
 
   function setAllUnits() {
     if (!activeBook) return;
-    finalizeSession(false);
+    finalizeSession();
     const nextIds = new Set(activeBook.units.map((unit) => unit.id));
     setSelectedUnitIds(nextIds);
     startSession({ selectedUnitIds: nextIds });
   }
 
   function clearUnits() {
-    finalizeSession(false);
+    finalizeSession();
     const nextIds = new Set<string>();
     setSelectedUnitIds(nextIds);
     startSession({ selectedUnitIds: nextIds });
@@ -578,7 +583,7 @@ export function InteractiveMemorizeMode({
 
   function chooseSessionSize(nextSessionSize: SessionSize) {
     if (sessionSize === nextSessionSize) return;
-    finalizeSession(false);
+    finalizeSession();
     setSessionSize(nextSessionSize);
     startSession({ sessionSize: nextSessionSize });
   }
@@ -718,7 +723,6 @@ export function InteractiveMemorizeMode({
 
   const selectedLabel = selectedSentenceLabel(selectedUnitIds, activeBook);
   const sortedUnits = [...activeBook.units].sort(sortUnits);
-  const isComplete = sessionEntries.length > 0 && currentIdx >= sessionEntries.length;
 
   if (sessionEntries.length === 0) {
     return (
@@ -977,7 +981,10 @@ export function InteractiveMemorizeMode({
               {!locked.ready && <p className="text-xs text-stone-500">正在准备本轮练习…</p>}
             </div>
 
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button type="button" disabled={!answers.length || locked.busy || pendingSaves > 0}
+                onClick={() => { resetQuestionState(); setCurrentIdx(sessionEntries.length); }}
+                className="mr-auto min-h-10 text-sm font-bold text-stone-600 disabled:opacity-50">结束本轮</button>
               <button
                 onClick={goToNextQuestion}
                 disabled={locked.busy || pendingSaves > 0}
@@ -1087,7 +1094,7 @@ export function InteractiveMemorizeMode({
                   type="checkbox"
                   checked={shuffle}
                   onChange={(event) => {
-                    finalizeSession(false);
+                    finalizeSession();
                     const nextShuffle = event.target.checked;
                     setShuffle(nextShuffle);
                     startSession({ shuffle: nextShuffle });

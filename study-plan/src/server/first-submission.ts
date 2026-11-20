@@ -1,4 +1,5 @@
 import "server-only";
+import { recordPracticeAnswer, submissionActivity } from "@/server/dot/rounds";
 import { pool } from "@/lib/db";
 import type { PoolClient } from "pg";
 
@@ -71,6 +72,7 @@ export async function saveFirstSubmission<A, F>(
   answer: A,
   grade: (answer: A, client: PoolClient) => F | Promise<F>,
   legacy?: { answer: A; feedback: F; submittedAt?: string },
+  round?: string | null,
 ): Promise<SavedFirstSubmission<A, F>> {
   validateIdentity(studentId, scope, id);
   const answerJson = JSON.stringify(answer);
@@ -91,6 +93,11 @@ export async function saveFirstSubmission<A, F>(
     if (savedJson === undefined || feedbackJson === undefined || Buffer.byteLength(savedJson, "utf8") > 256 * 1024 || Buffer.byteLength(feedbackJson, "utf8") > 512 * 1024) throw new Error("答题反馈过大或无效");
     const date = legacy?.submittedAt && Number.isFinite(Date.parse(legacy.submittedAt)) ? legacy.submittedAt : new Date().toISOString();
     const result = await client.query("INSERT INTO student_first_submissions (student_id, scope, question_id, answer, feedback, submitted_at) VALUES ($1,$2,$3,$4::jsonb,$5::jsonb,$6::timestamptz) RETURNING answer, feedback, submitted_at", [studentId, scope, id, savedJson, feedbackJson, date]);
+    const activity = submissionActivity(scope);
+    if (!legacy && activity) {
+      const items = (feedback as { itemResults?: Record<string, unknown> } | null)?.itemResults;
+      await recordPracticeAnswer(client, studentId, activity, round, items ? Math.max(1, Object.keys(items).length) : 1);
+    }
     await client.query("COMMIT");
     return { ...record<A, F>(result.rows[0]), replayed: Boolean(legacy) };
   } catch (error) {

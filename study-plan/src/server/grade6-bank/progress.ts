@@ -1,4 +1,5 @@
 import "server-only";
+import { recordPracticeAnswer } from "@/server/dot/rounds";
 import { pool } from "@/lib/db";
 import type { BankAnswers, BankProgress, BankResponse, BankFeedback } from "@/lib/grade6-bank-types";
 import { firstSubmission, firstSubmissions, withFirstSubmissionLock } from "@/server/first-submission";
@@ -79,7 +80,7 @@ export async function bankProgress(studentId: string, subjectId: string): Promis
   for (const [id, r] of Object.entries(await firstSubmissions<BankAnswers, SavedAttempt>(studentId, FIRST_SCOPE))) progress.responses[id] = r.feedback.response;
   return progress;
 }
-export async function saveBankResponse(studentId: string, subjectId: string, questionId: string, answers: BankAnswers, baseRevision: number, feedback?: BankFeedback): Promise<BankResponse> {
+export async function saveBankResponse(studentId: string, subjectId: string, questionId: string, answers: BankAnswers, baseRevision: number, feedback?: BankFeedback, round?: string | null, activity = "六上数学题库"): Promise<BankResponse> {
   bankBaseRevision(baseRevision);
   const updatedAt = new Date().toISOString();
   if (testMemory()) {
@@ -114,6 +115,7 @@ export async function saveBankResponse(studentId: string, subjectId: string, que
   if (result.rows[0]) {
     const response = responseFromRow(result.rows[0]);
     if (feedback) await client.query("INSERT INTO student_first_submissions (student_id,scope,question_id,answer,feedback,submitted_at) VALUES ($1,$2,$3,$4::jsonb,$5::jsonb,$6::timestamptz)", [studentId, FIRST_SCOPE, questionId, JSON.stringify(answers), JSON.stringify({ feedback, response }), response.updatedAt]);
+    if (feedback && Object.values(answers).some(value => value.trim())) await recordPracticeAnswer(client, studentId, activity, round);
     return response;
   }
   const current = await client.query("SELECT answers, submitted, outcome, score, max_score, submissions, updated_at, revision FROM grade6_bank_responses WHERE student_id=$1 AND subject_id=$2 AND question_id=$3", [studentId, subjectId, questionId]);

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const q = MATH_GRADE_SIX_ALL_QUESTIONS.find(q => q.id === body.question_id);
     if (!q) return NextResponse.json({ error: "题目不存在" }, { status: 404, headers: holidayHeaders });
     if (typeof body.value !== "number" || !Number.isInteger(body.value) || body.value < 0 || body.value >= q.options.length) throw new Error("请选择有效的选项");
-    const saved = await saveFirstSubmission<number, Feedback>(bankProfile(request).id, SCOPE, q.id, body.value, value => ({ answerIndex: q.answerIndex, explanation: q.explanation, isCorrect: q.answerIndex === value }));
+    const saved = await saveFirstSubmission<number, Feedback>(bankProfile(request).id, SCOPE, q.id, body.value, value => ({ answerIndex: q.answerIndex, explanation: q.explanation, isCorrect: q.answerIndex === value }), undefined, request.headers.get("x-practice-round"));
     return NextResponse.json({ value: saved.answer, feedback: saved.feedback, locked: true }, { headers: holidayHeaders });
   } catch (error) { const message = error instanceof Error ? error.message : ""; const safe = /^(提交字段|请选择)/.test(message); return NextResponse.json({ error: safe ? message : "提交失败，请稍后重试" }, { status: safe ? 400 : 503, headers: holidayHeaders }); }
 }

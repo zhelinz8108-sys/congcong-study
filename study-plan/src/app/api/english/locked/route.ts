@@ -36,6 +36,6 @@ export async function POST(request: NextRequest) {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || typeof parsed.id !== "string" || !Object.hasOwn(parsed, "response") || Object.keys(parsed).some(key => !["id", "response"].includes(key))) throw new Error();
     body = parsed;
   } catch { return NextResponse.json({ error: "提交格式不正确或内容过大" }, { status: 400, headers: holidayHeaders }); }
-  try { return NextResponse.json({ record: await englishLockedSubmit(input.student, input.module, input.subject, body.id, body.response, input.session) }, { headers: holidayHeaders }); }
+  try { return NextResponse.json({ record: await englishLockedSubmit(input.student, input.module, input.subject, body.id, body.response, input.session, request.headers.get("x-practice-round")) }, { headers: holidayHeaders }); }
   catch { return NextResponse.json({ error: "请检查答案并稍后重试；已提交的答案不能修改" }, { status: 400, headers: holidayHeaders }); }
 }

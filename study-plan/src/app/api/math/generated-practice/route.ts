@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (!match) return NextResponse.json({ error: "题目不存在" }, { status: 404, headers: holidayHeaders });
     if (typeof body.value !== "string" || !body.value.trim() || body.value.length > 3000) throw new Error("请填写答案");
     const question = params(match[1], match[2])[Number(match[3]) - 1];
-    const saved = await saveFirstSubmission<string, Feedback>(bankProfile(request).id, SCOPE, question.id, body.value.trim(), value => ({ answer: question.answer, explanation: question.explanation, isCorrect: gradeGeneratedMathQuestion(question, value), wrongReason: question.wrongReasons?.[value] ?? "这个答案没有满足题干条件。" }));
+    const saved = await saveFirstSubmission<string, Feedback>(bankProfile(request).id, SCOPE, question.id, body.value.trim(), value => ({ answer: question.answer, explanation: question.explanation, isCorrect: gradeGeneratedMathQuestion(question, value), wrongReason: question.wrongReasons?.[value] ?? "这个答案没有满足题干条件。" }), undefined, request.headers.get("x-practice-round"));
     return NextResponse.json({ value: saved.answer, isCorrect: saved.feedback.isCorrect, feedback: saved.feedback, locked: true }, { headers: holidayHeaders });
   } catch (error) { const message = error instanceof Error ? error.message : ""; const safe = /^(提交字段|请填写)/.test(message); return NextResponse.json({ error: safe ? message : "提交失败，请稍后重试" }, { status: safe ? 400 : 503, headers: holidayHeaders }); }
 }

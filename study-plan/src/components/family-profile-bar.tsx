@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { visitPracticePath, keepPracticeRoundActive, retryPracticeFinishes } from "@/lib/practice-round";
 import type { StudentProfile } from "@/lib/family-access";
 
 type FamilyProfileBarProps = {
@@ -12,6 +13,13 @@ export function FamilyProfileBar({ initialProfile }: FamilyProfileBarProps) {
   const pathname = usePathname();
   const [profile] = useState(initialProfile);
   const [loggingOut, setLoggingOut] = useState(false);
+
+  useEffect(() => { visitPracticePath(pathname); }, [pathname]);
+  useEffect(() => {
+    const timer = window.setInterval(keepPracticeRoundActive, 60000);
+    window.addEventListener("online", retryPracticeFinishes);
+    return () => { window.clearInterval(timer); window.removeEventListener("online", retryPracticeFinishes); };
+  }, []);
 
   if (pathname.startsWith("/access")) return null;
 

@@ -1,4 +1,5 @@
 "use client";
+import { finishPracticeRound } from "@/lib/practice-round";
 
 import { useState, type ReactNode } from "react";
 import type { SixBankQuestion } from "@/lib/english-six-bank";
@@ -25,7 +26,10 @@ export default function EnglishSixReaderExercises({ subjectId, questions, conten
     const response = drafts[question.id] ?? "";
     if (!locked.ready || pending || locked.records[question.id] || sixBankInputs(question, response).some(value => !value.trim())) return;
     setPending(question.id); setError("");
-    try { await locked.submit(question.id, response); }
+    try {
+      await locked.submit(question.id, response);
+      if (questions.every(q => q.id === question.id || locked.records[q.id])) finishPracticeRound();
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : "提交失败，请重试"); }
     finally { setPending(null); }
   }

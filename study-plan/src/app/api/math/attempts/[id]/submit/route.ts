@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { finishPaper } from "@/server/dot/rounds";
 import { pool } from "@/lib/db";
 import { STUDENT_PROFILE_COOKIE, parseStudentProfileCookie } from "@/lib/family-access";
 import { legacyMathQuestions } from "@/server/legacy-math-first";
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const saved = await client.query(`UPDATE math_attempts SET submitted_at=NOW(), status='submitted',total_score=$3,max_score=$4,correct_count=$5,total_count=$6
       WHERE id=$1 AND student_id=$2 AND status!='submitted' RETURNING *`, [id, profile.id,
       graded.reduce((sum, q) => sum + Number(q.response_score ?? 0), 0), graded.reduce((sum, q) => sum + Number(q.max_score ?? 0), 0), graded.filter(q => q.is_correct).length, graded.length]);
+    await finishPaper(client, profile.id, id);
     await client.query("COMMIT");
     return NextResponse.json(saved.rows[0] ?? attempt);
   } catch {
