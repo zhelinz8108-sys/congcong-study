@@ -19,10 +19,15 @@ LIVE = Path('/www/study-plan')
 RELEASES = Path('/www/study-plan-releases')
 BACKUPS = Path('/www/study-plan-data/backups')
 LOCK = Path('/run/study-plan-release/lock')
-COMMIT = 'be86fb9e392bc3e9779b4465e751d228eb9c7df9'
-PROTECTED = 'previous-' + COMMIT + '-44458782126-1'
-OLDER = 'previous-0add12fc94fdb6c2e0337dfd3b5eaadd4fe51a6d-44058067878-1'
-EARLIER_DUPLICATES = 'previous-c64ae9005711af6475daf44698224ba85048916a-43834284884-1'
+COMMIT = 'b3409a406ec02d37596557c257f9b438790a31ac'
+PROTECTED = 'previous-' + COMMIT + '-44464580830-1'
+OLDER = 'previous-be86fb9e392bc3e9779b4465e751d228eb9c7df9-44458782126-1'
+EARLIER_DUPLICATES = 'previous-0add12fc94fdb6c2e0337dfd3b5eaadd4fe51a6d-44058067878-1'
+DUPLICATE_RELEASES = (
+    EARLIER_DUPLICATES,
+    'previous-c64ae9005711af6475daf44698224ba85048916a-43834284884-1',
+    'previous-37adda11b81ee4c73c90d931656c0f5d22902103-43653324834-1',
+)
 TARGET_FREE = 5 * 1024**3 + 64 * 1024**2
 DIRECTORY_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
@@ -88,7 +93,7 @@ def assert_inactive(directory):
 
 
 def validate_layout(live, releases, backups, older_release=OLDER):
-    require(older_release in (OLDER, EARLIER_DUPLICATES), 'Unknown older release')
+    require(older_release in (OLDER, *DUPLICATE_RELEASES), 'Unknown older release')
     for directory in (live, releases, backups, releases / PROTECTED, releases / older_release):
         no_links(directory)
         require(directory.is_dir(), 'Required intact release directory is unavailable')
@@ -272,10 +277,14 @@ def prune_duplicates(live, releases, backups, device, available, target, apply=T
     roots = [releases / OLDER, live, releases / PROTECTED]
     plans, skipped = duplicate_plan(live, releases, device)
     capacity = sum(row['allocated'] for row in plans)
-    earlier = releases / EARLIER_DUPLICATES
-    if capacity < target - available() and os.path.lexists(earlier):
-        validate_layout(live, releases, backups, EARLIER_DUPLICATES)
-        extra, extra_skipped = duplicate_plan(live, releases, device, EARLIER_DUPLICATES)
+    for release in DUPLICATE_RELEASES:
+        if capacity >= target - available():
+            break
+        earlier = releases / release
+        if not os.path.lexists(earlier):
+            continue
+        validate_layout(live, releases, backups, release)
+        extra, extra_skipped = duplicate_plan(live, releases, device, release)
         plans.extend(extra)
         capacity += sum(row['allocated'] for row in extra)
         skipped += extra_skipped
