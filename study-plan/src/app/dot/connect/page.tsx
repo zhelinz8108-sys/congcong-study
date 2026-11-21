@@ -17,6 +17,7 @@ export default async function DotConnect({ searchParams }: { searchParams: Promi
       <p>在网页版 ChatGPT 的「插件」中选择「添加自定义 MCP 服务器」，填入下面的地址，身份验证选择 OAuth。</p>
       <code className="block break-all rounded border bg-white p-3">{origin}/dot/mcp</code>
       <p>完成家庭账号授权后，在你的 Dot 对话里说「订阅聪聪的练习完成提醒。每次用中文告诉我练习名称和本轮答了几题，每轮单独提醒。」</p>
+      <a href="/practice-reports" className="block font-semibold text-emerald-800 underline">在云端聊天里接收每轮练习报告</a>
     </div>}
   </main>;
 }

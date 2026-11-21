@@ -129,6 +129,42 @@ try {
   assert.deepEqual((await call("events/unsubscribe", params, tokens.access_token)).body.result, {});
   await auth.revoke(tokens.refresh_token, client);
   assert.equal((await call("tools/call", {name:"practice_notification_status"}, tokens.access_token)).status, 401);
+  const reports = load("src/server/practice-report.ts");
+  const reportsRoute = load("src/app/practice-reports/rounds/route.ts");
+  const student = "test-student";
+  const grants = await Promise.all([reports.createReportAccess(student), reports.createReportAccess(student)]);
+  assert.equal(grants.filter(Boolean).length, 1);
+  const grant = grants.find(Boolean);
+  assert.equal((await reports.reportAccess(student)).startsAt, grant.startsAt);
+  const report = async (token, query = "") => {
+    const res = await reportsRoute.GET(new Request(origin + "/practice-reports/rounds" + query,
+      { headers: token ? { authorization: "Bearer " + token } : {} }));
+    return { status: res.status, body: await res.json() };
+  };
+  assert.equal((await report()).status, 401);
+  assert.equal((await report("pr_" + randomBytes(32).toString("base64url"))).status, 401);
+  assert.deepEqual((await report(grant.token)).body, {rounds: [], nextAfter: null});
+  await pool.query(`INSERT INTO practice_rounds(student_id,activity,session_key,answered,due_at,finished_at)
+    SELECT $1,'英语单词','fixture-'||n,n,now(),now() FROM generate_series(1,102) n`, [student]);
+  await pool.query(`INSERT INTO practice_rounds(student_id,activity,session_key,answered,due_at,finished_at)
+    VALUES ($1,'进行中','in-progress',2,now(),NULL),('other-student','其他人','other',999,now(),now())`, [student]);
+  const page = (await report(grant.token)).body;
+  assert.equal(page.rounds.length, 100);
+  assert.equal(page.nextAfter, page.rounds.at(-1).id);
+  assert.deepEqual(Object.keys(page.rounds[0]).sort(), ["activity","answered","finishedAt","id"]);
+  const second = (await report(grant.token, "?after=" + page.nextAfter)).body;
+  assert.equal(second.nextAfter, null);
+  const all = [...page.rounds, ...second.rounds];
+  assert.equal(new Set(all.map(r => r.id)).size, 102);
+  assert.ok(all.every(r => r.activity === "英语单词"));
+  assert.deepEqual(all.map(r => r.answered).sort((a,b) => a-b), Array.from({length:102}, (_,i) => i+1));
+  assert.equal((await report(grant.token, "?after=" + randomUUID())).status, 400);
+  assert.equal((await report(grant.token, "?since=tomorrow")).status, 400);
+  assert.deepEqual((await report(grant.token, "?since=2099-01-01T00:00:00Z")).body.rounds, []);
+  await reports.revokeReportAccess(student);
+  assert.equal((await reports.reportAccess(student)).startsAt, null);
+  assert.equal((await report(grant.token)).status, 401);
+  console.log("Passed family-scoped reports, authorization baseline, isolated rounds, pagination, stable IDs, and revocation.");
   console.log("Passed OAuth consent/PKCE, refresh/revoke, signed challenges, round isolation, repeated submissions, blank papers, concurrent delivery, stable retries and unsubscribe.");
 } finally {
   await pool.end();

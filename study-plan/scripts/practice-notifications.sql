@@ -16,6 +16,11 @@ CREATE TABLE IF NOT EXISTS practice_rounds (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS practice_round_open ON practice_rounds (student_id, activity, session_key) WHERE finished_at IS NULL;
 CREATE INDEX IF NOT EXISTS practice_round_due ON practice_rounds (due_at) WHERE finished_at IS NULL;
+CREATE INDEX IF NOT EXISTS practice_round_report_order ON practice_rounds (student_id, finished_at, id) WHERE finished_at IS NOT NULL;
+CREATE TABLE IF NOT EXISTS practice_report_grants (
+  student_id text PRIMARY KEY, token_hash text NOT NULL UNIQUE,
+  starts_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
 CREATE TABLE IF NOT EXISTS dot_deliveries (
   round_id uuid NOT NULL REFERENCES practice_rounds ON DELETE CASCADE,
   subscription_id text NOT NULL REFERENCES dot_subscriptions ON DELETE CASCADE,

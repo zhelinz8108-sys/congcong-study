@@ -83,6 +83,16 @@ assert.ok(secret && (process.env.FAMILY_ACCESS_PASSWORD || '').trim(), 'Family a
 const payload = `v1.${Date.now() + 30 * 60 * 1000}`;
 const token = `${payload}.${createHmac('sha256', secret).update(payload).digest('base64url')}`;
 const headers = {Cookie: `congcong_family_access=${token}`};
+assert.equal((await fetch(base + '/practice-reports/rounds', {signal: AbortSignal.timeout(10000)})).status, 401);
+const reportPage = await fetch(base + '/practice-reports', {headers, signal: AbortSignal.timeout(10000)});
+assert.equal(reportPage.status, 200);
+assert.match(await reportPage.text(), /练习报告授权/);
+if (port === '3001') {
+  const reportAccess = await fetch(base + '/api/practice-reports/access', {headers, signal: AbortSignal.timeout(10000)});
+  assert.equal(reportAccess.status, 200);
+  assert.deepEqual(Object.keys(await reportAccess.json()), ['startsAt']);
+  console.log('Practice report settings, private feed and grant table verified.');
+}
 const guides = JSON.parse(await readFile('src/data/grade-six-reviews.json', 'utf8'));
 for (const guide of guides) {
   const url = `${base}/api/grade-six-reviews/${guide.id}`;
@@ -171,7 +181,7 @@ NODE
     migrate)
       # Only the reviewed, additive and idempotent migration is allowed here.
       [[ $(sha256sum scripts/migrate-postgres.mjs | cut -d' ' -f1) == ec51abe6712bfe7b55f220e8e858ef62dad6e037ca0ff6c6aad152656f29e2e0 ]] || fail 'Migration changed; review it before releasing.'
-      [[ $(sha256sum scripts/practice-notifications.sql | cut -d' ' -f1) == 263b9dc10b8ba7607e01456391b33b946c700149d467b00b05e0e3b45f4ed4d1 ]] || fail 'Notification migration changed; review it before releasing.'
+      [[ $(sha256sum scripts/practice-notifications.sql | cut -d' ' -f1) == ecfed7666917a175c00b575d4d31cde3e5bfc380e504b780a135f85d6bd22f8a ]] || fail 'Notification migration changed; review it before releasing.'
       export PGOPTIONS="${PGOPTIONS:+$PGOPTIONS }-c default_transaction_read_only=off"
       exec /usr/bin/node scripts/migrate-postgres.mjs
       ;;
