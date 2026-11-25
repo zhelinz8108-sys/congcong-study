@@ -21,6 +21,8 @@ FAILED_RELEASES = (
 )
 RELEASES = Path('/www/study-plan-releases')
 DATA = Path('/www/study-plan-data')
+INTERRUPTED_UPLOAD = 'd3a1e66e432f333997a68fa21af461bd5977f303-38989518044-1'
+UPLOAD_PACKAGE_SHA256 = '9aa32988be1d126fa79c8b070d0abf5a2309393a3b2150be09ba141606695237'
 PROGRESS = {'phase': 'starting', 'filesHashed': 0}
 
 
@@ -121,6 +123,34 @@ def relocate(releases, archives, identity):
     if source.exists() and not source.is_symlink():
         require((source / 'package.json').is_file() and (source / 'scripts/release-production.sh').is_file(), 'Not an unused application stage')
     return move_verified(source, destination, pending, receipt, identity)
+
+
+def preserve_interrupted_upload(releases, data):
+    # Run 38989518044 was cancelled in rsync before the build or activation.
+    source = releases / INTERRUPTED_UPLOAD
+    pending = releases / ('.archiving-' + INTERRUPTED_UPLOAD)
+    archives = data / 'failed-release-archives'
+    no_links(archives)
+    require(archives.is_dir() and archives.stat().st_uid == os.geteuid() and
+            stat.S_IMODE(archives.stat().st_mode) == 0o700, 'Expected the existing private stage archive')
+    destination = archives / INTERRUPTED_UPLOAD
+    receipt = archives / (INTERRUPTED_UPLOAD + '.json')
+    if source.is_symlink():
+        require(source.readlink() == destination, 'Unexpected archived upload link')
+    else:
+        item = source if source.exists() else pending
+        if item.exists():
+            ensure_inactive(item, INTERRUPTED_UPLOAD)
+            contents = tree(item)
+            require(not any(name in contents for name in ('.next', '.env.production', '.data', 'release-metadata.json')),
+                    'Expected an interrupted upload without production state')
+            package = contents.get('package.json')
+            require(package and package[4] == UPLOAD_PACKAGE_SHA256, 'Interrupted upload does not match the reviewed checkout')
+            size = sum(row[3] for row in contents.values())
+            needed = 0 if destination.exists() else size
+            require(size <= 128 * 1024**2 and shutil.disk_usage(data).free >= 10 * 1024**3 + needed,
+                    'Insufficient data headroom to preserve the interrupted upload')
+    return move_verified(source, destination, pending, receipt, INTERRUPTED_UPLOAD)
 
 
 def move_verified(source, destination, pending, receipt, identity, mutable=False):
@@ -311,6 +341,7 @@ def main():
     operation = parser.add_mutually_exclusive_group(required=True)
     operation.add_argument('--apply', action='store_true')
     operation.add_argument('--prepare-indexes', action='store_true')
+    operation.add_argument('--preserve-interrupted-upload', action='store_true')
     args = parser.parse_args()
     require(os.geteuid() == 0, 'Archive relocation must run as root')
     no_links(RELEASES); no_links(DATA)
@@ -324,6 +355,9 @@ def main():
         acquire_lock(lock)
         if args.prepare_indexes:
             print(json.dumps({'generatedAptPreparation': prepare_generated_apt_indexes()}), flush=True)
+            return
+        if args.preserve_interrupted_upload:
+            print(json.dumps({'reviewedInterruptedUpload': preserve_interrupted_upload(RELEASES, DATA)}), flush=True)
             return
         PROGRESS['phase'] = 'checking-failed-stages'
         needed = 0

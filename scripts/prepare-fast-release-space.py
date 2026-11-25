@@ -20,11 +20,12 @@ LIVE = Path('/www/study-plan')
 RELEASES = Path('/www/study-plan-releases')
 BACKUPS = Path('/www/study-plan-data/backups')
 LOCK = Path('/run/study-plan-release/lock')
-COMMIT = 'bef9f3ddf790c6e5cb6cd530d9ecf5271b8b184f'
-PROTECTED = 'previous-' + COMMIT + '-45662919143-1'
-OLDER = 'previous-73d0d0dfdf73a4ad54e8a8ba7574dc02f06fc4e0-45661308854-1'
+COMMIT = 'fc5895eae61b5b45c5a07c2fd91e3103361aa194'
+PROTECTED = 'previous-' + COMMIT + '-45669142939-1'
+OLDER = 'previous-bef9f3ddf790c6e5cb6cd530d9ecf5271b8b184f-45662919143-1'
 EARLIER_DUPLICATES = 'previous-0add12fc94fdb6c2e0337dfd3b5eaadd4fe51a6d-44058067878-1'
 DUPLICATE_RELEASES = (
+    'previous-73d0d0dfdf73a4ad54e8a8ba7574dc02f06fc4e0-45661308854-1',
     'previous-60e9a73333ac50cff76867aecae88251ba10f940-45659180284-1',
     'previous-77e3a9de01775fc9f44db0fb5864091062b72579-45656349855-1',
     'previous-047c09791c7f5f806a2f42eb258d86869bfc9a02-45651888404-1',
@@ -54,6 +55,10 @@ DUPLICATE_ROOTS = ('src', 'content', 'public', 'scripts')
 class SpaceError(ValueError):
     def __init__(self, message, **metrics):
         super().__init__(message); self.metrics = metrics
+
+
+class InsufficientCapacity(SpaceError):
+    """The verified candidates alone would not leave enough build space."""
 
 
 def require(condition, message, **metrics):
@@ -361,8 +366,8 @@ def prune_duplicates(live, releases, backups, device, available, target, apply=T
                'emptySourceMiB': directory_bytes // 1024**2}
     if not apply:
         return metrics
-    require(capacity + directory_bytes >= max(0, target - available()),
-            'Verified duplicate capacity is insufficient; no duplicate files were removed', **metrics)
+    if capacity + directory_bytes < max(0, target - available()):
+        raise InsufficientCapacity('Verified duplicate capacity is insufficient; no duplicate files were removed', **metrics)
     removed = 0
     for plan in plans:
         if available() >= target:
@@ -483,4 +488,4 @@ if __name__ == '__main__':
     except (SpaceError, OSError, ValueError) as error:
         print(json.dumps({'fastReleaseSpaceBlocked': True, 'reason': str(error) if isinstance(error, SpaceError) else type(error).__name__,
                           **getattr(error, 'metrics', {})}), flush=True)
-        raise SystemExit(1) from None
+        raise SystemExit(75 if isinstance(error, InsufficientCapacity) else 1) from None

@@ -185,4 +185,25 @@ with patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free
     helper.prepare_generated_apt_indexes()
     cleanup.assert_called_once_with()
     checks.append('bounded-apt-preparation-reuses-original-two-index-validator')
+with tempfile.TemporaryDirectory() as folder:
+    root = Path(folder); releases = root / 'releases'; data = root / 'data'
+    archives = data / 'failed-release-archives'; archives.mkdir(mode=0o700, parents=True)
+    source = releases / helper.INTERRUPTED_UPLOAD; source.mkdir(parents=True)
+    (source / 'package.json').write_text('reviewed checkout')
+    (source / 'partly-uploaded.bin').write_bytes(b'partial synthetic bytes')
+    original = helper.tree(source)
+    with patch.object(helper, 'ensure_inactive'), patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=12*1024**3)):
+        reject('unrecognized-checkout-retained', lambda: helper.preserve_interrupted_upload(releases, data))
+        with patch.object(helper, 'UPLOAD_PACKAGE_SHA256', original['package.json'][4]):
+            (source / '.next').mkdir()
+            reject('built-stage-retained', lambda: helper.preserve_interrupted_upload(releases, data))
+            (source / '.next').rmdir()
+            with patch.object(helper.shutil, 'disk_usage', return_value=SimpleNamespace(free=10*1024**3)):
+                reject('retain-data-headroom', lambda: helper.preserve_interrupted_upload(releases, data))
+            assert not source.is_symlink() and helper.tree(source) == original
+            assert helper.preserve_interrupted_upload(releases, data) == 'archived-and-verified'
+            assert source.readlink() == archives / helper.INTERRUPTED_UPLOAD
+            assert helper.tree(source.readlink()) == original
+            assert helper.preserve_interrupted_upload(releases, data) == 'already-archived'
+            checks.append('interrupted-transfer-preserved-byte-for-byte-with-existing-path-and-retry')
 print(json.dumps({'status': 'pass', 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))
