@@ -57,8 +57,6 @@
   .atlas-label { text-box: trim-end text alphabetic; transform: translate(var(--label-x, -50%), -100%); }
 }
 .atlas-clipboard { position: fixed; left: -200vw; top: 0; pointer-events: none; }
-.atlas-clipboard .atlas-labels { position: static; }
-.atlas-clipboard .atlas-label { position: static; transform: none; }
 .atlas-article math { display: inline math; white-space: nowrap; font-size: 1.09em; vertical-align: middle; }
 .atlas-article .mainfig { margin-block: 1.35rem; padding: .7rem 0; background: #f8efdf; }
 .atlas-article figcaption { color: var(--muted); font-size: .88rem; padding: .4rem .75rem 0; line-height: 1.55; }

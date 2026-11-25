@@ -20,11 +20,12 @@ LIVE = Path('/www/study-plan')
 RELEASES = Path('/www/study-plan-releases')
 BACKUPS = Path('/www/study-plan-data/backups')
 LOCK = Path('/run/study-plan-release/lock')
-COMMIT = '60e9a73333ac50cff76867aecae88251ba10f940'
-PROTECTED = 'previous-' + COMMIT + '-45659180284-1'
-OLDER = 'previous-77e3a9de01775fc9f44db0fb5864091062b72579-45656349855-1'
+COMMIT = '73d0d0dfdf73a4ad54e8a8ba7574dc02f06fc4e0'
+PROTECTED = 'previous-' + COMMIT + '-45661308854-1'
+OLDER = 'previous-60e9a73333ac50cff76867aecae88251ba10f940-45659180284-1'
 EARLIER_DUPLICATES = 'previous-0add12fc94fdb6c2e0337dfd3b5eaadd4fe51a6d-44058067878-1'
 DUPLICATE_RELEASES = (
+    'previous-77e3a9de01775fc9f44db0fb5864091062b72579-45656349855-1',
     'previous-047c09791c7f5f806a2f42eb258d86869bfc9a02-45651888404-1',
     'previous-71560cdce049c6ddb45d340b8caee863df5d82ef-45649029009-1',
     'previous-36257f85ce485a9961f3b3043baac2ca4479000c-45644748583-1',

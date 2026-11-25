@@ -3,32 +3,46 @@
 import { useRef, useState } from "react";
 import type { ClipboardEvent, MouseEvent, ReactNode } from "react";
 
-function copyMath(event: ClipboardEvent<HTMLElement>) {
+function copyAtlasText(event: ClipboardEvent<HTMLElement>) {
   const selection = window.getSelection();
   if (!selection?.rangeCount || selection.isCollapsed) return;
   const range = selection.getRangeAt(0);
   const common = range.commonAncestorContainer;
   const parent = common instanceof Element ? common : common.parentElement;
-  const formula = parent?.closest("math");
+  const context = parent?.closest("math, .atlas-label");
   const selectionCopy = range.cloneContents();
-  if (!formula && !selectionCopy.querySelector("math")) return;
+  if (!context && !selectionCopy.querySelector("math, .atlas-label")) return;
 
-  // A selection within a single fraction may start below the MathML root.
+  // cloneContents omits ancestors when only part of a label or fraction is selected.
   let selected: Node = selectionCopy;
-  for (let node = parent; formula && node && formula.contains(node); node = node.parentElement) {
+  for (let node = parent; context && node && context.contains(node); node = node.parentElement) {
     const wrapper = node.cloneNode(false);
     wrapper.appendChild(selected);
     selected = wrapper;
   }
   const copy = document.createElement("div");
   copy.append(selected);
+  // Coordinates belong to the diagram. Pasted labels follow the editor's text flow.
+  copy.querySelectorAll('svg, button, [aria-hidden="true"]').forEach(node => node.remove());
+  for (const label of copy.querySelectorAll<HTMLElement>(".atlas-label")) {
+    const span = document.createElement("span");
+    span.style.color = label.style.color;
+    span.style.fontWeight = label.style.fontWeight;
+    span.textContent = label.textContent;
+    label.replaceWith(span);
+  }
+  for (const layer of copy.querySelectorAll(".atlas-labels")) layer.replaceWith(...layer.childNodes);
+  for (const drawing of copy.querySelectorAll(".atlas-diagram")) {
+    const block = document.createElement("div");
+    block.append(...drawing.childNodes);
+    drawing.replaceWith(block);
+  }
   const richText = copy.innerHTML;
   for (const fraction of copy.querySelectorAll("mfrac")) {
     fraction.replaceWith(Array.from(fraction.children, part => part.textContent).join("/"));
   }
   for (const operator of copy.querySelectorAll("math mo")) operator.replaceWith(` ${operator.textContent} `);
   for (const math of copy.querySelectorAll("math")) math.replaceWith((math.textContent ?? "").trim());
-  copy.querySelectorAll('svg, button, [aria-hidden="true"]').forEach(node => node.remove());
 
   // innerText keeps paragraph breaks when a selection spans examples.
   copy.className = "atlas-clipboard";
@@ -73,8 +87,8 @@ export function MathAtlasArticle({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <article className="atlas-article" aria-label="图册正文" onClick={enlargeDiagram} onCopy={copyMath}>{children}</article>
-      <dialog ref={dialog} className="atlas-detail" aria-label="放大图解" onClose={() => enlarged.current?.replaceChildren()}>
+      <article className="atlas-article" aria-label="图册正文" onClick={enlargeDiagram} onCopy={copyAtlasText}>{children}</article>
+      <dialog ref={dialog} className="atlas-detail" aria-label="放大图解" onCopy={copyAtlasText} onClose={() => enlarged.current?.replaceChildren()}>
         <div className="atlas-detail-heading">
           <p>{title}</p><button type="button" onClick={() => dialog.current?.close()}>关闭</button>
         </div>
