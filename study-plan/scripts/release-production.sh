@@ -170,6 +170,9 @@ for (const [subjectPage, guide] of [
     const article = body.slice(start, body.indexOf('</main>', start));
     assert.equal((article.match(/class="atlas-topic"/g) || []).length, 58);
     assert.equal((article.match(/class="atlas-diagram"/g) || []).length, 229);
+    assert.equal((article.match(/<span class="atlas-label"[^>]*>[^<]+<\/span>/g) || []).length, 1403);
+    assert.equal((article.match(/<button type="button" class="atlas-zoom"/g) || []).length, 229);
+    assert.doesNotMatch(article, /<text\b|<button[^>]+class="atlas-diagram"/);
     assert.equal((article.match(/<math /g) || []).length, 39);
     assert.equal((article.match(/class="indexrow"/g) || []).length, 92);
     assert.doesNotMatch(article, /<(?:iframe|object|embed|canvas)\b/i);
@@ -191,7 +194,7 @@ for (const [subjectPage, guide] of [
     assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);
   }
 }
-console.log('Native math atlas verified: title followed by 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 272 in-page links.');
+console.log('Native math atlas verified: 1403 selectable HTML labels, 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 272 in-page links.');
 console.log(`Grade-six review links and original PDF/MP3 hashes verified on port ${port}.`);
 for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chinese/six',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank',
@@ -561,7 +564,7 @@ run_worker verify "$app" 3001
 sed -nE '/^Vocabulary book [1-3]: source=[0-9]+ retained=[0-9]+ removed=[0-9]+$/p' "$backup/verify.log"
 grep -Fx 'English homepage navigation verified.' "$backup/verify.log"
 grep -Fx 'Math homepage navigation verified.' "$backup/verify.log"
-grep -Fx 'Native math atlas verified: title followed by 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 272 in-page links.' "$backup/verify.log"
+grep -Fx 'Native math atlas verified: 1403 selectable HTML labels, 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 272 in-page links.' "$backup/verify.log"
 receipt deployed
 finished=1
 printf 'Release deployed: commit=%s BUILD_ID=%s; private receipt=%s/receipt.json\n' "$commit" "$new_build" "$backup"

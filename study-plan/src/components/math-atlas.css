@@ -41,8 +41,24 @@
 }
 .atlas-article .toc-row .unit, .atlas-article .toc-row .pages { color: var(--muted); font-size: .82rem; }
 .atlas-article .toc-row b { font-family: var(--serif); }
-.atlas-article .atlas-diagram { display: block; width: 100%; background: transparent; padding: 0; cursor: zoom-in; touch-action: manipulation; }
-.atlas-article svg { display: block; width: 100%; height: auto; font-family: system-ui, sans-serif; }
+.atlas-diagram { position: relative; container-type: inline-size; width: 100%; font-family: system-ui, sans-serif; }
+.atlas-diagram svg { display: block; width: 100%; height: auto; pointer-events: none; user-select: none; }
+.atlas-zoom { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+.atlas-labels { position: absolute; inset: 0; font-size: 0; line-height: 0; pointer-events: none; }
+.atlas-label {
+  position: absolute; display: block; width: max-content; white-space: pre; line-height: 1;
+  transform: translate(var(--label-x, -50%), -.86em);
+  -webkit-user-select: text; user-select: text; cursor: text; pointer-events: auto;
+}
+.atlas-label[data-anchor="start"] { --label-x: 0%; }
+.atlas-label[data-anchor="end"] { --label-x: -100%; }
+.atlas-label[data-font="cjk"] { font-family: "Noto Sans CJK SC", sans-serif; }
+@supports (text-box: trim-end text alphabetic) {
+  .atlas-label { text-box: trim-end text alphabetic; transform: translate(var(--label-x, -50%), -100%); }
+}
+.atlas-clipboard { position: fixed; left: -200vw; top: 0; pointer-events: none; }
+.atlas-clipboard .atlas-labels { position: static; }
+.atlas-clipboard .atlas-label { position: static; transform: none; }
 .atlas-article math { display: inline math; white-space: nowrap; font-size: 1.09em; vertical-align: middle; }
 .atlas-article .mainfig { margin-block: 1.35rem; padding: .7rem 0; background: #f8efdf; }
 .atlas-article figcaption { color: var(--muted); font-size: .88rem; padding: .4rem .75rem 0; line-height: 1.55; }
@@ -72,7 +88,7 @@
 .atlas-detail-heading p { margin: 0; font: 700 1rem/1.5 var(--serif); }
 .atlas-detail-heading button { min-width: 44px; min-height: 44px; color: var(--clay); cursor: pointer; }
 .atlas-detail-image { max-width: 100%; overflow: auto; padding-block: .5rem; }
-.atlas-detail-image img { display: block; margin: auto; max-width: none; height: auto; }
+.atlas-detail-image .atlas-diagram { margin-inline: auto; }
 @media (max-width: 74rem) {
   .atlas-site-nav { padding-top: 3.55rem; }
   .atlas-topic, .atlas-bookmark { scroll-margin-top: .65rem; }
