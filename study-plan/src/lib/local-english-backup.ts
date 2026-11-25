@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Material, Subject, Unit, Word } from "@/lib/types";
+import { gradedUnitsFromBackup } from "@/lib/graded-wordbooks";
 import { sm2 } from "@/lib/sm2";
 import { requireLocalDataFallback } from "@/lib/local-fallback";
 
@@ -16,6 +17,7 @@ type BackupSubject = Subject & {
 };
 
 let cachedSubject: BackupSubject | null | undefined;
+let cachedSource: BackupSubject | null = null;
 
 const BACKUP_PATH = path.join(
   process.cwd(),
@@ -81,7 +83,7 @@ function staticSubjectById(id: string) {
 
 function staticSubjectResponse(
   subject: (typeof STATIC_SUBJECTS)[number],
-  options: { metaOnly?: boolean; summaryOnly?: boolean; includeUnits?: boolean } = {}
+  options: { metaOnly?: boolean; summaryOnly?: boolean; includeUnits?: boolean; listeningSource?: boolean } = {}
 ) {
   if (options.metaOnly) {
     const {
@@ -101,16 +103,17 @@ function staticSubjectResponse(
   };
 }
 
-export async function getLocalEnglishSubject(): Promise<BackupSubject | null> {
+export async function getLocalEnglishSubject(listeningSource = false): Promise<BackupSubject | null> {
   requireLocalDataFallback();
-  if (cachedSubject !== undefined) return cachedSubject;
+  if (cachedSubject !== undefined) return listeningSource ? cachedSource : cachedSubject;
 
   try {
     const raw = await readFile(BACKUP_PATH, "utf8");
     const data = JSON.parse(stripBom(raw)) as BackupSubject;
     if (data?.id && Array.isArray(data.units)) {
-      cachedSubject = data;
-      return cachedSubject;
+      cachedSource = data;
+      cachedSubject = { ...data, units: gradedUnitsFromBackup(data.units) };
+      return listeningSource ? cachedSource : cachedSubject;
     }
   } catch {
     // Fall through to null so Supabase-backed routes can report their own errors.
@@ -120,8 +123,8 @@ export async function getLocalEnglishSubject(): Promise<BackupSubject | null> {
   return null;
 }
 
-export async function getLocalEnglishSubjectById(id: string) {
-  const subject = await getLocalEnglishSubject();
+export async function getLocalEnglishSubjectById(id: string, listeningSource = false) {
+  const subject = await getLocalEnglishSubject(listeningSource);
   if (!subject || subject.id !== id) return null;
   return subject;
 }
@@ -150,12 +153,12 @@ export async function getLocalSubjectsWithCounts() {
 
 export async function getLocalSubjectResponse(
   id: string,
-  options: { metaOnly?: boolean; summaryOnly?: boolean; includeUnits?: boolean } = {}
+  options: { metaOnly?: boolean; summaryOnly?: boolean; includeUnits?: boolean; listeningSource?: boolean } = {}
 ) {
   const staticSubject = staticSubjectById(id);
   if (staticSubject) return staticSubjectResponse(staticSubject, options);
 
-  const subject = await getLocalEnglishSubjectById(id);
+  const subject = await getLocalEnglishSubjectById(id, options.listeningSource);
   if (!subject) return null;
 
   if (options.metaOnly) {
@@ -225,7 +228,7 @@ export async function getLocalReviewedWord(wordId: string, quality: number) {
   const subject = await getLocalEnglishSubject();
   const word = subject?.units
     .flatMap((unit) => unit.words ?? [])
-    .find((item) => item.id === wordId);
+    .find((item) => item.id === wordId || item.previous_word_ids?.includes(wordId));
 
   if (!word) return null;
 

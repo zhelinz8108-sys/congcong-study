@@ -10,10 +10,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "需要word_id和quality" }, { status: 400 });
   }
 
+  const { data: archived } = await supabase.from("graded_wordbook_archive")
+    .select("kept_word_id").eq("word_id", word_id).single();
+  const keptWordId = archived?.kept_word_id ?? word_id;
+
   const { data: word, error } = await supabase
     .from("study_words")
     .select("interval, repetitions, ease_factor")
-    .eq("id", word_id)
+    .eq("id", keptWordId)
     .single();
 
   if (error || !word) {
@@ -41,12 +45,12 @@ export async function POST(req: NextRequest) {
       last_review: now,
       mastered: result.mastered,
     })
-    .eq("id", word_id);
+    .eq("id", keptWordId);
 
   const { data: updated } = await supabase
     .from("study_words")
     .select("*")
-    .eq("id", word_id)
+    .eq("id", keptWordId)
     .single();
 
   return NextResponse.json(updated);

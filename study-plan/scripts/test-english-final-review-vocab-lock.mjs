@@ -27,7 +27,7 @@ function load(relative) {
   function dependency(specifier) {
     if (specifier === "server-only" || specifier === "@/lib/use-english-locked") return {};
     if (specifier === "@/lib/db") return { pool: { query: async (sql, params) => {
-      assert.match(sql, /^SELECT id, word, meaning FROM study_words WHERE id=\$1$/);
+      assert.match(sql, /^SELECT id, word, meaning FROM study_sentence_words WHERE id=\$1$/);
       selects++;
       // PostgreSQL UUID lookup accepts unhyphenated aliases; the grader must reject them.
       const lookupId = params[0] === canonicalWordId.replaceAll("-", "") ? canonicalWordId : params[0];

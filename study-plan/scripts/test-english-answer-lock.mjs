@@ -41,7 +41,7 @@ const db = { pool: { async query(sql, values) {
   if (sql.includes("student_cloud_state")) { capturedPattern = values[1]; return { rows: legacyRows }; }
   if (listeningFixture && sql.includes("SELECT subject_id FROM study_units")) return { rows: listeningFixture.some(unit => unit.id === values[0]) ? [{ subject_id: "canonical-subject" }] : [] };
   if (listeningFixture && sql.includes("FROM study_units WHERE subject_id")) return { rows: listeningFixture };
-  if (listeningFixture && sql.includes("FROM study_words WHERE subject_id")) return { rows: listeningFixture.flatMap(unit => unit.words.map(word => ({ ...word, unit_id: unit.id }))) };
+  if (listeningFixture && sql.includes("FROM study_sentence_words WHERE subject_id")) return { rows: listeningFixture.flatMap(unit => unit.words.map(word => ({ ...word, unit_id: unit.id }))) };
   if (listeningFixture && sql.includes("FROM study_materials m")) return { rows: listeningFixture.flatMap(unit => unit.materials.map(material => ({ ...material, unit_id: unit.id }))) };
   throw new Error("Unexpected database access in isolated test");
 } } };

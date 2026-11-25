@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   try {
     words = await fetchAllRows<Word>((from, to) =>
       supabase
-        .from("study_words")
+        .from("study_vocabulary_words")
         .select("*")
         .eq("subject_id", subjectId)
         .order("sort_order")

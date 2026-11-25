@@ -92,6 +92,8 @@ if (port === '3001') {
   assert.equal(reportAccess.status, 200);
   assert.deepEqual(Object.keys(await reportAccess.json()), ['startsAt']);
   console.log('Practice report settings, private feed and grant table verified.');
+  const { verifyGradedWordbookRoutes } = await import(pathToFileURL(path.resolve('scripts/check-graded-wordbooks.mjs')));
+  await verifyGradedWordbookRoutes(base, headers);
 }
 const guides = JSON.parse(await readFile('src/data/grade-six-reviews.json', 'utf8'));
 for (const guide of guides) {
@@ -178,12 +180,16 @@ process.argv = [process.execPath, 'scripts/backup-postgres.mjs', '--output', pro
 await import(pathToFileURL(path.resolve('scripts/backup-postgres.mjs')));
 NODE
       ;;
-    migrate)
-      # Only the reviewed, additive and idempotent migration is allowed here.
-      [[ $(sha256sum scripts/migrate-postgres.mjs | cut -d' ' -f1) == ec51abe6712bfe7b55f220e8e858ef62dad6e037ca0ff6c6aad152656f29e2e0 ]] || fail 'Migration changed; review it before releasing.'
+    migrate|wordbooks)
+      # The wordbook archive runs only after backup and after the old service has stopped.
+      [[ $(sha256sum scripts/migrate-postgres.mjs | cut -d' ' -f1) == 7a623fb94ddc41c16caf6b2597398b75d3d47f958008308b3db71525f7fb34e3 ]] || fail 'Migration changed; review it before releasing.'
       [[ $(sha256sum scripts/practice-notifications.sql | cut -d' ' -f1) == ecfed7666917a175c00b575d4d31cde3e5bfc380e504b780a135f85d6bd22f8a ]] || fail 'Notification migration changed; review it before releasing.'
       export PGOPTIONS="${PGOPTIONS:+$PGOPTIONS }-c default_transaction_read_only=off"
-      exec /usr/bin/node scripts/migrate-postgres.mjs
+      if [[ $mode == wordbooks ]]; then
+        [[ $(sha256sum scripts/graded-wordbooks.sql | cut -d' ' -f1) == 146e284322087fe9d1bfe8100d9cd7cc074060cd38983c47d244f8f116f2a423 ]] || fail 'Wordbook migration changed; review it before releasing.'
+        exec /usr/bin/node scripts/migrate-postgres.mjs --wordbooks-only
+      fi
+      exec /usr/bin/node scripts/migrate-postgres.mjs --schema-only
       ;;
     *) fail 'Unknown worker mode.' ;;
   esac
@@ -265,7 +271,7 @@ cleanup() {
   trap - EXIT INT TERM HUP
   set +e
   if (( preflight_started )); then systemctl stop "$preflight_unit" >/dev/null 2>&1; fi
-  for mode in build verify backup migrate; do
+  for mode in build verify backup migrate wordbooks; do
     systemctl stop "study-plan-release-$release-$mode.service" >/dev/null 2>&1
   done
   if (( ! finished )) && [[ -d $previous && ! -L $previous ]]; then
@@ -467,11 +473,14 @@ receipt prepared
 printf 'Activating the verified release.\n'
 service_stop_started=1
 systemctl stop study-plan.service
+run_worker wordbooks "$stage" - root
 mv -T -- "$app" "$previous"
 mv -T -- "$stage" "$app"
 systemctl start study-plan.service
 wait_healthy 3001 || fail 'Activated database/storage health failed.'
 run_worker verify "$app" 3001
+# Release only aggregate book counts from the private verification log.
+sed -nE '/^Vocabulary book [1-3]: source=[0-9]+ retained=[0-9]+ removed=[0-9]+$/p' "$backup/verify.log"
 receipt deployed
 finished=1
 printf 'Release deployed: commit=%s BUILD_ID=%s; private receipt=%s/receipt.json\n' "$commit" "$new_build" "$backup"

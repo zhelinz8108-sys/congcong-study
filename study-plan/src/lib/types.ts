@@ -25,6 +25,7 @@ export interface Unit {
 
 export interface Word {
   id: string;
+  previous_word_ids?: string[] | null;
   subject_id: string;
   unit_id: string | null;
   word: string;

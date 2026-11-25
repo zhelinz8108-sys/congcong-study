@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { gradedWordbookRank } from "@/lib/graded-wordbooks";
 import { InteractiveMemorizeMode } from "@/components/interactive-memorize-mode";
 import type { Subject, Unit, Material, Word } from "@/lib/types";
 
@@ -2343,6 +2344,7 @@ export default function VocabPage() {
       );
       wordBooks.push({ groupName, units, totalWords });
     }
+    wordBooks.sort((a, b) => gradedWordbookRank(a.groupName) - gradedWordbookRank(b.groupName));
   }
 
   // Total word count from API response

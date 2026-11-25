@@ -39,7 +39,7 @@ async function query(raw, args = [], client) {
     await previous; client.unlock = unlock;
     return { rows: [] };
   }
-  if (sql === "SELECT id, word, meaning FROM study_words WHERE id=$1") {
+  if (sql === "SELECT id, word, meaning FROM study_sentence_words WHERE id=$1") {
     grades++;
     return { rows: words.has(args[0]) ? [structuredClone(words.get(args[0]))] : [] };
   }

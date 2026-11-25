@@ -15,7 +15,15 @@ const pool = new Pool({
   password: process.env.PGPASSWORD,
 });
 
+async function compactWordbooks() {
+  await pool.query(await readFile(new URL("./graded-wordbooks.sql", import.meta.url), "utf8"));
+}
+
 async function main() {
+  if (process.argv.includes("--wordbooks-only")) {
+    await compactWordbooks();
+    return;
+  }
   await pool.query(`
     CREATE TABLE IF NOT EXISTS student_cloud_state (
       student_id TEXT NOT NULL,
@@ -41,6 +49,7 @@ async function main() {
     ALTER TABLE grade6_bank_responses ADD COLUMN IF NOT EXISTS revision INTEGER NOT NULL DEFAULT 1;
   `);
   await pool.query(await readFile(new URL("./practice-notifications.sql", import.meta.url), "utf8"));
+  if (!process.argv.includes("--schema-only")) await compactWordbooks();
   console.log("PostgreSQL migrations completed.");
 }
 

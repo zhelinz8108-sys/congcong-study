@@ -13,7 +13,7 @@ export function cleanVocabMeaning(value: string) {
 export async function gradeVocabLocked(id: string, response: EnglishLockedAnswer, database: Pick<PoolClient, "query"> = pool): Promise<EnglishLockedFeedback> {
   const match = /^(en-zh|zh-en):([a-z0-9][a-z0-9_-]{0,127})$/.exec(id);
   if (!match || typeof response !== "string" || !response.trim() || response.length > 2000) throw new Error("单词题编号或答案不正确");
-  const row = await database.query("SELECT id, word, meaning FROM study_words WHERE id=$1", [match[2]]);
+  const row = await database.query("SELECT id, word, meaning FROM study_sentence_words WHERE id=$1", [match[2]]);
   const word = row.rows[0] as { id: string; word: string; meaning: string } | undefined;
   if (!word || String(word.id) !== match[2]) throw new Error("单词不存在或编号不规范");
   const expected = match[1] === "en-zh" ? cleanVocabMeaning(word.meaning) : word.word;

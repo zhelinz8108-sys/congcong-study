@@ -45,7 +45,7 @@ export function EnglishListeningPanel({ subjectId, playWordAudio }: EnglishListe
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`/api/subjects/${subjectId}`);
+        const response = await fetch(`/api/subjects/${subjectId}?source=listening`);
         if (!response.ok) {
           throw new Error("听力内容加载失败");
         }

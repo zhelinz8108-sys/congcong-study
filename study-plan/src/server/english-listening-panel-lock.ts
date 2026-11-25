@@ -15,7 +15,7 @@ export async function gradeListeningPanelLocked(id: string, response: EnglishLoc
   const subject = unitRow.rows[0].subject_id;
   const [unitRows, wordRows, materialRows] = await Promise.all([
     database.query("SELECT * FROM study_units WHERE subject_id=$1 ORDER BY sort_order, created_at, id", [subject]),
-    database.query("SELECT * FROM study_words WHERE subject_id=$1 ORDER BY sort_order, created_at, id", [subject]),
+    database.query("SELECT * FROM study_sentence_words WHERE subject_id=$1 ORDER BY sort_order, created_at, id", [subject]),
     database.query("SELECT m.* FROM study_materials m JOIN study_units u ON m.unit_id=u.id WHERE u.subject_id=$1 ORDER BY m.sort_order, m.created_at, m.id", [subject]),
   ]);
   const words = wordRows.rows as Word[], materials = materialRows.rows as Material[];

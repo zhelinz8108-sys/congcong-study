@@ -341,8 +341,11 @@ export function InteractiveMemorizeMode({
     for (const record of Object.values(locked.records)) {
       if (record.feedback.correct === false) result.add(record.id.replace(/^(?:en-zh|zh-en):/, ""));
     }
+    for (const word of words) {
+      if (word.previous_word_ids?.some(id => result.has(id))) result.add(word.id);
+    }
     return result;
-  }, [legacyMistakeIds, locked.mistakeWordIds, locked.records]);
+  }, [legacyMistakeIds, locked.mistakeWordIds, locked.records, words]);
 
   const entriesByBook = useMemo(() => {
     const result = new Map<string, PracticeEntry[]>();

@@ -19,6 +19,7 @@ export async function GET(req: NextRequest, { params }: Params) {
   const { id } = await params;
   const metaOnly = req.nextUrl.searchParams.get("meta") === "1";
   const summaryOnly = req.nextUrl.searchParams.get("summary") === "1";
+  const listeningSource = req.nextUrl.searchParams.get("source") === "listening";
   const includeUnits = req.nextUrl.searchParams.get("include_units") === "1";
 
   const { data: subject, error } = await supabase
@@ -32,6 +33,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       metaOnly,
       summaryOnly,
       includeUnits,
+      listeningSource,
     });
     if (localSubject) return NextResponse.json(localSubject);
     return NextResponse.json({ error: "未找到" }, { status: 404 });
@@ -152,7 +154,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   const wordPromise = fetchAllRows<Word>((from, to) =>
     supabase
-      .from("study_words")
+      .from(listeningSource ? "study_sentence_words" : "study_words")
       .select("*")
       .eq("subject_id", id)
       .order("sort_order")
