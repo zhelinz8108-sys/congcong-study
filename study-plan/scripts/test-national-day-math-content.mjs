@@ -45,8 +45,8 @@ test("the website uses a chapter directory and light vertical readers, never PDF
   const ui = read("../src/components/national-day-math-book.tsx");
   const route = read("../src/app/subjects/[id]/national-day-math/page.tsx");
   const subject = read("../src/app/subjects/[id]/page.tsx");
-  assert.match(subject, /href=\{`\/subjects\/\$\{id\}\/national-day-math`\}/);
-  assert.match(subject, /国庆数学/);
+  assert.doesNotMatch(subject, /\/national-day-math(?:-practice)?`/);
+  assert.doesNotMatch(subject, /国庆数学/);
   assert.match(route, /getPublicNationalDayMathSections/);
   assert.match(route, /NationalDayMathDirectory/);
   const directory = read("../src/components/national-day-math-directory.tsx");
