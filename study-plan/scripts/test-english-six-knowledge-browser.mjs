@@ -218,14 +218,14 @@ try {
   const entry = page.getByRole("link", { name: /^六上知识点/ });
   await entry.waitFor();
   assert.equal(await entry.getAttribute("href"), `/subjects/${subject}/english/six-knowledge`);
-  const order = await page.evaluate(({ knowledge, grammar, six }) => {
-    const fresh = document.querySelector(`a[href="${knowledge}"]`), previous = document.querySelector(`a[href="${grammar}"]`), old = document.querySelector(`a[href="${six}"]`);
+  const order = await page.evaluate(({ knowledge, vocab, six }) => {
+    const fresh = document.querySelector(`a[href="${knowledge}"]`), previous = document.querySelector(`a[href="${vocab}"]`), old = document.querySelector(`a[href="${six}"]`);
     return !!fresh && !!previous && !!old && !!previous.parentElement?.nextElementSibling?.contains(fresh);
-  }, { knowledge: `/subjects/${subject}/english/six-knowledge`, grammar: `/subjects/${subject}/grammar-guide`, six: `/subjects/${subject}/english/six` });
-  assert.ok(order, "New knowledge entry must follow Grammar Guide immediately, retaining the existing Six entry");
+  }, { knowledge: `/subjects/${subject}/english/six-knowledge`, vocab: `/subjects/${subject}/vocab`, six: `/subjects/${subject}/english/six` });
+  assert.ok(order, "Knowledge entry must follow vocabulary immediately, retaining the existing Six entry");
   await entry.click();
   await page.locator("[data-knowledge-hub]").waitFor();
-  checks.push("English homepage knowledge entry immediately follows Grammar Guide; existing Six retained");
+  checks.push("English homepage knowledge entry immediately follows vocabulary; existing Six retained");
   for (const width of widths) {
     await page.setViewportSize({ width, height: width > 700 ? 1000 : 844 });
     await page.goto(base);

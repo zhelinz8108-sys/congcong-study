@@ -138,13 +138,21 @@ try {
     await page.setViewportSize({width, height: width >= 1000 ? 1000 : 844});
     await page.goto(origin + home);
     await page.getByRole('heading', {name: '英语', exact: true}).waitFor();
-    const entry = page.getByRole('link', {name: /11月9日听力/});
-    assert.equal(await entry.count(), 1);
-    assert.equal(await entry.getAttribute('href'), dated);
-    await entry.scrollIntoViewIfNeeded();
+    const knowledge = page.locator(`a[href="${home}/english/six-knowledge"]`);
+    await knowledge.waitFor();
+    for (const path of ['english/six', 'english/extension-practice', 'vocab', 'english/six-knowledge']) {
+      assert.equal(await page.locator(`a[href="${home}/${path}"]`).count(), 1, `Missing home entry: ${path}`);
+    }
+    for (const skill of ['听力', '阅读', '口语', '写作']) {
+      assert.ok(await page.getByText(skill, {exact: true}).isVisible(), `Missing skill: ${skill}`);
+    }
+    for (const path of ['listening/2026-11-09', 'phrases', 'grammar', 'sentences', 'sentence-structure', 'grammar-guide']) {
+      assert.equal(await page.locator(`a[href="${home}/${path}"]`).count(), 0, `Unexpected home entry: ${path}`);
+    }
+    await knowledge.scrollIntoViewIfNeeded();
     await noOverflow(`home-${width}`);
     await page.screenshot({path: path.join(output, `home-${width}.png`)});
-    await entry.click();
+    await page.goto(origin + dated);
     await page.getByRole('heading', {name: '11月9日听力', exact: true}).waitFor();
     await page.getByText('暂未添加音频。添加后即可在这里播放。', {exact: true}).waitFor();
     await page.getByText('暂未添加题目或资料，可添加题目图片、PDF。', {exact: true}).waitFor();
@@ -154,7 +162,7 @@ try {
     await page.getByRole('link', {name: '← 返回英语主页', exact: true}).click();
     await page.getByRole('heading', {name: '英语', exact: true}).waitFor();
   }
-  checks.push('320-390-1440-home-entry-roundtrip-and-no-overflow', 'empty-date-navigation-has-no-writes');
+  checks.push('320-390-1440-removed-home-entries-and-direct-date-route', 'empty-date-navigation-has-no-writes');
 
   await page.setViewportSize({width: 390, height: 844});
   await page.goto(origin + dated);

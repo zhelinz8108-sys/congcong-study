@@ -787,16 +787,6 @@ export default function SubjectPage() {
             })}
           </div>
           <Link
-            href={`/subjects/${id}/listening/2026-11-09`}
-            className="mt-5 flex items-center justify-between gap-3 rounded-lg border-2 border-amber-200 bg-amber-50 px-5 py-5 text-amber-900 transition-colors hover:bg-amber-100"
-          >
-            <div>
-              <h2 className="text-2xl font-bold">11月9日听力</h2>
-              <p className="mt-1 text-sm">音频播放 · 听力题目与资料</p>
-            </div>
-            <span aria-hidden="true">→</span>
-          </Link>
-          <Link
             href={`/subjects/${id}/english/six`}
             className="mt-5 flex items-center justify-between gap-3 rounded-lg border-2 border-emerald-200 bg-white px-5 py-5 text-emerald-900 transition-colors hover:bg-emerald-50"
           >
@@ -811,7 +801,6 @@ export default function SubjectPage() {
           </Link>
           </div>
 
-          {/* 右侧：单词 / 词组学习 */}
           <div className="flex-1 space-y-4">
           {/* 单词学习 - links to dedicated page */}
           <div className="bg-white rounded-2xl border border-emerald-200 overflow-hidden">
@@ -970,66 +959,6 @@ export default function SubjectPage() {
                 </div>
               );
             })()}
-          </div>
-
-          <div className="bg-white rounded-2xl border border-emerald-200 overflow-hidden">
-            <Link
-              href={`/subjects/${id}/phrases`}
-              className="px-4 py-3 bg-emerald-50 flex items-center justify-between cursor-pointer hover:bg-emerald-100 transition-colors block"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-emerald-800 whitespace-nowrap">🗂️ 词组学习</span>
-              </div>
-              <span className="text-stone-400 text-sm">→</span>
-            </Link>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-amber-200 overflow-hidden">
-            <Link
-              href={`/subjects/${id}/grammar`}
-              className="px-4 py-3 bg-amber-50 flex items-center justify-between cursor-pointer hover:bg-amber-100 transition-colors block"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-amber-800 whitespace-nowrap">📚 语法</span>
-              </div>
-              <span className="text-stone-400 text-sm">→</span>
-            </Link>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-sky-200 overflow-hidden">
-            <Link
-              href={`/subjects/${id}/sentences`}
-              className="px-4 py-3 bg-sky-50 flex items-center justify-between cursor-pointer hover:bg-sky-100 transition-colors block"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-sky-800 whitespace-nowrap">✍️ 句子训练</span>
-              </div>
-              <span className="text-stone-400 text-sm">→</span>
-            </Link>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-indigo-200 overflow-hidden">
-            <Link
-              href={`/subjects/${id}/sentence-structure`}
-              className="px-4 py-3 bg-indigo-50 flex items-center justify-between cursor-pointer hover:bg-indigo-100 transition-colors block"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-indigo-800 whitespace-nowrap">🧩 句子结构</span>
-              </div>
-              <span className="text-stone-400 text-sm">→</span>
-            </Link>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-violet-200 overflow-hidden">
-            <Link
-              href={`/subjects/${id}/grammar-guide`}
-              className="px-4 py-3 bg-violet-50 flex items-center justify-between cursor-pointer hover:bg-violet-100 transition-colors block"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-violet-800 whitespace-nowrap">🧠 语法大全</span>
-              </div>
-              <span className="text-stone-400 text-sm">→</span>
-            </Link>
           </div>
 
           <div className="bg-white rounded-2xl border border-teal-200 overflow-hidden">
