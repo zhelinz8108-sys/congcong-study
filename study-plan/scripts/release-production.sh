@@ -123,8 +123,30 @@ for (const guide of guides) {
   const response = await fetch(url, {headers, signal: AbortSignal.timeout(20000)});
   assert.equal(response.status, 200, guide.id);
   assert.equal(response.headers.get('content-type'), guide.type);
-  assert.equal(createHash('sha256').update(Buffer.from(await response.arrayBuffer())).digest('hex'), guide.sha256, guide.id);
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), guide.sha256, guide.id);
   assert.equal((await fetch(url, {method: 'HEAD'})).status, 401);
+  if (guide.id === 'math') {
+    assert.match(response.headers.get('content-disposition'), /^inline;/);
+    const {getDocumentProxy} = await import('unpdf');
+    const pdf = await getDocumentProxy(bytes);
+    try {
+      assert.equal(pdf.numPages, 58);
+      const samples = new Map([[1, '全知识点图解'], [32, '认识圆'], [58, '位置与方向']]);
+      let links = 0;
+      for (let n = 1; n <= pdf.numPages; n++) {
+        const page = await pdf.getPage(n);
+        links += (await page.getAnnotations()).filter(item => item.subtype === 'Link').length;
+        if (samples.has(n)) {
+          const text = (await page.getTextContent()).items.map(item => item.str ?? '').join('').normalize('NFKC').replace(/\s/g, '');
+          assert.ok(text.includes(samples.get(n)), 'Unexpected original PDF page ' + n);
+        }
+      }
+      assert.equal(links, 280);
+    } finally {
+      await pdf.destroy();
+    }
+  }
 }
 for (const [subjectPage, guide] of [
   ['/subjects/4ea6b4fe-bfd3-440f-b780-6d71c2011609/math/grade-6', 'math'],
@@ -142,28 +164,19 @@ for (const [subjectPage, guide] of [
     assert.equal(reader.status, 200, readerPath);
     const body = await reader.text();
     assert.ok(body.includes('aria-label="图册正文"') && body.includes(`href="${home}"`), readerPath);
+    assert.ok(body.includes('data-pdf-source="/api/grade-six-reviews/math"') && body.includes('class="pdfViewer"'), readerPath);
     assert.ok(body.includes('href="/api/grade-six-reviews/math?download=1"'), readerPath);
+    const {version} = JSON.parse(await readFile('node_modules/pdfjs-dist/package.json', 'utf8'));
+    const worker = await fetch(base + '/pdfjs/' + version + '/worker.js', {signal: AbortSignal.timeout(10000)});
+    assert.equal(worker.status, 200);
+    assert.match(worker.headers.get('content-type'), /javascript/);
+    assert.ok(Buffer.from(await worker.arrayBuffer()).equals(await readFile('node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')));
   } else {
     assert.ok(html.includes('href="/api/grade-six-reviews/english"'), subjectPage);
     assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);
   }
 }
-const atlasPages = base + '/api/grade-six-reviews/math/pages/';
-assert.equal((await fetch(atlasPages + '3')).status, 401);
-assert.equal((await fetch(atlasPages + '59', {headers})).status, 404);
-let diagrams = 0, links = 0, formulas = 0;
-for (let n = 1; n <= 58; n++) {
-  const response = await fetch(atlasPages + n, {headers, signal: AbortSignal.timeout(10000)});
-  assert.equal(response.status, 200);
-  const page = await response.json();
-  assert.equal(page.number, n);
-  assert.ok(page.html.includes('class="page '));
-  diagrams += (page.html.match(/<svg\b/g) ?? []).length;
-  links += (page.html.match(/href="#atlas-/g) ?? []).length;
-  formulas += (page.html.match(/<math\b/g) ?? []).length;
-}
-assert.deepEqual([diagrams, links, formulas], [229, 280, 39]);
-console.log('Embedded math atlas verified: 58 pages, 229 diagrams, 280 links.');
+console.log('Original math atlas PDF verified: 58 pages, 280 links, continuous reader.');
 console.log(`Grade-six review links and original PDF/MP3 hashes verified on port ${port}.`);
 for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chinese/six',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank',
@@ -533,7 +546,7 @@ run_worker verify "$app" 3001
 sed -nE '/^Vocabulary book [1-3]: source=[0-9]+ retained=[0-9]+ removed=[0-9]+$/p' "$backup/verify.log"
 grep -Fx 'English homepage navigation verified.' "$backup/verify.log"
 grep -Fx 'Math homepage navigation verified.' "$backup/verify.log"
-grep -Fx 'Embedded math atlas verified: 58 pages, 229 diagrams, 280 links.' "$backup/verify.log"
+grep -Fx 'Original math atlas PDF verified: 58 pages, 280 links, continuous reader.' "$backup/verify.log"
 receipt deployed
 finished=1
 printf 'Release deployed: commit=%s BUILD_ID=%s; private receipt=%s/receipt.json\n' "$commit" "$new_build" "$backup"
