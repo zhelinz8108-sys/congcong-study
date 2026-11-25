@@ -88,7 +88,7 @@ for (const [subject, id, visible, removed] of [
     ['/english/six', '/english/extension-practice', '/vocab', '/english/six-knowledge'],
     ['/listening/2026-11-09', '/phrases', '/grammar', '/sentences', '/sentence-structure', '/grammar-guide']],
   ['Math', '4ea6b4fe-bfd3-440f-b780-6d71c2011609',
-    ['/math/problem-bank', '/math/extension-bank'], ['/national-day-math', '/national-day-math-practice']],
+    ['/math/atlas', '/math/problem-bank', '/math/extension-bank'], ['/national-day-math', '/national-day-math-practice']],
 ]) {
   const page = await fetch(base + '/subjects/' + id, {headers, signal: AbortSignal.timeout(10000)});
   assert.equal(page.status, 200);
@@ -134,8 +134,15 @@ for (const [subjectPage, guide] of [
   assert.equal(response.status, 200, subjectPage);
   const html = await response.text();
   if (guide === 'math') {
-    assert.ok(html.includes('aria-label="图册正文"'), subjectPage);
-    assert.ok(html.includes('href="/api/grade-six-reviews/math?download=1"'), subjectPage);
+    const home = subjectPage.slice(0, -'/math/grade-6'.length);
+    const readerPath = home + '/math/atlas';
+    assert.ok(html.includes(`href="${readerPath}"`), subjectPage);
+    assert.ok(!html.includes('aria-label="图册正文"'), subjectPage);
+    const reader = await fetch(base + readerPath, {headers, signal: AbortSignal.timeout(10000)});
+    assert.equal(reader.status, 200, readerPath);
+    const body = await reader.text();
+    assert.ok(body.includes('aria-label="图册正文"') && body.includes(`href="${home}"`), readerPath);
+    assert.ok(body.includes('href="/api/grade-six-reviews/math?download=1"'), readerPath);
   } else {
     assert.ok(html.includes('href="/api/grade-six-reviews/english"'), subjectPage);
     assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);

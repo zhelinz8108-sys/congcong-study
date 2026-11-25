@@ -20,7 +20,7 @@
   padding-inline: clamp(.65rem, 3%, 1.45rem);
 }
 .math-atlas .atlas-heading { justify-content: space-between; padding-top: .4rem; background: #f8efdf; }
-.math-atlas .atlas-heading h2 { font: 700 clamp(1rem, 3.4vw, 1.3rem)/1.4 var(--atlas-serif); margin: 0; }
+.math-atlas .atlas-heading h1 { font: 700 clamp(1rem, 3.4vw, 1.3rem)/1.4 var(--atlas-serif); margin: 0; }
 .math-atlas .atlas-heading a {
   display: inline-flex; align-items: center; min-height: 44px; white-space: nowrap;
   font-size: .83rem; color: var(--atlas-clay); text-decoration: underline; text-underline-offset: .2em;
@@ -33,7 +33,7 @@
 .math-atlas .atlas-nav button:disabled { cursor: default; color: #a6937e; border-color: #e3d5bf; background: transparent; }
 .math-atlas .atlas-nav select { position: static; flex: 1; min-width: 0; padding: 0 .5rem; font-family: inherit; font-size: 1rem; font-weight: 500; }
 .math-atlas .atlas-counter { color: var(--atlas-muted); font-size: .83rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.math-atlas .atlas-viewport { overflow: auto; height: clamp(18rem, 58vh, 39rem); height: clamp(18rem, 58svh, 39rem); scrollbar-color: #bc9874 #f8efdf; overflow-anchor: none; }
+.math-atlas .atlas-viewport { overflow: auto; height: max(18rem, calc(100vh - 13rem)); height: max(18rem, calc(100svh - 13rem)); scrollbar-color: #bc9874 #f8efdf; overflow-anchor: none; }
 .math-atlas .atlas-status { padding: 2rem; color: var(--atlas-muted); }
 .math-atlas .atlas-status button, .math-atlas .atlas-detail-head button { padding: .4rem .85rem; }
 .math-atlas .atlas-status button { margin-top: .8rem; }

@@ -737,7 +737,7 @@ export default function SubjectPage() {
   }
 
   return (
-    <div className={`${isEnglish && (!activeSkill || activeSkill === "listening") ? 'max-w-5xl' : isMath ? 'w-full min-w-0 max-w-3xl' : 'max-w-lg'} mx-auto px-5 py-8`} style={{ zoom: fontSize / 100 }}>
+    <div className={`${isEnglish && (!activeSkill || activeSkill === "listening") ? 'max-w-5xl' : 'max-w-lg'} ${isMath ? 'w-full' : ''} mx-auto px-5 py-8`} style={{ zoom: fontSize / 100 }}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/" className="text-stone-400 hover:text-stone-600 text-xl">←</Link>
@@ -1009,7 +1009,7 @@ export default function SubjectPage() {
 
       {isMath && (
         <div className="space-y-4">
-          <GradeSixReview subject="math" />
+          <GradeSixReview subject="math" href={`/subjects/${id}/math/atlas`} />
           <Link
             href={`/subjects/${id}/math/problem-bank`}
             className="block rounded-2xl border border-blue-200 bg-white p-5 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50"

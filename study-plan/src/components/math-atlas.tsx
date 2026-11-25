@@ -79,7 +79,7 @@ export function MathAtlas() {
   return (
     <section className="math-atlas" aria-label="六上数学全知识点图解">
       <header className="atlas-heading">
-        <h2>六上数学全知识点图解</h2>
+        <h1>六上数学全知识点图解</h1>
         <a href="/api/grade-six-reviews/math?download=1" download>下载 PDF</a>
       </header>
       <nav className="atlas-nav" aria-label="图册翻页">
