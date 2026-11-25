@@ -133,9 +133,30 @@ for (const [subjectPage, guide] of [
   const response = await fetch(base + subjectPage, {headers, signal: AbortSignal.timeout(20000)});
   assert.equal(response.status, 200, subjectPage);
   const html = await response.text();
-  assert.ok(html.includes(`href="/api/grade-six-reviews/${guide}"`), subjectPage);
-  if (guide === 'english') assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);
+  if (guide === 'math') {
+    assert.ok(html.includes('aria-label="图册正文"'), subjectPage);
+    assert.ok(html.includes('href="/api/grade-six-reviews/math?download=1"'), subjectPage);
+  } else {
+    assert.ok(html.includes('href="/api/grade-six-reviews/english"'), subjectPage);
+    assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);
+  }
 }
+const atlasPages = base + '/api/grade-six-reviews/math/pages/';
+assert.equal((await fetch(atlasPages + '3')).status, 401);
+assert.equal((await fetch(atlasPages + '59', {headers})).status, 404);
+let diagrams = 0, links = 0, formulas = 0;
+for (let n = 1; n <= 58; n++) {
+  const response = await fetch(atlasPages + n, {headers, signal: AbortSignal.timeout(10000)});
+  assert.equal(response.status, 200);
+  const page = await response.json();
+  assert.equal(page.number, n);
+  assert.ok(page.html.includes('class="page '));
+  diagrams += (page.html.match(/<svg\b/g) ?? []).length;
+  links += (page.html.match(/href="#atlas-/g) ?? []).length;
+  formulas += (page.html.match(/<math\b/g) ?? []).length;
+}
+assert.deepEqual([diagrams, links, formulas], [229, 280, 39]);
+console.log('Embedded math atlas verified: 58 pages, 229 diagrams, 280 links.');
 console.log(`Grade-six review links and original PDF/MP3 hashes verified on port ${port}.`);
 for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chinese/six',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank',
@@ -505,6 +526,7 @@ run_worker verify "$app" 3001
 sed -nE '/^Vocabulary book [1-3]: source=[0-9]+ retained=[0-9]+ removed=[0-9]+$/p' "$backup/verify.log"
 grep -Fx 'English homepage navigation verified.' "$backup/verify.log"
 grep -Fx 'Math homepage navigation verified.' "$backup/verify.log"
+grep -Fx 'Embedded math atlas verified: 58 pages, 229 diagrams, 280 links.' "$backup/verify.log"
 receipt deployed
 finished=1
 printf 'Release deployed: commit=%s BUILD_ID=%s; private receipt=%s/receipt.json\n' "$commit" "$new_build" "$backup"

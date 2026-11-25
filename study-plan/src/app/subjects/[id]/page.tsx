@@ -737,7 +737,7 @@ export default function SubjectPage() {
   }
 
   return (
-    <div className={`${isEnglish && (!activeSkill || activeSkill === "listening") ? 'max-w-5xl' : 'max-w-lg'} mx-auto px-5 py-8`} style={{ zoom: fontSize / 100 }}>
+    <div className={`${isEnglish && (!activeSkill || activeSkill === "listening") ? 'max-w-5xl' : isMath ? 'w-full min-w-0 max-w-3xl' : 'max-w-lg'} mx-auto px-5 py-8`} style={{ zoom: fontSize / 100 }}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link href="/" className="text-stone-400 hover:text-stone-600 text-xl">←</Link>

@@ -1,9 +1,11 @@
 [
   {
     "id": "math",
-    "filename": "六上数学期末复习图册（图解增强版）.pdf",
+    "filename": "六上数学全知识点图解（暖色图文版）.pdf",
     "type": "application/pdf",
-    "sha256": "bbb26164b04ebd1ba88205586d770c32fdd4df432664bfb35b76f567fd68ac7a"
+    "sha256": "28bfc0721163a4ef9dcb5a118cef330eb9c14c824a9040c0a6fdfb97950a70e5",
+    "parts": 2,
+    "readerSha256": "043d5c27fa0b43354b57f71aefd84a3bbdeff65429c5b4de10f5d8814a10886f"
   },
   {
     "id": "english",

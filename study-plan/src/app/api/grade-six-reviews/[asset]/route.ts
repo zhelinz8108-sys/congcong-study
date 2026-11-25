@@ -1,31 +1,11 @@
-import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { NextRequest } from "next/server";
 import assets from "@/data/grade-six-reviews.json";
 import { FAMILY_ACCESS_COOKIE, verifyFamilyAccessToken } from "@/lib/family-access";
-import { decryptEnglishSixKnowledge } from "@/server/english-six-knowledge-envelope";
+import { readReviewFile } from "@/server/grade-six-reviews";
 import { toeflRange } from "@/server/toefl-listening";
 
 export const runtime = "nodejs";
-
-const files = new Map<string, Buffer>();
-
-async function fileBytes(asset: (typeof assets)[number]) {
-  const cached = files.get(asset.id);
-  if (cached) return cached;
-
-  const file = path.join(process.cwd(), "content/grade-six-reviews", asset.id + ".encrypted.json");
-  const envelope = JSON.parse(await readFile(file, "utf8"));
-  const encoded = decryptEnglishSixKnowledge(envelope, process.env.HOLIDAY_MATH_700_KEY?.trim() ?? "");
-  if (typeof encoded !== "string") throw new Error("Invalid grade-six review package");
-  const bytes = Buffer.from(encoded, "base64");
-  if (createHash("sha256").update(bytes).digest("hex") !== asset.sha256) {
-    throw new Error("Grade-six review does not match its published edition");
-  }
-  files.set(asset.id, bytes);
-  return bytes;
-}
 
 type Context = { params: Promise<{ asset: string }> };
 
@@ -38,7 +18,7 @@ async function serve(request: NextRequest, context: Context) {
   const asset = assets.find((entry) => entry.id === id);
   if (!asset) return new Response(null, { status: 404, headers });
 
-  const bytes = await fileBytes(asset);
+  const bytes = await readReviewFile(asset);
   const range = toeflRange(request.headers.get("range"), bytes.length);
   headers.set("Accept-Ranges", "bytes");
   if (!range) {
