@@ -28,7 +28,6 @@ export default async function MathAtlasPage({ params }: { params: Promise<{ id: 
     <main className="math-atlas-web">
       <nav className="atlas-site-nav" aria-label="图册导航">
         <a href={`/subjects/${id}`}>← 数学首页</a>
-        <a href="#atlas-2">单元目录</a>
         <a href="#atlas-55">知识点索引</a>
         <a href="/api/grade-six-reviews/math?download=1" download>下载 PDF</a>
       </nav>

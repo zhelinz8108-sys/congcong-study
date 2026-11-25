@@ -176,9 +176,13 @@ for (const [subjectPage, guide] of [
     assert.doesNotMatch(article, /class="coverkeys?"/);
     const contents = [...article.matchAll(/<a class="toc-row(?: alt)?" href="#atlas-(\d+)"/g)];
     assert.deepEqual(contents.map(([, page]) => Number(page)), [3, 5, 9, 14, 16, 20, 22, 30, 32, 40, 42, 45, 50, 55]);
+    const opening = article.slice(0, contents[0].index);
+    assert.equal(opening.replace(/<[^>]+>/g, '').trim(), '六上数学全知识点图解');
+    assert.ok(opening.includes('<h1>六上数学全知识点图解</h1>'));
+    assert.ok(opening.endsWith('<nav class="toc-list" aria-label="单元目录">'));
     for (let n = 1; n <= 58; n++) assert.ok(article.includes(`id="atlas-${n}"`), 'Missing topic ' + n);
     const destinations = [...article.matchAll(/href="#(atlas-\d+)"/g)];
-    assert.equal(destinations.length, 276);
+    assert.equal(destinations.length, 272);
     for (const [, target] of destinations) assert.ok(article.includes(`id="${target}"`), target);
     const loggedOut = await fetch(base + readerPath, {signal: AbortSignal.timeout(10000)});
     assert.doesNotMatch(await loggedOut.text(), /class="atlas-article"|圆规应张开几厘米/);
@@ -187,7 +191,7 @@ for (const [subjectPage, guide] of [
     assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);
   }
 }
-console.log('Native math atlas verified: 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 276 in-page links.');
+console.log('Native math atlas verified: title followed by 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 272 in-page links.');
 console.log(`Grade-six review links and original PDF/MP3 hashes verified on port ${port}.`);
 for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chinese/six',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank',
@@ -557,7 +561,7 @@ run_worker verify "$app" 3001
 sed -nE '/^Vocabulary book [1-3]: source=[0-9]+ retained=[0-9]+ removed=[0-9]+$/p' "$backup/verify.log"
 grep -Fx 'English homepage navigation verified.' "$backup/verify.log"
 grep -Fx 'Math homepage navigation verified.' "$backup/verify.log"
-grep -Fx 'Native math atlas verified: 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 276 in-page links.' "$backup/verify.log"
+grep -Fx 'Native math atlas verified: title followed by 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 272 in-page links.' "$backup/verify.log"
 receipt deployed
 finished=1
 printf 'Release deployed: commit=%s BUILD_ID=%s; private receipt=%s/receipt.json\n' "$commit" "$new_build" "$backup"

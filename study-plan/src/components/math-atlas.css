@@ -21,22 +21,20 @@
 .atlas-article { line-height: 1.8; font-size: clamp(1rem, .95rem + .3vw, 1.1rem); overflow-wrap: break-word; }
 .atlas-topic { position: relative; padding-block: clamp(1.85rem, 5vw, 3.6rem); scroll-margin-top: 1rem; }
 .atlas-topic + .atlas-topic { border-top: 1px solid var(--rule); }
+.atlas-topic:first-child { padding-block: clamp(1.25rem, 3.5vw, 2.25rem) .65rem; }
+.atlas-topic:first-child + .atlas-topic { padding-top: 0; border-top: 0; }
 .atlas-bookmark { position: absolute; top: 0; scroll-margin-top: 1rem; }
 .atlas-article p, .atlas-article figure { margin: 0; }
 .atlas-article .content { display: flow-root; }
 .atlas-article .running { float: right; margin-left: .65rem; color: var(--muted); font-size: .8rem; }
-.atlas-article .imprint, .atlas-article .cover .running { display: none; }
+.atlas-article .imprint { display: none; }
 .atlas-article .eyebrow, .atlas-article .tag { color: var(--clay); font-size: .85rem; font-weight: 650; }
 .atlas-article h1, .atlas-article h2, .atlas-article h3 { font-family: var(--serif); text-wrap: pretty; }
-.atlas-article h1 { margin: .65rem 0; font-size: clamp(2.5rem, 6vw, 4.1rem); line-height: 1.16; font-weight: 750; }
-.atlas-article .title-top { display: block; font-size: .45em; font-weight: 600; margin-bottom: .38em; }
-.atlas-article .title-main { color: #60331f; }
+.atlas-article h1 { margin: 0; color: #60331f; font-size: clamp(1.55rem, 4vw, 2.25rem); line-height: 1.3; font-weight: 700; }
 .atlas-article h2 { clear: both; margin: .45rem 0 .65rem; font-weight: 700; font-size: clamp(1.6rem, 3.8vw, 2.45rem); line-height: 1.34; }
 .atlas-article h3 { margin: 0 0 .25rem; color: #79402b; font-size: 1.18rem; line-height: 1.5; font-weight: 700; }
-.atlas-article .lead, .atlas-article .largelead { color: #63503f; font-size: 1.04em; }
-.atlas-article .largelead { font-family: var(--serif); font-size: clamp(1.05rem, 2vw, 1.25rem); }
-.atlas-article .cvbottom { margin-top: .8rem; color: var(--muted); }
-.atlas-article .toc-list, .atlas-article .stack, .atlas-article .cardstack, .atlas-article .indexgroups { margin-top: 1.4rem; }
+.atlas-article .lead { color: #63503f; font-size: 1.04em; }
+.atlas-article .stack, .atlas-article .cardstack, .atlas-article .indexgroups { margin-top: 1.4rem; }
 .atlas-article .toc-row {
   display: grid; grid-template-columns: 6rem minmax(0, 1fr) auto; gap: .25rem .7rem; align-items: baseline;
   padding: .7rem 0; border-bottom: 1px solid var(--rule); min-height: 44px;
@@ -79,9 +77,13 @@
   .atlas-site-nav { padding-top: 3.55rem; }
   .atlas-topic, .atlas-bookmark { scroll-margin-top: .65rem; }
   .atlas-topic + .atlas-topic { padding-top: 3.65rem; }
+  #atlas-2, #atlas-2 .atlas-bookmark { scroll-margin-top: 3.65rem; }
 }
 @media (max-width: 32rem) {
   .atlas-site-nav { font-size: .82rem; }
+  .atlas-article .toc-row { grid-template-columns: 4.25rem minmax(0, 1fr) auto; gap: .35rem; }
+}
+@media (max-width: 22rem) {
   .atlas-article .toc-row { grid-template-columns: minmax(0, 1fr) auto; gap: 0 .55rem; }
   .atlas-article .toc-row b { grid-column: 1; }
   .atlas-article .toc-row .pages { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
