@@ -36,7 +36,8 @@ DUPLICATE_RELEASES = (
 )
 TARGET_FREE = 5 * 1024**3 + 64 * 1024**2
 BUILD_HEADROOM = 4 * 1024**3
-UPLOAD_MARGIN = 256 * 1024**2
+UNMEASURED_UPLOAD_MARGIN = 256 * 1024**2
+TRANSFER_HEADROOM = 64 * 1024**2
 DIRECTORY_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
 
@@ -375,18 +376,24 @@ def recover_space(live, releases, backups, available, apply=False, target=TARGET
             'requiredRootMiB': metrics['requiredRootMiB'], 'generatedCandidates': metrics['generatedCandidates'], **duplicates}
 
 
-def target_for_upload(upload_bytes):
+def target_for_upload(upload_bytes, largest_file_bytes=None):
     if upload_bytes is None:
+        require(largest_file_bytes is None, 'A largest file size requires a checkout size')
         return TARGET_FREE
     require(upload_bytes > 0, 'A positive checkout size is required')
-    return BUILD_HEADROOM + upload_bytes + UPLOAD_MARGIN
+    if largest_file_bytes is None:
+        return BUILD_HEADROOM + upload_bytes + UNMEASURED_UPLOAD_MARGIN
+    require(0 < largest_file_bytes <= upload_bytes, 'Invalid largest checkout file size')
+    # rsync writes one temporary replacement at a time beside the seeded files.
+    return BUILD_HEADROOM + upload_bytes + largest_file_bytes + TRANSFER_HEADROOM
 
 
 def main():
     parser = argparse.ArgumentParser(); parser.add_argument('--apply', action='store_true')
     parser.add_argument('--upload-bytes', type=int, help='Allocated bytes in the clean runner checkout')
+    parser.add_argument('--largest-file-bytes', type=int, help='Size of the largest regular file in that checkout')
     args = parser.parse_args()
-    target = target_for_upload(args.upload_bytes)
+    target = target_for_upload(args.upload_bytes, args.largest_file_bytes)
     require(os.geteuid() == 0, 'Root is required for fixed release-space preparation')
     no_links(LOCK)
     descriptor = os.open(LOCK, os.O_RDWR | os.O_NOFOLLOW)

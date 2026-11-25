@@ -69,9 +69,11 @@ checks.append('enough-root-space-skips-all-history-and-filesystem-inspection')
 assert helper.target_for_upload(None) == helper.TARGET_FREE
 for mib in (710, 1200):
     assert helper.target_for_upload(mib * 1024**2) == (4096 + mib + 256) * 1024**2
-for invalid in (-1, 0):
+for largest_mib in (9, 400):
+    assert helper.target_for_upload(722 * 1024**2, largest_mib * 1024**2) == (4096 + 722 + largest_mib + 64) * 1024**2
+for invalid in ((-1,), (0,), (None, 1), (100, -1), (100, 0), (100, 101)):
     try:
-        helper.target_for_upload(invalid)
+        helper.target_for_upload(*invalid)
     except helper.SpaceError:
         pass
     else:
