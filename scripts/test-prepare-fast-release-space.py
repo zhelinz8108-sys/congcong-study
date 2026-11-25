@@ -66,6 +66,18 @@ def expect_rejected(call, root):
 assert helper.recover_space(Path('/not-present'), Path('/not-present'), Path('/not-present'), lambda: helper.TARGET_FREE, apply=True)['changed'] is False
 checks.append('enough-root-space-skips-all-history-and-filesystem-inspection')
 
+assert helper.target_for_upload(None) == helper.TARGET_FREE
+for mib in (710, 1200):
+    assert helper.target_for_upload(mib * 1024**2) == (4096 + mib + 256) * 1024**2
+for invalid in (-1, 0):
+    try:
+        helper.target_for_upload(invalid)
+    except helper.SpaceError:
+        pass
+    else:
+        raise AssertionError('Invalid upload size was accepted')
+checks.append('measured-upload-keeps-full-build-headroom-and-transfer-margin')
+
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory); live, releases, backups, protected, older, receipts = fixture(root)
     before = snapshot(root)

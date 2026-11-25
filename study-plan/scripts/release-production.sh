@@ -83,6 +83,22 @@ assert.ok(secret && (process.env.FAMILY_ACCESS_PASSWORD || '').trim(), 'Family a
 const payload = `v1.${Date.now() + 30 * 60 * 1000}`;
 const token = `${payload}.${createHmac('sha256', secret).update(payload).digest('base64url')}`;
 const headers = {Cookie: `congcong_family_access=${token}`};
+const englishHome = await fetch(base + '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1', {headers, signal: AbortSignal.timeout(10000)});
+assert.equal(englishHome.status, 200);
+const scripts = [...(await englishHome.text()).matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)];
+const homeChunk = scripts.map(match => decodeURIComponent(match[1].split('?')[0]))
+  .find(src => /^\/_next\/static\/chunks\/app\/subjects\/\[id\]\/page-[\w-]+\.js$/.test(src));
+assert.ok(homeChunk, 'The subject homepage must serve its compiled navigation.');
+const asset = await fetch(base + homeChunk, {headers, signal: AbortSignal.timeout(10000)});
+assert.equal(asset.status, 200);
+const navigation = await asset.text();
+assert.ok(navigation === await readFile('.next' + homeChunk.slice('/_next'.length), 'utf8'),
+  'The homepage must load this release’s navigation.');
+for (const suffix of ['/english/six', '/english/extension-practice', '/vocab', '/english/six-knowledge'])
+  assert.ok(navigation.includes(suffix), `Missing English home link: ${suffix}`);
+for (const suffix of ['/listening/2026-11-09', '/phrases', '/grammar', '/sentences', '/sentence-structure', '/grammar-guide'])
+  assert.ok(!navigation.includes('}' + suffix + '`'), `Unexpected English home link: ${suffix}`);
+console.log('English homepage navigation verified.');
 assert.equal((await fetch(base + '/practice-reports/rounds', {signal: AbortSignal.timeout(10000)})).status, 401);
 const reportPage = await fetch(base + '/practice-reports', {headers, signal: AbortSignal.timeout(10000)});
 assert.equal(reportPage.status, 200);
@@ -481,6 +497,7 @@ wait_healthy 3001 || fail 'Activated database/storage health failed.'
 run_worker verify "$app" 3001
 # Release only aggregate book counts from the private verification log.
 sed -nE '/^Vocabulary book [1-3]: source=[0-9]+ retained=[0-9]+ removed=[0-9]+$/p' "$backup/verify.log"
+grep -Fx 'English homepage navigation verified.' "$backup/verify.log"
 receipt deployed
 finished=1
 printf 'Release deployed: commit=%s BUILD_ID=%s; private receipt=%s/receipt.json\n' "$commit" "$new_build" "$backup"

@@ -4,7 +4,7 @@ The user authorized removing unused server content. Generated trees are
 preferred; an older source/material file is eligible only when independent
 byte-identical live and latest-rollback copies both remain verified intact.
 Uploads, independent media, configuration, backups and archives are excluded.
-Default is a read-only plan. No compression or release thresholds change.
+Default is a read-only plan. The runner supplies its measured checkout size.
 """
 import argparse
 import fcntl
@@ -32,6 +32,8 @@ DUPLICATE_RELEASES = (
     'previous-37adda11b81ee4c73c90d931656c0f5d22902103-43653324834-1',
 )
 TARGET_FREE = 5 * 1024**3 + 64 * 1024**2
+BUILD_HEADROOM = 4 * 1024**3
+UPLOAD_MARGIN = 256 * 1024**2
 DIRECTORY_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
 
@@ -370,9 +372,18 @@ def recover_space(live, releases, backups, available, apply=False, target=TARGET
             'requiredRootMiB': metrics['requiredRootMiB'], 'generatedCandidates': metrics['generatedCandidates'], **duplicates}
 
 
+def target_for_upload(upload_bytes):
+    if upload_bytes is None:
+        return TARGET_FREE
+    require(upload_bytes > 0, 'A positive checkout size is required')
+    return BUILD_HEADROOM + upload_bytes + UPLOAD_MARGIN
+
+
 def main():
     parser = argparse.ArgumentParser(); parser.add_argument('--apply', action='store_true')
+    parser.add_argument('--upload-bytes', type=int, help='Allocated bytes in the clean runner checkout')
     args = parser.parse_args()
+    target = target_for_upload(args.upload_bytes)
     require(os.geteuid() == 0, 'Root is required for fixed release-space preparation')
     no_links(LOCK)
     descriptor = os.open(LOCK, os.O_RDWR | os.O_NOFOLLOW)
@@ -381,7 +392,8 @@ def main():
         require(stat.S_ISREG(info.st_mode) and info.st_uid == 0 and stat.S_IMODE(info.st_mode) == 0o600,
                 'Invalid private release lock')
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        result = recover_space(LIVE, RELEASES, BACKUPS, lambda: shutil.disk_usage(RELEASES).free, apply=args.apply)
+        result = recover_space(LIVE, RELEASES, BACKUPS, lambda: shutil.disk_usage(RELEASES).free,
+                               apply=args.apply, target=target)
         print(json.dumps({'fastReleaseSpace': result}), flush=True)
 
 
