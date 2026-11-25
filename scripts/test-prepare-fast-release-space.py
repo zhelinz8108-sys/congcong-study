@@ -189,7 +189,11 @@ with tempfile.TemporaryDirectory() as directory:
 assert helper.duplicate_allowed(Path('content/grade6-bank/sealed/private/static.png.enc'))
 assert helper.duplicate_allowed(Path('content/chinese-six/sealed/pages/static.png.enc'))
 assert helper.duplicate_allowed(Path('public/listening/a.mp3'))
+for prefix in ('test', 'check', 'audit', 'verify'):
+    assert helper.duplicate_allowed(Path(f'scripts/{prefix}-atlas.mjs'))
 for relative in ('src/.env.private', 'src/.data/student.json', 'public/uploads/user.pdf',
+                 'scripts/release-production.sh', 'scripts/migrate-data.mjs', 'scripts/test-data.db.mjs',
+                 'scripts/test-manifest.mjs', 'scripts/fixtures/test-atlas.mjs', 'scripts/.env.test',
                  'content/english-six/resource.json', 'content/toefl-listening/audio.mp3', 'content/media/audio.mp3',
                  'content/snapshot.db', 'content/snapshot.dump.enc', 'content/archive.tar.gz.enc',
                  'content/manifest.json.enc', 'content/questions/static.png.enc', 'src/other.json.enc',
@@ -198,6 +202,25 @@ for relative in ('src/.env.private', 'src/.data/student.json', 'public/uploads/u
                  'src/receipt.json', 'src/BUILD_ID', 'public/release-metadata.json'):
     assert not helper.duplicate_allowed(Path(relative)), relative
 checks.append('duplicate-exclusions-cover-independent-media-databases-archives-config-and-metadata-even-when-encrypted')
+
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); live, releases, backups, protected, older, _ = fixture(root)
+    matched = Path('scripts/test-atlas.mjs')
+    changed = Path('scripts/check-figures.mjs')
+    for folder in (live, protected, older):
+        write(folder / matched, 'synthetic test code\n' * 1000)
+        write(folder / changed, 'old' if folder == older else 'new')
+        write(folder / 'scripts/migrate-data.mjs', 'synthetic migration')
+    plans, _ = helper.duplicate_plan(live, releases, live.stat().st_dev)
+    assert [p['paths'][0] for p in plans if p['paths'][0].parent == older / 'scripts'] == [older / matched]
+    retained = [snapshot(live), snapshot(protected)]
+    with patch.object(helper, 'assert_inactive'):
+        result = helper.prune_duplicates(live, releases, backups, live.stat().st_dev,
+                                         lambda: 0 if (older / matched).exists() else 4096, 4096)
+    assert result['duplicateFilesRemoved'] == 1 and not (older / matched).exists()
+    assert (older / changed).is_file() and (older / 'scripts/migrate-data.mjs').is_file()
+    assert [snapshot(live), snapshot(protected)] == retained
+    checks.append('only-third-byte-identical-verification-script-is-reclaimed')
 
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory); live, releases, backups, protected, older, receipts = fixture(root)

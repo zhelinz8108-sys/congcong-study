@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import stat
 
@@ -43,6 +44,7 @@ UNMEASURED_UPLOAD_MARGIN = 256 * 1024**2
 TRANSFER_HEADROOM = 64 * 1024**2
 DIRECTORY_FLAGS = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 FILE_FLAGS = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
+DUPLICATE_ROOTS = ('src', 'content', 'public', 'scripts')
 
 
 class SpaceError(ValueError):
@@ -189,7 +191,9 @@ def deletion_plan(live, releases, device):
 
 def duplicate_allowed(relative):
     parts = relative.parts
-    if not parts or parts[0] not in ('src', 'content', 'public'):
+    if not parts or parts[0] not in DUPLICATE_ROOTS:
+        return False
+    if parts[0] == 'scripts' and (len(parts) != 2 or not re.fullmatch(r'(?:test|check|audit|verify)-[a-z0-9-]+\.mjs', parts[1])):
         return False
     if any(part.startswith('.env') or part in ('.data', 'uploads', 'media') for part in parts):
         return False
@@ -263,7 +267,7 @@ def inspect_duplicate(paths, device, expected=None, remove=False):
 def duplicate_plan(live, releases, device, older_release=OLDER):
     older, protected = releases / older_release, releases / PROTECTED
     plans, skipped = [], 0
-    for name in ('src', 'content', 'public'):
+    for name in DUPLICATE_ROOTS:
         base = older / name
         if not base.is_dir() or base.is_symlink():
             continue
