@@ -164,19 +164,27 @@ for (const [subjectPage, guide] of [
     assert.equal(reader.status, 200, readerPath);
     const body = await reader.text();
     assert.ok(body.includes('aria-label="图册正文"') && body.includes(`href="${home}"`), readerPath);
-    assert.ok(body.includes('data-pdf-source="/api/grade-six-reviews/math"') && body.includes('class="pdfViewer"'), readerPath);
     assert.ok(body.includes('href="/api/grade-six-reviews/math?download=1"'), readerPath);
-    const {version} = JSON.parse(await readFile('node_modules/pdfjs-dist/package.json', 'utf8'));
-    const worker = await fetch(base + '/pdfjs/' + version + '/worker.js', {signal: AbortSignal.timeout(10000)});
-    assert.equal(worker.status, 200);
-    assert.match(worker.headers.get('content-type'), /javascript/);
-    assert.ok(Buffer.from(await worker.arrayBuffer()).equals(await readFile('node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs')));
+    const start = body.indexOf('<article class="atlas-article"');
+    assert.ok(start >= 0, 'Expected the complete server-rendered article');
+    const article = body.slice(start, body.indexOf('</main>', start));
+    assert.equal((article.match(/class="atlas-topic"/g) || []).length, 58);
+    assert.equal((article.match(/class="atlas-diagram"/g) || []).length, 229);
+    assert.equal((article.match(/<math /g) || []).length, 39);
+    assert.equal((article.match(/class="indexrow"/g) || []).length, 92);
+    assert.doesNotMatch(article, /<(?:iframe|object|embed|canvas)\b/i);
+    for (let n = 1; n <= 58; n++) assert.ok(article.includes(`id="atlas-${n}"`), 'Missing topic ' + n);
+    const destinations = [...article.matchAll(/href="#(atlas-\d+)"/g)];
+    assert.equal(destinations.length, 280);
+    for (const [, target] of destinations) assert.ok(article.includes(`id="${target}"`), target);
+    const loggedOut = await fetch(base + readerPath, {signal: AbortSignal.timeout(10000)});
+    assert.doesNotMatch(await loggedOut.text(), /class="atlas-article"|圆规应张开几厘米/);
   } else {
     assert.ok(html.includes('href="/api/grade-six-reviews/english"'), subjectPage);
     assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);
   }
 }
-console.log('Original math atlas PDF verified: 58 pages, 280 links, continuous reader.');
+console.log('Native math atlas verified: 58 sections, 229 diagrams, 39 formulas, 92 index entries and 280 in-page links.');
 console.log(`Grade-six review links and original PDF/MP3 hashes verified on port ${port}.`);
 for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chinese/six',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank',
@@ -546,7 +554,7 @@ run_worker verify "$app" 3001
 sed -nE '/^Vocabulary book [1-3]: source=[0-9]+ retained=[0-9]+ removed=[0-9]+$/p' "$backup/verify.log"
 grep -Fx 'English homepage navigation verified.' "$backup/verify.log"
 grep -Fx 'Math homepage navigation verified.' "$backup/verify.log"
-grep -Fx 'Original math atlas PDF verified: 58 pages, 280 links, continuous reader.' "$backup/verify.log"
+grep -Fx 'Native math atlas verified: 58 sections, 229 diagrams, 39 formulas, 92 index entries and 280 in-page links.' "$backup/verify.log"
 receipt deployed
 finished=1
 printf 'Release deployed: commit=%s BUILD_ID=%s; private receipt=%s/receipt.json\n' "$commit" "$new_build" "$backup"

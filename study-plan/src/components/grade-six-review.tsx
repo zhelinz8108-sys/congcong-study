@@ -1,30 +1,27 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 function MathAtlasEntry({ href }: { href: string }) {
-  const router = useRouter();
   useEffect(() => {
     // Previously shared topic links had their page number on the subject homepage.
     function followOldPageLink() {
       const hash = window.location.hash;
-      if (/^#atlas-[1-9]\d*$/.test(hash)) router.replace(href + hash);
+      if (/^#atlas-[1-9]\d*$/.test(hash)) window.location.replace(href + hash);
     }
     followOldPageLink();
     window.addEventListener("hashchange", followOldPageLink);
     return () => window.removeEventListener("hashchange", followOldPageLink);
-  }, [href, router]);
+  }, [href]);
 
   return (
-    <Link href={href} prefetch={false} className="mb-4 block rounded-2xl border border-[#dfc9aa] border-l-4 border-l-[#a46c43] bg-[#fffaf1] p-5 text-stone-900 shadow-sm hover:border-[#ba936c] focus-visible:outline-2 focus-visible:outline-[#87432a]">
+    <a href={href} className="mb-4 block rounded-2xl border border-[#dfc9aa] border-l-4 border-l-[#a46c43] bg-[#fffaf1] p-5 text-stone-900 shadow-sm hover:border-[#ba936c] focus-visible:outline-2 focus-visible:outline-[#87432a]">
       <h2 className="text-xl font-bold">六上数学全知识点图解</h2>
       <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <p className="text-sm text-stone-600">58 页 · 知识点、例题与自测</p>
+        <p className="text-sm text-stone-600">7 个单元 · 4 个综合实践 · 期末自测</p>
         <span className="text-sm font-semibold text-[#87432a]">阅读图册 <span aria-hidden="true">→</span></span>
       </div>
-    </Link>
+    </a>
   );
 }
 
