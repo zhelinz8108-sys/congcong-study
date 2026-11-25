@@ -35,15 +35,7 @@
 .atlas-article h3 { margin: 0 0 .25rem; color: #79402b; font-size: 1.18rem; line-height: 1.5; font-weight: 700; }
 .atlas-article .lead, .atlas-article .largelead { color: #63503f; font-size: 1.04em; }
 .atlas-article .largelead { font-family: var(--serif); font-size: clamp(1.05rem, 2vw, 1.25rem); }
-.atlas-article .coverkeys { margin-block: 1.4rem 1.1rem; border-top: 1px solid var(--rule); }
-.atlas-article .coverkey {
-  display: grid; grid-template-columns: clamp(5.5rem, 23%, 8rem) minmax(0, 1fr); grid-template-rows: auto auto;
-  align-items: start; gap: 0 clamp(.8rem, 3vw, 1.55rem); padding-block: .5rem;
-  border-bottom: 1px solid var(--rule); font-size: .92rem; color: var(--muted);
-}
-.atlas-article .coverkey img { grid-row: span 2; width: 100%; height: clamp(3.8rem, 8vw, 4.7rem); object-fit: contain; align-self: center; background: #fcf5e9; }
-.atlas-article .coverkey b { align-self: end; color: var(--clay); font: 700 1.2rem/1.55 var(--serif); }
-.atlas-article .cvbottom { color: var(--muted); }
+.atlas-article .cvbottom { margin-top: .8rem; color: var(--muted); }
 .atlas-article .toc-list, .atlas-article .stack, .atlas-article .cardstack, .atlas-article .indexgroups { margin-top: 1.4rem; }
 .atlas-article .toc-row {
   display: grid; grid-template-columns: 6rem minmax(0, 1fr) auto; gap: .25rem .7rem; align-items: baseline;
