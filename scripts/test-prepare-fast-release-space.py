@@ -189,6 +189,7 @@ with tempfile.TemporaryDirectory() as directory:
 assert helper.duplicate_allowed(Path('content/grade6-bank/sealed/private/static.png.enc'))
 assert helper.duplicate_allowed(Path('content/chinese-six/sealed/pages/static.png.enc'))
 assert helper.duplicate_allowed(Path('public/listening/a.mp3'))
+assert helper.duplicate_allowed(Path('content/grade6-bank/manifest.json'))
 for prefix in ('test', 'check', 'audit', 'verify'):
     assert helper.duplicate_allowed(Path(f'scripts/{prefix}-atlas.mjs'))
 for relative in ('src/.env.private', 'src/.data/student.json', 'public/uploads/user.pdf',
@@ -196,7 +197,8 @@ for relative in ('src/.env.private', 'src/.data/student.json', 'public/uploads/u
                  'scripts/test-manifest.mjs', 'scripts/fixtures/test-atlas.mjs', 'scripts/.env.test',
                  'content/english-six/resource.json', 'content/toefl-listening/audio.mp3', 'content/media/audio.mp3',
                  'content/snapshot.db', 'content/snapshot.dump.enc', 'content/archive.tar.gz.enc',
-                 'content/manifest.json.enc', 'content/questions/static.png.enc', 'src/other.json.enc',
+                 'content/manifest.json.enc', 'content/grade6-bank/backup-manifest.json',
+                 'content/grade6-bank/private/manifest.json', 'content/questions/static.png.enc', 'src/other.json.enc',
                  'content/grade6-bank/sealed/private/snapshot.dump.enc',
                  'content/chinese-six/sealed/pages/archive.tar.gz.enc',
                  'src/receipt.json', 'src/BUILD_ID', 'public/release-metadata.json'):
@@ -323,5 +325,52 @@ with tempfile.TemporaryDirectory() as directory:
     assert snapshot(live) == live_before and snapshot(protected) == protected_before
     assert (earlier / 'src/unique.ts').is_file() and (earlier / 'node_modules/keep').is_file()
     checks.append('secondary-rollback-only-when-needed-with-receipt-intact-and-sufficient-combined-triple-verified-bytes')
+
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); live, releases, backups, protected, older, _ = fixture(root)
+    catalogue = Path('content/grade6-bank/manifest.json')
+    for version in (live, protected, older):
+        write(version / catalogue, '{"version":1,"collections":[]}')
+        (version / 'src/routes/old/nested').mkdir(parents=True)
+        (version / 'src/.data/preserved').mkdir(parents=True)
+        (version / 'src/uploads/preserved').mkdir(parents=True)
+    (older / 'src/redirect').symlink_to(root / 'outside', target_is_directory=True)
+    write(older / 'src/unique/old.ts', 'a different release')
+    (older / 'public/empty').mkdir()
+    device = live.stat().st_dev
+    plans, _ = helper.duplicate_plan(live, releases, device)
+    assert older / catalogue in [candidate['paths'][0] for candidate in plans]
+    dirs = helper.empty_source_directories(older, device)
+    assert [row[0] for row in dirs] == [older / 'src/routes/old/nested', older / 'src/routes/old', older / 'src/routes']
+    # tmpfs can allocate zero blocks for an empty directory. Model ext4 blocks here.
+    dirs = [(path, signature, 4096) for path, signature, _ in dirs]
+    allocations = {row['paths'][0]: row['allocated'] for row in plans}
+    allocations.update({path: size for path, _, size in dirs})
+    free = lambda: sum(size for path, size in allocations.items() if not path.exists())
+    total = sum(allocations.values())
+    retained = [snapshot(live), snapshot(protected), snapshot(root / 'outside')]
+    with patch.object(helper, 'assert_inactive'), patch.object(helper, 'empty_source_directories', return_value=dirs):
+        expect_rejected(lambda: helper.prune_duplicates(live, releases, backups, device, free, total + 1), root)
+        before = snapshot(root)
+        assert helper.prune_duplicates(live, releases, backups, device, free, total, apply=False)['emptySourceDirectories'] == 3
+        assert snapshot(root) == before
+        result = helper.prune_duplicates(live, releases, backups, device, free, total)
+    assert result['emptyDirectoriesRemoved'] == 3 and not (older / catalogue).exists()
+    assert retained == [snapshot(live), snapshot(protected), snapshot(root / 'outside')]
+    for name in ('src', 'src/.data/preserved', 'src/uploads/preserved', 'src/redirect', 'src/unique/old.ts', 'public/empty'):
+        assert (older / name).exists()
+    checks.append('only-already-empty-historical-source-branches-and-third-course-catalogue-reclaimed-after-full-capacity-proof')
+
+with tempfile.TemporaryDirectory() as directory:
+    root = Path(directory); live, releases, backups, protected, older, _ = fixture(root)
+    device = live.stat().st_dev
+    candidate = older / 'src/was-empty'
+    candidate.mkdir()
+    [(path, signature, _)] = helper.empty_source_directories(older, device)
+    write(candidate / 'arrived.ts', 'keep new contents')
+    with patch.object(helper, 'assert_inactive'), patch.object(helper, 'duplicate_plan', return_value=([], 0)), \
+         patch.object(helper, 'empty_source_directories', return_value=[(path, signature, 4096)]):
+        expect_rejected(lambda: helper.prune_duplicates(live, releases, backups, device, lambda: 0, 4096), root)
+    checks.append('directory-that-becomes-nonempty-after-planning-cannot-be-removed')
 
 print(json.dumps({'passed': True, 'checks': checks, 'productionWrites': 0, 'networkCalls': 0}))

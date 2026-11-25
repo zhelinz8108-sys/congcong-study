@@ -208,7 +208,10 @@ def duplicate_allowed(relative):
     if parts[:2] in (('content', 'english-six'), ('content', 'toefl-listening')):
         return False
     name = relative.name.lower()
-    if 'manifest' in name or 'receipt' in name or name in ('build_id', 'release-metadata.json'):
+    # This checked-in question catalogue is course content. Release and backup
+    # manifests retain the existing exclusion, even if their contents match.
+    course_catalogue = parts == ('content', 'grade6-bank', 'manifest.json')
+    if ('manifest' in name and not course_catalogue) or 'receipt' in name or name in ('build_id', 'release-metadata.json'):
         return False
     if '.enc' in (suffix.lower() for suffix in relative.suffixes) or name.endswith('.enc'):
         if not name.endswith('.enc') or parts[:4] not in (
@@ -292,6 +295,42 @@ def duplicate_plan(live, releases, device, older_release=OLDER):
     return sorted(plans, key=lambda row: row['allocated'], reverse=True), skipped
 
 
+def empty_source_directories(older, device):
+    """Collect only already-empty branches below a reviewed inactive src tree."""
+    source = older / 'src'
+    if source.is_symlink() or not source.is_dir():
+        return []
+    plan = []
+
+    def visit(path, descriptor):
+        info = os.fstat(descriptor)
+        if info.st_dev != device:
+            return False
+        empty = True
+        with os.scandir(descriptor) as entries:
+            for entry in entries:
+                child = path / entry.name
+                if not entry.is_dir(follow_symlinks=False) or not duplicate_allowed(child.relative_to(older)):
+                    empty = False
+                    continue
+                nested = os.open(entry.name, DIRECTORY_FLAGS, dir_fd=descriptor)
+                try:
+                    if not visit(child, nested):
+                        empty = False
+                finally:
+                    os.close(nested)
+        if empty and path != source:
+            plan.append((path, identity(info)[:5], info.st_blocks * 512))
+        return empty
+
+    descriptor = open_directory(source)
+    try:
+        visit(source, descriptor)
+    finally:
+        os.close(descriptor)
+    return plan
+
+
 def prune_duplicates(live, releases, backups, device, available, target, apply=True):
     validate_layout(live, releases, backups)
     roots = [releases / OLDER, live, releases / PROTECTED]
@@ -311,11 +350,18 @@ def prune_duplicates(live, releases, backups, device, available, target, apply=T
         roots.append(earlier)
     root_ids = {path: identity(path.stat())[:5] for path in roots}
     require(len({row[:2] for row in root_ids.values()}) == len(roots), 'Release directories must be distinct')
+    directories = []
+    if capacity < target - available():
+        for older in roots:
+            if older.parent == releases and older.name != PROTECTED:
+                directories.extend(empty_source_directories(older, device))
+    directory_bytes = sum(allocated for _, _, allocated in directories)
     metrics = {'duplicateCandidates': len(plans), 'duplicateCandidateMiB': capacity // 1024**2,
-               'duplicateSkipped': skipped}
+               'duplicateSkipped': skipped, 'emptySourceDirectories': len(directories),
+               'emptySourceMiB': directory_bytes // 1024**2}
     if not apply:
         return metrics
-    require(capacity >= max(0, target - available()),
+    require(capacity + directory_bytes >= max(0, target - available()),
             'Verified duplicate capacity is insufficient; no duplicate files were removed', **metrics)
     removed = 0
     for plan in plans:
@@ -326,9 +372,22 @@ def prune_duplicates(live, releases, backups, device, available, target, apply=T
             require(identity(path.stat())[:5] == root_ids[path], 'Retained release root changed; remaining copies retained')
         inspect_duplicate(plan['paths'], device, expected=plan, remove=True)
         removed += 1
+    removed_dirs = 0
+    for directory, signature, _ in directories:
+        if available() >= target:
+            break
+        parent = open_directory(directory.parent)
+        try:
+            info = os.stat(directory.name, dir_fd=parent, follow_symlinks=False)
+            require(identity(info)[:5] == signature, 'Empty source directory changed during verification')
+            # rmdir itself rejects new files, directory links and mounted trees.
+            os.rmdir(directory.name, dir_fd=parent)
+        finally:
+            os.close(parent)
+        removed_dirs += 1
     require(available() >= target, 'Concurrent disk use exhausted verified duplicate savings',
-            duplicateFilesRemoved=removed, **metrics)
-    return {'duplicateFilesRemoved': removed, **metrics}
+            duplicateFilesRemoved=removed, emptyDirectoriesRemoved=removed_dirs, **metrics)
+    return {'duplicateFilesRemoved': removed, 'emptyDirectoriesRemoved': removed_dirs, **metrics}
 
 
 def summary(plan):
@@ -382,7 +441,7 @@ def recover_space(live, releases, backups, available, apply=False, target=TARGET
     final = available()
     require(final >= target, 'Reviewed generated content was insufficient; deployment remains blocked',
             removedTargets=removed, **{**metrics, 'rootFreeMiB': final // 1024**2})
-    return {'changed': removed > 0 or duplicates.get('duplicateFilesRemoved', 0) > 0,
+    return {'changed': bool(removed or duplicates.get('duplicateFilesRemoved') or duplicates.get('emptyDirectoriesRemoved')),
             'removedTargets': removed, 'rootFreeMiB': final // 1024**2,
             'requiredRootMiB': metrics['requiredRootMiB'], 'generatedCandidates': metrics['generatedCandidates'], **duplicates}
 
