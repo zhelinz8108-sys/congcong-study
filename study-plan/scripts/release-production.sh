@@ -169,8 +169,11 @@ for (const [subjectPage, guide] of [
     assert.ok(start >= 0, 'Expected the complete server-rendered article');
     const article = body.slice(start, body.indexOf('</main>', start));
     assert.equal((article.match(/class="atlas-topic"/g) || []).length, 58);
-    assert.equal((article.match(/class="atlas-diagram"/g) || []).length, 229);
-    assert.equal((article.match(/class="atlas-model"/g) || []).length, 44);
+    assert.equal((article.match(/class="atlas-diagram"/g) || []).length, 231);
+    assert.equal((article.match(/class="atlas-model"/g) || []).length, 231);
+    assert.equal((article.match(/data-kind="geometry"/g) || []).length, 149);
+    assert.equal((article.match(/<table class="atlas-values"/g) || []).length, 36);
+    assert.equal((article.match(/data-kind="scene"/g) || []).length, 2);
     assert.equal((article.match(/<table class="atlas-strip"/g) || []).length, 74);
     const example = article.match(/<div class="atlas-model" id="atlas-eighths".*?(?=<button type="button" class="atlas-zoom")/s)?.[0];
     assert.ok(example, 'Missing native eighths model');
@@ -179,11 +182,11 @@ for (const [subjectPage, guide] of [
     assert.equal((example.match(/background-color:#dfae80/g) || []).length, 6);
     assert.equal((example.match(/background-color:#fffdf7/g) || []).length, 2);
     assert.equal((article.match(/<span class="atlas-label"[^>]*>[^<]+<\/span>/g) || []).length, 1403);
-    assert.equal((article.match(/<button type="button" class="atlas-zoom"/g) || []).length, 229);
+    assert.equal((article.match(/<button type="button" class="atlas-zoom"/g) || []).length, 231);
     assert.doesNotMatch(article, /<text\b|<button[^>]+class="atlas-diagram"/);
     assert.equal((article.match(/<math /g) || []).length, 39);
     assert.equal((article.match(/class="indexrow"/g) || []).length, 92);
-    assert.doesNotMatch(article, /<(?:iframe|object|embed|canvas)\b/i);
+    assert.doesNotMatch(article, /<(?:img|picture|svg|iframe|object|embed|canvas)\b|data:image\/|url\s*\(/i);
     assert.doesNotMatch(article, /class="coverkeys?"/);
     const contents = [...article.matchAll(/<a class="toc-row(?: alt)?" href="#atlas-(\d+)"/g)];
     assert.deepEqual(contents.map(([, page]) => Number(page)), [3, 5, 9, 14, 16, 20, 22, 30, 32, 40, 42, 45, 50, 55]);
@@ -202,7 +205,7 @@ for (const [subjectPage, guide] of [
     assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);
   }
 }
-console.log('Native math atlas verified: 44 native bar models, 74 editable bars, 1403 selectable HTML labels, 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 272 in-page links.');
+console.log('Complete HTML math atlas verified: 229 teaching diagrams and 2 illustrated scenes, 36 value tables, 74 editable bars, 1403 selectable labels, 58 sections and zero embedded images.');
 console.log(`Grade-six review links and original PDF/MP3 hashes verified on port ${port}.`);
 for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chinese/six',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank',
@@ -572,7 +575,7 @@ run_worker verify "$app" 3001
 sed -nE '/^Vocabulary book [1-3]: source=[0-9]+ retained=[0-9]+ removed=[0-9]+$/p' "$backup/verify.log"
 grep -Fx 'English homepage navigation verified.' "$backup/verify.log"
 grep -Fx 'Math homepage navigation verified.' "$backup/verify.log"
-grep -Fx 'Native math atlas verified: 44 native bar models, 74 editable bars, 1403 selectable HTML labels, 14 contents entries, 58 sections, 229 diagrams, 39 formulas, 92 index entries and 272 in-page links.' "$backup/verify.log"
+grep -Fx 'Complete HTML math atlas verified: 229 teaching diagrams and 2 illustrated scenes, 36 value tables, 74 editable bars, 1403 selectable labels, 58 sections and zero embedded images.' "$backup/verify.log"
 receipt deployed
 finished=1
 printf 'Release deployed: commit=%s BUILD_ID=%s; private receipt=%s/receipt.json\n' "$commit" "$new_build" "$backup"

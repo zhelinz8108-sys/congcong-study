@@ -1,12 +1,40 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ClipboardEvent, MouseEvent, ReactNode } from "react";
+
+function copyDrawing(model: HTMLElement) {
+  const title = model.closest(".atlas-diagram")?.getAttribute("aria-label") ?? "数学图解";
+  const width = Number(model.dataset.width);
+  const result = model.cloneNode(true) as HTMLElement;
+  result.setAttribute("aria-label", title);
+  result.style.cssText = `position:relative;width:${width}px;height:${Number(model.dataset.height)}px;font:normal 0/0 system-ui,sans-serif`;
+  const plane = result.querySelector<HTMLElement>(".atlas-drawing")!;
+  Object.assign(plane.style, { position: "absolute", top: "0", left: "0", overflow: "hidden" });
+  for (const shape of plane.querySelectorAll("span")) {
+    Object.assign(shape.style, { display: "block", position: "absolute" });
+    if (shape.matches(".atlas-contour,.atlas-clip,.atlas-origin,.atlas-pigment")) shape.style.inset = "0";
+  }
+  const layer = result.querySelector<HTMLElement>(".atlas-labels");
+  if (layer) Object.assign(layer.style, { position: "absolute", inset: "0" });
+  const labels = Array.from(result.querySelectorAll<HTMLElement>(".atlas-label"));
+  for (const label of labels) {
+    const shift = label.dataset.anchor === "start" ? "0%" : label.dataset.anchor === "end" ? "-100%" : "-50%";
+    Object.assign(label.style, {
+      position: "absolute", display: "block", width: "max-content", whiteSpace: "pre", lineHeight: "1",
+      transform: `translate(${shift},-.86em)`, fontSize: `${parseFloat(label.style.fontSize) * width / 100}px`,
+    });
+  }
+  return { html: result.outerHTML, text: labels.map(label => label.textContent).join("\n") || title };
+}
 
 function clipboardContents(range: Range, host: HTMLElement) {
   const common = range.commonAncestorContainer;
   const parent = common instanceof Element ? common : common.parentElement;
-  const context = parent?.closest("math, .atlas-label, .atlas-strip, .atlas-model");
+  if (common instanceof HTMLElement && common.matches('.atlas-model:is([data-kind="geometry"],[data-kind="scene"])') &&
+      range.startContainer === common && range.startOffset === 0 && range.endContainer === common &&
+      range.endOffset === common.childNodes.length) return copyDrawing(common);
+  const context = parent?.closest("math, .atlas-label, .atlas-strip, .atlas-values, .atlas-model");
   const selectionCopy = range.cloneContents();
   if (!context && !selectionCopy.querySelector("math, .atlas-label, .atlas-strip")) return;
 
@@ -20,7 +48,7 @@ function clipboardContents(range: Range, host: HTMLElement) {
   const copy = document.createElement("div");
   copy.append(selected);
   // Coordinates belong to the diagram. Pasted labels follow the editor's text flow.
-  copy.querySelectorAll('svg, button, [aria-hidden="true"]').forEach(node => node.remove());
+  copy.querySelectorAll('button, [aria-hidden="true"]').forEach(node => node.remove());
   for (const label of copy.querySelectorAll<HTMLElement>(".atlas-label")) {
     const span = document.createElement("span");
     span.style.color = label.style.color;
@@ -29,6 +57,14 @@ function clipboardContents(range: Range, host: HTMLElement) {
     label.replaceWith(span);
   }
   for (const layer of copy.querySelectorAll(".atlas-labels")) layer.replaceWith(...layer.childNodes);
+  for (const table of copy.querySelectorAll<HTMLTableElement>("table.atlas-values")) {
+    table.style.cssText = "border-collapse:collapse;text-align:center;margin:.25em auto";
+    table.removeAttribute("class");
+    for (const cell of table.querySelectorAll<HTMLElement>("th,td")) {
+      cell.style.cssText = "padding:3px 8px;border:1px solid #cfbda2";
+      cell.style.backgroundColor = cell.tagName === "TH" ? "#f4e4cf" : "#fffdf7";
+    }
+  }
   const strips = new Map<HTMLTableElement, string>();
   for (const table of copy.querySelectorAll<HTMLTableElement>("table.atlas-strip")) {
     const colors = new Map<string, string>();
@@ -90,10 +126,25 @@ function copyAtlasText(event: ClipboardEvent<HTMLElement>) {
 }
 
 export function MathAtlasArticle({ children }: { children: ReactNode }) {
+  const article = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const enlarged = useRef<HTMLDivElement>(null);
-  const [figure, setFigure] = useState({ title: "", hasBars: false });
+  const fallbackScale = useRef<ResizeObserver | null>(null);
+  const [title, setTitle] = useState("");
   const [copyLabel, setCopyLabel] = useState("复制图解");
+
+  useEffect(() => {
+    if (CSS.supports("transform", "scale(tan(atan2(100cqw, 1px)))")) return;
+    const observer = new ResizeObserver(rows => {
+      for (const { target, contentRect } of rows) {
+        const model = target as HTMLElement;
+        model.style.setProperty("--atlas-scale", String(contentRect.width / Number(model.dataset.width)));
+      }
+    });
+    fallbackScale.current = observer;
+    article.current?.querySelectorAll(".atlas-model[data-kind]").forEach(model => observer.observe(model));
+    return () => { observer.disconnect(); fallbackScale.current = null; };
+  }, []);
 
   function enlargeDiagram(event: MouseEvent<HTMLElement>) {
     if (!(event.target instanceof Element) || !dialog.current || !enlarged.current) return;
@@ -102,25 +153,26 @@ export function MathAtlasArticle({ children }: { children: ReactNode }) {
     const original = control?.closest<HTMLElement>(".atlas-diagram");
     if (!original) return;
     const model = original.querySelector<HTMLElement>(".atlas-model");
-    const width = model ? Number(model.dataset.width) : original.querySelector("svg")?.viewBox.baseVal.width;
+    const width = Number(model?.dataset.width);
     if (!width) return;
 
     const drawing = original.cloneNode(true) as HTMLElement;
     drawing.querySelector("button")?.remove();
-    // Keep the enlarged arrows, patterns and clips scoped to their own drawing.
     for (const element of drawing.querySelectorAll("[id]")) element.id = "atlas-detail-" + element.id;
-    for (const element of drawing.querySelectorAll('[fill^="url("], [marker-end], [clip-path]')) {
-      for (const attr of ["fill", "marker-end", "clip-path"]) {
-        const value = element.getAttribute(attr);
-        if (value?.startsWith("url(#")) element.setAttribute(attr, value.replace("url(#", "url(#atlas-detail-"));
-      }
-    }
     drawing.style.width = Math.max(680, width * 1.35) + "px";
     enlarged.current.replaceChildren(drawing);
-    setFigure({ title: original.getAttribute("aria-label") ?? "数学图解", hasBars: !!model });
+    const clone = drawing.querySelector(".atlas-model[data-kind]");
+    if (clone) fallbackScale.current?.observe(clone);
+    setTitle(original.getAttribute("aria-label") ?? "数学图解");
     setCopyLabel("复制图解");
     original.querySelector<HTMLButtonElement>("button.atlas-zoom")?.focus({ preventScroll: true });
     dialog.current.showModal();
+  }
+
+  function closeDiagram() {
+    const clone = enlarged.current?.querySelector(".atlas-model[data-kind]");
+    if (clone) fallbackScale.current?.unobserve(clone);
+    enlarged.current?.replaceChildren();
   }
 
   async function copyOpenDiagram() {
@@ -152,11 +204,11 @@ export function MathAtlasArticle({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <article className="atlas-article" aria-label="图册正文" onClick={enlargeDiagram} onCopy={copyAtlasText}>{children}</article>
-      <dialog ref={dialog} className="atlas-detail" aria-label="放大图解" onCopy={copyAtlasText} onClose={() => enlarged.current?.replaceChildren()}>
+      <article ref={article} className="atlas-article" aria-label="图册正文" onClick={enlargeDiagram} onCopy={copyAtlasText}>{children}</article>
+      <dialog ref={dialog} className="atlas-detail" aria-label="放大图解" onCopy={copyAtlasText} onClose={closeDiagram}>
         <div className="atlas-detail-heading">
-          <p>{figure.title}</p>
-          {figure.hasBars && <button type="button" onClick={copyOpenDiagram} aria-live="polite">{copyLabel}</button>}
+          <p>{title}</p>
+          <button type="button" onClick={copyOpenDiagram} aria-live="polite">{copyLabel}</button>
           <button type="button" onClick={() => dialog.current?.close()}>关闭</button>
         </div>
         <div ref={enlarged} className="atlas-detail-image" tabIndex={0} role="region" aria-label="图解细节" />

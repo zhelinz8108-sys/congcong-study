@@ -42,9 +42,21 @@
 .atlas-article .toc-row .unit, .atlas-article .toc-row .pages { color: var(--muted); font-size: .82rem; }
 .atlas-article .toc-row b { font-family: var(--serif); }
 .atlas-diagram { position: relative; container-type: inline-size; width: 100%; font-family: system-ui, sans-serif; }
-.atlas-diagram svg { display: block; width: 100%; height: auto; pointer-events: none; user-select: none; }
 .atlas-model { position: relative; width: 100%; font-size: 0; line-height: 0; pointer-events: none; }
 .atlas-model .atlas-label { z-index: 2; }
+.atlas-model[data-kind] { z-index: 1; }
+.atlas-drawing {
+  position: absolute; top: 0; left: 0; overflow: hidden; transform-origin: 0 0;
+  transform: scale(var(--atlas-scale, 1)); pointer-events: none;
+}
+@supports (transform: scale(tan(atan2(100cqw, 1px)))) {
+  .atlas-drawing { transform: scale(tan(atan2(100cqw, var(--drawing-width)))); }
+}
+.atlas-drawing span { display: block; position: absolute; }
+.atlas-contour, .atlas-origin, .atlas-clip, .atlas-pigment { inset: 0; }
+.atlas-values { position: absolute; table-layout: fixed; border-spacing: 0; border-collapse: separate; font-size: 0; line-height: 0; }
+.atlas-values :is(th, td) { position: relative; padding: 0; border: 0; }
+.atlas-model[data-kind="scene"] .atlas-drawing { contain: strict; will-change: transform; }
 .atlas-strip { position: absolute; z-index: 1; table-layout: fixed; border-collapse: separate; border-spacing: 0; pointer-events: auto; cursor: zoom-in; }
 .atlas-strip td { position: relative; padding: 0; border: 0; }
 .atlas-strip td::after, .atlas-frame {
