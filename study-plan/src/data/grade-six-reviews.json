@@ -18,5 +18,13 @@
     "filename": "六上英语期末自测听力.mp3",
     "type": "audio/mpeg",
     "sha256": "7222fce95c2307ecfb4bca9fa128443b7d4e1f4d569871579ee31fd4896b1c2e"
+  },
+  {
+    "id": "english-atlas",
+    "filename": "六上英语知识点图解.pdf",
+    "type": "application/pdf",
+    "sha256": "03ac1398be969090fd95095b3a63ebabd6c701a2ea58482c2847ef7c643643a7",
+    "readerSha256": "d016d11b23c95584f30be39e6238c1f4e4baa2696778d1c0eb88aff6c7e2ea82",
+    "pageCount": 58
   }
 ]

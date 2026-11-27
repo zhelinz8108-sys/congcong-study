@@ -144,7 +144,7 @@ export function EnglishSixKnowledgeHub({ subjectId, bookSummary }: { subjectId: 
       <p className={styles.description}>词汇与句型、语法与易错点、语音和写作，按单元一起学。</p>
       <p className={styles.bookTitle}>{bookSummary.title}</p>
     </header>
-    <GradeSixReview subject="english" />
+    <GradeSixReview subject="english" href={`/subjects/${subjectId}/english/atlas`} />
     <nav className={styles.unitDirectory} aria-label="六上知识点单元目录">
       <div className={styles.directoryHeading}><h2>选择单元</h2><span>{bookSummary.units.length} 个单元</span></div>
       <ol className={styles.unitList}>{bookSummary.units.map(unit => <li key={unit.number}>

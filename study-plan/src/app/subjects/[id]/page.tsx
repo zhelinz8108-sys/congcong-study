@@ -786,6 +786,7 @@ export default function SubjectPage() {
               );
             })}
           </div>
+          <GradeSixReview subject="english" href={`/subjects/${id}/english/atlas`} />
           <Link
             href={`/subjects/${id}/english/six`}
             className="mt-5 flex items-center justify-between gap-3 rounded-lg border-2 border-emerald-200 bg-white px-5 py-5 text-emerald-900 transition-colors hover:bg-emerald-50"

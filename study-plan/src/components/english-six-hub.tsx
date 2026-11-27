@@ -75,7 +75,7 @@ export default function EnglishSixHub({ subjectId }: { subjectId: string }) {
       <div><p className={styles.eyebrow}>六年级上册 · 英语</p><h1>六上</h1></div>
       <span className={styles.edition}>2026 新版</span>
     </header>
-    <GradeSixReview subject="english" />
+    <GradeSixReview subject="english" href={`/subjects/${subjectId}/english/atlas`} />
     {error && <p role="alert">{error}</p>}
     {!index && !error && <p role="status">正在载入资料…</p>}
     {index && <>

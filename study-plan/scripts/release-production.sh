@@ -85,7 +85,7 @@ const token = `${payload}.${createHmac('sha256', secret).update(payload).digest(
 const headers = {Cookie: `congcong_family_access=${token}`};
 for (const [subject, id, visible, removed] of [
   ['English', '8bd6f79b-99f5-4e68-a961-872d60d260b1',
-    ['/english/six', '/english/extension-practice', '/vocab', '/english/six-knowledge'],
+    ['/english/six', '/english/atlas', '/english/extension-practice', '/vocab', '/english/six-knowledge'],
     ['/listening/2026-11-09', '/phrases', '/grammar', '/sentences', '/sentence-structure', '/grammar-guide']],
   ['Math', '4ea6b4fe-bfd3-440f-b780-6d71c2011609',
     ['/math/atlas', '/math/problem-bank', '/math/extension-bank'], ['/national-day-math', '/national-day-math-practice']],
@@ -201,8 +201,27 @@ for (const [subjectPage, guide] of [
     const loggedOut = await fetch(base + readerPath, {signal: AbortSignal.timeout(10000)});
     assert.doesNotMatch(await loggedOut.text(), /class="atlas-article"|圆规应张开几厘米/);
   } else {
-    assert.ok(html.includes('href="/api/grade-six-reviews/english"'), subjectPage);
-    assert.ok(html.includes('src="/api/grade-six-reviews/english-listening"'), subjectPage);
+    const readerPath = subjectPage.replace(/\/six$/, '/atlas');
+    assert.ok(html.includes(`href="${readerPath}"`), subjectPage);
+    const reader = await fetch(base + readerPath, {headers, signal: AbortSignal.timeout(15000)});
+    assert.equal(reader.status, 200, readerPath);
+    const htmlReader = await reader.text();
+    const article = htmlReader.match(/<article class="ea-article">([\s\S]*?)<\/article>/)?.[1];
+    assert.ok(article, 'Expected a complete native English article');
+    const edition = guides.find(guide => guide.id === 'english-atlas');
+    assert.equal((article.match(/<section id="/g) ?? []).length, edition.pageCount);
+    for (let unit = 1; unit <= 8; unit++) {
+      for (const suffix of ['', '-words', '-usage', '-read', '-write']) {
+        assert.ok(article.includes(`id="unit-${unit}${suffix}"`));
+      }
+    }
+    for (const [, id] of article.matchAll(/href="#([^"]+)"/g)) assert.ok(article.includes(`id="${id}"`));
+    assert.doesNotMatch(article, /<(?:iframe|embed|object|canvas|img)\b/i);
+    assert.ok(htmlReader.includes('href="/api/grade-six-reviews/english-atlas?download=1"'));
+    assert.ok(htmlReader.includes('href="/api/grade-six-reviews/english?download=1"'));
+    assert.ok(article.includes('src="/api/grade-six-reviews/english-listening"'));
+    const loggedOut = await fetch(base + readerPath, {signal: AbortSignal.timeout(10000)});
+    assert.doesNotMatch(await loggedOut.text(), /class="ea-article"|Who did Lin help/);
   }
 }
 console.log('Complete HTML math atlas verified: 229 teaching diagrams and 2 illustrated scenes, 36 value tables, 74 editable bars, 1403 selectable labels, 58 sections and zero embedded images.');

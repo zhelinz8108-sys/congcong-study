@@ -39,22 +39,36 @@ export function readReviewFile(asset: ReviewFile): Promise<Buffer> {
 }
 
 export const atlasPageCount = index.reduce((count, group) => count + group.titles.length, 0);
-let atlasPages: Promise<string[]> | undefined;
+type AtlasEdition = { id: string; sha256: string; readerSha256?: string; pageCount?: number };
+const atlasBooks = new Map<string, Promise<string[]>>();
 
-export function getMathAtlasPages() {
-  atlasPages ??= (async () => {
-    const math = assets.find(asset => asset.id === "math");
-    if (!math?.readerSha256) throw new Error("Missing math atlas edition");
-    const bytes = await readReviewFile({ id: "math-reader", sha256: math.readerSha256 });
+function readAtlasPages(assetId: string, expectedPages?: number) {
+  const cached = atlasBooks.get(assetId);
+  if (cached) return cached;
+
+  const pending = (async () => {
+    const asset: AtlasEdition | undefined = assets.find(entry => entry.id === assetId);
+    const count = expectedPages ?? asset?.pageCount;
+    if (!asset?.readerSha256 || !count) throw new Error("Missing atlas edition");
+    const bytes = await readReviewFile({ id: assetId + "-reader", sha256: asset.readerSha256 });
     const book = JSON.parse(brotliDecompressSync(bytes, { maxOutputLength: 8 * 1024 * 1024 }).toString("utf8"));
-    if (book.edition !== math.sha256 || !Array.isArray(book.pages) || book.pages.length !== atlasPageCount ||
+    if (book.edition !== asset.sha256 || !Array.isArray(book.pages) || book.pages.length !== count ||
         !book.pages.every((page: unknown) => typeof page === "string" && page.length > 0)) {
-      throw new Error("Math atlas pages do not match the downloadable edition");
+      throw new Error("Atlas pages do not match the downloadable edition");
     }
     return book.pages as string[];
   })().catch(error => {
-    atlasPages = undefined;
+    atlasBooks.delete(assetId);
     throw error;
   });
-  return atlasPages;
+  atlasBooks.set(assetId, pending);
+  return pending;
+}
+
+export function getMathAtlasPages() {
+  return readAtlasPages("math", atlasPageCount);
+}
+
+export function getEnglishAtlasPages() {
+  return readAtlasPages("english-atlas");
 }
