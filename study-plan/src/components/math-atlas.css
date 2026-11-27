@@ -83,7 +83,10 @@
   .atlas-label { text-box: trim-end text alphabetic; transform: translate(var(--label-x, -50%), -100%); }
 }
 .atlas-clipboard { position: fixed; left: -200vw; top: 0; pointer-events: none; }
-.atlas-article math { display: inline math; white-space: nowrap; font-size: 1.09em; vertical-align: middle; }
+.atlas-article math, .atlas-detail math { display: inline math; white-space: nowrap; font-size: 1.09em; vertical-align: middle; }
+.math-atlas-web .atlas-fraction { font-family: "STIX Two Math", "Cambria Math", math; vertical-align: .1em; }
+.math-atlas-web .atlas-fraction :is(mn, mi) { font-size: .82em; }
+.atlas-label .atlas-fraction { font-size: 1em; }
 .atlas-article .mainfig { margin-block: 1.35rem; padding: .7rem 0; background: #f8efdf; }
 .atlas-article figcaption { color: var(--muted); font-size: .88rem; padding: .4rem .75rem 0; line-height: 1.55; }
 .atlas-article .note, .atlas-article .panel, .atlas-article .testrow { padding-block: 1.1rem; border-top: 1px solid var(--rule); }

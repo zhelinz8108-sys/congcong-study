@@ -3,6 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { ClipboardEvent, MouseEvent, ReactNode } from "react";
 
+function flattenMathForPlainText(root: Element) {
+  for (const fraction of root.querySelectorAll("mfrac")) {
+    fraction.replaceWith(Array.from(fraction.children, part => part.textContent).join("/"));
+  }
+  for (const operator of root.querySelectorAll("math mo")) operator.replaceWith(` ${operator.textContent} `);
+  for (const math of root.querySelectorAll("math")) math.replaceWith((math.textContent ?? "").trim());
+}
+
 function copyDrawing(model: HTMLElement) {
   const title = model.closest(".atlas-diagram")?.getAttribute("aria-label") ?? "数学图解";
   const width = Number(model.dataset.width);
@@ -25,7 +33,9 @@ function copyDrawing(model: HTMLElement) {
       transform: `translate(${shift},-.86em)`, fontSize: `${parseFloat(label.style.fontSize) * width / 100}px`,
     });
   }
-  return { html: result.outerHTML, text: labels.map(label => label.textContent).join("\n") || title };
+  const html = result.outerHTML;
+  flattenMathForPlainText(result);
+  return { html, text: labels.map(label => label.textContent).join("\n") || title };
 }
 
 function clipboardContents(range: Range, host: HTMLElement) {
@@ -53,7 +63,7 @@ function clipboardContents(range: Range, host: HTMLElement) {
     const span = document.createElement("span");
     span.style.color = label.style.color;
     span.style.fontWeight = label.style.fontWeight;
-    span.textContent = label.textContent;
+    span.append(...label.childNodes);
     label.replaceWith(span);
   }
   for (const layer of copy.querySelectorAll(".atlas-labels")) layer.replaceWith(...layer.childNodes);
@@ -98,11 +108,7 @@ function clipboardContents(range: Range, host: HTMLElement) {
     row.textContent = marks;
     table.replaceWith(row);
   }
-  for (const fraction of copy.querySelectorAll("mfrac")) {
-    fraction.replaceWith(Array.from(fraction.children, part => part.textContent).join("/"));
-  }
-  for (const operator of copy.querySelectorAll("math mo")) operator.replaceWith(` ${operator.textContent} `);
-  for (const math of copy.querySelectorAll("math")) math.replaceWith((math.textContent ?? "").trim());
+  flattenMathForPlainText(copy);
 
   // innerText keeps paragraph breaks when a selection spans examples.
   copy.className = "atlas-clipboard";
@@ -130,7 +136,7 @@ export function MathAtlasArticle({ children }: { children: ReactNode }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const enlarged = useRef<HTMLDivElement>(null);
   const fallbackScale = useRef<ResizeObserver | null>(null);
-  const [title, setTitle] = useState("");
+  const dialogTitle = useRef<HTMLParagraphElement>(null);
   const [copyLabel, setCopyLabel] = useState("复制图解");
 
   useEffect(() => {
@@ -163,7 +169,11 @@ export function MathAtlasArticle({ children }: { children: ReactNode }) {
     enlarged.current.replaceChildren(drawing);
     const clone = drawing.querySelector(".atlas-model[data-kind]");
     if (clone) fallbackScale.current?.observe(clone);
-    setTitle(original.getAttribute("aria-label") ?? "数学图解");
+    const caption = original.parentElement?.querySelector(":scope > figcaption");
+    if (dialogTitle.current) {
+      if (caption) dialogTitle.current.replaceChildren(...Array.from(caption.childNodes, node => node.cloneNode(true)));
+      else dialogTitle.current.textContent = original.getAttribute("aria-label") ?? "数学图解";
+    }
     setCopyLabel("复制图解");
     original.querySelector<HTMLButtonElement>("button.atlas-zoom")?.focus({ preventScroll: true });
     dialog.current.showModal();
@@ -207,7 +217,7 @@ export function MathAtlasArticle({ children }: { children: ReactNode }) {
       <article ref={article} className="atlas-article" aria-label="图册正文" onClick={enlargeDiagram} onCopy={copyAtlasText}>{children}</article>
       <dialog ref={dialog} className="atlas-detail" aria-label="放大图解" onCopy={copyAtlasText} onClose={closeDiagram}>
         <div className="atlas-detail-heading">
-          <p>{title}</p>
+          <p ref={dialogTitle} />
           <button type="button" onClick={copyOpenDiagram} aria-live="polite">{copyLabel}</button>
           <button type="button" onClick={() => dialog.current?.close()}>关闭</button>
         </div>

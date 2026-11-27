@@ -132,13 +132,17 @@ for (const guide of guides) {
     const pdf = await getDocumentProxy(bytes);
     try {
       assert.equal(pdf.numPages, 58);
-      const samples = new Map([[1, '全知识点图解'], [32, '认识圆'], [58, '位置与方向']]);
+      const samples = new Map([[1, '全知识点图解'], [3, '分数除法与倒数'], [32, '认识圆'], [58, '位置与方向']]);
       let links = 0;
       for (let n = 1; n <= pdf.numPages; n++) {
         const page = await pdf.getPage(n);
         links += (await page.getAnnotations()).filter(item => item.subtype === 'Link').length;
+        const items = (await page.getTextContent()).items.map(item => item.str ?? '');
+        for (const item of items) {
+          assert.doesNotMatch(item, /(?:\d|[acn])[/／⁄∕](?:\d|[bd])/, 'Unstacked fraction in PDF on page ' + n);
+        }
         if (samples.has(n)) {
-          const text = (await page.getTextContent()).items.map(item => item.str ?? '').join('').normalize('NFKC').replace(/\s/g, '');
+          const text = items.join('').normalize('NFKC').replace(/\s/g, '');
           assert.ok(text.includes(samples.get(n)), 'Unexpected original PDF page ' + n);
         }
       }
@@ -181,10 +185,15 @@ for (const [subjectPage, guide] of [
     assert.equal((example.match(/<td /g) || []).length, 8);
     assert.equal((example.match(/background-color:#dfae80/g) || []).length, 6);
     assert.equal((example.match(/background-color:#fffdf7/g) || []).length, 2);
-    assert.equal((article.match(/<span class="atlas-label"[^>]*>[^<]+<\/span>/g) || []).length, 1403);
+    assert.equal((article.match(/<span class="atlas-label"[^>]*>(?!<\/span>)/g) || []).length, 1403);
     assert.equal((article.match(/<button type="button" class="atlas-zoom"/g) || []).length, 231);
     assert.doesNotMatch(article, /<text\b|<button[^>]+class="atlas-diagram"/);
-    assert.equal((article.match(/<math /g) || []).length, 39);
+    assert.equal((article.match(/<math display="inline"/g) || []).length, 39);
+    assert.equal((article.match(/<mfrac>/g) || []).length, 192);
+    assert.equal((example.match(/<mfrac>/g) || []).length, 3);
+    for (const [, visibleText] of article.matchAll(/>([^<>]+)</g)) {
+      assert.doesNotMatch(visibleText, /(?:\d|[acn])[/／⁄∕](?:\d|[bd])/, 'Unstacked fraction in math atlas');
+    }
     assert.equal((article.match(/class="indexrow"/g) || []).length, 92);
     assert.doesNotMatch(article, /<(?:img|picture|svg|iframe|object|embed|canvas)\b|data:image\/|url\s*\(/i);
     assert.doesNotMatch(article, /class="coverkeys?"/);
