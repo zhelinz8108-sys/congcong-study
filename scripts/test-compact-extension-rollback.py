@@ -528,6 +528,14 @@ with tempfile.TemporaryDirectory() as directory:
     before = helper.snapshot(base)
     with patch.object(helper, 'BASE_ARCHIVE_ROOT', base):
         plans = helper.preflight_vocab_base_archives()
+        single = helper.preflight_vocab_base_archives((helper.VOCAB_BASE_COMMITS[4],))
+        assert single == [plans[4]]
+        try:
+            helper.preflight_vocab_base_archives(('unreviewed',))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('Unreviewed archive accepted')
     assert helper.snapshot(base) == before
     assert len(plans) == len(helper.VOCAB_BASE_COMMITS) and [folder for folder, _plan in plans] == folders
     for folder, marker in plans:

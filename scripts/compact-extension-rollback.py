@@ -648,13 +648,16 @@ def private_regular(path):
     return metadata
 
 
-def preflight_vocab_base_archives():
-    """Inspect every fixed candidate before changing even the newer rollback."""
+def preflight_vocab_base_archives(commits=None):
+    """Check the identity and integrity of each requested retained archive."""
+    if commits is None:
+        commits = VOCAB_BASE_COMMITS
+    require(set(commits).issubset(VOCAB_BASE_COMMITS), 'Unknown archive identity')
     no_links(BASE_ARCHIVE_ROOT)
     require(BASE_ARCHIVE_ROOT.is_dir(), 'Reviewed archive base is unavailable')
     candidates = list(BASE_ARCHIVE_ROOT.iterdir())
     plans = []
-    for commit in VOCAB_BASE_COMMITS:
+    for commit in commits:
         matches = [folder for folder in candidates if re.fullmatch(re.escape(commit) + r'-[A-Za-z0-9_-]{1,128}', folder.name)]
         require(len(matches) == 1, 'A reviewed legacy archive is missing or ambiguous; retain all copies')
         folder = matches[0]
@@ -790,11 +793,12 @@ def main():
     parser.add_argument('--apply-astra', action='store_true')
     parser.add_argument('--apply-short-choices', action='store_true')
     parser.add_argument('--apply-vocab', action='store_true')
+    parser.add_argument('--recompress-release-archive', action='store_true')
     parser.add_argument('--verify-vocab-plan', action='store_true')
     parser.add_argument('--verify', action='store_true')
     parser.add_argument('--restore')
     args = parser.parse_args()
-    require(sum([args.apply, args.apply_astra, args.apply_short_choices, args.apply_vocab, args.verify_vocab_plan, args.verify, bool(args.restore)]) == 1, 'Select exactly one operation')
+    require(sum([args.apply, args.apply_astra, args.apply_short_choices, args.apply_vocab, args.recompress_release_archive, args.verify_vocab_plan, args.verify, bool(args.restore)]) == 1, 'Select exactly one operation')
     require(os.geteuid() == 0, 'Preserving file ownership requires root')
     if args.verify or args.restore:
         folder = Path(__file__).resolve().parent
@@ -817,7 +821,14 @@ def main():
     with open('/run/study-plan-release/lock', 'r+') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         source_code = globals().get('_SOURCE') or Path(__file__).read_text()
-        if args.verify_vocab_plan:
+        if args.recompress_release_archive:
+            # The storage inventory identified this retained gzip. Keep the same
+            # restore procedure and require a verified lossless tar replacement.
+            archive, = preflight_vocab_base_archives(('e00733cfa66583481e42f2acac0b4756c29e4383',))
+            folder, manifest = archive
+            recompress_vocab_base(folder, manifest, source_code)
+            print(json.dumps({'verifiedArchiveFormat': 'xz', 'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2}), flush=True)
+        elif args.verify_vocab_plan:
             plans = verify_vocab_plan()
             print(json.dumps({'vocabularyArchivePlanVerified': True, 'archiveWrites': 0, 'candidates': len(plans) if plans else 0}), flush=True)
         elif args.apply_vocab:
