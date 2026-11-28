@@ -3,8 +3,10 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { brotliDecompressSync } from "node:zlib";
+import AdmZip from "adm-zip";
 import assets from "@/data/grade-six-reviews.json";
 import index from "@/data/math-atlas-index.json";
+import { finalExamNames, finalExamNumber, type FinalExamEdition } from "@/lib/math-final-exams";
 import { decryptEnglishSixKnowledge } from "./english-six-knowledge-envelope";
 
 const root = path.join(process.cwd(), "content/grade-six-reviews");
@@ -71,4 +73,24 @@ export function getMathAtlasPages() {
 
 export function getEnglishAtlasPages() {
   return readAtlasPages("english-atlas");
+}
+
+export async function getFinalExamArticle(number: number, edition: FinalExamEdition) {
+  const articles = await readAtlasPages(`math-final-${edition}`, finalExamNames.length);
+  return articles[number - 1];
+}
+
+export async function readFinalExamPdf(id: string) {
+  const match = /^math-final-(student|answers)-(\d+)$/.exec(id);
+  const number = match && finalExamNumber(match[2]);
+  if (!match || !number) return null;
+
+  // Serve the original individual PDFs directly from the verified print bundle.
+  const bundle = assets.find(asset => asset.id === "math-final-pack");
+  if (!bundle) throw new Error("Missing final exam print bundle");
+  const label = match[1] === "student" ? "学生卷" : "答案解析";
+  const filename = `第${String(number).padStart(2, "0")}卷-${label}.pdf`;
+  const entry = new AdmZip(await readReviewFile(bundle)).getEntry(`${label}/${filename}`);
+  if (!entry || entry.isDirectory) throw new Error("Missing PDF in final exam print bundle");
+  return { filename, type: "application/pdf", bytes: entry.getData() };
 }

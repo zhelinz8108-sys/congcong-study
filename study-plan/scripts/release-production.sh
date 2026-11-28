@@ -88,7 +88,7 @@ for (const [subject, id, visible, removed] of [
     ['/english/six', '/english/atlas', '/english/extension-practice', '/vocab', '/english/six-knowledge'],
     ['/listening/2026-11-09', '/phrases', '/grammar', '/sentences', '/sentence-structure', '/grammar-guide']],
   ['Math', '4ea6b4fe-bfd3-440f-b780-6d71c2011609',
-    ['/math/atlas', '/math/problem-bank', '/math/extension-bank'], ['/national-day-math', '/national-day-math-practice']],
+    ['/math/atlas', '/math/problem-bank', '/math/extension-bank', '/math/final-exams'], ['/national-day-math', '/national-day-math-practice']],
 ]) {
   const page = await fetch(base + '/subjects/' + id, {headers, signal: AbortSignal.timeout(10000)});
   assert.equal(page.status, 200);
@@ -235,6 +235,8 @@ for (const [subjectPage, guide] of [
 }
 console.log('Complete HTML math atlas verified: 229 teaching diagrams and 2 illustrated scenes, 36 value tables, 74 editable bars, 1403 selectable labels, 58 sections and zero embedded images.');
 console.log(`Grade-six review links and original PDF/MP3 hashes verified on port ${port}.`);
+const { verifyMathFinalExams } = await import(pathToFileURL(path.resolve('scripts/check-math-final-exams.mjs')));
+await verifyMathFinalExams(base, headers);
 for (const route of ['/', '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/chinese/six',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/math/problem-bank',
   '/subjects/8bd6f79b-99f5-4e68-a961-872d60d260b1/listening/2026-11-09']) {

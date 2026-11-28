@@ -2,7 +2,7 @@ import path from "node:path";
 import type { NextRequest } from "next/server";
 import assets from "@/data/grade-six-reviews.json";
 import { FAMILY_ACCESS_COOKIE, verifyFamilyAccessToken } from "@/lib/family-access";
-import { readReviewFile } from "@/server/grade-six-reviews";
+import { readFinalExamPdf, readReviewFile } from "@/server/grade-six-reviews";
 import { toeflRange } from "@/server/toefl-listening";
 
 export const runtime = "nodejs";
@@ -15,10 +15,11 @@ async function serve(request: NextRequest, context: Context) {
     return new Response(null, { status: 401, headers });
   }
   const { asset: id } = await context.params;
-  const asset = assets.find((entry) => entry.id === id);
+  const book = assets.find((entry) => entry.id === id);
+  const asset = book ? { ...book, bytes: await readReviewFile(book) } : await readFinalExamPdf(id);
   if (!asset) return new Response(null, { status: 404, headers });
 
-  const bytes = await readReviewFile(asset);
+  const { bytes } = asset;
   const range = toeflRange(request.headers.get("range"), bytes.length);
   headers.set("Accept-Ranges", "bytes");
   if (!range) {

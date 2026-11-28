@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/grade-six-reviews/**": ["./content/grade-six-reviews/*.encrypted.json"],
     "/subjects/*/math/atlas": ["./content/grade-six-reviews/math-reader.encrypted.json"],
+    "/subjects/*/math/final-exams/*": ["./content/grade-six-reviews/math-final-*-reader.encrypted.json"],
     "/subjects/*/english/atlas": ["./content/grade-six-reviews/english-atlas-reader.encrypted.json"],
     "/api/extension-practice/**": ["./content/math-extension/questions.public.json", "./content/math-extension/answers.encrypted.json", "./content/english-extension/questions.public.json", "./content/english-extension/answers.encrypted.json", "./content/english-extension/short-choices.public.json"],
     "/subjects/*/math/extension-bank*": ["./content/math-extension/questions.public.json"],

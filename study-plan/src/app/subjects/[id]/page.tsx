@@ -1029,6 +1029,15 @@ export default function SubjectPage() {
           <Link href={`/subjects/${id}/math/extension-bank`} className="block rounded-2xl border border-amber-200 bg-amber-50/60 p-5 shadow-sm transition-colors hover:bg-amber-100/60" style={{ borderLeftWidth: 4, borderLeftColor: '#b87835' }}>
             <div className="flex items-center justify-between gap-4"><div><h2 className="text-2xl font-bold text-stone-900">拓展题库</h2><p className="mt-1 text-sm leading-6 text-stone-500">六上 8 个章节 · 每章 100 题 · 选择与填空 · 提交后看解析</p></div><span aria-hidden="true" className="text-amber-600">→</span></div>
           </Link>
+          <Link href={`/subjects/${id}/math/final-exams`} className="block rounded-2xl border border-[#e1cdbb] border-l-4 border-l-[#945a3d] bg-[#fffaf5] p-5 shadow-sm transition-colors hover:bg-[#fbf1e7]">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-stone-900">期末模拟</h2>
+                <p className="mt-1 text-sm leading-6 text-stone-600">六上数学 · 10 份试卷 · 每卷 50 题 · 附答案解析</p>
+              </div>
+              <span aria-hidden="true" className="text-[#945a3d]">→</span>
+            </div>
+          </Link>
         </div>
       )}
 
