@@ -822,9 +822,9 @@ def main():
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         source_code = globals().get('_SOURCE') or Path(__file__).read_text()
         if args.recompress_release_archive:
-            # The storage inventory identified this retained gzip. Keep the same
-            # restore procedure and require a verified lossless tar replacement.
-            archive, = preflight_vocab_base_archives(('e00733cfa66583481e42f2acac0b4756c29e4383',))
+            # The live inventory shows this reviewed archive is still gzip. The
+            # preceding e00733cf archive has already been verified and converted.
+            archive, = preflight_vocab_base_archives(('f262dc6438e48d3992f1abe2d0e291ff3108b222',))
             folder, manifest = archive
             recompress_vocab_base(folder, manifest, source_code)
             print(json.dumps({'verifiedArchiveFormat': 'xz', 'rootFreeMiB': shutil.disk_usage(RELEASES).free // 1024**2}), flush=True)
