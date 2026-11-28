@@ -32,6 +32,7 @@ if [[ ${1:-} == --worker ]]; then
       build_check english-vocab-rounds node scripts/test-english-vocab-sessions.mjs
       build_check english-vocab-feedback node scripts/test-interactive-vocab-feedback.mjs
       build_check version npm run test:version
+      build_check final-exam-grading node scripts/test-math-final-grading.mjs
       build_check mathematics npm run test:grade6-bank
       build_check final-results node scripts/test-grade6-bank-result-release.mjs
       build_check chinese-seal npm run test:chinese-six:sealed
@@ -121,6 +122,10 @@ const guides = JSON.parse(await readFile('src/data/grade-six-reviews.json', 'utf
 for (const guide of guides) {
   const url = `${base}/api/grade-six-reviews/${guide.id}`;
   const response = await fetch(url, {headers, signal: AbortSignal.timeout(20000)});
+  if (response.status === 403 && ['math-final-answers','math-final-pack'].includes(guide.id)) {
+    assert.equal((await fetch(url, {method: 'HEAD'})).status, 401);
+    continue;
+  }
   assert.equal(response.status, 200, guide.id);
   assert.equal(response.headers.get('content-type'), guide.type);
   const bytes = new Uint8Array(await response.arrayBuffer());

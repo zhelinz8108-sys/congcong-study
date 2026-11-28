@@ -1,8 +1,9 @@
 import path from "node:path";
 import type { NextRequest } from "next/server";
 import assets from "@/data/grade-six-reviews.json";
-import { FAMILY_ACCESS_COOKIE, verifyFamilyAccessToken } from "@/lib/family-access";
+import { FAMILY_ACCESS_COOKIE, STUDENT_PROFILE_COOKIE, parseStudentProfileCookie, verifyFamilyAccessToken } from "@/lib/family-access";
 import { readFinalExamPdf, readReviewFile } from "@/server/grade-six-reviews";
+import { examSummary, mayDownloadExam } from "@/server/math-final-exams";
 import { toeflRange } from "@/server/toefl-listening";
 
 export const runtime = "nodejs";
@@ -15,6 +16,11 @@ async function serve(request: NextRequest, context: Context) {
     return new Response(null, { status: 401, headers });
   }
   const { asset: id } = await context.params;
+  if (/^math-final-(?:answers(?:-(?:[1-9]|10))?|pack)$/.test(id)) {
+    headers.set("Cache-Control", "private, no-store");
+    const student = parseStudentProfileCookie(request.cookies.get(STUDENT_PROFILE_COOKIE)?.value).id;
+    if (!mayDownloadExam(id, await examSummary(student))) return new Response(null, { status: 403, headers });
+  }
   const book = assets.find((entry) => entry.id === id);
   const asset = book ? { ...book, bytes: await readReviewFile(book) } : await readFinalExamPdf(id);
   if (!asset) return new Response(null, { status: 404, headers });

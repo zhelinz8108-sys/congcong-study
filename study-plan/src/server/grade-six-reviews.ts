@@ -6,7 +6,7 @@ import { brotliDecompressSync } from "node:zlib";
 import AdmZip from "adm-zip";
 import assets from "@/data/grade-six-reviews.json";
 import index from "@/data/math-atlas-index.json";
-import { finalExamNames, finalExamNumber, type FinalExamEdition } from "@/lib/math-final-exams";
+import { finalExamNumber } from "@/lib/math-final-exams";
 import { decryptEnglishSixKnowledge } from "./english-six-knowledge-envelope";
 
 const root = path.join(process.cwd(), "content/grade-six-reviews");
@@ -73,11 +73,6 @@ export function getMathAtlasPages() {
 
 export function getEnglishAtlasPages() {
   return readAtlasPages("english-atlas");
-}
-
-export async function getFinalExamArticle(number: number, edition: FinalExamEdition) {
-  const articles = await readAtlasPages(`math-final-${edition}`, finalExamNames.length);
-  return articles[number - 1];
 }
 
 export async function readFinalExamPdf(id: string) {

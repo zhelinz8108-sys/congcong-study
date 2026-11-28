@@ -1033,7 +1033,7 @@ export default function SubjectPage() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-stone-900">期末模拟</h2>
-                <p className="mt-1 text-sm leading-6 text-stone-600">六上数学 · 10 份试卷 · 每卷 50 题 · 附答案解析</p>
+                <p className="mt-1 text-sm leading-6 text-stone-600">六上数学 · 10 份试卷 · 每卷 50 题 · 整卷提交后看成绩和解析</p>
               </div>
               <span aria-hidden="true" className="text-[#945a3d]">→</span>
             </div>

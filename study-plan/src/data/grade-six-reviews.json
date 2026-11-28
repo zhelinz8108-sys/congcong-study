@@ -31,21 +31,19 @@
     "id": "math-final-student",
     "filename": "六上数学期末模拟卷（学生卷）.pdf",
     "type": "application/pdf",
-    "sha256": "2ab20932b2e0b7cc6007712b383f05b774bb86c53ed549150c868d0380df9c7e",
-    "readerSha256": "3a9d8ff3eb8363a9bf4dc407bf17bb0891712c5f162d391896b5e8855f1370c1"
+    "sha256": "01ff99bb022c6a345432dd91330be3dd447ac8fcda7e9742324f5fbc8c942667"
   },
   {
     "id": "math-final-answers",
     "filename": "六上数学期末模拟卷（答案解析）.pdf",
     "type": "application/pdf",
-    "sha256": "63bc9104cdbeaf3df1143cc30ecb542c2a6ee362096069b7466fd751df7f58a7",
-    "readerSha256": "0a7a52e38fd5870164481f73f01ccf75300bc2903f399f1f9197cec1eea2f9d8"
+    "sha256": "84f10b23a844df0bb82138a43150c1574e02e013b67ed2b81c7c6625023163d6"
   },
   {
     "id": "math-final-pack",
     "filename": "六上数学期末模拟卷（逐卷打印包）.zip",
     "type": "application/zip",
-    "sha256": "ba3a6bda538b2ec568156705d98c5d360afc45e5e3ecae9572db341a3b56318e",
+    "sha256": "f653ef0523364a7efdf7646c32b08c97a3081a1cfbd6e1e5422d1363a83a9620",
     "parts": 2
   }
 ]
